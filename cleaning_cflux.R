@@ -81,7 +81,4 @@ co2_conc_incline <- match.flux(combined,incline)
 
 
 co2_flux_incline <- flux.calc(co2_conc_incline, chamber_volume = 34.3, plot_area = 0.08575) %>% #need to specify the size of the chamber because it is different than Three-D
-  filter(p.value <= 0.05
-         # & r.squared >= 0.7)
-  ) %>%
   write_csv("INCLINE_c-flux_2020.csv")
