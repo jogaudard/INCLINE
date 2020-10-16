@@ -4,12 +4,32 @@ source("https://raw.githubusercontent.com/jogaudard/common/master/fun-fluxes.R")
 library(lubridate, warn.conflicts = FALSE)
 library(broom)
 library(fs)
+library("dataDownloader")
+
 
 measurement <- 120 #the length of the measurement taken on the field in seconds
 startcrop <- 30 #how much to crop at the beginning of the measurement in seconds
 endcrop <- 10 #how much to crop at the end of the measurement in seconds
 
-location <- "/home/jga051/Documents/01_PhD/05_data/01_summer2020/rawData" #location of datafiles
+#download and unzip files from OSF
+get_file(node = "7a4y9",
+         file = "INCLINE_cflux_2020.zip",
+         path = "data/C-Flux/summer_2020",
+         remote_path = "RawData/C-Flux")
+
+get_file(node = "7a4y9",
+         file = "INCLINE_field-record_2020.csv",
+         path = "data/C-Flux/summer_2020",
+         remote_path = "RawData/C-Flux")
+
+# Unzip files
+zipFile <- "data/C-Flux/summer_2020/INCLINE_cflux_2020.zip"
+if(file.exists(zipFile)){
+  outDir <- "data/C-Flux/summer_2020"
+  unzip(zipFile, exdir = outDir)
+}
+
+location <- "data/C-Flux/summer_2020/rawData" #location of datafiles
 #import all squirrel files and select date/time and CO2_calc columns, merge them, name it fluxes
 fluxes <-
   dir_ls(location, regexp = "*CO2*") %>% 
@@ -52,7 +72,7 @@ combined <- fluxes %>%
   left_join(temp_air, by = "Datetime")
 
 #import the record file
-incline <- read_csv("/home/jga051/Documents/01_PhD/05_data/01_summer2020/InclineRecord.csv", na = c(""), col_types = "cccntcnc") %>% 
+incline <- read_csv("data/C-Flux/summer_2020/INCLINE_field-record_2020.csv", na = c(""), col_types = "cccntcnc") %>% 
   mutate(
     Date = dmy(Date),
     Start = as_datetime(paste(Date, Starting_time)), #converting the date as posixct, pasting date and starting time together
@@ -68,17 +88,17 @@ incline <- read_csv("/home/jga051/Documents/01_PhD/05_data/01_summer2020/Incline
 
 co2_conc_incline <- match.flux(combined,incline)
 
-#graph CO2 fluxes to visually check the data
-# co2_conc_incline %>% 
-#   filter(Date == "2020-08-04") %>% 
-#   ggplot(aes(x=Datetime, y=CO2)) + 
-#   # geom_point(size=0.005) +
-#   geom_line(size = 0.1, aes(group = ID)) +
-#   coord_fixed(ratio = 10) +
-#   scale_x_datetime(date_breaks = "30 min") +
-#   # geom_line(size=0.05)
-#   ggsave("incline.png", height = 5, width = 120, units = "cm")
+# graph CO2 fluxes to visually check the data
+co2_conc_incline %>%
+  filter(Date == "2020-08-06") %>%
+  ggplot(aes(x=Datetime, y=CO2)) +
+  # geom_point(size=0.005) +
+  geom_line(size = 0.1, aes(group = ID)) +
+  coord_fixed(ratio = 10) +
+  scale_x_datetime(date_breaks = "30 min") +
+  # geom_line(size=0.05)
+  ggsave("incline.png", height = 5, width = 120, units = "cm")
 
 
 co2_flux_incline <- flux.calc(co2_conc_incline, chamber_volume = 34.3, plot_area = 0.08575) %>% #need to specify the size of the chamber because it is different than Three-D
-  write_csv("INCLINE_c-flux_2020.csv")
+  write_csv("data/C-Flux/summer_2020/INCLINE_c-flux_2020.csv")
