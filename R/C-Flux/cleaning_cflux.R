@@ -12,12 +12,12 @@ startcrop <- 30 #how much to crop at the beginning of the measurement in seconds
 endcrop <- 10 #how much to crop at the end of the measurement in seconds
 
 #download and unzip files from OSF
-get_file(node = "7a4y9",
+get_file(node = "zhk3m",
          file = "INCLINE_cflux_2020.zip",
          path = "data/C-Flux/summer_2020",
          remote_path = "RawData/C-Flux")
 
-get_file(node = "7a4y9",
+get_file(node = "zhk3m",
          file = "INCLINE_field-record_2020.csv",
          path = "data/C-Flux/summer_2020",
          remote_path = "RawData/C-Flux")
