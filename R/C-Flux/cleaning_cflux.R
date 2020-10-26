@@ -90,14 +90,15 @@ co2_conc_incline <- match.flux(combined,incline)
 
 # graph CO2 fluxes to visually check the data
 co2_conc_incline %>%
-  filter(Date == "2020-08-06") %>%
+  # filter(Date == "2020-08-06") %>%
   ggplot(aes(x=Datetime, y=CO2)) +
   # geom_point(size=0.005) +
   geom_line(size = 0.1, aes(group = ID)) +
-  coord_fixed(ratio = 10) +
+  # coord_fixed(ratio = 10) +
   scale_x_datetime(date_breaks = "30 min") +
+  facet_wrap(vars(Date), ncol = 1, scales = "free") +
   # geom_line(size=0.05)
-  ggsave("incline.png", height = 5, width = 120, units = "cm")
+  ggsave("incline.png", height = 40, width = 100, units = "cm")
 
 
 co2_flux_incline <- flux.calc(co2_conc_incline, chamber_volume = 34.3, plot_area = 0.08575) %>% #need to specify the size of the chamber because it is different than Three-D
