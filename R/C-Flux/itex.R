@@ -158,7 +158,7 @@ plot.meta.data <- full_join(plant, soil, by = "Plot_ID") %>%
     Treatment == "OTC"
     | Treatment == "CTL"
   )
-write_csv(plot.meta.data, "ITEX/plot_meta.cvs")
+write_csv(plot.meta.data, "ITEX/plot_meta.csv")
 
 #below is some stuffs useful to see which species are missing a name and which one is in which group.
 #
