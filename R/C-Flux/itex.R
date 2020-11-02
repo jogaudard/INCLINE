@@ -160,6 +160,44 @@ plot.meta.data <- full_join(plant, soil, by = "Plot_ID") %>%
   )
 write_csv(plot.meta.data, "ITEX/plot_meta.csv")
 
+##producing climate data
+get_file(node = "npfa9",
+         file = "GriddedDailyClimateData2009-2019.csv",
+         path = "ITEX",
+         remote_path = "")
+
+climate2019 <- read_csv("ITEX/GriddedDailyClimateData2009-2019.csv") %>% 
+  filter(
+    Year == 2018,
+    Site == "Skj" |
+    Site == "Ulv" |
+    Site == "Gud" |
+    Site == "Lav"
+  ) %>% 
+  select(Site, Month, Temperature, Precipitation)
+
+year.df <- climate2019 %>% 
+  group_by(Site) %>% 
+  summarise(
+    precipitation.year = sum(Precipitation),
+    temperature.year = mean(Temperature)
+  )
+
+temperature <- climate2019 %>% 
+  group_by(Site, Month) %>% 
+  summarise(
+    temp.avg = mean(Temperature)
+  ) %>% 
+  pivot_wider(names_from = Month, values_from = temp.avg) %>% 
+  select(Site, "2", "7") %>% 
+  rename(
+    temp.february = "2",
+    temp.july = "7"
+  )
+
+Site.meta.data <- left_join(temperature, year.df)
+write_csv(Site.meta.data, "ITEX/site_metadata.csv")
+
 #below is some stuffs useful to see which species are missing a name and which one is in which group.
 #
 # 
