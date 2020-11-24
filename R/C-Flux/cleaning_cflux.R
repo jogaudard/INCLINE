@@ -109,4 +109,7 @@ co2_conc_incline %>%
 
 
 co2_flux_incline <- flux.calc(co2_conc_incline, chamber_volume = 34.3, plot_area = 0.08575) %>% #need to specify the size of the chamber because it is different than Three-D
+  rename(
+    plotID = plot_ID
+  ) %>% 
   write_csv("data/C-Flux/summer_2020/INCLINE_c-flux_2020.csv")
