@@ -2,7 +2,8 @@
 ### READ IN DATA ###
 ###########################
 
-source("R/Load packages.R")
+library(tidyverse)
+library(lubridate)
 # only needed for soiltemp template
 # source("R/Rgathering/ReadInPlotLevel.R")
 
@@ -29,7 +30,7 @@ metaTomst <- read_csv2("data/metaData/Logger_info.csv", col_names = TRUE, na = c
 files <- dir(path = "data/climate_tomst", pattern = "^data.*\\.csv$", full.names = TRUE, recursive = TRUE)
 
 # remove empty file
-files <- files[!(files %in% c("data/climate tomst/2020_Sept_Joa/data_94194607_2.csv"))]
+# files <- files[!(files %in% c("data/climate_tomst/.csv"))]
 
 # Function to read in data
 temp <- map_df(set_names(files), function(file) {
