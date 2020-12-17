@@ -1,5 +1,7 @@
 library(tidyverse)
 library("dataDownloader")
+library(fuzzyjoin)
+
 
 #importing flux data from OSF
 get_file(node = "zhk3m",
@@ -12,7 +14,7 @@ itex.df <- read_csv("data/C-Flux/summer_2020/INCLINE_c-flux_2020.csv") %>%
   filter(
     p.value <= 0.05
     # & r.squared >= 0.7
-    & Type == "ER"
+    & type == "ER"
   )
 
 
@@ -29,20 +31,55 @@ itex.df <- read_csv("data/C-Flux/summer_2020/INCLINE_c-flux_2020.csv") %>%
 
 treatment <- read_csv("treatment.csv")
 
+#importing data from Tomst loggers
+
+
+
+# tomst <- read_csv()
+tomst <- TomstLogger_2019_2020 %>% 
+  drop_na(SoilTemperature, GroundTemperature, AirTemperature, RawSoilmoisture) %>%  #in case there are NA because of the cleaning or broken loggers
+  mutate(
+    plotID = str_to_upper(plotID)
+  )
+  
 # itex.df <- left_join(itex.df, treatment, by = "Plot_ID")
   # right_join(treatment, itex.df, by = "Plot_ID")
 
 #a bit of cleaning
 
-itex.df <-left_join(itex.df, treatment, by = "Plot_ID") %>%
+itex.df <-left_join(itex.df, treatment, by = c("plotID" = "Plot_ID")) %>%
   mutate(
-    Treatment = str_replace_all(Treatment, c("W_C" = "OTC", "C_C" = "CTL")), #replacing the name of the treatments to fit ITEX wishes
-    temp_air = Temp_airavg - 273.15, #temp air in celsius
+    treatment = str_replace_all(Treatment, c("W_C" = "OTC", "C_C" = "CTL")), #replacing the name of the treatments to fit ITEX wishes
+    temp_air = temp_airavg - 273.15, #temp air in celsius
     flux = flux /(60*60), # they want fluxes in mmol/sqm/s instead of mmol/sqm/h
-    Replicate = str_replace_all(Replicate, c("1" = "Rep1", "2" = "Rep2", "3" = "Rep3", "4" = "Rep4"))
+    Replicate = str_replace_all(replicate, c("1" = "Rep1", "2" = "Rep2", "3" = "Rep3", "4" = "Rep4"))
     # Replicate = replace_all(Replicate, c(1, 2, 3), c("Rep1", "Rep2", "Rep3"))
+  )
+  # select(Plot_ID, Replicate, Date, temp_air, r.squared, flux, Treatment)
+
+test <- group_by(itex.df, plotID) %>% 
+  nearestTime(itex.df,tomst, datetime, Date_Time) #problem with this method is that it will take the nearest value, even if it is very far. I don't want data that are several days away from my measurment.
+
+# get the avg values on the hour per logger
+tomst_round <- tomst %>% 
+  mutate(
+    round = round_date(Date_Time, unit = "30 minutes")
   ) %>% 
-  select(Plot_ID, Replicate, Date, temp_air, r.squared, flux, Treatment)
+  group_by(plotID, LoggerID, round) %>% 
+  summarise(
+    SoilTemperature.avg = mean(SoilTemperature),
+    GroundTemperature.avg = mean(GroundTemperature),
+    AirTemperature.avg = mean(AirTemperature),
+    RawSoilmoisture.avg = mean(RawSoilmoisture)
+  )
+
+itex.df_test <- itex.df %>% 
+  mutate(
+    round = round_date(datetime, unit = "30 minutes")
+  ) %>%
+  left_join(tomst_round, by = c("plotID", "round"))
+
+
 
 write_csv(itex.df, "data/C-Flux/summer_2020/ITEX_cflux_2020.csv")
 
