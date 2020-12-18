@@ -1,6 +1,7 @@
 library(tidyverse)
 library("dataDownloader")
 library(fuzzyjoin)
+library(lubridate)
 
 
 #importing flux data from OSF
@@ -35,8 +36,8 @@ treatment <- read_csv("treatment.csv")
 
 
 
-# tomst <- read_csv()
-tomst <- TomstLogger_2019_2020 %>% 
+tomst <- read_csv("INCLINE_TomstLogger_2019_2020.csv") %>% 
+# tomst <- TomstLogger_2019_2020 %>% 
   drop_na(SoilTemperature, GroundTemperature, AirTemperature, RawSoilmoisture) %>%  #in case there are NA because of the cleaning or broken loggers
   mutate(
     plotID = str_to_upper(plotID)
@@ -57,8 +58,8 @@ itex.df <-left_join(itex.df, treatment, by = c("plotID" = "Plot_ID")) %>%
   )
   # select(Plot_ID, Replicate, Date, temp_air, r.squared, flux, Treatment)
 
-test <- group_by(itex.df, plotID) %>% 
-  nearestTime(itex.df,tomst, datetime, Date_Time) #problem with this method is that it will take the nearest value, even if it is very far. I don't want data that are several days away from my measurment.
+# test <- group_by(itex.df, plotID) %>% 
+#   nearestTime(itex.df,tomst, datetime, Date_Time) #problem with this method is that it will take the nearest value, even if it is very far. I don't want data that are several days away from my measurment.
 
 # get the avg values on the hour per logger
 tomst_round <- tomst %>% 
@@ -73,7 +74,7 @@ tomst_round <- tomst %>%
     RawSoilmoisture.avg = mean(RawSoilmoisture)
   )
 
-itex.df_test <- itex.df %>% 
+itex.df <- itex.df %>% 
   mutate(
     round = round_date(datetime, unit = "30 minutes")
   ) %>%
