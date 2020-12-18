@@ -2,7 +2,9 @@
 ### READ IN DATA ###
 ###########################
 #
-source("R/Load packages.R")
+library(tidyverse)
+library(lubridate)
+# library(purrrlyr)
 # only needed for soiltemp template
 # source("R/Rgathering/ReadInPlotLevel.R")
 
@@ -29,7 +31,7 @@ metaTomst <- read_csv2("data/metaData/Logger_info.csv", col_names = TRUE, na = c
 files <- dir(path = "data/climate_tomst", pattern = "^data.*\\.csv$", full.names = TRUE, recursive = TRUE)
 
 # remove empty file
-files <- files[!(files %in% c("data/climate tomst/2020_Sept_Joa/data_94194607_2.csv"))]
+files <- files[!(files %in% c("data/climate_tomst/data_94194607_2.csv"))]
 
 # Function to read in data
 temp <- map_df(set_names(files), function(file) {
@@ -55,6 +57,25 @@ TomstLogger_2019_2020 <- temp %>%
     LoggerID = as.double(LoggerID)
   ) %>% 
   left_join(metaTomst, by = c("LoggerID"="loggerID")) %>% 
+
+# write csv per site
+# temp <- TomstLogger_2019_2020 %>% 
+#   mutate(
+#     Site = as_factor(Site)
+#   ) %>% 
+#   nest(!c(Site)) %>% 
+#   by_row(~write.csv(.$data, file = .$dataset))
+
+# temp2 <- TomstLogger_2019_2020 %>% 
+#   drop_na(Site) %>% 
+#   nest(data = c(File, ID, Date_Time, Time_zone, SoilTemperature, GroundTemperature, 
+#                 AirTemperature, RawSoilmoisture, Shake, ErrorFlag, LoggerID, 
+#                 plotID, Block, Plot, OTC, Treatment, date_in, date_out)) %>%
+#   by_row(~write.csv(.$data, file = paste(.$Site, ".csv", sep = "")))
+
+# do the soil moisture calibration with the horrible Tomst excel sheet
+
+# import and join the files after calibration
   
   # Data curation
   
@@ -69,24 +90,26 @@ TomstLogger_2019_2020 <- temp %>%
   ) %>% 
   
   # fix wrong values (first graph them to see what to fix, below is what was done for another dataset)
-  mutate(AirTemperature = case_when(LoggerID %in% c("94195252", "94195220") & AirTemperature < -40 ~ NA_real_,
-                                    LoggerID == "94195209" & Date_Time > "2020-08-12 00:00:00" & Date_Time < "2020-08-13 00:00:00" ~ NA_real_,
+  mutate(AirTemperature = case_when(LoggerID %in% c("94194653") & AirTemperature < -40 ~ NA_real_,
                                     TRUE ~ as.numeric(AirTemperature)),
          
-         GroundTemperature = case_when(LoggerID %in% c("94195208", "94195252") & GroundTemperature < -40 ~ NA_real_,
-                                       LoggerID == "94195209" & Date_Time > "2020-08-12 00:00:00" & Date_Time < "2020-08-13 00:00:00" ~ NA_real_,
+         GroundTemperature = case_when(LoggerID %in% c("94194653") & GroundTemperature < -40 ~ NA_real_,
+                                       LoggerID %in% c("94194653") & GroundTemperature > 40 ~ NA_real_,
                                        TRUE ~ as.numeric(GroundTemperature)),
          
-         SoilTemperature = case_when(LoggerID %in% c("94195252", "94195236") & SoilTemperature < -40 ~ NA_real_,
-                                     LoggerID %in% c("94200493", "94200499") & Date_Time < "2020-07-03 08:00:00" ~ NA_real_,
-                                     LoggerID %in% c("94195208") & ErrorFlag == 1 ~ NA_real_,
-                                     LoggerID %in% c("94200493") & Date_Time > "2020-07-17 01:00:00" & Date_Time < "2020-09-16 01:00:00" ~ NA_real_,
-                                     LoggerID == "94195209" & Date_Time > "2020-08-12 00:00:00" & Date_Time < "2020-08-13 00:00:00" ~ NA_real_,
+         SoilTemperature = case_when(LoggerID %in% c("94194610", "94194613", "94194615", "94194616", "94194619", "94194652", "94194653", "94194654", "94194657", "94194658", "94194659", "94194660", "94194691", "94194694", "94194695", "94194699", "94205702", "94205731", "94205732") & SoilTemperature > 25 ~ NA_real_,
+                                     LoggerID %in% c("94194662", "94194667", "94194670", "94194693", "94194696", "94194611", "94194617", "94194626", "94194625", "94194655", "94194661", "94194681", "94194669", "94194666", "94205729", "94205727", "94205704", "94205703", "94205730", "94205731", "94205734", "94205760") & SoilTemperature > 20 ~ NA_real_,
+                                     LoggerID %in% c("94194653") & SoilTemperature < -40 ~ NA_real_,
+                                     # LoggerID %in% c("", "") & Date_Time > "2020-07-03 08:00:00" ~ NA_real_,
+                                     # LoggerID %in% c("") & ErrorFlag == 1 ~ NA_real_,
+                                     # LoggerID %in% c("") & Date_Time > "2020-07-17 01:00:00" & Date_Time < "2020-09-16 01:00:00" ~ NA_real_,
+                                     # LoggerID == "" & Date_Time > "2020-08-12 00:00:00" & Date_Time < "2020-08-13 00:00:00" ~ NA_real_,
                                      TRUE ~ as.numeric(SoilTemperature)))
 
 
 # Save clean file
-write_csv(x = TomstLogger_2019_2020, path = "data_cleaned/climate/THREE-D_TomstLogger_2019_2020.csv")
+write_csv(TomstLogger_2019_2020, "INCLINE_TomstLogger_2019_2020.csv")
+
 
 
 # Checking data
@@ -98,9 +121,33 @@ dd %>%
   # filter(LoggerID %in% c("94200493", "94200499")) %>% 
   #filter(SoilTemperature < 20) %>% 
   # filter(Date_Time < "2020-07-05 08:00:00") %>% 
+  ggplot(aes(x = Date_Time, y = GroundTemperature, colour = as.factor(LoggerID))) +
+  geom_line() +
+  # geom_vline(xintercept = ymd_hms("2020-06-25 12:00:00")) +
+  facet_wrap(~ LoggerID, scales = "free") +
+  theme(legend.position="none") +
+  ggsave("GroundTemperature.png", height = 50, width = 100, units = "cm")
+
+dd %>% 
+  #filter(destSiteID == "Lia") %>% 
+  # filter(LoggerID %in% c("94200493", "94200499")) %>% 
+  #filter(SoilTemperature < 20) %>% 
+  # filter(Date_Time < "2020-07-05 08:00:00") %>% 
   ggplot(aes(x = Date_Time, y = SoilTemperature, colour = as.factor(LoggerID))) +
   geom_line() +
   # geom_vline(xintercept = ymd_hms("2020-06-25 12:00:00")) +
   facet_wrap(~ LoggerID, scales = "free") +
-  theme(legend.position="none")
+  theme(legend.position="none") +
+  ggsave("SoilTemperature.png", height = 50, width = 100, units = "cm")
 
+dd %>% 
+  #filter(destSiteID == "Lia") %>% 
+  # filter(LoggerID %in% c("94200493", "94200499")) %>% 
+  #filter(SoilTemperature < 20) %>% 
+  # filter(Date_Time < "2020-07-05 08:00:00") %>% 
+  ggplot(aes(x = Date_Time, y = AirTemperature, colour = as.factor(LoggerID))) +
+  geom_line() +
+  # geom_vline(xintercept = ymd_hms("2020-06-25 12:00:00")) +
+  facet_wrap(~ LoggerID, scales = "free") +
+  theme(legend.position="none") +
+  ggsave("AirTemperature.png", height = 50, width = 100, units = "cm")
