@@ -110,8 +110,6 @@ TomstLogger_2019_2020 <- temp %>%
 # Save clean file
 write_csv(TomstLogger_2019_2020, "INCLINE_TomstLogger_2019_2020.csv")
 
-
-
 # Checking data
 dd <- TomstLogger_2019_2020
 
