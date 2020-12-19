@@ -53,7 +53,7 @@ itex.df <-left_join(itex.df, treatment, by = c("plotID" = "Plot_ID")) %>%
     treatment = str_replace_all(Treatment, c("W_C" = "OTC", "C_C" = "CTL")), #replacing the name of the treatments to fit ITEX wishes
     temp_air = temp_airavg - 273.15, #temp air in celsius
     flux = flux /(60*60), # they want fluxes in mmol/sqm/s instead of mmol/sqm/h
-    Replicate = str_replace_all(replicate, c("1" = "Rep1", "2" = "Rep2", "3" = "Rep3", "4" = "Rep4"))
+    replicate = str_replace_all(replicate, c("1" = "Rep1", "2" = "Rep2", "3" = "Rep3", "4" = "Rep4"))
     # Replicate = replace_all(Replicate, c(1, 2, 3), c("Rep1", "Rep2", "Rep3"))
   )
   # select(Plot_ID, Replicate, Date, temp_air, r.squared, flux, Treatment)
@@ -64,21 +64,22 @@ itex.df <-left_join(itex.df, treatment, by = c("plotID" = "Plot_ID")) %>%
 # get the avg values on the hour per logger
 tomst_round <- tomst %>% 
   mutate(
-    round = round_date(Date_Time, unit = "30 minutes")
+    round = round_date(Date_Time, unit = "1 hour")
   ) %>% 
   group_by(plotID, LoggerID, round) %>% 
   summarise(
-    SoilTemperature.avg = mean(SoilTemperature),
-    GroundTemperature.avg = mean(GroundTemperature),
-    AirTemperature.avg = mean(AirTemperature),
-    RawSoilmoisture.avg = mean(RawSoilmoisture)
+    soiltemp_avg_tomst = mean(SoilTemperature),
+    groundtemp_avg_tomst = mean(GroundTemperature),
+    airtemp_avg_tomst = mean(AirTemperature),
+    rawsoilmoist_avg_tomst = mean(RawSoilmoisture)
   )
 
 itex.df <- itex.df %>% 
   mutate(
-    round = round_date(datetime, unit = "30 minutes")
+    round = round_date(datetime, unit = "1 hour")
   ) %>%
-  left_join(tomst_round, by = c("plotID", "round"))
+  left_join(tomst_round, by = c("plotID", "round")) %>% 
+  select(plotID, replicate, date, temp_air, r.squared, flux, treatment, soiltemp_avg_tomst, groundtemp_avg_tomst, airtemp_avg_tomst)
 
 
 
