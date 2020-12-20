@@ -8,9 +8,10 @@ library(fs)
 library("dataDownloader")
 
 
-measurement <- 120 #the length of the measurement taken on the field in seconds
+measurement <- 180 #the length of the measurement taken on the field in seconds
 startcrop <- 10 #how much to crop at the beginning of the measurement in seconds
-endcrop <- 10 #how much to crop at the end of the measurement in seconds
+endcrop <- 60 #how much to crop at the end of the measurement in seconds
+#measurement is 120s long but I want to see more on the graph to be sure
 
 #download and unzip files from OSF
 # get_file(node = "zhk3m",
@@ -107,164 +108,34 @@ incline <- read_csv("data/C-Flux/summer_2020/INCLINE_field-record_2020.csv", na 
 co2_conc_incline <- match.flux(combined,incline)
 
 #adjusting the time window
+# import cutting
+cutting <- read_csv("data/C-Flux/summer_2020/cutting.csv", na = "", col_types = "dtt")
+
+co2_conc_incline <- co2_conc_incline %>% 
+  left_join(cutting, by = "ID") %>% 
+  mutate(
+    start_cut = ymd_hms(paste(date, start_cut)),
+    end_cut = ymd_hms(paste(date, end_cut))
+  )
+
+# adjusting the time window with manual cuts
 co2_conc_incline <- co2_conc_incline %>% mutate(
+  start_window = case_when(
+    start_cut > start_window ~ start_cut,
+    # start_cut = NA ~ start_window,
+    TRUE ~ start_window
+  ),
+  end_window = case_when(
+    end_cut < end_window ~ end_cut,
+    TRUE ~ end_window
+  ),
   cut = case_when(
     datetime <= start_window | datetime >= end_window ~ "cut",
-    ID == 1 & datetime < ymd_hms("2020-07-17T12:15:50") ~ "cut",
-    ID == 2 & datetime < ymd_hms("2020-07-17T12:19:50") ~ "cut",
-    ID == 3 & datetime < ymd_hms("2020-07-17T12:23:50") ~ "cut",
-    ID == 4 & datetime < ymd_hms("2020-07-17T12:27:30") ~ "cut",
-    ID == 5 & datetime < ymd_hms("2020-07-17T12:31:20") ~ "cut",
-    ID == 6 & datetime < ymd_hms("2020-07-17T12:35:10") ~ "cut",
-    ID == 7 & datetime < ymd_hms("2020-07-17T12:52:30") ~ "cut",
-    ID == 8 & datetime < ymd_hms("2020-07-17T12:56:50") ~ "cut",
-    ID == 9 & datetime < ymd_hms("2020-07-17T13:01:40") ~ "cut",
-    ID == 10 & datetime < ymd_hms("2020-07-17T13:06:50") ~ "cut",
-    ID == 16 & datetime > ymd_hms("2020-07-17T15:20") ~ "cut",
-    ID == 18 & datetime < ymd_hms("2020-07-17T15:28:50") ~ "cut",
-    ID == 19 & datetime < ymd_hms("2020-07-17T15:38:30") ~ "cut",
-    ID == 20 & datetime < ymd_hms("2020-07-17T15:41:50") ~ "cut",
-    ID == 21 & datetime < ymd_hms("2020-07-17T15:45:25") ~ "cut",
-    ID == 22 & datetime < ymd_hms("2020-07-17T15:48:55") ~ "cut",
-    ID == 23 & datetime < ymd_hms("2020-07-17T15:52:10") ~ "cut",
-    ID == 24 & datetime < ymd_hms("2020-07-17T15:55:50") ~ "cut",
-    ID == 25 & datetime < ymd_hms("2020-07-17T16:06:00") ~ "cut",
-    ID == 26 & datetime < ymd_hms("2020-07-17T16:09:40") ~ "cut",
-    ID == 31 & datetime < ymd_hms("2020-07-17T16:28:15") ~ "cut",
-    ID == 32 & datetime < ymd_hms("2020-07-17T16:31:45") ~ "cut",
-    ID == 33 & datetime < ymd_hms("2020-07-17T16:35:10") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-    ID ==  & datetime > ymd_hms("") ~ "cut",
-
+    # ID ==  & (datetime < ymd_hms("") | datetime > ymd_hms("")) ~ "cut",
     TRUE ~ "keep"
   ),
   cut = as_factor(cut)
-)
+  )
 
 # graph CO2 fluxes to visually check the data
 # co2_conc_incline %>%
