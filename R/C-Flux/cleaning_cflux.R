@@ -111,22 +111,24 @@ co2_conc_incline <- match.flux(combined,incline)
 # import cutting
 cutting <- read_csv("data/C-Flux/summer_2020/cutting.csv", na = "", col_types = "dtt")
 
-co2_conc_incline <- co2_conc_incline %>% 
+co2_conc_incline_cut <- co2_conc_incline %>% 
   left_join(cutting, by = "ID") %>% 
   mutate(
-    start_cut = ymd_hms(paste(date, start_cut)),
-    end_cut = ymd_hms(paste(date, end_cut))
+    start_cut = ymd_hms(paste(date, .$start_cut)),
+    end_cut = ymd_hms(paste(date, .$end_cut))
   )
 
 # adjusting the time window with manual cuts
-co2_conc_incline <- co2_conc_incline %>% mutate(
+co2_conc_incline_cut <- co2_conc_incline_cut %>% mutate(
   start_window = case_when(
-    start_cut > start_window ~ start_cut,
+    is.na(start_cut) == FALSE ~ start_cut,
+    # start_cut > start_window ~ start_cut,
     # start_cut = NA ~ start_window,
     TRUE ~ start_window
   ),
   end_window = case_when(
-    end_cut < end_window ~ end_cut,
+    is.na(end_cut) == FALSE ~ end_cut,
+    # end_cut < end_window ~ end_cut,
     TRUE ~ end_window
   ),
   cut = case_when(
@@ -150,16 +152,16 @@ co2_conc_incline <- co2_conc_incline %>% mutate(
 #   ggsave("incline.png", height = 40, width = 100, units = "cm")
 
 #plot each flux to look into details what to cut off
-ggplot(co2_conc_incline, aes(x = datetime, y = CO2, color = cut)) +
+ggplot(co2_conc_incline_cut, aes(x = datetime, y = CO2, color = cut)) +
   geom_line(size = 0.2, aes(group = ID)) +
-  scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M:%S") +
+  scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
   # scale_x_date(date_labels = "%H:%M:%S") +
   facet_wrap(vars(ID), ncol = 36, scales = "free") +
   ggsave("incline_detail.png", height = 60, width = 126, units = "cm")
 
 
 #graph CO2 fluxes to visually check the data
-ggplot(co2_conc_incline, aes(x=datetime, y=CO2, color = cut)) + 
+ggplot(co2_conc_incline_cut, aes(x=datetime, y=CO2, color = cut)) + 
   # geom_point(size=0.005) +
   geom_line(size = 0.2, aes(group = ID)) +
   # coord_fixed(ratio = 10) +
