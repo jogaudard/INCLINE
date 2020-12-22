@@ -133,6 +133,10 @@ co2_conc_incline_cut <- co2_conc_incline_cut %>% mutate(
   ),
   cut = case_when(
     datetime <= start_window | datetime >= end_window ~ "cut",
+    ID == 418 & (datetime < ymd_hms("2020-08-08T10:47:25") | datetime > ymd_hms("2020-08-08T10:47:30")) ~ "cut",
+    ID == 476 & (datetime < ymd_hms("2020-08-22T11:51:25") | datetime > ymd_hms("2020-08-22T11:51:30")) ~ "cut",
+    ID == 558 & (datetime < ymd_hms("2020-08-24T12:47:00") | datetime > ymd_hms("2020-08-24T12:47:05")) ~ "cut",
+    
     # ID ==  & (datetime < ymd_hms("") | datetime > ymd_hms("")) ~ "cut",
     TRUE ~ "keep"
   ),
