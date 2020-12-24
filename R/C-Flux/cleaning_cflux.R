@@ -30,6 +30,11 @@ get_file(node = "zhk3m",
          path = "data/C-Flux/summer_2020",
          remote_path = "RawData/C-Flux")
 
+get_file(node = "zhk3m",
+         file = "INCLINE_cutting_2020.csv",
+         path = "data/C-Flux/summer_2020",
+         remote_path = "RawData/C-Flux")
+
 # Unzip files
 zipFile <- "data/C-Flux/summer_2020/Three-D_cflux_2020.zip"
 if(file.exists(zipFile)){
@@ -109,7 +114,7 @@ co2_conc_incline <- match.flux(combined,incline)
 
 #adjusting the time window
 # import cutting
-cutting <- read_csv("data/C-Flux/summer_2020/cutting.csv", na = "", col_types = "dtt")
+cutting <- read_csv("data/C-Flux/summer_2020/INCLINE_cutting_2020.csv", na = "", col_types = "dtt")
 
 co2_conc_incline_cut <- co2_conc_incline %>% 
   left_join(cutting, by = "ID") %>% 
@@ -133,9 +138,10 @@ co2_conc_incline_cut <- co2_conc_incline_cut %>% mutate(
   ),
   cut = case_when(
     datetime <= start_window | datetime >= end_window ~ "cut",
-    ID == 418 & (datetime < ymd_hms("2020-08-08T10:47:25") | datetime > ymd_hms("2020-08-08T10:47:30")) ~ "cut",
-    ID == 476 & (datetime < ymd_hms("2020-08-22T11:51:25") | datetime > ymd_hms("2020-08-22T11:51:30")) ~ "cut",
-    ID == 558 & (datetime < ymd_hms("2020-08-24T12:47:00") | datetime > ymd_hms("2020-08-24T12:47:05")) ~ "cut",
+    ID == 418 & datetime %in% c(ymd_hms("2020-08-08T10:47:25"):ymd_hms("2020-08-08T10:47:30")) ~ "cut",
+    ID == 476 & datetime %in% c(ymd_hms("2020-08-22T11:51:25"):ymd_hms("2020-08-22T11:51:30")) ~ "cut",
+    ID == 558 & datetime %in% c(ymd_hms("2020-08-24T12:47:00"):ymd_hms("2020-08-24T12:47:05")) ~ "cut",
+
     
     # ID ==  & (datetime < ymd_hms("") | datetime > ymd_hms("")) ~ "cut",
     TRUE ~ "keep"
@@ -175,28 +181,43 @@ ggplot(co2_conc_incline_cut, aes(x=datetime, y=CO2, color = cut)) +
   ggsave("incline.png", height = 40, width = 100, units = "cm")
 
 #calculation of flux
-co2_flux_incline <- filter(co2_conc_incline, cut == "keep") %>% #cut out the discarded parts
-  flux.calc(co2_conc_incline, chamber_volume = 34.3, plot_area = 0.08575) %>% #need to specify the size of the chamber because it is different than Three-D
+flux_incline <- filter(co2_conc_incline_cut, cut == "keep") %>% #cut out the discarded parts
+  flux.calc(chamber_volume = 34.3, plot_area = 0.08575) %>%  #need to specify the size of the chamber because it is different than Three-D
+  rename(
+      turfID = plot_ID
+    )
 
-
-write_csv(flux_threed, "data/C-Flux/summer_2020/INCLINE_c-flux_2020.csv")
+write_csv(flux_incline, "data/C-Flux/summer_2020/INCLINE_c-flux_2020.csv")
 
 #make a freq hist about length of fluxes
-ggplot(co2_flux_incline, aes(nobs)) +
+ggplot(flux_incline, aes(nobs)) +
   geom_bar() +
   scale_x_binned()
 
+#another graph to check
+filter(co2_conc_incline_cut, cut == "keep") %>% 
+ggplot(aes(x = datetime, y = CO2, color = cut)) +
+  geom_line(size = 0.2, aes(group = ID)) +
+  scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
+  # scale_x_date(date_labels = "%H:%M:%S") +
+  facet_wrap(vars(ID), ncol = 36, scales = "free") +
+  ggsave("incline_detail_cut.png", height = 60, width = 126, units = "cm")
+
 #to remove poor quality data
-# co2_flux_incline_clean <- co2_flux_incline %>% 
+# co2_flux_incline_clean <- flux_incline %>%
 #   filter(
 #     ((p.value <= 0.05 & r.squared >= 0.7) |
 #       (p.value >0.05 & r.squared <= 0.2)) &
-#       nobs >= 60
+#       nobs >= 50
 #   )
-# count(co2_flux_incline_clean)
+# a <- count(co2_flux_incline_clean)
+# b <- count(flux_incline)
+# a
+# b
+# a/b
 
 # co2_flux_incline <- flux.calc(co2_conc_incline, chamber_volume = 34.3, plot_area = 0.08575) %>% #need to specify the size of the chamber because it is different than Three-D
 #   rename(
 #     plotID = plot_ID
-#   ) %>% 
+#   ) %>%
 #   write_csv("data/C-Flux/summer_2020/INCLINE_c-flux_2020.csv")
