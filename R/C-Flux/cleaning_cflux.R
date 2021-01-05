@@ -97,7 +97,7 @@ combined <- fluxes %>%
 #   drop_na(starting_time) %>% #need to remove rows with NA in starting time: when running out of battery we took only two measurements per plot, but the replicates stayed in the record file
 #   select(plot_ID,type,replicate,starting_time,date,campaign,remarks,start,end)
 
-incline <- read_csv("data/C-Flux/summer_2020/INCLINE_field-record_2020.csv", na = c(""), col_types = "cccntcnc") %>% 
+incline <- read_csv("data/C-Flux/summer_2020/INCLINE_field-record_2020.csv", na = c(""), col_types = "cccntcfc") %>% 
   drop_na(starting_time) %>% #delete row without starting time (meaning no measurement was done)
   mutate(
     date = dmy(date),
@@ -139,8 +139,8 @@ co2_conc_incline_cut <- co2_conc_incline_cut %>% mutate(
   cut = case_when(
     datetime <= start_window | datetime >= end_window ~ "cut",
     ID == 418 & datetime %in% c(ymd_hms("2020-08-08T10:47:25"):ymd_hms("2020-08-08T10:47:30")) ~ "cut",
-    ID == 476 & datetime %in% c(ymd_hms("2020-08-22T11:51:25"):ymd_hms("2020-08-22T11:51:30")) ~ "cut",
-    ID == 558 & datetime %in% c(ymd_hms("2020-08-24T12:47:00"):ymd_hms("2020-08-24T12:47:05")) ~ "cut",
+    ID == 482 & datetime %in% c(ymd_hms("2020-08-22T11:51:25"):ymd_hms("2020-08-22T11:51:30")) ~ "cut",
+    ID == 564 & datetime %in% c(ymd_hms("2020-08-24T12:47:00"):ymd_hms("2020-08-24T12:47:05")) ~ "cut",
 
     
     # ID ==  & (datetime < ymd_hms("") | datetime > ymd_hms("")) ~ "cut",
