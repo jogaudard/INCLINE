@@ -19,13 +19,13 @@ ggplot(lrc_flux, aes(x = PARavg, y = flux, color = turfID)) +
 #grouping per treatment instead of turfs
 #!! this part needs to be modified, not the same system as Three-D!!
 #need to add a treatment column
+
+treatment <- read_csv("treatment.csv")
+
 lrc_flux <- lrc_flux %>% 
-  mutate(
-    treatment = case_when(
-      str_detect(turf_ID, "W") ~ "W",
-      TRUE ~ "A"
-    )
-  )
+  left_join(treatment, by = c("turfID" = "Plot_ID")) %>% 
+  rename(treatment = Treatment)
+
 #plotting
 ggplot(lrc_flux, aes(x = PARavg, y = flux, color = treatment)) +
   geom_point(size = 0.1) +
