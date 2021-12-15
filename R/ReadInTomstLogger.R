@@ -4,15 +4,26 @@
 #
 library(tidyverse)
 library(lubridate)
+library(dataDownloader)
 # library(purrrlyr)
 # only needed for soiltemp template
 # source("R/Rgathering/ReadInPlotLevel.R")
 
+get_file(node = "zhk3m",
+         file = "climate_tomst.zip",
+         path = "data",
+         remote_path = "RawData/Climate")
+get_file(node = "zhk3m",
+         file = "logger_info.csv",
+         path = "data",
+         remote_path = "RawData/Climate")
+
+unzip("data/climate_tomst.zip", exdir = "data")
 
 #### CLIMATE DATA ####
 
 # Read in meta data
-metaTomst <- read_csv2("data/metaData/Logger_info.csv", col_names = TRUE, na = c(""), col_types = "fcffffncnc") %>% 
+metaTomst <- read_csv2("data/logger_info.csv", col_names = TRUE, na = c(""), col_types = "fcffffncnc") %>% 
   mutate(
     Date_logger_in = dmy(Date_logger_in),
     Date_logger2_in = dmy(Date_logger2_in)
@@ -108,7 +119,7 @@ TomstLogger_2019_2020 <- temp %>%
 
 
 # Save clean file
-write_csv(TomstLogger_2019_2020, "INCLINE_TomstLogger_2019_2020.csv")
+write_csv(TomstLogger_2019_2020, "data/INCLINE_microclimate.csv")
 
 # Checking data
 dd <- TomstLogger_2019_2020
