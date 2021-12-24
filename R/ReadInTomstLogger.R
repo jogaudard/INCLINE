@@ -2,6 +2,8 @@
 ### READ IN DATA ###
 ###########################
 #
+
+source("https://raw.githubusercontent.com/audhalbritter/Three-D/master/R/Climate/soilmoisture_correction.R")
 library(tidyverse)
 library(lubridate)
 library(dataDownloader)
@@ -56,7 +58,7 @@ temp <- map_df(set_names(files), function(file) {
 # "94201711", "94201712", "94201713"
 
 
-TomstLogger_2019_2020 <- temp %>% 
+microclimate <- temp %>% 
   # rename column names
   rename("ID" = "X1", "datetime" = "X2", "time_zone" = "X3", "soil_temperature" = "X4", "ground_temperature" = "X5", "air_temperature" = "X6", "RawSoilmoisture" = "X7", "Shake" = "X8", "ErrorFlag" = "X9") %>% 
   mutate(datetime = ymd_hm(datetime)) %>% 
@@ -117,12 +119,30 @@ TomstLogger_2019_2020 <- temp %>%
                                      # LoggerID == "" & Date_Time > "2020-08-12 00:00:00" & Date_Time < "2020-08-13 00:00:00" ~ NA_real_,
                                      TRUE ~ as.numeric(soil_temperature)))
 
+#adding soil moisture
+microclimate <- microclimate %>% 
+  mutate(
+    soil_moisture = soil.moist(
+      rawsoilmoist = RawSoilmoisture,
+      soil_temp = soil_temperature,
+      soilclass = "loamy_sand_A" #need to check if correct soil class
+    )
+  )
+#cleaning soil moisture data
+microclimate <- microclimate %>% 
+  mutate(
+    soil_moisture = case_when(
+      soil_moisture <= 0 ~ NA_real_,
+      TRUE ~ soil_moisture
+    )
+  )
+
 
 # Save clean file
-write_csv(TomstLogger_2019_2020, "data/INCLINE_microclimate.csv")
+write_csv(microclimate, "data/INCLINE_microclimate.csv")
 
 # Checking data
-dd <- TomstLogger_2019_2020
+dd <- microclimate
 
 
 dd %>% 
@@ -160,3 +180,15 @@ dd %>%
   facet_wrap(~ LoggerID, scales = "free") +
   theme(legend.position="none") +
   ggsave("AirTemperature.png", height = 50, width = 100, units = "cm")
+
+microclimate %>% 
+  #filter(destSiteID == "Lia") %>% 
+  # filter(LoggerID %in% c("94200493", "94200499")) %>% 
+  #filter(SoilTemperature < 20) %>% 
+  # filter(Date_Time < "2020-07-05 08:00:00") %>% 
+  ggplot(aes(x = datetime, y = soil_moisture, colour = as.factor(LoggerID))) +
+  geom_line() +
+  # geom_vline(xintercept = ymd_hms("2020-06-25 12:00:00")) +
+  facet_wrap(~ LoggerID, scales = "free") +
+  theme(legend.position="none") +
+  ggsave("soil_moisture.png", height = 50, width = 100, units = "cm")
