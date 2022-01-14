@@ -9,4 +9,22 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Introduction
 
+# Method
+
+## Sites
+
+## Design
+
+## Treatments
+
+# Data management
+
+## Location
+
+## Naming convention
+
+## Data collection
+
+## Data dictionnaries
