@@ -3,6 +3,7 @@
  library(lubridate)
  library(dataDownloader)
  
+ source("https://raw.githubusercontent.com/audhalbritter/Three-D/master/R/Rgathering/make_data_dic.R") #Aud made a pretty cool function for that
 
 # data import -------------------------------------------------------------
 
