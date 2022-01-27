@@ -37,14 +37,14 @@ treatment <- read_csv("treatment.csv")
 
 
 tomst <- read_csv("INCLINE_TomstLogger_2019_2020.csv") %>% 
-# tomst <- TomstLogger_2019_2020 %>% 
+  # tomst <- TomstLogger_2019_2020 %>% 
   drop_na(SoilTemperature, GroundTemperature, AirTemperature, RawSoilmoisture) %>%  #in case there are NA because of the cleaning or broken loggers
   mutate(
     plotID = str_to_upper(plotID)
   )
-  
+
 # itex.df <- left_join(itex.df, treatment, by = "Plot_ID")
-  # right_join(treatment, itex.df, by = "Plot_ID")
+# right_join(treatment, itex.df, by = "Plot_ID")
 
 #a bit of cleaning
 
@@ -56,7 +56,7 @@ itex.df <-left_join(itex.df, treatment, by = c("plotID" = "Plot_ID")) %>%
     replicate = str_replace_all(replicate, c("1" = "Rep1", "2" = "Rep2", "3" = "Rep3", "4" = "Rep4"))
     # Replicate = replace_all(Replicate, c(1, 2, 3), c("Rep1", "Rep2", "Rep3"))
   )
-  # select(Plot_ID, Replicate, Date, temp_air, r.squared, flux, Treatment)
+# select(Plot_ID, Replicate, Date, temp_air, r.squared, flux, Treatment)
 
 # test <- group_by(itex.df, plotID) %>% 
 #   nearestTime(itex.df,tomst, datetime, Date_Time) #problem with this method is that it will take the nearest value, even if it is very far. I don't want data that are several days away from my measurment.
@@ -177,7 +177,7 @@ group_cover <- left_join(cover, info, by = "species") %>%
   summarise(
     sum.group = sum(value)
   ) %>% 
-    mutate( #just building the plot names to have the same as the other dataframes
+  mutate( #just building the plot names to have the same as the other dataframes
     Site = substr(Site, 1, 3),
     Site = str_to_upper(Site)
     # Site = str_replace_all(Site, c("Lavisdalen" = "LAV", "Skjellingahaugen"))
@@ -209,9 +209,9 @@ climate2019 <- read_csv("ITEX/GriddedDailyClimateData2009-2019.csv") %>%
   filter(
     Year == 2018,
     Site == "Skj" |
-    Site == "Ulv" |
-    Site == "Gud" |
-    Site == "Lav"
+      Site == "Ulv" |
+      Site == "Gud" |
+      Site == "Lav"
   ) %>% 
   select(Site, Month, Temperature, Precipitation)
 
@@ -277,4 +277,3 @@ write_csv(Site.meta.data, "ITEX/site_metadata.csv")
 #       & !is.na(value)) %>% 
 #     select(Block, plot, Site, value) %>% 
 #     distinct()
-  

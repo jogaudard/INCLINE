@@ -141,13 +141,13 @@ co2_conc_incline_cut <- co2_conc_incline_cut %>% mutate(
     ID == 418 & datetime %in% c(ymd_hms("2020-08-08T10:47:25"):ymd_hms("2020-08-08T10:47:30")) ~ "cut",
     ID == 482 & datetime %in% c(ymd_hms("2020-08-22T11:51:25"):ymd_hms("2020-08-22T11:51:30")) ~ "cut",
     ID == 564 & datetime %in% c(ymd_hms("2020-08-24T12:47:00"):ymd_hms("2020-08-24T12:47:05")) ~ "cut",
-
+    
     
     # ID ==  & (datetime < ymd_hms("") | datetime > ymd_hms("")) ~ "cut",
     TRUE ~ "keep"
   ),
   cut = as_factor(cut)
-  )
+)
 
 # graph CO2 fluxes to visually check the data
 # co2_conc_incline %>%
@@ -181,13 +181,70 @@ ggplot(co2_conc_incline_cut, aes(x=datetime, y=CO2, color = cut)) +
   ggsave("incline.png", height = 40, width = 100, units = "cm")
 
 #calculation of flux
-flux_incline <- filter(co2_conc_incline_cut, cut == "keep") %>% #cut out the discarded parts
-  flux.calc(chamber_volume = 34.3, plot_area = 0.08575) %>%  #need to specify the size of the chamber because it is different than Three-D
-  rename(
-      turfID = plot_ID
-    )
 
-write_csv(flux_incline, "data/C-Flux/summer_2020/INCLINE_c-flux_2020.csv")
+#new function for that
+flux.calc2 <- function(co2conc, # dataset of CO2 concentration versus time (output of match.flux)
+                       chamber_volume = 24.5, # volume of the flux chamber in L, default for Three-D chamber (25x24.5x40cm)
+                       tube_volume = 0.075, # volume of the tubing in L, default for summer 2020 setup
+                       atm_pressure = 1, # atmoshperic pressure, assumed 1 atm
+                       plot_area = 0.0625 # area of the plot in m^2, default for Three-D
+)
+{
+  R = 0.082057 #gas constant, in L*atm*K^(-1)*mol^(-1)
+  vol = chamber_volume + tube_volume
+  # co2conc <- co2_cut
+  slopes <- co2conc %>% 
+    group_by(ID) %>% 
+    mutate(
+      time = difftime(datetime[1:length(datetime)],datetime[1] , units = "secs")
+    ) %>% 
+    select(ID, time, CO2) %>%
+    do({model = lm(CO2 ~ time, data=.)    # create your model
+    data.frame(tidy(model),              # get coefficient info
+               glance(model))}) %>%          # get model info
+    filter(term == "time") %>% 
+    rename(slope = estimate) %>% 
+    select(ID, slope, p.value, r.squared, adj.r.squared, nobs) %>% 
+    ungroup()
+  
+  means <- co2conc %>% 
+    group_by(ID) %>% 
+    summarise(
+      PARavg = mean(PAR, na.rm = TRUE), #mean value of PAR for each flux
+      temp_airavg = mean(temp_air, na.rm = TRUE)  #mean value of temp_air for each flux
+      + 273.15, #transforming in kelvin for calculation
+    ) %>% 
+    ungroup()
+  
+  fluxes_final <- left_join(slopes, means, by = "ID") %>% 
+    left_join(
+      co2conc,
+      by = "ID"
+    ) %>% 
+    select(ID, slope, p.value, r.squared, adj.r.squared, nobs, PARavg, temp_airavg, plot_ID, type, campaign, remarks, start_window) %>% 
+    distinct() %>% 
+    rename(
+      datetime = start_window
+    ) %>% 
+    mutate(
+      flux = (slope * atm_pressure * vol)/(R * temp_airavg * plot_area) #gives flux in micromol/s/m^2
+      *3600 #secs to hours
+      /1000 #micromol to mmol
+    ) %>% #flux is now in mmol/m^2/h, which is more common
+    arrange(datetime) %>% 
+    select(!slope)
+  
+  return(fluxes_final)
+  
+}
+
+flux_incline <- filter(co2_conc_incline_cut, cut == "keep") %>% #cut out the discarded parts
+  flux.calc2(chamber_volume = 34.3, plot_area = 0.08575) %>%  #need to specify the size of the chamber because it is different than Three-D
+  rename(
+    turfID = plot_ID
+  )
+
+write_csv(flux_incline, "data_cleaned/INCLINE_c-flux_2020.csv")
 
 #make a freq hist about length of fluxes
 ggplot(flux_incline, aes(nobs)) +
@@ -196,7 +253,7 @@ ggplot(flux_incline, aes(nobs)) +
 
 #another graph to check
 filter(co2_conc_incline_cut, cut == "keep") %>% 
-ggplot(aes(x = datetime, y = CO2, color = cut)) +
+  ggplot(aes(x = datetime, y = CO2, color = cut)) +
   geom_line(size = 0.2, aes(group = ID)) +
   scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
   # scale_x_date(date_labels = "%H:%M:%S") +
