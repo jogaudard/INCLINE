@@ -1,0 +1,30 @@
+---
+title: "INCLINE Readme"
+# author: "Joseph Gaudard"
+# date: "1/14/2022"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+# Method
+
+## Sites
+
+## Design
+
+## Treatments
+
+# Data management
+
+## Location
+
+## Naming convention
+
+## Data collection
+
+## Data dictionnaries
