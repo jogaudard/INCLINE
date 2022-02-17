@@ -6,6 +6,7 @@
 library(tidyverse)
 library(dataDownloader)
 library(osfr)
+library(lubridate)
 
 #### Downloading data from OSF ####
 
@@ -28,8 +29,8 @@ get_file(node = "zhk3m",
 
 #### Load data ####
 
-Sib_pro <- read_delim("data/Demography/Sib_pro_2018-2021.csv", delim = ";")
-Ver_alp <- read_delim("data/Demography/Ver_alp_2018-2021.csv", delim = ";")
+Sib_pro <- read_csv2("data/Demography/Sib_pro_2018-2021.csv")
+Ver_alp <- read_csv2("data/Demography/Ver_alp_2018-2021.csv")
 INCLINE_metadata <- read_delim("data/INCLINE_metadata_LoggerDates.csv", delim = ";")
 
 #### Cleaning variables names in dataset ####
@@ -43,7 +44,9 @@ Sib_pro <- Sib_pro %>%
   mutate(plotID = paste0(siteID, "_", block, "_", plot)) %>% #creating unique plotID variable
   mutate(unique_IDS = paste0(plotID, "_", IDS)) %>% #creating unique individual ID
   left_join(INCLINE_metadata, by = "plotID") %>% #adding treatment info from INCLINE metadata file
-  select(!Treat) #removing treatment column from the original dataset
+  select(!Treat) %>% #removing treatment column from the original dataset
+  select(!NC8) %>% 
+  select(!NAC5) #removing columns number of capsules 8 (NC8) and number of aborted capsules 5 (NAC5) because there are no entries in them
 
 Ver_alp <- Ver_alp %>% 
   rename(siteID = Site, block = Block, plot = Plot, year = Year, date = Date, regitrator = Registrator, seedling = seedl) %>%  #Rename to lower capital, and correct naming convention for the INCLINE project
@@ -52,4 +55,19 @@ Ver_alp <- Ver_alp %>%
   left_join(INCLINE_metadata, by = "plotID") %>% #adding treatment info from INCLINE metadata file
   select(!Treat) #removing treatment column from the original dataset
 
+#### Changing variable types ####
 
+Sib_pro <- Sib_pro %>% 
+  mutate(date = dmy(date), #changing the date to actual date format
+         siteID = as.factor(siteID), #changing siteID, OTC and treatment to factor
+         OTC = as.factor(OTC),
+         treatment = as.factor(treatment))
+
+Ver_alp <- Ver_alp %>% 
+  mutate(date = dmy(date), #changing the date to actual date format
+         siteID = as.factor(siteID), #changing siteID, OTC and treatment to factor
+         OTC = as.factor(OTC),
+         treatment = as.factor(treatment))
+
+
+         
