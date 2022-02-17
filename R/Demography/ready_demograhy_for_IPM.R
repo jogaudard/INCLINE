@@ -48,7 +48,7 @@ Sib_pro_2018_2019 <- Sib_pro_2018 %>%
                        ifelse(size > 0 & sizeNext > 0, 1, NA)),
          flo.no = NB_2018 + NFL_2018 + NC_2018,
          flo.if = ifelse(flo.no > 0, 1, 0)) %>%
-  mutate(offspringNext = ifelse(seedling_2019 == "yes", "sexual",
+  mutate(offspringNext = ifelse(seedling_2019 == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_2019 == "yes" & is.na(size), "sexual",
                                        ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
   ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
@@ -65,7 +65,7 @@ Sib_pro_2019_2020 <- Sib_pro_2019 %>%
                        ifelse(size > 0 & sizeNext > 0, 1, NA)),
          flo.no = NB_2019 + NFL_2019 + NC_2019,
          flo.if = ifelse(flo.no > 0, 1, 0)) %>%
-  mutate(offspringNext = ifelse(seedling_2020 == "yes", "sexual",
+  mutate(offspringNext = ifelse(seedling_2020 == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_2020 == "yes" & is.na(size), "sexual",
                                        ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
   ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
