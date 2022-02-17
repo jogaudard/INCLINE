@@ -32,7 +32,8 @@ get_file(node = "zhk3m",
 Sib_pro_germ <- read_csv("data/Germination/INCLINE_Germination_Seedling_Experiment_Data_SP.csv")
 Ver_alp_germ <- read_csv2("data/Germination/INCLINE_Germination_Seedling_Experiment_Data_Va.csv")
 INCLINE_metadata <- read_delim("data/INCLINE_metadata_LoggerDates.csv", delim = ";")
-
+comment_dict <- read_delim("data/Germination/comment_dictionary.csv", delim = ";")
+harvest_comment_dict <- read_delim("data/Germination/harvest_comment_dictionary.csv", delim = ";")
 
 ##### Veronica alpina #####
 
@@ -93,9 +94,18 @@ Ver_alp_germ <- Ver_alp_germ %>%
 ## Entering information in the "flag" column from comment section. Options are: Remove_duplicate, Dead_plant, Sick_plant, Other, Missing_date, Possible_mistakes_in_ID, and Biomass_mistakes
 
 Ver_alp_germ1 <- Ver_alp_germ %>% 
-  mutate(flag = ifelse(flag %in% c("Duplicate_remove", "Remove_duplicate", "Remove_Duplicate", "Remove_duplicat", "Remove_unsureID", "	No germination date. 2 seeds.; seed#2 germinated with cotyledons 23.03.2020'", "Might have two versions of this, becasue this one was not crossed out (18.05.2020) Agar dried out, crossed out dish 07.05.2020"),  "Remove_duplicate",
+  mutate(flag_seedling = ifelse(flag %in% c("Duplicate_remove", "Remove_duplicate", "Remove_Duplicate", "Remove_duplicat", "Remove_unsureID", "	No germination date. 2 seeds.; seed#2 germinated with cotyledons 23.03.2020'", "Might have two versions of this, becasue this one was not crossed out (18.05.2020) Agar dried out, crossed out dish 07.05.2020"),  "Remove_duplicate",
                        ifelse(flag == "No", NA,
                               ifelse(flag == "Remove_rotten", "Dead_plant", flag)))) %>% 
+  mutate(flag_germination = plyr::mapvalues(comment, from = comment_dict$comment, to = comment_dict$flag_germination, warn_missing = FALSE), #Using dictionary to categorize comments
+         flag_seedling = plyr::mapvalues(comment, from = comment_dict$comment, to = comment_dict$flag_seedling, warn_missing = FALSE)) %>% #Using dictionary to categorize comments
+  mutate(flag_germination2 = plyr::mapvalues(harvest_comment, from = harvest_comment_dict$harvest_comment, to = harvest_comment_dict$flag_germination, warn_missing = FALSE)) #Does not work, probably need to include all the comments...
+
+# ,
+#          flag_seedling = plyr::mapvalues(comment, from = comment_dict$comment, to = comment_dict$flag_germination), #Using dictionary to categorize comments
+#          flag_seedling = plyr::mapvalues(harvest_comment, from = harvest_comment_dict$comment, to = harvest_comment_dict$flag_seedling)) 
+#   
+  
   mutate(flag = ifelse(comment %in% c("yellowing 09.04.2020", "yellowing 09.04", "yellow", "Very moldy, embryo green with cut-test", "Very moldy, but allive (cut-test)", "seems mouldy at root 17.03.2020", "seems dyin 17.03.2020", "Black fungus on cotelydons", "Black cotelydon?", "09.03.2020, looks pretty bad"), "Sick_plant",
                        ifelse(comment %in% c("Was yellow and dead, but also disturbed during harvest of another seedling", "Was not there on th 09.04.2020 (Seems dead on harvest day 07.04.2020)", "VERY MOLDY PLATE-17.03.2020", "Too mushy to harvest", "This whole plate is dying", "Seems to be dead", "Seems dead,re did the parafilm, 06.04.2020", "Seems dead, re did the parafilm, 06.04.2020", "Seems dead on hravest day 07.04.2020, wasnot harvested", "Seems dead", "Seed blackened 07.05.2020", "rotted seed", "Reposition due to loose agar; Seems to be dead", "moulded away 17.03.2020", "Molded", "Modly seed", "Looks dead, very yellow and lying down, did not harvest on the 07.04.2020", "Looks dead", "Had leaf until the 27th without a root. Got the root on 28th. Seems to disintegrate on the 6.3.. Got cotyledons but falling apart on 17.03.2020", "found germinated and dead 17.03.2020", "Found dead on the 11.03.2020", "dying 09.04.2020", "dying 09.04", "Don't have any green pgiments left, scored it as dead", "DEAD? -17.03.2020", "Dead?", "dead?", "Dead seed (06.04.2020)", "dead 6.3.", "dead 20.03.2020", "dead 17.03.2020", "dead 06.03.2020. Well, it has cotyledons 17.03.2020", "Dead", "dead", "20.02.2020 Replated seeds on agar. Seems dead."), "Dead_plant",
                               ifelse(comment %in% c("Two seeds?", "Two seeds at same place", "Two seedlings in the same place", "Two seedlings in this spot: there was not really any true leaves here, only two seedling with cotelydons each. That was discovered when pulling them out for harvest, so they were removed. Taking out the true leaf date, but the germintion and cotelydon date can still be used.", "2 seeds on this spot"), "Remove_duplicate",
