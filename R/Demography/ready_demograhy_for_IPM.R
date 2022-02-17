@@ -71,3 +71,20 @@ Sib_pro_2019_2020 <- Sib_pro_2019 %>%
   ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
   select(unique_IDS, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling_2020, juvenile_2020) 
 
+Sib_pro_2020_2021 <- Sib_pro_2020 %>% 
+  full_join(Sib_pro_2021, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2020", "_2021")) %>% 
+  mutate(size = 2.625811097 + LSL_2020 * 0.005558019 + NL_2020 * 0.069472337 + LL_2020 * 0.066783627, #Mock numbers from Seedclim data and another species
+         sizeNext = 2.625811097 + LSL_2021 * 0.005558019 + NL_2021 * 0.069472337 + LL_2021 * 0.066783627, #Mock numbers from Seedclim data and another species
+         fec = (4.38 * NFL_2020) + (4.38 * NB_2020) + (4.38 * NC_2020), #Average seeds per flower at Skjellingahaugen was 4.38
+         surv = ifelse(size > 0 & is.na(sizeNext), 0,
+                       ifelse(size > 0 & sizeNext > 0, 1, NA)),
+         flo.no = NB_2020 + NFL_2020 + NC_2020,
+         flo.if = ifelse(flo.no > 0, 1, 0)) %>%
+  mutate(offspringNext = ifelse(seedling_2021 == "yes" & is.na(size), "sexual",
+                                ifelse(juvenile_2021 == "yes" & is.na(size), "sexual",
+                                       ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
+  ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
+  select(unique_IDS, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling_2021, juvenile_2021) 
+
+
+
