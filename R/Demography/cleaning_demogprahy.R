@@ -1,6 +1,6 @@
-#######################################################
-### Script for cleaning demography data for INCLINE ###
-#######################################################
+###########################################################
+### Script for cleaning raw demography data for INCLINE ###
+###########################################################
 
 #### Libraries ####
 library(tidyverse)
@@ -51,3 +51,5 @@ Ver_alp <- Ver_alp %>%
   mutate(unique_IDS = paste0(plotID, "_", IDS)) %>% #creating unique individual ID
   left_join(INCLINE_metadata, by = "plotID") %>% #adding treatment info from INCLINE metadata file
   select(!Treat) #removing treatment column from the original dataset
+
+
