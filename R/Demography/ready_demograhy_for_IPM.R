@@ -7,6 +7,15 @@
 #### Libraries ####
 library(tidyverse)
 
+#### Downloading data from OSF ####
+
+#osf_auth(token = "get from my document every time you run the code") 
+
+get_file(node = "zhk3m",
+         file = "Seeds_per_capsule.csv",
+         path = "data/Demography",
+         remote_path = "RawData/Demography")
+
 ##### Sibbaldia procumbens #####
 
 #### Making seedling information ####
