@@ -16,6 +16,17 @@ get_file(node = "zhk3m",
          path = "data/Demography",
          remote_path = "RawData/Demography")
 
+#### Load data ####
+
+Seeds_per_capsule <- read_csv2("data/Demography/Seeds_per_capsule.csv")
+#Need biomass regression datasets as well
+
+#### Biomass regressions ####
+#This section will calculate the biomass regressions that will find the constants used to calculate the estimated biomass of each individual.
+
+#### Seeds per capsules ####
+#This section will be calculating the amount of seeds per capsule based of the size of the mother, need the biomass regressions first
+
 ##### Sibbaldia procumbens #####
 
 #### Making seedling information ####
