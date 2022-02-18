@@ -107,3 +107,40 @@ Ver_alp_germ1 <- Ver_alp_germ %>%
   select(!flag)  %>% #Remove old flag column
   group_by(petri_dish) %>% 
   fill(flag_whole_petridish, .direction = "downup") #Give whole petridish comment too all seeds in the same petri dish
+
+
+
+##### Sibbaldia procumbens #####
+
+#### Fixing mistakes in dataset ####
+
+#Making dictionary to fix wrongly entered dates
+SP_mistakes <- read.table(header = TRUE, stringsAsFactors = FALSE, text = 
+                            "old new
+  02.02.2020 02.03.2020
+  09.04.2020 09.03.2020
+  08.06 08.06.2020")
+
+#Removing wrongly enetered data, fixing wrong dates and making new variables
+
+Sib_pro_germ1 <- Sib_pro_germ %>% 
+  mutate(Germination_date = ifelse(Germination_date %in% c("Agar dried out, crossed out dish 07.05.2022", "Agar dried out, crossed out dish 07.05.2021", "Agar dried out, crossed out dish 07.05.2020"), NA, Germination_date)) %>% 
+  mutate(Germination_date = plyr::mapvalues(Germination_date, from = SP_mistakes$old, to = SP_mistakes$new)) %>% 
+  mutate(Cotelydon_date = plyr::mapvalues(Cotelydon_date, from = SP_mistakes$old, to = SP_mistakes$new)) %>%
+  mutate(Leaf_date = plyr::mapvalues(Leaf_date, from = SP_mistakes$old, to = SP_mistakes$new)) %>% 
+  mutate(Replicate = as.factor(Replicate)) %>% 
+  mutate(Start_date = dmy(Start_date)) %>% 
+  mutate(Germination_date = dmy(Germination_date)) %>% 
+  mutate(Cotelydon_date = dmy(Cotelydon_date)) %>% 
+  mutate(Leaf_date = dmy(Leaf_date)) %>% 
+  mutate(petri_dish = paste(Species, Site, Water_potential, Replicate, sep = "_")) %>% 
+  mutate(days_to_germination = Germination_date - Start_date,
+         days_to_cotelydon = Cotelydon_date - Start_date,
+         days_to_leaf = Leaf_date - Start_date) %>% 
+  mutate(site_WP = paste(Site, Water_potential)) %>% 
+  mutate(Water_potential = as.factor(Water_potential)) %>% 
+  group_by(Species, Site, Water_potential, Replicate) %>% 
+  mutate(seeds_in_dish = n()) %>% 
+  ungroup() %>% 
+  select(!comment) %>% 
+  rename(species = Species, siteID = Site, water_potential = Water_potential, replicate = Replicate, seed_nr = Seed, start_date = Start_date, germination_date = Germination_date, comment = Comment...9, cotelydon_date = Cotelydon_date, leaf_date = Leaf_date, harvest_date = Harvest_date, harvest_comment = Harvest_comment, wet_mass_g_root = Wet_mass_g_root, wet_mass_g_above_ground = Wet_mass_g_rest, wet_mass_g_total = "Total wet mass", wet_mass_g_true_leaf = "Wet_mass_g_True leaf", dry_mass_g_root = Dry_mass_g_root, dry_mass_g_above_ground = Dry_mass_g_above_ground, dry_mass_g_total = Dry_mass_g_total, weighing_comments = Weighing_comments, removel_whole_petridish = Remove_whole_petridish, seed_viable = Viable_seeds, lights_off = "Lights_off (Yes/no)", flag = Flag)
