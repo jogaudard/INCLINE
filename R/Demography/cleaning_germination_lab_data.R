@@ -93,7 +93,7 @@ Ver_alp_germ <- Ver_alp_germ %>%
   group_by(Species, Site, Water_potential, Replicate) %>% 
   mutate(seeds_in_dish = n())  %>% 
   #rename(unique_ID = X) %>% 
-  rename(species = Species, siteID = Site, water_potential = Water_potential, replicate = Replicate, seed_nr = Seed, start_date = Start_date, germination_date = Germination_date, comment = Comment, cotelydon_date = Cotelydon_date, deaf_date = Leaf_date, harvest_date = Harvest_date, harvest_comment = Harvest_comment, wet_mass_g_root = Wet_mass_g_root, wet_mass_g = Wet_mass_g_, dry_mass_g_root = Dry_mass_g_root, dry_mass_g_above_ground = Dry_mass_g_above_ground, dry_mass_g_total = Dry_mass_g_total, weighing_comments = Weighing_comments, notes = Notes, removel_whole_petridish = Remove_whole_petridish, seed_viable = Seed_viable, lights_off = "Lights_off (Yes/no)", flag = Flag)
+  rename(species = Species, siteID = Site, water_potential = Water_potential, replicate = Replicate, seed_nr = Seed, start_date = Start_date, germination_date = Germination_date, comment = Comment, cotelydon_date = Cotelydon_date, leaf_date = Leaf_date, harvest_date = Harvest_date, harvest_comment = Harvest_comment, wet_mass_g_root = Wet_mass_g_root, wet_mass_g = Wet_mass_g_, dry_mass_g_root = Dry_mass_g_root, dry_mass_g_above_ground = Dry_mass_g_above_ground, dry_mass_g_total = Dry_mass_g_total, weighing_comments = Weighing_comments, notes = Notes, removel_whole_petridish = Remove_whole_petridish, seed_viable = Seed_viable, lights_off = "Lights_off (Yes/no)", flag = Flag)
 
 #### Deal with comments. Categorize them ####
 ## Entering information in flag columns from comment section. I have three columns, flags for the germination (when seeds rotted, or became sick, or when we believe there are mistakes in the dates), seedlings (when the plant has started rotting, or died before seedlings where harvested - to be used for filtering seedlings out of the final data set), and whole petri dish flags - when a shole petridish needs removing because of drying out or mold. Options for flags are: Remove_duplicate, Dead_plant, Sick_plant,  Missing_date, Possible_mistakes_in_ID, Biomass_mistakes, Moldy, Agar_issues and Other. Using dictionaries to translate between comments and flags.
@@ -104,5 +104,6 @@ Ver_alp_germ1 <- Ver_alp_germ %>%
   left_join(comment_dict, by = c("comment", "flag_germination", "flag_seedling")) %>% #Translate from the comment column via dictionary
   left_join(harvest_comment_dict, by = c("harvest_comment", "flag_germination", "flag_seedling", "flag_whole_petridish")) %>% #translate from the harvest_comment column via dictionary
   left_join(dish_comment_dict, by = c("comment", "flag_whole_petridish")) %>% #None of these comments apply to Ver_alp, so maybe they are comments for Sib_pro?
-  select(!flag) #Remove old flag column
-
+  select(!flag)  %>% #Remove old flag column
+  group_by(petri_dish) %>% 
+  fill(flag_whole_petridish, .direction = "downup") #Give whole petridish comment too all seeds in the same petri dish
