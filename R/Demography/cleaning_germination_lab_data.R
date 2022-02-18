@@ -54,17 +54,17 @@ VA_mistakes <- read.table(header = TRUE, stringsAsFactors = FALSE, text =
   6.7.2020 06.07.2020")
 
 
-#Moving comments to comment section that have been entered in date columns.
+#Moving comments to comment section that have been entered in date columns. Removing things that have been entered in the wrong column. Update the dates to the correct ones using the dictionary above.
 
 Ver_alp_germ <- Ver_alp_germ %>%
-  mutate(Comment = ifelse(Germination_date %in% c("DEAD", "dead"), "Dead", Comment),
-         Germination_date = ifelse(Germination_date %in% c("DEAD", "dead", " ", ""), NA, Germination_date),
-         Harvest_comment = ifelse(Harvest_date == "Brown and a bit moldy", "Brown and a bit moldy", Harvest_comment),
-         Harvest_date = ifelse(Harvest_date == "Brown and a bit moldy", NA, Harvest_date),
+  mutate(Comment = ifelse(Germination_date %in% c("DEAD", "dead"), "Dead", Comment), 
+         Germination_date = ifelse(Germination_date %in% c("DEAD", "dead", " ", ""), NA, Germination_date), 
+         Harvest_comment = ifelse(Harvest_date == "Brown and a bit moldy", "Brown and a bit moldy", Harvest_comment), 
+         Harvest_date = ifelse(Harvest_date == "Brown and a bit moldy", NA, Harvest_date), 
          Comment = ifelse(dead_date == "yellow", "yellow",
                           ifelse(dead_date %in% c("seed seems dead", "Seed seems dead"), "Seed seems dead", 
                                  ifelse(dead_date == "early", "dead",
-                                        ifelse(dead_date == "meant to be harvested 20.04 but no plant?", "meant to be harvested 20.04 but no plant?", Comment)))),
+                                        ifelse(dead_date == "meant to be harvested 20.04 but no plant?", "meant to be harvested 20.04 but no plant?", Comment)))), 
          dead_date = ifelse(dead_date %in% c("yellow", "Unknown", "seed seems dead", "meant to be harvested 20.04 but no plant?", "early", "Seed seems dead"), NA,
                             ifelse(dead_date == "before 18.05.2020", "18.05.2020",
                                    ifelse(dead_date == "before 17.03.2020", "17.03.2020", dead_date))),
@@ -75,10 +75,14 @@ Ver_alp_germ <- Ver_alp_germ %>%
          Dry_mass_g_total = ifelse(Dry_mass_g_total %in% c("two roots; two seedlings; second seedling: Dry_mass_g_root=0.00036, Dry_mass_g_above_ground=0.00022","two roots","3 roots"), NA, Dry_mass_g_total)) %>% 
   mutate(Germination_date = plyr::mapvalues(Germination_date, from = VA_mistakes$old, to = VA_mistakes$new), #Using dictionary to change dates from wrongly entered to correct
          Cotelydon_date = plyr::mapvalues(Cotelydon_date, from = VA_mistakes$old, to = VA_mistakes$new),
-         Leaf_date = plyr::mapvalues(Leaf_date, from = VA_mistakes$old, to = VA_mistakes$new)) %>% 
+         Leaf_date = plyr::mapvalues(Leaf_date, from = VA_mistakes$old, to = VA_mistakes$new))
+
+# Make new variables
+
+Ver_alp_germ <- Ver_alp_germ %>%
   mutate(Start_date = dmy(Start_date)) %>% 
-  mutate(Germination_date = dmy(Germination_date)) %>% #One failed, need to find it and fix it
-  mutate(Cotelydon_date = dmy(Cotelydon_date)) %>% #One failed, need to find it and fix it
+  mutate(Germination_date = dmy(Germination_date)) %>% 
+  mutate(Cotelydon_date = dmy(Cotelydon_date)) %>% 
   mutate(Leaf_date = dmy(Leaf_date)) %>% 
   mutate(petri_dish = paste(Species, Site, Water_potential, Replicate, sep = "_")) %>% 
   mutate(days_to_germination = Germination_date - Start_date,
@@ -95,9 +99,10 @@ Ver_alp_germ <- Ver_alp_germ %>%
 ## Entering information in flag columns from comment section. I have three columns, flags for the germination (when seeds rotted, or became sick, or when we believe there are mistakes in the dates), seedlings (when the plant has started rotting, or died before seedlings where harvested - to be used for filtering seedlings out of the final data set), and whole petri dish flags - when a shole petridish needs removing because of drying out or mold. Options for flags are: Remove_duplicate, Dead_plant, Sick_plant,  Missing_date, Possible_mistakes_in_ID, Biomass_mistakes, Moldy, Agar_issues and Other. Using dictionaries to translate between comments and flags.
 
 Ver_alp_germ1 <- Ver_alp_germ %>% 
-  mutate(flag_germination = case_when(flag %in% c("Duplicate_remove", "Remove_duplicate", "Remove_Duplicate", "Remove_duplicat", "Remove_unsureID", "	No germination date. 2 seeds.; seed#2 germinated with cotyledons 23.03.2020'", "Might have two versions of this, becasue this one was not crossed out (18.05.2020) Agar dried out, crossed out dish 07.05.2020") ~ "Remove_duplicate")) %>% 
-  mutate(flag_seedling = case_when(flag == "Remove_rotten" ~ "Dead_plant")) %>% 
-  left_join(comment_dict, by = c("comment", "flag_germination", "flag_seedling")) %>% 
-  left_join(harvest_comment_dict, by = c("harvest_comment", "flag_germination", "flag_seedling", "flag_whole_petridish")) %>% 
-  left_join(dish_comment_dict, by = c("comment", "flag_whole_petridish")) %>% 
-  select(!flag)
+  mutate(flag_germination = case_when(flag %in% c("Duplicate_remove", "Remove_duplicate", "Remove_Duplicate", "Remove_duplicat", "Remove_unsureID", "	No germination date. 2 seeds.; seed#2 germinated with cotyledons 23.03.2020'", "Might have two versions of this, becasue this one was not crossed out (18.05.2020) Agar dried out, crossed out dish 07.05.2020") ~ "Remove_duplicate")) %>% #Change the few comments in the flag column to match the generalized flags
+  mutate(flag_seedling = case_when(flag == "Remove_rotten" ~ "Dead_plant")) %>% #Change the few comments in the flag column to match the generalized flags
+  left_join(comment_dict, by = c("comment", "flag_germination", "flag_seedling")) %>% #Translate from the comment column via dictionary
+  left_join(harvest_comment_dict, by = c("harvest_comment", "flag_germination", "flag_seedling", "flag_whole_petridish")) %>% #translate from the harvest_comment column via dictionary
+  left_join(dish_comment_dict, by = c("comment", "flag_whole_petridish")) %>% #None of these comments apply to Ver_alp, so maybe they are comments for Sib_pro?
+  select(!flag) #Remove old flag column
+
