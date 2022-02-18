@@ -95,9 +95,9 @@ Ver_alp_germ <- Ver_alp_germ %>%
 ## Entering information in the "flag" column from comment section. Options are: Remove_duplicate, Dead_plant, Sick_plant, Other, Missing_date, Possible_mistakes_in_ID, and Biomass_mistakes
 
 Ver_alp_germ1 <- Ver_alp_germ %>% 
-  mutate(flag = ifelse(flag %in% c("Duplicate_remove", "Remove_duplicate", "Remove_Duplicate", "Remove_duplicat", "Remove_unsureID", "	No germination date. 2 seeds.; seed#2 germinated with cotyledons 23.03.2020'", "Might have two versions of this, becasue this one was not crossed out (18.05.2020) Agar dried out, crossed out dish 07.05.2020"),  "Remove_duplicate",
-                       ifelse(flag == "No", NA,
-                              ifelse(flag == "Remove_rotten", "Dead_plant", flag)))) %>% 
-  left_join(comment_dict, by = "comment") %>% 
+  mutate(flag_germination = case_when(flag %in% c("Duplicate_remove", "Remove_duplicate", "Remove_Duplicate", "Remove_duplicat", "Remove_unsureID", "	No germination date. 2 seeds.; seed#2 germinated with cotyledons 23.03.2020'", "Might have two versions of this, becasue this one was not crossed out (18.05.2020) Agar dried out, crossed out dish 07.05.2020") ~ "Remove_duplicate")) %>% 
+  mutate(flag_seedling = case_when(flag == "Remove_rotten" ~ "Dead_plant")) %>% 
+  left_join(comment_dict, by = c("comment", "flag_germination", "flag_seedling")) %>% 
   left_join(harvest_comment_dict, by = c("harvest_comment", "flag_germination", "flag_seedling", "flag_whole_petridish")) %>% 
-  left_join(dish_comment_dict, by = c("comment", "flag_whole_petridish"))
+  left_join(dish_comment_dict, by = c("comment", "flag_whole_petridish")) %>% 
+  select(!flag)
