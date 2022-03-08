@@ -28,7 +28,7 @@ biomass_Ver_alp <- read_delim("data/Demography/SeedClim_Ver_alp_biomass_regressi
 #### Biomass regressions ####
 #This section will calculate the biomass regressions that will find the constants used to calculate the estimated biomass of each individual.
 
-biomass_Sib_pro1 <- biomass_Sib_pro %>% 
+biomass_Sib_pro <- biomass_Sib_pro %>% 
   rename(siteID = Lok, plot = Plot, subplot = Rute, individual = Ind, date = Dat, comment = ...22, root_mass = R, leaf_mass = L, leaf_stalk_mass = LS, flower_mass = RF, bud_mass = RB, capsule_mass = RC, flower_stem_mass = RIF) %>%   #Rename to lower capital, and correct naming convention for the INCLINE project, and spell out names so that they make sense for outsiders
   select(-prec) %>% 
   mutate(vegetative_mass = root_mass + leaf_mass + leaf_stalk_mass) %>% 
@@ -37,7 +37,7 @@ biomass_Sib_pro1 <- biomass_Sib_pro %>%
   mutate(full_leaf_mass = log2(full_leaf_mass)) %>% 
   filter(!is.na(siteID))
 
-Sib_pro_biomass_regression <- lmer(vegetative_mass ~ NL + LL + (1|siteID), data = biomass_Sib_pro1) #Removed LSL (leaf stalk length) because it was not significantly important for the biomass
+Sib_pro_biomass_regression <- lmer(vegetative_mass ~ NL + LL + (1|siteID), data = biomass_Sib_pro) #Removed LSL (leaf stalk length) because it was not significantly important for the biomass
 
 summary(Sib_pro_biomass_regression)
 
@@ -69,7 +69,8 @@ Ver_alp_coef <- biomass_Ver_alp %>%
 
 Seedling_info_SP <- Sib_pro %>% 
   filter(seedling == "yes") %>% 
-  mutate(size = 2.625811097 + LSL * 0.005558019 + NL * 0.069472337 + LL * 0.066783627) %>% #Mock numbers from Seedclim data and another species
+  left_join(Sib_pro_coef, by = "siteID") %>% 
+  mutate(size = Intercept + NL * NL_coef + LL * LL_coef) %>% #Making biomass estimate with intercept and coefficients from biomass regression
   mutate(seeds_cap = mean(size, na.rm = TRUE),
          seeds_cap_sd = sd(size, na.rm = TRUE),
          seedling_establishment_rate = 0.6) %>% # 60% chance of germinating in the lab with seeds from sibbaldia at Lavsidalen
@@ -97,6 +98,8 @@ Sib_pro_2021 <- Sib_pro %>%
 
 Sib_pro_2018_2019 <- Sib_pro_2018 %>% 
   full_join(Sib_pro_2019, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2018", "_2019")) %>% 
+  left_join(Sib_pro_coef, by = "siteID") %>% 
+  mutate(size = Intercept + NL * NL_coef + LL * LL_coef)
   mutate(size = 2.625811097 + LSL_2018 * 0.005558019 + NL_2018 * 0.069472337 + LL_2018 * 0.066783627, #Mock numbers from Seedclim data and another species
          sizeNext = 2.625811097 + LSL_2019 * 0.005558019 + NL_2019 * 0.069472337 + LL_2019 * 0.066783627, #Mock numbers from Seedclim data and another species
          fec = (4.38 * NFL_2018) + (4.38 * NB_2018) + (4.38 * NC_2018), #Average seeds per flower at Skjellingahaugen was 4.38
