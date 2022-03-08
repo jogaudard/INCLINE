@@ -6,6 +6,8 @@
 
 #### Libraries ####
 library(tidyverse)
+library(lme4)
+library(lmerTest)
 
 #### Downloading data from OSF ####
 
@@ -19,10 +21,22 @@ get_file(node = "zhk3m",
 #### Load data ####
 
 Seeds_per_capsule <- read_csv2("data/Demography/Seeds_per_capsule.csv")
+biomass_Sib_pro <- read_csv2("data/Demography/Biomass_Sib_pro.csv")
 #Need biomass regression datasets as well
 
 #### Biomass regressions ####
 #This section will calculate the biomass regressions that will find the constants used to calculate the estimated biomass of each individual.
+
+biomass_Sib_pro1 <- biomass_Sib_pro %>% 
+  rename(siteID = Lok, plot = Plot, subplot = Rute, individual = Ind, date = Dat, comment = ...22, root_mass = R, leaf_mass = L, leaf_stalk_mass = LS, flower_mass = RF, bud_mass = RB, capsule_mass = RC, flower_stem_mass = RIF) %>% 
+  select(-prec) %>% 
+  mutate(vegetative_mass = root_mass + leaf_mass + leaf_stalk_mass) %>% 
+  mutate(vegetative_mass = log2(vegetative_mass))
+  #Rename to lower capital, and correct naming convention for the INCLINE project, and spell out names so that they make sense for outsiders
+
+Sib_pro_biomass_regression <- lmer(vegetative_mass ~ NL + LL + LSL + (1|siteID), data = biomass_Sib_pro1)
+
+summary(Sib_pro_biomass_regression)
 
 #### Seeds per capsules ####
 #This section will be calculating the amount of seeds per capsule based of the size of the mother, need the biomass regressions first
