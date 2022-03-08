@@ -81,27 +81,26 @@ Seedling_info_SP <- Sib_pro %>%
 
 Sib_pro_2018 <- Sib_pro %>% 
   filter(year == 2018) %>% 
-  select(plotID, unique_IDS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
+  select(siteID, plotID, unique_IDS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
 
 Sib_pro_2019 <- Sib_pro %>% 
   filter(year == 2019) %>% 
-  select(plotID, unique_IDS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
+  select(siteID, plotID, unique_IDS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
 
 Sib_pro_2020 <- Sib_pro %>% 
   filter(year == 2020) %>% 
-  select(plotID, unique_IDS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
+  select(siteID, plotID, unique_IDS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
 
 Sib_pro_2021 <- Sib_pro %>% 
   filter(year == 2021) %>% 
-  select(plotID, unique_IDS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
+  select(siteID, plotID, unique_IDS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
 
 
 Sib_pro_2018_2019 <- Sib_pro_2018 %>% 
-  full_join(Sib_pro_2019, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2018", "_2019")) %>% 
   left_join(Sib_pro_coef, by = "siteID") %>% 
-  mutate(size = Intercept + NL * NL_coef + LL * LL_coef)
-  mutate(size = 2.625811097 + LSL_2018 * 0.005558019 + NL_2018 * 0.069472337 + LL_2018 * 0.066783627, #Mock numbers from Seedclim data and another species
-         sizeNext = 2.625811097 + LSL_2019 * 0.005558019 + NL_2019 * 0.069472337 + LL_2019 * 0.066783627, #Mock numbers from Seedclim data and another species
+  full_join(Sib_pro_2019, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2018", "_2019")) %>% 
+  mutate(size = Intercept + NL_2018 * NL_coef + LL_2018 * LL_coef,
+         sizeNext = Intercept + NL_2019 * NL_coef + LL_2019 * LL_coef,
          fec = (4.38 * NFL_2018) + (4.38 * NB_2018) + (4.38 * NC_2018), #Average seeds per flower at Skjellingahaugen was 4.38
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA)),
