@@ -41,23 +41,24 @@ Sib_pro_biomass_regression <- lmer(vegetative_mass ~ NL + LL + (1|siteID), data 
 
 summary(Sib_pro_biomass_regression)
 
-table <- coef(Sib_pro_biomass_regression)$siteID
+Sib_pro_coef <- coef(Sib_pro_biomass_regression)$siteID
 
-table <- table %>% 
-  mutate(species = "Sib_pro") %>% 
+Sib_pro_coef <- Sib_pro_coef %>% 
   rownames_to_column() %>% 
   mutate(siteID = case_when(rowname == "Gudmedalen" ~ "Gud",
                              rowname == "Lavisdalen" ~ "Lav",
                              rowname == "Skjellingahaugen" ~ "Skj",
                              rowname == "Ulvehaugen" ~ "Ulv")) %>% 
-  select(!rowname)
+  select(!rowname) %>% 
+  rename(Intercept = "(Intercept)", NL_coef = NL, LL_coef = LL)
 
 
-#Joning dataset with biomass regression information for both Veronica alpina and Sibbaldia procumbens
-biomass_regressions <- biomass_Ver_alp %>%  
-  bind_rows(table) %>% 
-  filter(species %in% c("valp", "Sib_pro"))
-
+#Using placeholder data from SeedClim for the biomass regressions there
+Ver_alp_coef <- biomass_Ver_alp %>% 
+  filter(species == "valp") %>% 
+  select(!species) %>% 
+  rename(Intercept = "(Intercept)", SH_coef = SH, NL_coef = NL, LL_coef = LL, WL_coef = WL)
+  
 
 #### Seeds per capsules ####
 #This section will be calculating the amount of seeds per capsule based of the size of the mother, need the biomass regressions first
