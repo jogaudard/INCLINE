@@ -29,18 +29,19 @@ biomass_Ver_alp <- read_delim("data/Demography/SeedClim_Ver_alp_biomass_regressi
 #This section will calculate the biomass regressions that will find the constants used to calculate the estimated biomass of each individual.
 
 biomass_Sib_pro1 <- biomass_Sib_pro %>% 
-  rename(siteID = Lok, plot = Plot, subplot = Rute, individual = Ind, date = Dat, comment = ...22, root_mass = R, leaf_mass = L, leaf_stalk_mass = LS, flower_mass = RF, bud_mass = RB, capsule_mass = RC, flower_stem_mass = RIF) %>% 
+  rename(siteID = Lok, plot = Plot, subplot = Rute, individual = Ind, date = Dat, comment = ...22, root_mass = R, leaf_mass = L, leaf_stalk_mass = LS, flower_mass = RF, bud_mass = RB, capsule_mass = RC, flower_stem_mass = RIF) %>%   #Rename to lower capital, and correct naming convention for the INCLINE project, and spell out names so that they make sense for outsiders
   select(-prec) %>% 
   mutate(vegetative_mass = root_mass + leaf_mass + leaf_stalk_mass) %>% 
   mutate(vegetative_mass = log2(vegetative_mass)) %>% 
   mutate(full_leaf_mass = leaf_mass+leaf_stalk_mass) %>% 
   mutate(full_leaf_mass = log2(full_leaf_mass)) %>% 
   filter(!is.na(siteID))
-  #Rename to lower capital, and correct naming convention for the INCLINE project, and spell out names so that they make sense for outsiders
 
-Sib_pro_biomass_regression <- lmer(vegetative_mass ~ NL + LL + (1|siteID), data = biomass_Sib_pro1) #Make linear regression 
+Sib_pro_biomass_regression <- lmer(vegetative_mass ~ NL + LL + (1|siteID), data = biomass_Sib_pro1) #Removed LSL (leaf stalk length) because it was not significantly important for the biomass
 
 summary(Sib_pro_biomass_regression)
+
+table <- coef(Sib_pro_biomass_regression)$siteID
 
 
 #### Seeds per capsules ####
