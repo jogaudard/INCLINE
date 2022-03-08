@@ -43,6 +43,21 @@ summary(Sib_pro_biomass_regression)
 
 table <- coef(Sib_pro_biomass_regression)$siteID
 
+table <- table %>% 
+  mutate(species = "Sib_pro") %>% 
+  rownames_to_column() %>% 
+  mutate(siteID = case_when(rowname == "Gudmedalen" ~ "Gud",
+                             rowname == "Lavisdalen" ~ "Lav",
+                             rowname == "Skjellingahaugen" ~ "Skj",
+                             rowname == "Ulvehaugen" ~ "Ulv")) %>% 
+  select(!rowname)
+
+
+#Joning dataset with biomass regression information for both Veronica alpina and Sibbaldia procumbens
+biomass_regressions <- biomass_Ver_alp %>%  
+  bind_rows(table) %>% 
+  filter(species %in% c("valp", "Sib_pro"))
+
 
 #### Seeds per capsules ####
 #This section will be calculating the amount of seeds per capsule based of the size of the mother, need the biomass regressions first
