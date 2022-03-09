@@ -8,6 +8,7 @@
 library(tidyverse)
 library(lme4)
 library(lmerTest)
+library(lubridate)
 
 #### Downloading data from OSF ####
 
@@ -24,7 +25,8 @@ Seeds_per_capsule <- read_csv2("data/Demography/Seeds_per_capsule.csv")
 biomass_Sib_pro <- read_csv2("data/Demography/Biomass_Sib_pro.csv")
 biomass_Ver_alp <- read_delim("data/Demography/SeedClim_Ver_alp_biomass_regression.txt")
 biomass_Ver_alp_INCLINE <- read_csv2("data/Demography/SG.19_above-below_allocation.csv")
-#Need biomass regression datasets as well
+seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv")
+
 
 #### Biomass regressions ####
 #This section will calculate the biomass regressions that will find the constants used to calculate the estimated biomass of each individual.
@@ -118,6 +120,47 @@ Seeds_per_capsule_VA <- Seeds_per_capsule_VA %>%
 Seeds_per_capsule_VA <- Seeds_per_capsule_VA$mean_seeds
 
 #### Seedling establishment coefficients ####
+
+seedling_est1 <- seedling_est %>% 
+  filter(Year == 2020) %>% 
+  filter(Plot %in% c("C", "OTC")) %>% 
+  select(Site, Block, Plot, PlotID, Date, Species, ID, Vegetation, Present) %>% 
+  mutate(Date = dmy(Date)) %>% 
+  mutate(campaign_number = if_else(Date == "2020-06-29" | Date == "2020-06-30" | Date == "2020-07-13" | Date == "2020-07-14" | Date == "2020-07-17", "first",
+                                   if_else(Date == "2020-08-05" | Date == "2020-08-07" | Date == "2020-08-12" | Date == "2020-08-13" | Date == "2020-08-14", "second",
+                                         if_else(Date == "2020-08-26" | Date == "2020-08-24" | Date == "2020-08-25" | Date == "2020-08-27", "third", "NA"))))
+
+seedling_est_VA <- seedling_est1 %>% 
+  filter(Species == "Ver_alp") %>% 
+  filter(campaign_number == "second") %>%
+  filter(Present == "yes") %>% 
+  group_by(Site, Block, Plot, PlotID, Vegetation) %>% 
+  mutate(total_germinated = n()) %>% 
+  ungroup() %>% 
+  mutate(total_seeds = 20) %>% 
+  mutate(germination_percentage = total_germinated/total_seeds) %>% 
+  select(-ID) %>% 
+  unique() %>% 
+  select(Plot, Vegetation, germination_percentage) %>% 
+  group_by(Plot, Vegetation) %>% 
+  mutate(germination_percentage = mean(germination_percentage)) %>% 
+  unique()
+  
+seedling_est_SP <- seedling_est1 %>% 
+  filter(Species == "Sib_pro") %>% 
+  filter(campaign_number == "second") %>%
+  filter(Present == "yes") %>% 
+  group_by(Site, Block, Plot, PlotID, Vegetation) %>% 
+  mutate(total_germinated = n()) %>% 
+  ungroup() %>% 
+  mutate(total_seeds = 20) %>% 
+  mutate(germination_percentage = total_germinated/total_seeds) %>% 
+  select(-ID) %>% 
+  unique() %>% 
+  select(Plot, Vegetation, germination_percentage) %>% 
+  group_by(Plot, Vegetation) %>% 
+  mutate(germination_percentage = mean(germination_percentage)) %>% 
+  unique()
 
 
 
