@@ -23,11 +23,13 @@ get_file(node = "zhk3m",
 Seeds_per_capsule <- read_csv2("data/Demography/Seeds_per_capsule.csv")
 biomass_Sib_pro <- read_csv2("data/Demography/Biomass_Sib_pro.csv")
 biomass_Ver_alp <- read_delim("data/Demography/SeedClim_Ver_alp_biomass_regression.txt")
+biomass_Ver_alp_INCLINE <- read_csv2("data/Demography/SG.19_above-below_allocation.csv")
 #Need biomass regression datasets as well
 
 #### Biomass regressions ####
 #This section will calculate the biomass regressions that will find the constants used to calculate the estimated biomass of each individual.
 
+##### Sibbaldia procumbens #####
 biomass_Sib_pro <- biomass_Sib_pro %>% 
   rename(siteID = Lok, plot = Plot, subplot = Rute, individual = Ind, date = Dat, comment = ...22, root_mass = R, leaf_mass = L, leaf_stalk_mass = LS, flower_mass = RF, bud_mass = RB, capsule_mass = RC, flower_stem_mass = RIF) %>%   #Rename to lower capital, and correct naming convention for the INCLINE project, and spell out names so that they make sense for outsiders
   select(-prec) %>% 
@@ -58,7 +60,18 @@ Ver_alp_coef <- biomass_Ver_alp %>%
   filter(species == "valp") %>% 
   select(!species) %>% 
   rename(Intercept = "(Intercept)", SH_coef = SH, NL_coef = NL, LL_coef = LL, WL_coef = WL)
-  
+
+##### Veronica alpina #####
+
+biomass_Ver_alp_INCLINE1 <- biomass_Ver_alp_INCLINE %>% 
+  filter(Species == "Veralp") %>% 
+  select(Site, SH, NL, LL, WL, AB, BB) %>% 
+  filter(!is.na(AB))
+
+Ver_alp_biomass_regression <- lm(AB ~ SH + NL + LL + WL, data = biomass_Ver_alp_INCLINE1)
+Ver_alp_biomass_regression <- lm(AB ~ NL + LL, data = biomass_Ver_alp_INCLINE1)
+
+summary(Ver_alp_biomass_regression)
 
 #### Seeds per capsules ####
 #This section will be calculating the amount of seeds per capsule based of the size of the mother, need the biomass regressions first
@@ -155,8 +168,8 @@ Sib_pro_2020_2021 <- Sib_pro_2020 %>%
 Sib_pro_2018_2021 <- bind_rows(Sib_pro_2018_2019, Sib_pro_2019_2020, Sib_pro_2020_2021)
 
 #Some plots fro visualization/checking
-Sib_pro_2018_2021 %>% ggplot(aes(x = sizeNext, y = size, color = flo.if)) + geom_point() + geom_abline()
-Sib_pro_2018_2021 %>% ggplot(aes(x = sizeNext, y = size, color = seedlingNext)) + geom_point() + geom_abline()
+Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = flo.if)) + geom_point() + geom_abline()
+Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = seedlingNext)) + geom_point() + geom_abline()
 
 ##### Veronica alpina #####
 
