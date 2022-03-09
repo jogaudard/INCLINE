@@ -84,14 +84,18 @@ Ver_alp_coef <- biomass_Ver_alp %>%
 
 Seeds_per_capsule_SP <- Seeds_per_capsule %>% 
   filter(Species == "Sib_pro") %>% 
-  mutate(mean_seeds = mean(Number_of_seeds, na.rm = TRUE))
+  mutate(mean_seeds = mean(Number_of_seeds, na.rm = TRUE)) %>% 
+  mutate(Site = case_when(Site == "LAV" ~ "Lav",
+                          Site == "ULV" ~ "Ulv",
+                          Site == "GUD" ~ "Gud",
+                          Site == "SKJ" ~ "Skj")) %>% 
+  left_join(Sib_pro_coef, by = c("Site" = "siteID")) %>% 
+  mutate(size = Intercept + Number_of_leaves*NL_coef + Leaf_length_mm* LL_coef)
 
-seed1 <- lm(Number_of_seeds ~ Number_of_leaves, data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on number of leaves, it does not.
+seed1 <- lm(Number_of_seeds ~ size, data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends biomass, it does not.
 summary(seed1)
-seed2 <- lm(Number_of_seeds ~ Leaf_length_mm, data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on leaf length, it does not.
+seed2 <- lm(Number_of_seeds ~ Site, data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on location, it does not.
 summary(seed2)
-seed3 <- lm(Number_of_seeds ~ Site, data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on location, it does not.
-summary(seed3)
 
 Seeds_per_capsule_SP <- Seeds_per_capsule_SP %>% 
   select(mean_seeds) %>% 
