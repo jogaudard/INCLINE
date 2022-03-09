@@ -121,7 +121,7 @@ Seeds_per_capsule_VA <- Seeds_per_capsule_VA$mean_seeds
 
 #### Seedling establishment coefficients ####
 
-seedling_est1 <- seedling_est %>% 
+seedling_est <- seedling_est %>% 
   filter(Year == 2020) %>% 
   filter(Plot %in% c("C", "OTC")) %>% 
   select(Site, Block, Plot, PlotID, Date, Species, ID, Vegetation, Present) %>% 
@@ -130,7 +130,7 @@ seedling_est1 <- seedling_est %>%
                                    if_else(Date == "2020-08-05" | Date == "2020-08-07" | Date == "2020-08-12" | Date == "2020-08-13" | Date == "2020-08-14", "second",
                                          if_else(Date == "2020-08-26" | Date == "2020-08-24" | Date == "2020-08-25" | Date == "2020-08-27", "third", "NA"))))
 
-seedling_est_VA <- seedling_est1 %>% 
+seedling_est_VA <- seedling_est %>% 
   filter(Species == "Ver_alp") %>% 
   filter(campaign_number == "second") %>%
   filter(Present == "yes") %>% 
@@ -145,8 +145,18 @@ seedling_est_VA <- seedling_est1 %>%
   group_by(Plot, Vegetation) %>% 
   mutate(germination_percentage = mean(germination_percentage)) %>% 
   unique()
+
+seedling_est_VA_W <- seedling_est_VA %>% 
+  filter(Vegetation == "no" & Plot == "OTC")
+
+seedling_est_VA_W <- seedling_est_VA_W$germination_percentage
+
+seedling_est_VA_C <- seedling_est_VA %>% 
+  filter(Vegetation == "no" & Plot == "C")
+
+seedling_est_VA_C <- seedling_est_VA_C$germination_percentage
   
-seedling_est_SP <- seedling_est1 %>% 
+seedling_est_SP <- seedling_est %>% 
   filter(Species == "Sib_pro") %>% 
   filter(campaign_number == "second") %>%
   filter(Present == "yes") %>% 
@@ -162,9 +172,19 @@ seedling_est_SP <- seedling_est1 %>%
   mutate(germination_percentage = mean(germination_percentage)) %>% 
   unique()
 
+seedling_est_SP_W <- seedling_est_SP %>% 
+  filter(Vegetation == "no" & Plot == "OTC")
 
+seedling_est_SP_W <- seedling_est_SP_W$germination_percentage
+
+seedling_est_SP_C <- seedling_est_SP %>% 
+  filter(Vegetation == "no" & Plot == "C")
+
+seedling_est_SP_C <- seedling_est_SP_C$germination_percentage
 
 #### Making seedling information ####
+
+###### Sibaldia procumbens ######
 
 Seedling_info_SP <- Sib_pro %>% 
   filter(seedling == "yes") %>% 
@@ -172,8 +192,22 @@ Seedling_info_SP <- Sib_pro %>%
   mutate(size = Intercept + NL * NL_coef + LL * LL_coef) %>% #Making biomass estimate with intercept and coefficients from biomass regression
   mutate(seeds_cap = mean(size, na.rm = TRUE),
          seeds_cap_sd = sd(size, na.rm = TRUE),
-         seedling_establishment_rate = 0.6) %>% # 60% chance of germinating in the lab with seeds from sibbaldia at Lavsidalen
-  select(seeds_cap, seeds_cap_sd, seedling_establishment_rate) %>% 
+         seedling_establishment_rate = if_else(OTC == "C", seedling_est_SP_C,
+                                               if_else(OTC == "W", seedling_est_SP_W, 0))) %>% 
+  select(OTC, seeds_cap, seeds_cap_sd, seedling_establishment_rate) %>% 
+  distinct()
+
+###### Veronica alpina ######
+
+Seedling_info_VA <- Ver_alp %>% 
+  filter(seedling == "yes") %>% 
+  add_column(Ver_alp_coef) %>% 
+  mutate(size = Intercept + SH * SH_coef + NL * NL_coef + LL * LL_coef + WL * WL_coef) %>% #Making biomass estimate with intercept and coefficients from biomass regression
+  mutate(seeds_cap = mean(size, na.rm = TRUE),
+         seeds_cap_sd = sd(size, na.rm = TRUE),
+         seedling_establishment_rate = if_else(OTC == "C", seedling_est_VA_C,
+                                               if_else(OTC == "W", seedling_est_VA_W, 0))) %>% 
+  select(OTC, seeds_cap, seeds_cap_sd, seedling_establishment_rate) %>% 
   distinct()
 
 #### Making transitions ####
