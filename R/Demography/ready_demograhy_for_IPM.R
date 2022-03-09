@@ -154,7 +154,9 @@ Sib_pro_2020_2021 <- Sib_pro_2020 %>%
 
 Sib_pro_2018_2021 <- bind_rows(Sib_pro_2018_2019, Sib_pro_2019_2020, Sib_pro_2020_2021)
 
+#Some plots fro visualization/checking
 Sib_pro_2018_2021 %>% ggplot(aes(x = sizeNext, y = size, color = flo.if)) + geom_point() + geom_abline()
+Sib_pro_2018_2021 %>% ggplot(aes(x = sizeNext, y = size, color = seedlingNext)) + geom_point() + geom_abline()
 
 ##### Veronica alpina #####
 
