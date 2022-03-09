@@ -314,13 +314,14 @@ Ver_alp_2021 <- Ver_alp %>%
 
 
 Ver_alp_2018_2019 <- Ver_alp_2018 %>% 
+  add_column(Ver_alp_coef) %>% 
   full_join(Ver_alp_2019, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2018", "_2019")) %>% 
-  mutate(size = 2.625811097 + SH_2018 * 0.005558019 + NL_2018 * 0.069472337 + LL_2018 * 0.066783627 + WL_2018*0.05, #Mock numbers 
-         sizeNext = 2.625811097 + SH_2019 * 0.005558019 + NL_2019 * 0.069472337 + LL_2019 * 0.066783627 + WL_2019*0.05, #Mock numbers 
-         fec = (4.38 * NFL_2018) + (4.38 * NB_2018) + (4.38 * NC_2018), #Mock number of seeds per flower
+  mutate(size = Intercept + SH_2018 * SH_coef + NL_2018 * NL_coef + LL_2018 * LL_coef + WL_2018 * WL_coef, 
+         sizeNext = Intercept + SH_2019 * SH_coef + NL_2019 * NL_coef + LL_2019 * LL_coef + WL_2019 * WL_coef, 
+         fec = (Seeds_per_capsule_VA * NFL_2018) + (Seeds_per_capsule_VA * NB_2018) + (Seeds_per_capsule_VA * NC_2018),
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
-                       ifelse(size > 0 & sizeNext > 0, 1, NA)),
-         flo.no = NB_2018 + NFL_2018 + NC_2018,
+                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
+  mutate(flo.no = rowSums(dplyr::select(., NB_2018, NFL_2018, NC_2018), na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0)) %>%
   mutate(offspringNext = ifelse(seedling_2019 == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_2019 == "yes" & is.na(size), "sexual",
@@ -330,16 +331,15 @@ Ver_alp_2018_2019 <- Ver_alp_2018 %>%
   rename(seedlingNext = seedling_2019, juvenileNext = juvenile_2019) %>% 
   mutate(transition = "2018-2019")
 
-
-
 Ver_alp_2019_2020 <- Ver_alp_2019 %>% 
+  add_column(Ver_alp_coef) %>% 
   full_join(Ver_alp_2020, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2019", "_2020")) %>% 
-  mutate(size = 2.625811097 + SH_2019 * 0.005558019 + NL_2019 * 0.069472337 + LL_2019 * 0.066783627 + WL_2019*0.05, #Mock numbers 
-         sizeNext = 2.625811097 + SH_2020 * 0.005558019 + NL_2020 * 0.069472337 + LL_2020 * 0.066783627 + WL_2020*0.05, #Mock numbers 
-         fec = (4.38 * NFL_2019) + (4.38 * NB_2019) + (4.38 * NC_2019), #Average seeds per flower at Skjellingahaugen was 4.38
+  mutate(size = Intercept + SH_2019 * SH_coef + NL_2019 * NL_coef + LL_2019 * LL_coef + WL_2019 * WL_coef, 
+         sizeNext = Intercept + SH_2020 * SH_coef + NL_2020 * NL_coef + LL_2020 * LL_coef + WL_2020 * WL_coef, 
+         fec = (Seeds_per_capsule_VA * NFL_2019) + (Seeds_per_capsule_VA * NB_2019) + (Seeds_per_capsule_VA * NC_2019),
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
-                       ifelse(size > 0 & sizeNext > 0, 1, NA)),
-         flo.no = NB_2019 + NFL_2019 + NC_2019,
+                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
+  mutate(flo.no = rowSums(dplyr::select(., NB_2019, NFL_2019, NC_2019), na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0)) %>%
   mutate(offspringNext = ifelse(seedling_2020 == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_2020 == "yes" & is.na(size), "sexual",
@@ -350,13 +350,14 @@ Ver_alp_2019_2020 <- Ver_alp_2019 %>%
   mutate(transition = "2019-2020")
 
 Ver_alp_2020_2021 <- Ver_alp_2020 %>% 
+  add_column(Ver_alp_coef) %>% 
   full_join(Ver_alp_2021, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2020", "_2021")) %>% 
-  mutate(size = 2.625811097 + SH_2020 * 0.005558019 + NL_2020 * 0.069472337 + LL_2020 * 0.066783627 + WL_2020*0.05, #Mock numbers 
-         sizeNext = 2.625811097 + SH_2021 * 0.005558019 + NL_2021 * 0.069472337 + LL_2021 * 0.066783627 + WL_2020*0.05, #Mock numbers
-         fec = (4.38 * NFL_2020) + (4.38 * NB_2020) + (4.38 * NC_2020), #Average seeds per flower at Skjellingahaugen was 4.38
+  mutate(size = Intercept + SH_2020 * SH_coef + NL_2020 * NL_coef + LL_2020 * LL_coef + WL_2020 * WL_coef, 
+         sizeNext = Intercept + SH_2021 * SH_coef + NL_2021 * NL_coef + LL_2021 * LL_coef + WL_2021 * WL_coef, 
+         fec = (Seeds_per_capsule_VA * NFL_2020) + (Seeds_per_capsule_VA * NB_2020) + (Seeds_per_capsule_VA * NC_2020),
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
-                       ifelse(size > 0 & sizeNext > 0, 1, NA)),
-         flo.no = NB_2020 + NFL_2020 + NC_2020,
+                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
+  mutate(flo.no = rowSums(dplyr::select(., NB_2020, NFL_2020, NC_2020), na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0)) %>%
   mutate(offspringNext = ifelse(seedling_2021 == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_2021 == "yes" & is.na(size), "sexual",
