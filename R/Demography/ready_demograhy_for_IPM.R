@@ -237,7 +237,7 @@ Sib_pro_2018_2019 <- Sib_pro_2018 %>%
   full_join(Sib_pro_2019, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2018", "_2019")) %>% 
   mutate(size = Intercept + NL_2018 * NL_coef + LL_2018 * LL_coef,
          sizeNext = Intercept + NL_2019 * NL_coef + LL_2019 * LL_coef,
-         fec = (4.38 * NFL_2018) + (4.38 * NB_2018) + (4.38 * NC_2018), #Average seeds per flower at Skjellingahaugen was 4.38
+         fec = (Seeds_per_capsule_SP * NFL_2018) + (Seeds_per_capsule_SP * NB_2018) + (Seeds_per_capsule_SP * NC_2018), 
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
   mutate(flo.no = rowSums(dplyr::select(., NB_2018, NFL_2018, NC_2018), na.rm=TRUE),
@@ -255,7 +255,7 @@ Sib_pro_2019_2020 <- Sib_pro_2019 %>%
   full_join(Sib_pro_2020, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2019", "_2020")) %>% 
   mutate(size = Intercept + NL_2019 * NL_coef + LL_2019 * LL_coef,
          sizeNext = Intercept + NL_2020 * NL_coef + LL_2020 * LL_coef,
-         fec = (4.38 * NFL_2019) + (4.38 * NB_2019) + (4.38 * NC_2019), #Average seeds per flower at Skjellingahaugen was 4.38
+         fec = (Seeds_per_capsule_SP * NFL_2019) + (Seeds_per_capsule_SP * NB_2019) + (Seeds_per_capsule_SP * NC_2019), 
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
   mutate(flo.no = rowSums(dplyr::select(., NB_2019, NFL_2019, NC_2019), na.rm=TRUE),
@@ -273,7 +273,7 @@ Sib_pro_2020_2021 <- Sib_pro_2020 %>%
   full_join(Sib_pro_2021, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2020", "_2021")) %>% 
   mutate(size = Intercept + NL_2020 * NL_coef + LL_2020 * LL_coef,
          sizeNext = Intercept + NL_2021 * NL_coef + LL_2021 * LL_coef,
-         fec = (4.38 * NFL_2020) + (4.38 * NB_2020) + (4.38 * NC_2020), #Average seeds per flower at Skjellingahaugen was 4.38
+         fec = (Seeds_per_capsule_SP * NFL_2020) + (Seeds_per_capsule_SP * NB_2020) + (Seeds_per_capsule_SP * NC_2020), 
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
   mutate(flo.no = rowSums(dplyr::select(., NB_2020, NFL_2020, NC_2020), na.rm=TRUE),
@@ -295,19 +295,6 @@ Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = flo.if)) + geom
 Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = seedlingNext)) + geom_point() + geom_abline()
 
 ##### Veronica alpina #####
-
-#### Making seedling information ####
-
-Seedling_info_VA <- Ver_alp %>% 
-  filter(seedling == "yes") %>% 
-  mutate(size = 2.625811097 + SH * 0.005558019 + NL * 0.069472337 + LL * 0.066783627 + WL*0.05) %>% #Mock numbers 
-  mutate(seeds_cap = mean(size, na.rm = TRUE),
-         seeds_cap_sd = sd(size, na.rm = TRUE),
-         seedling_establishment_rate = 0.6) %>% # Mock number
-  select(seeds_cap, seeds_cap_sd, seedling_establishment_rate) %>% 
-  distinct()
-
-#### Making transitions ####
 
 Ver_alp_2018 <- Ver_alp %>% 
   filter(year == 2018) %>% 
