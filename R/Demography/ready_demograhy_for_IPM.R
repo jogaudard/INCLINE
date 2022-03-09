@@ -104,7 +104,7 @@ Sib_pro_2018_2019 <- Sib_pro_2018 %>%
          fec = (4.38 * NFL_2018) + (4.38 * NB_2018) + (4.38 * NC_2018), #Average seeds per flower at Skjellingahaugen was 4.38
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
-  mutate(flo.no = rowSums(dplyr::select(., NB_2019, NFL_2019, NC_2019), na.rm=TRUE),
+  mutate(flo.no = rowSums(dplyr::select(., NB_2018, NFL_2018, NC_2018), na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0)) %>%
   mutate(offspringNext = ifelse(seedling_2019 == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_2019 == "yes" & is.na(size), "sexual",
@@ -122,7 +122,7 @@ Sib_pro_2019_2020 <- Sib_pro_2019 %>%
          fec = (4.38 * NFL_2019) + (4.38 * NB_2019) + (4.38 * NC_2019), #Average seeds per flower at Skjellingahaugen was 4.38
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
-  mutate(flo.no = rowSums(dplyr::select(., NB_2020, NFL_2020, NC_2020), na.rm=TRUE),
+  mutate(flo.no = rowSums(dplyr::select(., NB_2019, NFL_2019, NC_2019), na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0)) %>%
   mutate(offspringNext = ifelse(seedling_2020 == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_2020 == "yes" & is.na(size), "sexual",
@@ -140,7 +140,7 @@ Sib_pro_2020_2021 <- Sib_pro_2020 %>%
          fec = (4.38 * NFL_2020) + (4.38 * NB_2020) + (4.38 * NC_2020), #Average seeds per flower at Skjellingahaugen was 4.38
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
-  mutate(flo.no = rowSums(dplyr::select(., NB_2021, NFL_2021, NC_2021), na.rm=TRUE),
+  mutate(flo.no = rowSums(dplyr::select(., NB_2020, NFL_2020, NC_2020), na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0)) %>%
   mutate(offspringNext = ifelse(seedling_2021 == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_2021 == "yes" & is.na(size), "sexual",
