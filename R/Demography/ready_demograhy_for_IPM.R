@@ -55,28 +55,71 @@ Sib_pro_coef <- Sib_pro_coef %>%
   rename(Intercept = "(Intercept)", NL_coef = NL, LL_coef = LL)
 
 
+##### Veronica alpina #####
+
 #Using placeholder data from SeedClim for the biomass regressions there
 Ver_alp_coef <- biomass_Ver_alp %>% 
   filter(species == "valp") %>% 
   select(!species) %>% 
   rename(Intercept = "(Intercept)", SH_coef = SH, NL_coef = NL, LL_coef = LL, WL_coef = WL)
 
-##### Veronica alpina #####
-
 biomass_Ver_alp_INCLINE1 <- biomass_Ver_alp_INCLINE %>% 
   filter(Species == "Veralp") %>% 
   select(Site, SH, NL, LL, WL, AB, BB) %>% 
-  filter(!is.na(AB))
+  filter(!is.na(AB)) %>% 
+  mutate(AB = log2(AB))
 
 Ver_alp_biomass_regression <- lm(AB ~ SH + NL + LL + WL, data = biomass_Ver_alp_INCLINE1)
-Ver_alp_biomass_regression <- lm(AB ~ NL + LL, data = biomass_Ver_alp_INCLINE1)
+Ver_alp_biomass_regression <- lm(AB ~ SH + NL, data = biomass_Ver_alp_INCLINE1)
 
 summary(Ver_alp_biomass_regression)
 
-#### Seeds per capsules ####
+#### Seeds per capsules coefficients ####
 #This section will be calculating the amount of seeds per capsule based of the size of the mother, need the biomass regressions first
 
-##### Sibbaldia procumbens #####
+###### Sibbaldia procumbens ######
+
+Seeds_per_capsule_SP <- Seeds_per_capsule %>% 
+  filter(Species == "Sib_pro") %>% 
+  mutate(mean_seeds = mean(Number_of_seeds, na.rm = TRUE))
+
+seed1 <- lm(Number_of_seeds ~ Number_of_leaves, data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on number of leaves, it does not.
+summary(seed1)
+seed2 <- lm(Number_of_seeds ~ Leaf_length_mm, data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on leaf length, it does not.
+summary(seed2)
+seed3 <- lm(Number_of_seeds ~ Site, data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on location, it does not.
+summary(seed3)
+
+Seeds_per_capsule_SP <- Seeds_per_capsule_SP %>% 
+  select(mean_seeds) %>% 
+  unique()
+
+Seeds_per_capsule_SP <- Seeds_per_capsule_SP$mean_seeds
+
+###### Veronica alpina ######
+
+Seeds_per_capsule_VA <- Seeds_per_capsule %>% 
+  filter(Species == "Ver_alp") %>% 
+  mutate(mean_seeds = mean(Number_of_seeds, na.rm = TRUE))
+
+seed_VA_1 <- lm(Number_of_seeds ~ Site, data = Seeds_per_capsule_VA)
+summary(seed_VA_1)
+seed_VA_2 <- lm(Number_of_seeds ~ Shoot_height_mm + Number_of_leaves + Leaf_length_mm + Leaf_width_mm, data = Seeds_per_capsule_VA)
+summary(seed_VA_2)
+seed_VA_3 <- lm(Number_of_seeds ~ Number_of_leaves + Leaf_length_mm, data = Seeds_per_capsule_SP)
+summary(seed_VA_3)
+seed_VA_4 <- lm(Number_of_seeds ~ Leaf_length_mm, data = Seeds_per_capsule_SP)
+summary(seed_VA_4)
+
+Seeds_per_capsule_VA <- Seeds_per_capsule_VA %>% 
+  select(mean_seeds) %>% 
+  unique()
+
+Seeds_per_capsule_VA <- Seeds_per_capsule_VA$mean_seeds
+
+#### Seedling establishment coefficients ####
+
+
 
 #### Making seedling information ####
 
