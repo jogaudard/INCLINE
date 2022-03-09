@@ -92,7 +92,7 @@ Seeds_per_capsule_SP <- Seeds_per_capsule %>%
   left_join(Sib_pro_coef, by = c("Site" = "siteID")) %>% 
   mutate(size = Intercept + Number_of_leaves*NL_coef + Leaf_length_mm* LL_coef)
 
-seed1 <- lm(Number_of_seeds ~ size, data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends biomass, it does not.
+seed1 <- lm(Number_of_seeds ~ size, data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on biomass, it does not.
 summary(seed1)
 seed2 <- lm(Number_of_seeds ~ Site, data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on location, it does not.
 summary(seed2)
@@ -107,16 +107,14 @@ Seeds_per_capsule_SP <- Seeds_per_capsule_SP$mean_seeds
 
 Seeds_per_capsule_VA <- Seeds_per_capsule %>% 
   filter(Species == "Ver_alp") %>% 
-  mutate(mean_seeds = mean(Number_of_seeds, na.rm = TRUE))
+  mutate(mean_seeds = mean(Number_of_seeds, na.rm = TRUE)) %>%
+  add_column(Ver_alp_coef) %>% 
+  mutate(size = Intercept + Shoot_height_mm * SH_coef + Number_of_leaves * NL_coef + Leaf_length_mm * LL_coef + Leaf_width_mm * WL_coef) #Making biomass estimate with intercept and coefficients from biomass regression
 
 seed_VA_1 <- lm(Number_of_seeds ~ Site, data = Seeds_per_capsule_VA)
 summary(seed_VA_1)
-seed_VA_2 <- lm(Number_of_seeds ~ Shoot_height_mm + Number_of_leaves + Leaf_length_mm + Leaf_width_mm, data = Seeds_per_capsule_VA)
+seed_VA_2 <- lm(Number_of_seeds ~ size, data = Seeds_per_capsule_VA)
 summary(seed_VA_2)
-seed_VA_3 <- lm(Number_of_seeds ~ Number_of_leaves + Leaf_length_mm, data = Seeds_per_capsule_SP)
-summary(seed_VA_3)
-seed_VA_4 <- lm(Number_of_seeds ~ Leaf_length_mm, data = Seeds_per_capsule_SP)
-summary(seed_VA_4)
 
 Seeds_per_capsule_VA <- Seeds_per_capsule_VA %>% 
   select(mean_seeds) %>% 
@@ -124,6 +122,12 @@ Seeds_per_capsule_VA <- Seeds_per_capsule_VA %>%
 
 Seeds_per_capsule_VA <- Seeds_per_capsule_VA$mean_seeds
 
+Seeds_per_capsule_VA_coef <- coef(seed_VA_2) %>% 
+  as.data.frame() %>% 
+  rownames_to_column() %>% 
+  pivot_wider(names_from = "rowname", values_from = ".") %>% 
+  rename(Intercept_seeds = "(Intercept)", size_seed = size)
+  
 #### Seedling establishment coefficients ####
 
 seedling_est <- seedling_est %>% 
@@ -319,14 +323,15 @@ Ver_alp_2021 <- Ver_alp %>%
 
 Ver_alp_2018_2019 <- Ver_alp_2018 %>% 
   add_column(Ver_alp_coef) %>% 
+  add_column(Seeds_per_capsule_VA_coef) %>% 
   full_join(Ver_alp_2019, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2018", "_2019")) %>% 
   mutate(size = Intercept + SH_2018 * SH_coef + NL_2018 * NL_coef + LL_2018 * LL_coef + WL_2018 * WL_coef, 
-         sizeNext = Intercept + SH_2019 * SH_coef + NL_2019 * NL_coef + LL_2019 * LL_coef + WL_2019 * WL_coef, 
-         fec = (Seeds_per_capsule_VA * NFL_2018) + (Seeds_per_capsule_VA * NB_2018) + (Seeds_per_capsule_VA * NC_2018),
+         sizeNext = Intercept + SH_2019 * SH_coef + NL_2019 * NL_coef + LL_2019 * LL_coef + WL_2019 * WL_coef,
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
   mutate(flo.no = rowSums(dplyr::select(., NB_2018, NFL_2018, NC_2018), na.rm=TRUE),
-         flo.if = ifelse(flo.no > 0, 1, 0)) %>%
+         flo.if = ifelse(flo.no > 0, 1, 0),
+         fec = ((Intercept_seeds + size * size_seed)  * flo.no)) %>%
   mutate(offspringNext = ifelse(seedling_2019 == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_2019 == "yes" & is.na(size), "sexual",
                                        ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
@@ -337,14 +342,15 @@ Ver_alp_2018_2019 <- Ver_alp_2018 %>%
 
 Ver_alp_2019_2020 <- Ver_alp_2019 %>% 
   add_column(Ver_alp_coef) %>% 
+  add_column(Seeds_per_capsule_VA_coef) %>% 
   full_join(Ver_alp_2020, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2019", "_2020")) %>% 
   mutate(size = Intercept + SH_2019 * SH_coef + NL_2019 * NL_coef + LL_2019 * LL_coef + WL_2019 * WL_coef, 
          sizeNext = Intercept + SH_2020 * SH_coef + NL_2020 * NL_coef + LL_2020 * LL_coef + WL_2020 * WL_coef, 
-         fec = (Seeds_per_capsule_VA * NFL_2019) + (Seeds_per_capsule_VA * NB_2019) + (Seeds_per_capsule_VA * NC_2019),
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
   mutate(flo.no = rowSums(dplyr::select(., NB_2019, NFL_2019, NC_2019), na.rm=TRUE),
-         flo.if = ifelse(flo.no > 0, 1, 0)) %>%
+         flo.if = ifelse(flo.no > 0, 1, 0),
+         fec = ((Intercept_seeds + size * size_seed)  * flo.no)) %>%
   mutate(offspringNext = ifelse(seedling_2020 == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_2020 == "yes" & is.na(size), "sexual",
                                        ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
@@ -355,14 +361,15 @@ Ver_alp_2019_2020 <- Ver_alp_2019 %>%
 
 Ver_alp_2020_2021 <- Ver_alp_2020 %>% 
   add_column(Ver_alp_coef) %>% 
+  add_column(Seeds_per_capsule_VA_coef) %>% 
   full_join(Ver_alp_2021, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2020", "_2021")) %>% 
   mutate(size = Intercept + SH_2020 * SH_coef + NL_2020 * NL_coef + LL_2020 * LL_coef + WL_2020 * WL_coef, 
          sizeNext = Intercept + SH_2021 * SH_coef + NL_2021 * NL_coef + LL_2021 * LL_coef + WL_2021 * WL_coef, 
-         fec = (Seeds_per_capsule_VA * NFL_2020) + (Seeds_per_capsule_VA * NB_2020) + (Seeds_per_capsule_VA * NC_2020),
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
   mutate(flo.no = rowSums(dplyr::select(., NB_2020, NFL_2020, NC_2020), na.rm=TRUE),
-         flo.if = ifelse(flo.no > 0, 1, 0)) %>%
+         flo.if = ifelse(flo.no > 0, 1, 0),
+         fec = ((Intercept_seeds + size * size_seed)  * flo.no)) %>%
   mutate(offspringNext = ifelse(seedling_2021 == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_2021 == "yes" & is.na(size), "sexual",
                                        ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
