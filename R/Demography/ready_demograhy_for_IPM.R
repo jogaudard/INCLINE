@@ -29,7 +29,7 @@ seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv")
 
 
 #### Biomass regressions ####
-#This section will calculate the biomass regressions that will find the constants used to calculate the estimated biomass of each individual.
+#This section calculate the biomass regressions that and find the coefficients used to calculate the estimated biomass of each individual
 
 ##### Sibbaldia procumbens #####
 biomass_Sib_pro <- biomass_Sib_pro %>% 
@@ -78,7 +78,7 @@ Ver_alp_coef <- biomass_Ver_alp %>%
 # summary(Ver_alp_biomass_regression)
 
 #### Seeds per capsules coefficients ####
-#This section will be calculating the amount of seeds per capsule based of the size of the mother, need the biomass regressions first
+#This section calculate the amount of seeds per capsule, and test if that is related to size of the mother or site. If it is related make regression and find coefficients for calculating it later (Veronica), if not, use the mean seed number per capsule (Sibbaldia).
 
 ###### Sibbaldia procumbens ######
 
@@ -377,7 +377,6 @@ Ver_alp_2020_2021 <- Ver_alp_2020 %>%
   select(unique_IDS, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling_2021, juvenile_2021) %>% 
   rename(seedlingNext = seedling_2021, juvenileNext = juvenile_2021)%>% 
   mutate(transition = "2020-2021")
-
 
 
 Ver_alp_2018_2021 <- bind_rows(Ver_alp_2018_2019, Ver_alp_2019_2020, Ver_alp_2020_2021)
