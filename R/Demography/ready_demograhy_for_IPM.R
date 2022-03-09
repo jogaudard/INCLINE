@@ -65,16 +65,17 @@ Ver_alp_coef <- biomass_Ver_alp %>%
   select(!species) %>% 
   rename(Intercept = "(Intercept)", SH_coef = SH, NL_coef = NL, LL_coef = LL, WL_coef = WL)
 
-biomass_Ver_alp_INCLINE1 <- biomass_Ver_alp_INCLINE %>% 
-  filter(Species == "Veralp") %>% 
-  select(Site, SH, NL, LL, WL, AB, BB) %>% 
-  filter(!is.na(AB)) %>% 
-  mutate(AB = log2(AB))
-
-Ver_alp_biomass_regression <- lm(AB ~ SH + NL + LL + WL, data = biomass_Ver_alp_INCLINE1)
-Ver_alp_biomass_regression <- lm(AB ~ SH + NL, data = biomass_Ver_alp_INCLINE1)
-
-summary(Ver_alp_biomass_regression)
+#INCLINE data for biomass regressions - we do not trust this data, using old data from SeedClim
+# biomass_Ver_alp_INCLINE1 <- biomass_Ver_alp_INCLINE %>% 
+#   filter(Species == "Veralp") %>% 
+#   select(Site, SH, NL, LL, WL, AB, BB) %>% 
+#   filter(!is.na(AB)) %>% 
+#   mutate(AB = log2(AB))
+# 
+# Ver_alp_biomass_regression <- lm(AB ~ SH + NL + LL + WL, data = biomass_Ver_alp_INCLINE1)
+# Ver_alp_biomass_regression <- lm(AB ~ SH + NL, data = biomass_Ver_alp_INCLINE1)
+# 
+# summary(Ver_alp_biomass_regression)
 
 #### Seeds per capsules coefficients ####
 #This section will be calculating the amount of seeds per capsule based of the size of the mother, need the biomass regressions first
@@ -211,6 +212,8 @@ Seedling_info_VA <- Ver_alp %>%
   distinct()
 
 #### Making transitions ####
+
+###### Sibaldia procumbens ######
 
 Sib_pro_2018 <- Sib_pro %>% 
   filter(year == 2018) %>% 
