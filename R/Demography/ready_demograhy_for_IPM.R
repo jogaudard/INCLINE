@@ -41,7 +41,7 @@ biomass_Sib_pro <- biomass_Sib_pro %>%
   mutate(full_leaf_mass = log2(full_leaf_mass)) %>% 
   filter(!is.na(siteID))
 
-Sib_pro_biomass_regression <- lmer(vegetative_mass ~ NL + LL + (1|siteID), data = biomass_Sib_pro) #Removed LSL (leaf stalk length) because it was not significantly important for the biomass
+Sib_pro_biomass_regression <- lmer(full_leaf_mass ~ LSL + NL + LL + (1|siteID), data = biomass_Sib_pro) #Removed LSL (leaf stalk length) because it was not significantly important for the biomass
 
 summary(Sib_pro_biomass_regression)
 
@@ -54,7 +54,7 @@ Sib_pro_coef <- Sib_pro_coef %>%
                              rowname == "Skjellingahaugen" ~ "Skj",
                              rowname == "Ulvehaugen" ~ "Ulv")) %>% 
   select(!rowname) %>% 
-  rename(Intercept = "(Intercept)", NL_coef = NL, LL_coef = LL)
+  rename(Intercept = "(Intercept)", LSL_coef = LSL, NL_coef = NL, LL_coef = LL)
 
 
 ##### Veronica alpina #####
@@ -129,6 +129,7 @@ Seeds_per_capsule_VA_coef <- coef(seed_VA_2) %>%
   rename(Intercept_seeds = "(Intercept)", size_seed = size)
   
 #### Seedling establishment coefficients ####
+#This section calculate the seedling establishment rate for each species in the warmed and unwarmed plots (using the data from the vegetated plots further in the analysis)
 
 seedling_est <- seedling_est %>% 
   filter(Year == 2020) %>% 
@@ -192,6 +193,7 @@ seedling_est_SP_C <- seedling_est_SP %>%
 seedling_est_SP_C <- seedling_est_SP_C$germination_percentage
 
 #### Making seedling information ####
+#This section calculates the average seedlings size of each species, and adding in the seedling establishment rate in the same dataset to have all seedling data together
 
 ###### Sibaldia procumbens ######
 
@@ -220,6 +222,8 @@ Seedling_info_VA <- Ver_alp %>%
   distinct()
 
 #### Making transitions ####
+#This section calculates the size of individuals, estimates of seed number. And cleaning the data so that we have the correct variables, and variable names for the analysis.
+
 
 ###### Sibaldia procumbens ######
 
