@@ -134,6 +134,8 @@ seedling_est <- seedling_est %>%
                                    if_else(Date == "2020-08-05" | Date == "2020-08-07" | Date == "2020-08-12" | Date == "2020-08-13" | Date == "2020-08-14", "second",
                                          if_else(Date == "2020-08-26" | Date == "2020-08-24" | Date == "2020-08-25" | Date == "2020-08-27", "third", "NA"))))
 
+###### Veronica alpina ######
+
 seedling_est_VA <- seedling_est %>% 
   filter(Species == "Ver_alp") %>% 
   filter(campaign_number == "second") %>%
@@ -165,6 +167,7 @@ seedling_est_VA_Veg <- seedling_est_VA %>%
 
 seedling_est_VA_Veg <- seedling_est_VA_Veg$germination_percentage
   
+###### Sibbaldia procumbens ######
 seedling_est_SP <- seedling_est %>% 
   filter(Species == "Sib_pro") %>% 
   filter(campaign_number == "second") %>%
@@ -175,19 +178,24 @@ seedling_est_SP <- seedling_est %>%
   mutate(total_seeds = 20) %>% 
   mutate(germination_percentage = total_germinated/total_seeds) %>% 
   select(-ID) %>% 
-  unique() %>% 
-  select(Plot, Vegetation, germination_percentage) %>% 
-  group_by(Plot, Vegetation) %>% 
+  unique() 
+
+model2 <- lm(germination_percentage ~ Plot + Vegetation, data = seedling_est_SP)
+summary(model2)
+
+seedling_est_SP <- seedling_est_SP%>% 
+  select(Plot, germination_percentage) %>% 
+  group_by(Plot) %>% 
   mutate(germination_percentage = mean(germination_percentage)) %>% 
   unique()
 
 seedling_est_SP_W <- seedling_est_SP %>% 
-  filter(Vegetation == "no" & Plot == "OTC")
+  filter(Plot == "OTC")
 
 seedling_est_SP_W <- seedling_est_SP_W$germination_percentage
 
 seedling_est_SP_C <- seedling_est_SP %>% 
-  filter(Vegetation == "no" & Plot == "C")
+  filter(Plot == "C")
 
 seedling_est_SP_C <- seedling_est_SP_C$germination_percentage
 
