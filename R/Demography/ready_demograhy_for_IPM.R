@@ -90,7 +90,7 @@ Seeds_per_capsule_SP <- Seeds_per_capsule %>%
                           Site == "GUD" ~ "Gud",
                           Site == "SKJ" ~ "Skj")) %>% 
   left_join(Sib_pro_coef, by = c("Site" = "siteID")) %>% 
-  mutate(size = Intercept + Number_of_leaves*NL_coef + Leaf_length_mm* LL_coef)
+  mutate(size = Intercept + Leaf_stock_length_mm*LSL_coef + Number_of_leaves*NL_coef + Leaf_length_mm* LL_coef)
 
 seed1 <- lm(Number_of_seeds ~ size, data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on biomass, it does not.
 summary(seed1)
@@ -115,12 +115,6 @@ seed_VA_1 <- lm(Number_of_seeds ~ Site, data = Seeds_per_capsule_VA)
 summary(seed_VA_1)
 seed_VA_2 <- lm(Number_of_seeds ~ size, data = Seeds_per_capsule_VA)
 summary(seed_VA_2)
-
-Seeds_per_capsule_VA <- Seeds_per_capsule_VA %>% 
-  select(mean_seeds) %>% 
-  unique()
-
-Seeds_per_capsule_VA <- Seeds_per_capsule_VA$mean_seeds
 
 Seeds_per_capsule_VA_coef <- coef(seed_VA_2) %>% 
   as.data.frame() %>% 
@@ -150,21 +144,26 @@ seedling_est_VA <- seedling_est %>%
   mutate(total_seeds = 20) %>% 
   mutate(germination_percentage = total_germinated/total_seeds) %>% 
   select(-ID) %>% 
-  unique() %>% 
-  select(Plot, Vegetation, germination_percentage) %>% 
-  group_by(Plot, Vegetation) %>% 
+  unique() 
+
+model1 <- lm(germination_percentage ~ Plot + Vegetation, data = seedling_est_VA)
+summary(model1)
+
+seedling_est_VA <- seedling_est_VA%>% 
+  select(Vegetation, germination_percentage) %>% 
+  group_by(Vegetation) %>% 
   mutate(germination_percentage = mean(germination_percentage)) %>% 
   unique()
 
-seedling_est_VA_W <- seedling_est_VA %>% 
-  filter(Vegetation == "no" & Plot == "OTC")
+seedling_est_VA_NoVeg <- seedling_est_VA %>% 
+  filter(Vegetation == "no")
 
-seedling_est_VA_W <- seedling_est_VA_W$germination_percentage
+seedling_est_VA_NoVeg <- seedling_est_VA_NoVeg$germination_percentage
 
-seedling_est_VA_C <- seedling_est_VA %>% 
-  filter(Vegetation == "no" & Plot == "C")
+seedling_est_VA_Veg <- seedling_est_VA %>% 
+  filter(Vegetation == "yes")
 
-seedling_est_VA_C <- seedling_est_VA_C$germination_percentage
+seedling_est_VA_Veg <- seedling_est_VA_Veg$germination_percentage
   
 seedling_est_SP <- seedling_est %>% 
   filter(Species == "Sib_pro") %>% 
