@@ -207,12 +207,21 @@ seedling_est_SP_C <- seedling_est_SP_C$germination_percentage
 Seedling_info_SP <- Sib_pro %>% 
   filter(seedling == "yes") %>% 
   left_join(Sib_pro_coef, by = "siteID") %>% 
-  mutate(size = Intercept + NL * NL_coef + LL * LL_coef) %>% #Making biomass estimate with intercept and coefficients from biomass regression
+  mutate(size = Intercept + LSL * LSL_coef + NL * NL_coef + LL * LL_coef) #Making biomass estimate with intercept and coefficients from biomass regression
+
+model_seedling <- lmer(size ~ treatment + (1|siteID), data = Seedling_info_SP)
+
+summary(model_seedling) #Warming does not affect the size of the seedling, but treatment does (extant and novel)
+
+
+Seedling_info_SP <- Seedling_info_SP %>%
+  group_by(treatment) %>% 
   mutate(seeds_cap = mean(size, na.rm = TRUE),
-         seeds_cap_sd = sd(size, na.rm = TRUE),
-         seedling_establishment_rate = if_else(OTC == "C", seedling_est_SP_C,
+         seeds_cap_sd = sd(size, na.rm = TRUE)) %>%
+  ungroup() %>% 
+  mutate(seedling_establishment_rate = if_else(OTC == "C", seedling_est_SP_C,
                                                if_else(OTC == "W", seedling_est_SP_W, 0))) %>% 
-  select(OTC, seeds_cap, seeds_cap_sd, seedling_establishment_rate) %>% 
+  select(OTC, treatment, seeds_cap, seeds_cap_sd, seedling_establishment_rate) %>% 
   distinct()
 
 ###### Veronica alpina ######
