@@ -229,12 +229,20 @@ Seedling_info_SP <- Seedling_info_SP %>%
 Seedling_info_VA <- Ver_alp %>% 
   filter(seedling == "yes") %>% 
   add_column(Ver_alp_coef) %>% 
-  mutate(size = Intercept + SH * SH_coef + NL * NL_coef + LL * LL_coef + WL * WL_coef) %>% #Making biomass estimate with intercept and coefficients from biomass regression
+  mutate(size = Intercept + SH * SH_coef + NL * NL_coef + LL * LL_coef + WL * WL_coef) #Making biomass estimate with intercept and coefficients from biomass regression
+
+model_seedling_VA <- lmer(size ~ treatment + (1|siteID), data = Seedling_info_VA)
+
+summary(model_seedling_VA)
+
+Seedling_info_VA <- Seedling_info_VA %>% 
+  group_by(treatment) %>% 
   mutate(seeds_cap = mean(size, na.rm = TRUE),
-         seeds_cap_sd = sd(size, na.rm = TRUE),
-         seedling_establishment_rate = if_else(OTC == "C", seedling_est_VA_C,
-                                               if_else(OTC == "W", seedling_est_VA_W, 0))) %>% 
-  select(OTC, seeds_cap, seeds_cap_sd, seedling_establishment_rate) %>% 
+         seeds_cap_sd = sd(size, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  mutate(seedling_establishment_rate = if_else(treatment == "C" | treatment == "E" | treatment == "N", seedling_est_VA_Veg,
+                                               if_else(treatment == "R", seedling_est_VA_NoVeg, 0))) %>% 
+  select(treatment, seeds_cap, seeds_cap_sd, seedling_establishment_rate) %>% 
   distinct()
 
 #### Making transitions ####
