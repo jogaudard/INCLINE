@@ -254,18 +254,15 @@ Seedling_info_VA <- Seedling_info_VA %>%
 
 Sib_pro_2018 <- Sib_pro %>% 
   filter(year == 2018) %>% 
-  select(siteID, plotID, unique_IDS, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile) %>% 
-  filter(!is.na(LSL) & !is.na(NL) & !is.na(LL))
+  select(siteID, plotID, unique_IDS, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
 
 Sib_pro_2019 <- Sib_pro %>% 
   filter(year == 2019) %>% 
-   select(siteID, plotID, unique_IDS, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)  %>% 
-   filter(!is.na(LSL) & !is.na(NL) & !is.na(LL))
+   select(siteID, plotID, unique_IDS, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
 
 Sib_pro_2020 <- Sib_pro %>% 
   filter(year == 2020) %>% 
-  select(siteID, plotID, unique_IDS, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile) %>% 
-  filter(!is.na(LSL) & !is.na(NL) & !is.na(LL)) #removing a lot of individuals - check this..
+  select(siteID, plotID, unique_IDS, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile) 
 
 Sib_pro_2021 <- Sib_pro %>% 
   filter(year == 2021) %>% 
