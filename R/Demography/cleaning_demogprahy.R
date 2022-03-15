@@ -46,14 +46,22 @@ Sib_pro <- Sib_pro %>%
   left_join(INCLINE_metadata, by = "plotID") %>% #adding treatment info from INCLINE metadata file
   select(!Treat) %>% #removing treatment column from the original dataset
   select(!NC8) %>% 
-  select(!NAC5) #removing columns number of capsules 8 (NC8) and number of aborted capsules 5 (NAC5) because there are no entries in them
+  select(!NAC5) %>% #removing columns number of capsules 8 (NC8) and number of aborted capsules 5 (NAC5) because there are no entries in them
+  filter(!(is.na(LSL) & is.na(NL) & is.na(LL) & is.na(NFS))) %>%  #remove any individuals that are dead in that year (they might still be in the dataset because we made a comment that the species is gone)
+  mutate(seedling = case_when(is.na(seedling) ~ "no",
+                              seedling == "yes" ~ "yes",
+                              seedling == "no" ~ "no")) %>% 
+  mutate(juvenile = case_when(is.na(juvenile) ~ "no",
+                              juvenile == "yes" ~ "yes",
+                              juvenile == "no" ~ "no"))
 
 Ver_alp <- Ver_alp %>% 
   rename(siteID = Site, block = Block, plot = Plot, year = Year, date = Date, regitrator = Registrator, seedling = seedl) %>%  #Rename to lower capital, and correct naming convention for the INCLINE project
   mutate(plotID = paste0(siteID, "_", block, "_", plot)) %>% #creating unique plotID variable
   mutate(unique_IDS = paste0(plotID, "_", IDS)) %>% #creating unique individual ID
   left_join(INCLINE_metadata, by = "plotID") %>% #adding treatment info from INCLINE metadata file
-  select(!Treat) #removing treatment column from the original dataset
+  select(!Treat) %>% #removing treatment column from the original dataset
+  filter(!(is.na(SH) & is.na(NL) & is.na(LL) & is.na(WL)))
 
 #### Changing variable types ####
 
