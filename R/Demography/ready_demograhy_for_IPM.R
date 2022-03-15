@@ -26,6 +26,7 @@ biomass_Sib_pro <- read_csv2("data/Demography/Biomass_Sib_pro.csv")
 biomass_Ver_alp <- read_delim("data/Demography/SeedClim_Ver_alp_biomass_regression.txt")
 biomass_Ver_alp_INCLINE <- read_csv2("data/Demography/SG.19_above-below_allocation.csv")
 seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv")
+biomass_Ver_alp_INCLINE2 <- read_csv2("data/Demography/VeronicaAlpina_Biomass_Seedclim_edited.csv")
 
 
 #### Biomass regressions ####
