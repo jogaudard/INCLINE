@@ -254,15 +254,18 @@ Seedling_info_VA <- Seedling_info_VA %>%
 
 Sib_pro_2018 <- Sib_pro %>% 
   filter(year == 2018) %>% 
-  select(siteID, plotID, unique_IDS, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
+  select(siteID, plotID, unique_IDS, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile) %>% 
+  filter(!is.na(LSL) & !is.na(NL) & !is.na(LL))
 
 Sib_pro_2019 <- Sib_pro %>% 
   filter(year == 2019) %>% 
-  select(siteID, plotID, unique_IDS, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
+   select(siteID, plotID, unique_IDS, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)  %>% 
+   filter(!is.na(LSL) & !is.na(NL) & !is.na(LL))
 
 Sib_pro_2020 <- Sib_pro %>% 
   filter(year == 2020) %>% 
-  select(siteID, plotID, unique_IDS, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
+  select(siteID, plotID, unique_IDS, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile) %>% 
+  filter(!is.na(LSL) & !is.na(NL) & !is.na(LL)) #removing a lot of individuals - check this..
 
 Sib_pro_2021 <- Sib_pro %>% 
   filter(year == 2021) %>% 
@@ -270,13 +273,13 @@ Sib_pro_2021 <- Sib_pro %>%
 
 
 Sib_pro_2018_2019 <- Sib_pro_2018 %>% 
+  full_join(Sib_pro_2019, by = c("unique_IDS", "plotID", "OTC", "treatment", "siteID"), suffix = c("_2018", "_2019")) %>%
   left_join(Sib_pro_coef, by = "siteID") %>% 
-  full_join(Sib_pro_2019, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2018", "_2019")) %>% 
-  mutate(size = Intercept + NL_2018 * NL_coef + LL_2018 * LL_coef,
-         sizeNext = Intercept + NL_2019 * NL_coef + LL_2019 * LL_coef,
-         fec = (Seeds_per_capsule_SP * NFL_2018) + (Seeds_per_capsule_SP * NB_2018) + (Seeds_per_capsule_SP * NC_2018), 
+  mutate(size = Intercept + (NL_2018 * NL_coef) + (LL_2018 * LL_coef),
+         sizeNext = Intercept + (NL_2019 * NL_coef) + (LL_2019 * LL_coef),
+         fec = (Seeds_per_capsule_SP * NFL_2018) + (Seeds_per_capsule_SP * NB_2018) + (Seeds_per_capsule_SP * NC_2018),
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
-                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
+                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>%
   mutate(flo.no = rowSums(dplyr::select(., NB_2018, NFL_2018, NC_2018), na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0)) %>%
   mutate(offspringNext = ifelse(seedling_2019 == "yes" & is.na(size), "sexual",
@@ -288,8 +291,8 @@ Sib_pro_2018_2019 <- Sib_pro_2018 %>%
   mutate(transition = "2018-2019")
 
 Sib_pro_2019_2020 <- Sib_pro_2019 %>% 
+  full_join(Sib_pro_2020, by = c("unique_IDS", "plotID", "OTC", "treatment", "siteID"), suffix = c("_2019", "_2020")) %>% 
   left_join(Sib_pro_coef, by = "siteID") %>% 
-  full_join(Sib_pro_2020, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2019", "_2020")) %>% 
   mutate(size = Intercept + NL_2019 * NL_coef + LL_2019 * LL_coef,
          sizeNext = Intercept + NL_2020 * NL_coef + LL_2020 * LL_coef,
          fec = (Seeds_per_capsule_SP * NFL_2019) + (Seeds_per_capsule_SP * NB_2019) + (Seeds_per_capsule_SP * NC_2019), 
@@ -299,15 +302,15 @@ Sib_pro_2019_2020 <- Sib_pro_2019 %>%
          flo.if = ifelse(flo.no > 0, 1, 0)) %>%
   mutate(offspringNext = ifelse(seedling_2020 == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_2020 == "yes" & is.na(size), "sexual",
-                                       ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
+                                       ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>%
   ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
   select(unique_IDS, OTC, MS_2019, MS_2020, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling_2020, juvenile_2020) %>% 
   rename(seedlingNext = seedling_2020, juvenileNext = juvenile_2020) %>% 
   mutate(transition = "2019-2020")
 
 Sib_pro_2020_2021 <- Sib_pro_2020 %>% 
+  full_join(Sib_pro_2021, by = c("unique_IDS", "plotID", "OTC", "treatment", "siteID"), suffix = c("_2020", "_2021")) %>% 
   left_join(Sib_pro_coef, by = "siteID") %>% 
-  full_join(Sib_pro_2021, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2020", "_2021")) %>% 
   mutate(size = Intercept + NL_2020 * NL_coef + LL_2020 * LL_coef,
          sizeNext = Intercept + NL_2021 * NL_coef + LL_2021 * LL_coef,
          fec = (Seeds_per_capsule_SP * NFL_2020) + (Seeds_per_capsule_SP * NB_2020) + (Seeds_per_capsule_SP * NC_2020), 
