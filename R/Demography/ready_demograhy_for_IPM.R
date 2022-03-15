@@ -254,19 +254,19 @@ Seedling_info_VA <- Seedling_info_VA %>%
 
 Sib_pro_2018 <- Sib_pro %>% 
   filter(year == 2018) %>% 
-  select(siteID, plotID, unique_IDS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
+  select(siteID, plotID, unique_IDS, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
 
 Sib_pro_2019 <- Sib_pro %>% 
   filter(year == 2019) %>% 
-  select(siteID, plotID, unique_IDS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
+  select(siteID, plotID, unique_IDS, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
 
 Sib_pro_2020 <- Sib_pro %>% 
   filter(year == 2020) %>% 
-  select(siteID, plotID, unique_IDS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
+  select(siteID, plotID, unique_IDS, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
 
 Sib_pro_2021 <- Sib_pro %>% 
   filter(year == 2021) %>% 
-  select(siteID, plotID, unique_IDS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
+  select(siteID, plotID, unique_IDS, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
 
 
 Sib_pro_2018_2019 <- Sib_pro_2018 %>% 
@@ -283,7 +283,7 @@ Sib_pro_2018_2019 <- Sib_pro_2018 %>%
                                 ifelse(juvenile_2019 == "yes" & is.na(size), "sexual",
                                        ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
   ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
-  select(unique_IDS, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling_2019, juvenile_2019) %>% 
+  select(unique_IDS, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling_2019, juvenile_2019, MS_2018, MS_2019) %>% 
   rename(seedlingNext = seedling_2019, juvenileNext = juvenile_2019) %>% 
   mutate(transition = "2018-2019")
 
@@ -301,7 +301,7 @@ Sib_pro_2019_2020 <- Sib_pro_2019 %>%
                                 ifelse(juvenile_2020 == "yes" & is.na(size), "sexual",
                                        ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
   ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
-  select(unique_IDS, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling_2020, juvenile_2020) %>% 
+  select(unique_IDS, OTC, MS_2019, MS_2020, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling_2020, juvenile_2020) %>% 
   rename(seedlingNext = seedling_2020, juvenileNext = juvenile_2020) %>% 
   mutate(transition = "2019-2020")
 
@@ -319,7 +319,7 @@ Sib_pro_2020_2021 <- Sib_pro_2020 %>%
                                 ifelse(juvenile_2021 == "yes" & is.na(size), "sexual",
                                        ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
   ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
-  select(unique_IDS, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling_2021, juvenile_2021) %>% 
+  select(unique_IDS, MS_2020, MS_2021, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling_2021, juvenile_2021) %>% 
   rename(seedlingNext = seedling_2021, juvenileNext = juvenile_2021)%>% 
   mutate(transition = "2020-2021")
 
