@@ -48,7 +48,7 @@ Sib_pro <- Sib_pro %>%
   select(!NC8) %>% 
   select(!NAC5) %>% #removing columns number of capsules 8 (NC8) and number of aborted capsules 5 (NAC5) because there are no entries in them
   filter(!(is.na(LSL) & is.na(NL) & is.na(LL) & is.na(NFS))) %>%  #remove any individuals that are dead in that year (they might still be in the dataset because we made a comment that the species is gone)
-  mutate(seedling = case_when(is.na(seedling) ~ "no",
+  mutate(seedling = case_when(is.na(seedling) ~ "no", #replacing NAs in the seedling and juvenile column with NO, assuming we just forgot to enter something there.
                               seedling == "yes" ~ "yes",
                               seedling == "no" ~ "no")) %>% 
   mutate(juvenile = case_when(is.na(juvenile) ~ "no",
@@ -61,7 +61,13 @@ Ver_alp <- Ver_alp %>%
   mutate(unique_IDS = paste0(plotID, "_", IDS)) %>% #creating unique individual ID
   left_join(INCLINE_metadata, by = "plotID") %>% #adding treatment info from INCLINE metadata file
   select(!Treat) %>% #removing treatment column from the original dataset
-  filter(!(is.na(SH) & is.na(NL) & is.na(LL) & is.na(WL)))
+  filter(!(is.na(SH) & is.na(NL) & is.na(LL) & is.na(WL))) %>% #remove any individuals that are dead in that year (they might still be in the dataset because we made a comment that the species is gone)
+  mutate(seedling = case_when(is.na(seedling) ~ "no", #replacing NAs in the seedling and juvenile column with NO, assuming we just forgot to enter something there.
+                              seedling == "yes" ~ "yes",
+                              seedling == "no" ~ "no")) %>% 
+  mutate(juvenile = case_when(is.na(juvenile) ~ "no",
+                              juvenile == "yes" ~ "yes",
+                              juvenile == "no" ~ "no"))
 
 #### Changing variable types ####
 
