@@ -159,6 +159,8 @@ Seeds_per_capsule_VA %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_poin
 #### Seedling establishment coefficients ####
 #This section calculate the seedling establishment rate for each species in the warmed and unwarmed plots (using the data from the vegetated plots further in the analysis)
 
+#seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv") 
+
 seedling_est <- seedling_est %>% 
   filter(Year == 2020) %>% 
   filter(Plot %in% c("C", "OTC")) %>% 
@@ -167,16 +169,17 @@ seedling_est <- seedling_est %>%
   mutate(campaign_number = if_else(Date == "2020-06-29" | Date == "2020-06-30" | Date == "2020-07-13" | Date == "2020-07-14" | Date == "2020-07-17", "first",
                                    if_else(Date == "2020-08-05" | Date == "2020-08-07" | Date == "2020-08-12" | Date == "2020-08-13" | Date == "2020-08-14", "second",
                                          if_else(Date == "2020-08-26" | Date == "2020-08-24" | Date == "2020-08-25" | Date == "2020-08-27", "third", "NA")))) %>% 
-  rename(Warming = Plot)
+  rename(Warming = Plot) 
 
 ###### Veronica alpina ######
 
 seedling_est_VA <- seedling_est %>% 
   filter(Species == "Ver_alp") %>% 
-  filter(campaign_number == "second") %>%
-  filter(Present == "yes") %>% 
+  filter(campaign_number == "second") %>% 
   group_by(Site, Block, Warming, PlotID, Vegetation) %>% 
-  mutate(total_germinated = n()) %>% 
+  mutate(count = case_when(Present == "yes" ~ 1,
+                           Present == "no" ~ 0)) %>% 
+  mutate(total_germinated = sum(count)) %>% 
   ungroup() %>% 
   mutate(total_seeds = 20) %>% 
   mutate(germination_percentage = total_germinated/total_seeds) %>% 
@@ -189,7 +192,7 @@ seedling_est_VA <- seedling_est %>%
 model1 <- lm(germination_percentage ~ Warming + Vegetation, data = seedling_est_VA)
 summary(model1)
 
-seedling_est_VA %>% ggplot(aes(x = Vegetation, y = germination_percentage, fill = Vegetation)) + geom_violin() + geom_jitter(alpha = 0.5, width = 0.10) + facet_grid(~Warming) + theme_bw() + ggtitle("Germination success in different treatments for Veronica alpina")
+seedling_est_VA %>% ggplot(aes(x = Vegetation, y = germination_percentage, fill = Vegetation)) + geom_violin() + geom_jitter(alpha = 0.5, width = 0.10) + facet_grid(~Warming) + theme_bw() + ggtitle("Germination success in different treatments for Veronica alpina") + scale_fill_viridis_d(alpha = 0.5)
 
 seedling_est_VA <- seedling_est_VA%>% 
   select(Vegetation, germination_percentage) %>% 
@@ -226,21 +229,21 @@ seedling_est_SP <- seedling_est %>%
 model2 <- lm(germination_percentage ~ Warming + Vegetation, data = seedling_est_SP)
 summary(model2)
 
-seedling_est_SP %>% ggplot(aes(x = Warming, y = germination_percentage, fill = Warming)) + geom_violin() + geom_jitter(alpha = 0.5, width = 0.10) + facet_grid(~Vegetation) + theme_bw() + ggtitle("Germination success in different treatments for Sibbaldia procumbens")
+seedling_est_SP %>% ggplot(aes(x = Warming, y = germination_percentage, fill = Warming)) + geom_violin() + geom_jitter(alpha = 0.5, width = 0.10) + facet_grid(~Vegetation) + theme_bw() + ggtitle("Germination success in different treatments for Sibbaldia procumbens") + scale_fill_manual(values = c("lightblue", "darkred"))
 
 seedling_est_SP <- seedling_est_SP%>% 
-  select(Plot, germination_percentage) %>% 
-  group_by(Plot) %>% 
+  select(Warming, germination_percentage) %>% 
+  group_by(Warming) %>% 
   mutate(germination_percentage = mean(germination_percentage)) %>% 
   unique()
 
 seedling_est_SP_W <- seedling_est_SP %>% 
-  filter(Plot == "OTC")
+  filter(Warming == "OTC")
 
 seedling_est_SP_W <- seedling_est_SP_W$germination_percentage
 
 seedling_est_SP_C <- seedling_est_SP %>% 
-  filter(Plot == "C")
+  filter(Warming == "C")
 
 seedling_est_SP_C <- seedling_est_SP_C$germination_percentage
 
