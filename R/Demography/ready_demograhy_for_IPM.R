@@ -52,7 +52,7 @@ biomass_Sib_pro <- biomass_Sib_pro %>%
   mutate(full_leaf_mass = log2(full_leaf_mass)) %>% 
   filter(!is.na(siteID))
 
-Sib_pro_biomass_regression <- lmer(full_leaf_mass ~ LSL + NL + LL + (1|siteID), data = biomass_Sib_pro) #Removed LSL (leaf stalk length) because it was not significantly important for the biomass
+Sib_pro_biomass_regression <- lmer(full_leaf_mass ~ LSL + NL + LL + (1|siteID), data = biomass_Sib_pro)
 
 summary(Sib_pro_biomass_regression)
 
@@ -74,6 +74,24 @@ Sib_pro_coef <- Sib_pro_coef %>%
 Ver_alp_coef <- biomass_Ver_alp %>% 
   filter(species == "valp") %>% 
   select(!species) %>% 
+  rename(Intercept = "(Intercept)", SH_coef = SH, NL_coef = NL, LL_coef = LL, WL_coef = WL)
+
+# biomass Ver_alp
+
+biomass_Ver_alp2 <- biomass_Ver_alp2 %>% 
+  select(siteID, IDS, SH, NL, LL, WL, ag) %>% 
+  filter(!ag == 0) %>% 
+  mutate(ag = log2(ag))
+
+Ver_alp_biomass_regression <- lmer(ag ~ SH + NL + LL + WL + (1|siteID), data = biomass_Ver_alp2) 
+
+summary(Ver_alp_biomass_regression)
+
+Ver_alp_coef <- coef(Ver_alp_biomass_regression)$siteID
+
+Ver_alp_coef <- Ver_alp_coef %>% 
+  rownames_to_column() %>% 
+  rename(siteID = rowname) %>% 
   rename(Intercept = "(Intercept)", SH_coef = SH, NL_coef = NL, LL_coef = LL, WL_coef = WL)
 
 #INCLINE data for biomass regressions - we do not trust this data, using old data from SeedClim
