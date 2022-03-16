@@ -258,23 +258,27 @@ seedling_est_SP <- seedling_est_SP%>%
 ###### Sibaldia procumbens ######
 
 Seedling_info_SP <- Sib_pro %>% 
-  filter(seedling == "yes") %>% 
+  filter(seedling == "yes") %>%  #There are some seedlings that lack informaiton in LSL, NL or LL. Do we need to gap fill the data here?
   left_join(Sib_pro_coef, by = "siteID") %>% 
-  mutate(size = Intercept + LSL * LSL_coef + NL * NL_coef + LL * LL_coef) #Making biomass estimate with intercept and coefficients from biomass regression
+  mutate(size = Intercept + LSL * LSL_coef + NL * NL_coef + LL * LL_coef) %>% #Making biomass estimate with intercept and coefficients from biomass regression
+  mutate(size = log2(size))
+
+model1_seedling <- lmer(size ~ OTC + treatment + (1|siteID), data = Seedling_info_SP)
+summary(model1_seedling) #Seedlings grow larger in extant and novel transplant, but smaller in removal transplant
 
 model_seedling <- lmer(size ~ treatment + (1|siteID), data = Seedling_info_SP)
+summary(model_seedling) #Seedlings grow larger in extant and novel transplant, but smaller in removal transplant
 
-summary(model_seedling) #Warming does not affect the size of the seedling, but treatment does (extant and novel)
-
+Seedling_info_SP %>%  ggplot(aes(x = treatment, y = size)) +  geom_jitter(alpha= 0.2) + geom_violin(aes(fill = treatment, alpha = 0.5), draw_quantiles = c(0.25, 0.5, 0.75)) + ggtitle("Seedling size by treatment for Sibbaldia procumbens") + ylab("log2(size)") + scale_fill_viridis_d() + theme_bw()
 
 Seedling_info_SP <- Seedling_info_SP %>%
   group_by(treatment) %>% 
   mutate(seeds_cap = mean(size, na.rm = TRUE),
          seeds_cap_sd = sd(size, na.rm = TRUE)) %>%
   ungroup() %>% 
-  mutate(seedling_establishment_rate = if_else(OTC == "C", seedling_est_SP_C,
-                                               if_else(OTC == "W", seedling_est_SP_W, 0))) %>% 
-  select(OTC, treatment, seeds_cap, seeds_cap_sd, seedling_establishment_rate) %>% 
+  # mutate(seedling_establishment_rate = if_else(OTC == "C", seedling_est_SP_C,
+  #                                              if_else(OTC == "W", seedling_est_SP_W, 0))) %>% 
+  select(treatment, seeds_cap, seeds_cap_sd) %>% 
   distinct()
 
 ###### Veronica alpina ######
