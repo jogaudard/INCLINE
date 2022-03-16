@@ -126,6 +126,8 @@ summary(seed1)
 seed2 <- lm(Number_of_seeds ~ Site, data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on location, it does not.
 summary(seed2)
 
+Seeds_per_capsule_SP %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm", linetype = "dashed") + ggtitle("Number of seeds by size for Sibbaldia procumbens") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
+
 Seeds_per_capsule_SP <- Seeds_per_capsule_SP %>% 
   select(mean_seeds) %>% 
   unique()
@@ -137,7 +139,11 @@ Seeds_per_capsule_SP <- Seeds_per_capsule_SP$mean_seeds
 Seeds_per_capsule_VA <- Seeds_per_capsule %>% 
   filter(Species == "Ver_alp") %>% 
   mutate(mean_seeds = mean(Number_of_seeds, na.rm = TRUE)) %>%
-  add_column(Ver_alp_coef) %>% 
+  mutate(Site = case_when(Site == "LAV" ~ "Lav",
+                          Site == "ULV" ~ "Ulv",
+                          Site == "GUD" ~ "Gud",
+                          Site == "SKJ" ~ "Skj")) %>% 
+  left_join(Ver_alp_coef, by =c("Site" = "siteID")) %>% 
   mutate(size = Intercept + Shoot_height_mm * SH_coef + Number_of_leaves * NL_coef + Leaf_length_mm * LL_coef + Leaf_width_mm * WL_coef) #Making biomass estimate with intercept and coefficients from biomass regression
 
 seed_VA_1 <- lm(Number_of_seeds ~ Site, data = Seeds_per_capsule_VA)
@@ -150,6 +156,8 @@ Seeds_per_capsule_VA_coef <- coef(seed_VA_2) %>%
   rownames_to_column() %>% 
   pivot_wider(names_from = "rowname", values_from = ".") %>% 
   rename(Intercept_seeds = "(Intercept)", size_seed = size)
+
+Seeds_per_capsule_VA %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm") + ggtitle("Number of seeds by size for Veronica_alpina") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
   
 #### Seedling establishment coefficients ####
 #This section calculate the seedling establishment rate for each species in the warmed and unwarmed plots (using the data from the vegetated plots further in the analysis)
