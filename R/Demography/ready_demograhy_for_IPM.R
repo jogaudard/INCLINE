@@ -140,11 +140,7 @@ Seeds_per_capsule_SP <- Seeds_per_capsule_SP$mean_seeds
 Seeds_per_capsule_VA <- Seeds_per_capsule %>% 
   filter(Species == "Ver_alp") %>% 
   mutate(mean_seeds = mean(Number_of_seeds, na.rm = TRUE)) %>%
-  mutate(Site = case_when(Site == "LAV" ~ "Lav",
-                          Site == "ULV" ~ "Ulv",
-                          Site == "GUD" ~ "Gud",
-                          Site == "SKJ" ~ "Skj")) %>% 
-  left_join(Ver_alp_coef, by =c("Site" = "siteID")) %>% 
+  bind_rows(Ver_alp_coef) %>% view()
   mutate(size = Intercept + Shoot_height_mm * SH_coef + Number_of_leaves * NL_coef + Leaf_length_mm * LL_coef + Leaf_width_mm * WL_coef) #Making biomass estimate with intercept and coefficients from biomass regression
 
 seed_VA_1 <- lm(Number_of_seeds ~ Site, data = Seeds_per_capsule_VA)
