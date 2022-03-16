@@ -189,34 +189,37 @@ seedling_est_VA <- seedling_est %>%
                                 Vegetation == "no" ~ "NoVeg")) %>% 
   mutate(Treatment = paste0(Warming, "_", Vegetation))
 
-model1 <- lm(germination_percentage ~ Warming + Vegetation, data = seedling_est_VA)
+model1 <- lmer(germination_percentage ~ Warming + Vegetation +(1|Site), data = seedling_est_VA)
 summary(model1)
 
-seedling_est_VA %>% ggplot(aes(x = Vegetation, y = germination_percentage, fill = Vegetation)) + geom_violin() + geom_jitter(alpha = 0.5, width = 0.10) + facet_grid(~Warming) + theme_bw() + ggtitle("Germination success in different treatments for Veronica alpina") + scale_fill_viridis_d(alpha = 0.5)
+seedling_est_VA %>% ggplot(aes(x = Warming, y = germination_percentage, fill = Warming)) + geom_violin() + geom_jitter(alpha = 0.5, width = 0.10) + facet_grid(~Vegetation) + theme_bw() + ggtitle("Germination success in different treatments for Veronica alpina") + scale_fill_manual(values = c("lightblue", "darkred"))
 
 seedling_est_VA <- seedling_est_VA%>% 
-  select(Vegetation, germination_percentage) %>% 
-  group_by(Vegetation) %>% 
+  select(Vegetation, Warming, germination_percentage) %>% 
+  group_by(Vegetation, Warming) %>% 
   mutate(germination_percentage = mean(germination_percentage)) %>% 
   unique()
 
-seedling_est_VA_NoVeg <- seedling_est_VA %>% 
-  filter(Vegetation == "NoVeg")
+# Need to make this in a format that can be added in the model later
 
-seedling_est_VA_NoVeg <- seedling_est_VA_NoVeg$germination_percentage
-
-seedling_est_VA_Veg <- seedling_est_VA %>% 
-  filter(Vegetation == "Veg")
-
-seedling_est_VA_Veg <- seedling_est_VA_Veg$germination_percentage
+# seedling_est_VA_NoVeg <- seedling_est_VA %>% 
+#   filter(Vegetation == "NoVeg")
+# 
+# seedling_est_VA_NoVeg <- seedling_est_VA_NoVeg$germination_percentage
+# 
+# seedling_est_VA_Veg <- seedling_est_VA %>% 
+#   filter(Vegetation == "Veg")
+# 
+# seedling_est_VA_Veg <- seedling_est_VA_Veg$germination_percentage
   
 ###### Sibbaldia procumbens ######
 seedling_est_SP <- seedling_est %>% 
   filter(Species == "Sib_pro") %>% 
   filter(campaign_number == "second") %>%
-  filter(Present == "yes") %>% 
   group_by(Site, Block, Warming, PlotID, Vegetation) %>% 
-  mutate(total_germinated = n()) %>% 
+  mutate(count = case_when(Present == "yes" ~ 1,
+                           Present == "no" ~ 0)) %>% 
+  mutate(total_germinated = sum(count)) %>% 
   ungroup() %>% 
   mutate(total_seeds = 20) %>% 
   mutate(germination_percentage = total_germinated/total_seeds) %>% 
@@ -226,26 +229,28 @@ seedling_est_SP <- seedling_est %>%
                                 Vegetation == "no" ~ "NoVeg")) %>% 
   mutate(Treatment = paste0(Warming, "_", Vegetation))
 
-model2 <- lm(germination_percentage ~ Warming + Vegetation, data = seedling_est_SP)
+model2 <- lmer(germination_percentage ~ Warming + Vegetation + (1|Site), data = seedling_est_SP)
 summary(model2)
 
 seedling_est_SP %>% ggplot(aes(x = Warming, y = germination_percentage, fill = Warming)) + geom_violin() + geom_jitter(alpha = 0.5, width = 0.10) + facet_grid(~Vegetation) + theme_bw() + ggtitle("Germination success in different treatments for Sibbaldia procumbens") + scale_fill_manual(values = c("lightblue", "darkred"))
 
 seedling_est_SP <- seedling_est_SP%>% 
-  select(Warming, germination_percentage) %>% 
-  group_by(Warming) %>% 
+  select(Vegetation, germination_percentage) %>% 
+  group_by(Vegetation) %>% 
   mutate(germination_percentage = mean(germination_percentage)) %>% 
   unique()
 
-seedling_est_SP_W <- seedling_est_SP %>% 
-  filter(Warming == "OTC")
+# Need to make this in a format that can be added in the model later
 
-seedling_est_SP_W <- seedling_est_SP_W$germination_percentage
-
-seedling_est_SP_C <- seedling_est_SP %>% 
-  filter(Warming == "C")
-
-seedling_est_SP_C <- seedling_est_SP_C$germination_percentage
+# seedling_est_SP_W <- seedling_est_SP %>% 
+#   filter(Warming == "OTC")
+# 
+# seedling_est_SP_W <- seedling_est_SP_W$germination_percentage
+# 
+# seedling_est_SP_C <- seedling_est_SP %>% 
+#   filter(Warming == "C")
+# 
+# seedling_est_SP_C <- seedling_est_SP_C$germination_percentage
 
 #### Making seedling information ####
 #This section calculates the average seedlings size of each species, and adding in the seedling establishment rate in the same dataset to have all seedling data together
