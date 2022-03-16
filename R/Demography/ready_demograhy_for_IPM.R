@@ -83,18 +83,16 @@ biomass_Ver_alp2 <- biomass_Ver_alp2 %>%
   filter(!ag == 0) %>% 
   mutate(ag = log2(ag))
 
-Ver_alp_biomass_regression <- lmer(ag ~ SH + NL + LL + WL + (1|siteID), data = biomass_Ver_alp2) 
-summary(Ver_alp_biomass_regression)
+# Ver_alp_biomass_regression <- lmer(ag ~ SH + NL + LL + WL + (1|siteID), data = biomass_Ver_alp2)  #Not using this as it came with a singularity warning. Mixed effect model and linear model gives the same intercept and slopes for each variable.
+# summary(Ver_alp_biomass_regression)
 
 Ver_alp_biomass_regression_lm <- lm(ag ~ SH + NL + LL + WL, data = biomass_Ver_alp2) 
 summary(Ver_alp_biomass_regression_lm)
 
-
-Ver_alp_coef <- coef(Ver_alp_biomass_regression)$siteID
-
-Ver_alp_coef <- Ver_alp_coef %>% 
+Ver_alp_coef <- coef(Ver_alp_biomass_regression_lm) %>% 
+  as.data.frame() %>% 
   rownames_to_column() %>% 
-  rename(siteID = rowname) %>% 
+  pivot_wider(names_from = "rowname", values_from = ".") %>% 
   rename(Intercept = "(Intercept)", SH_coef = SH, NL_coef = NL, LL_coef = LL, WL_coef = WL)
 
 #INCLINE data for biomass regressions - we do not trust this data, using old data from SeedClim
