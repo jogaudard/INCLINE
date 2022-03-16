@@ -285,7 +285,7 @@ Seedling_info_SP <- Seedling_info_SP %>%
 Seedling_info_VA <- Ver_alp %>% 
   filter(seedling == "yes") %>% 
   add_column(Ver_alp_coef) %>%
-  filter(!SH == 0,
+  filter(!SH == 0, #Quick fix to solve the problem of seedling that do not have values in all columns. Need to check in dataset. Some of the problems come from when people registered two seedlings, and that the size traits might not have been transfered to the second seedling. Need to check manually.
          !NL == 0,
          !LL == 0,
          !WL == 0) %>% 
