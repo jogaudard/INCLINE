@@ -84,8 +84,11 @@ biomass_Ver_alp2 <- biomass_Ver_alp2 %>%
   mutate(ag = log2(ag))
 
 Ver_alp_biomass_regression <- lmer(ag ~ SH + NL + LL + WL + (1|siteID), data = biomass_Ver_alp2) 
-
 summary(Ver_alp_biomass_regression)
+
+Ver_alp_biomass_regression_lm <- lm(ag ~ SH + NL + LL + WL, data = biomass_Ver_alp2) 
+summary(Ver_alp_biomass_regression_lm)
+
 
 Ver_alp_coef <- coef(Ver_alp_biomass_regression)$siteID
 
