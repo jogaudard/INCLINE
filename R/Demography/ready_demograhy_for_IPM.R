@@ -19,14 +19,24 @@ get_file(node = "zhk3m",
          path = "data/Demography",
          remote_path = "RawData/Demography")
 
+get_file(node = "zhk3m",
+         file = "INCLINE_seedling_data.csv",
+         path = "data/Demography",
+         remote_path = "RawData/Germination_field_experiment")
+
+get_file(node = "zhk3m",
+         file = "Biomass_Sib_pro.csv",
+         path = "data/Demography",
+         remote_path = "RawData/Demography")
+
 #### Load data ####
 
 Seeds_per_capsule <- read_csv2("data/Demography/Seeds_per_capsule.csv")
 biomass_Sib_pro <- read_csv2("data/Demography/Biomass_Sib_pro.csv")
 biomass_Ver_alp <- read_delim("data/Demography/SeedClim_Ver_alp_biomass_regression.txt")
-biomass_Ver_alp_INCLINE <- read_csv2("data/Demography/SG.19_above-below_allocation.csv")
-seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv")
-biomass_Ver_alp_INCLINE2 <- read_csv2("data/Demography/VeronicaAlpina_Biomass_Seedclim_edited.csv")
+#biomass_Ver_alp_INCLINE <- read_csv2("data/Demography/SG.19_above-below_allocation.csv") #Not using this because some of the biomass rotted while collecting data, so biomass might not be correct
+seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv") 
+biomass_Ver_alp2 <- read_csv2("data/Demography/VeronicaAlpina_Biomass_Seedclim_edited.csv") #from SeedClim not on INCLINE OSF
 
 
 #### Biomass regressions ####
