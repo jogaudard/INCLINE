@@ -260,8 +260,7 @@ seedling_est_SP <- seedling_est_SP%>%
 Seedling_info_SP <- Sib_pro %>% 
   filter(seedling == "yes") %>%  #There are some seedlings that lack informaiton in LSL, NL or LL. Do we need to gap fill the data here?
   left_join(Sib_pro_coef, by = "siteID") %>% 
-  mutate(size = Intercept + LSL * LSL_coef + NL * NL_coef + LL * LL_coef) %>% #Making biomass estimate with intercept and coefficients from biomass regression
-  mutate(size = log2(size))
+  mutate(size = Intercept + LSL * LSL_coef + NL * NL_coef + LL * LL_coef) #Making biomass estimate with intercept and coefficients from biomass regression
 
 model1_seedling <- lmer(size ~ OTC + treatment + (1|siteID), data = Seedling_info_SP)
 summary(model1_seedling) #Seedlings grow larger in extant and novel transplant, but smaller in removal transplant
@@ -269,7 +268,7 @@ summary(model1_seedling) #Seedlings grow larger in extant and novel transplant, 
 model_seedling <- lmer(size ~ treatment + (1|siteID), data = Seedling_info_SP)
 summary(model_seedling) #Seedlings grow larger in extant and novel transplant, but smaller in removal transplant
 
-Seedling_info_SP %>%  ggplot(aes(x = treatment, y = size)) +  geom_jitter(alpha= 0.2) + geom_violin(aes(fill = treatment, alpha = 0.5), draw_quantiles = c(0.25, 0.5, 0.75)) + ggtitle("Seedling size by treatment for Sibbaldia procumbens") + ylab("log2(size)") + scale_fill_viridis_d() + theme_bw()
+Seedling_info_SP %>%  ggplot(aes(x = treatment, y = size)) +  geom_jitter(alpha= 0.2) + geom_violin(aes(fill = treatment, alpha = 0.5), draw_quantiles = c(0.25, 0.5, 0.75)) + ggtitle("Seedling size by treatment for Sibbaldia procumbens") + ylab("size") + scale_fill_viridis_d() + theme_bw()
 
 Seedling_info_SP <- Seedling_info_SP %>%
   group_by(treatment) %>% 
@@ -285,21 +284,26 @@ Seedling_info_SP <- Seedling_info_SP %>%
 
 Seedling_info_VA <- Ver_alp %>% 
   filter(seedling == "yes") %>% 
-  add_column(Ver_alp_coef) %>% 
+  add_column(Ver_alp_coef) %>%
+  filter(!SH == 0,
+         !NL == 0,
+         !LL == 0,
+         !WL == 0) %>% 
   mutate(size = Intercept + SH * SH_coef + NL * NL_coef + LL * LL_coef + WL * WL_coef) #Making biomass estimate with intercept and coefficients from biomass regression
 
-model_seedling_VA <- lmer(size ~ treatment + (1|siteID), data = Seedling_info_VA)
-
+model_seedling_VA <- lmer(size ~ OTC + (1|siteID), data = Seedling_info_VA)
 summary(model_seedling_VA)
 
+Seedling_info_VA %>%  ggplot(aes(x = OTC, y = size)) +  geom_jitter(alpha= 0.2) + geom_violin(aes(fill = OTC, alpha = 0.5), draw_quantiles = c(0.25, 0.5, 0.75)) + ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") + scale_fill_manual(values = c("lightblue", "darkred")) + theme_bw()
+
 Seedling_info_VA <- Seedling_info_VA %>% 
-  group_by(treatment) %>% 
+  group_by(OTC) %>% 
   mutate(seeds_cap = mean(size, na.rm = TRUE),
          seeds_cap_sd = sd(size, na.rm = TRUE)) %>% 
   ungroup() %>% 
-  mutate(seedling_establishment_rate = if_else(treatment == "C" | treatment == "E" | treatment == "N", seedling_est_VA_Veg,
-                                               if_else(treatment == "R", seedling_est_VA_NoVeg, 0))) %>% 
-  select(treatment, seeds_cap, seeds_cap_sd, seedling_establishment_rate) %>% 
+  # mutate(seedling_establishment_rate = if_else(treatment == "C" | treatment == "E" | treatment == "N", seedling_est_VA_Veg,
+  #                                              if_else(treatment == "R", seedling_est_VA_NoVeg, 0))) %>% 
+  select(OTC, seeds_cap, seeds_cap_sd) %>% 
   distinct()
 
 #### Making transitions ####
