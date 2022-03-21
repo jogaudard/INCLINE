@@ -140,8 +140,9 @@ Seeds_per_capsule_SP <- Seeds_per_capsule_SP$mean_seeds
 Seeds_per_capsule_VA <- Seeds_per_capsule %>% 
   filter(Species == "Ver_alp") %>% 
   mutate(mean_seeds = mean(Number_of_seeds, na.rm = TRUE)) %>%
-  bind_rows(Ver_alp_coef) %>% view()
-  mutate(size = Intercept + Shoot_height_mm * SH_coef + Number_of_leaves * NL_coef + Leaf_length_mm * LL_coef + Leaf_width_mm * WL_coef) #Making biomass estimate with intercept and coefficients from biomass regression
+  bind_cols(Ver_alp_coef) %>%
+  mutate(size = Intercept + Shoot_height_mm * SH_coef + Number_of_leaves * NL_coef + Leaf_length_mm * LL_coef + Leaf_width_mm * WL_coef) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
+  filter(!(Site == "SKJ" & Individual == "9"))
 
 seed_VA_1 <- lm(Number_of_seeds ~ Site, data = Seeds_per_capsule_VA)
 summary(seed_VA_1)
@@ -154,7 +155,7 @@ Seeds_per_capsule_VA_coef <- coef(seed_VA_2) %>%
   pivot_wider(names_from = "rowname", values_from = ".") %>% 
   rename(Intercept_seeds = "(Intercept)", size_seed = size)
 
-Seeds_per_capsule_VA %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm") + ggtitle("Number of seeds by size for Veronica_alpina") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
+Seeds_per_capsule_VA %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm", linetype = "dashed") + ggtitle("Number of seeds by size for Veronica_alpina") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
   
 #### Seedling establishment coefficients ####
 #This section calculate the seedling establishment rate for each species in the warmed and unwarmed plots (using the data from the vegetated plots further in the analysis)
@@ -268,7 +269,7 @@ summary(model1_seedling) #Seedlings grow larger in extant and novel transplant, 
 model_seedling <- lmer(size ~ treatment + (1|siteID), data = Seedling_info_SP)
 summary(model_seedling) #Seedlings grow larger in extant and novel transplant, but smaller in removal transplant
 
-Seedling_info_SP %>%  ggplot(aes(x = treatment, y = size)) +  geom_jitter(alpha= 0.2) + geom_violin(aes(fill = treatment, alpha = 0.5), draw_quantiles = c(0.25, 0.5, 0.75)) + ggtitle("Seedling size by treatment for Sibbaldia procumbens") + ylab("size") + scale_fill_viridis_d() + theme_bw()
+Seedling_info_SP %>%  ggplot(aes(x = treatment, y = size)) +  geom_jitter(alpha= 0.2) + geom_violin(aes(fill = treatment, alpha = 0.5), draw_quantiles = c(0.25, 0.5, 0.75)) + facet_wrap(OTC~siteID, nrow = 2) + ggtitle("Seedling size by treatment for Sibbaldia procumbens") + ylab("size") + scale_fill_viridis_d() + theme_bw()
 
 Seedling_info_SP <- Seedling_info_SP %>%
   group_by(treatment) %>% 
