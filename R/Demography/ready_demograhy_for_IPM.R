@@ -319,26 +319,35 @@ Seedling_info_SP <- Seedling_info_SP %>%
 
 Seedling_info_VA <- Ver_alp %>% 
   filter(seedling == "yes") %>% 
+  group_by(OTC, treatment) %>% 
+  mutate(mean_SH = round(mean(SH, na.rm = TRUE)),
+         mean_NL = round(mean(NL, na.rm = TRUE)),
+         mean_LL = round(mean(LL, na.rm = TRUE)),
+         mean_WL = round(mean(WL, na.rm = TRUE))) %>%
+  mutate(LSL = case_when(SH == 0 ~ mean_SH,   #Filling in gaps with the mean for each treatments - might have to attack this differently later
+                         SH > 0 ~ SH)) %>% 
+  mutate(NL = case_when(NL == 0 ~ mean_NL,
+                        NL > 0 ~ NL)) %>% 
+  mutate(LL = case_when(LL == 0 ~ mean_LL,
+                        LL > 0 ~ LL)) %>% 
+  mutate(LL = case_when(WL == 0 ~ mean_WL,
+                        WL > 0 ~ WL)) %>% 
   add_column(Ver_alp_coef) %>%
-  filter(!SH == 0, 
-         !NL == 0,
-         !LL == 0,
-         !WL == 0) %>% #Quick fix to solve the problem of seedling that do not have values in all columns. Need to check in dataset. Some of the problems come from when people registered two seedlings, and that the size traits might not have been transfered to the second seedling. Need to check manually.
   mutate(size = Intercept + SH * SH_coef + NL * NL_coef + LL * LL_coef + WL * WL_coef) #Making biomass estimate with intercept and coefficients from biomass regression
 
-model_seedling_VA <- lmer(size ~ OTC + (1|siteID), data = Seedling_info_VA)
+model_seedling_VA <- lmer(size ~ treatment + (1|siteID/blockID/plotID), data = Seedling_info_VA)
 summary(model_seedling_VA)
 
-Seedling_info_VA %>%  ggplot(aes(x = OTC, y = size)) +  geom_jitter(alpha= 0.2) + geom_violin(aes(fill = OTC, alpha = 0.5), draw_quantiles = c(0.25, 0.5, 0.75)) + ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") + scale_fill_manual(values = c("lightblue", "darkred")) + theme_bw()
+Seedling_info_VA %>%  ggplot(aes(x = treatment, y = size)) +  geom_jitter(alpha= 0.2) + geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) + ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") + scale_fill_manual(values = c("lightblue", "darkred")) + theme_bw()
 
 Seedling_info_VA <- Seedling_info_VA %>% 
-  group_by(OTC) %>% 
+  group_by(treatment) %>% 
   mutate(seeds_cap = mean(size, na.rm = TRUE),
          seeds_cap_sd = sd(size, na.rm = TRUE)) %>% 
   ungroup() %>% 
   # mutate(seedling_establishment_rate = if_else(treatment == "C" | treatment == "E" | treatment == "N", seedling_est_VA_Veg,
   #                                              if_else(treatment == "R", seedling_est_VA_NoVeg, 0))) %>% 
-  select(OTC, seeds_cap, seeds_cap_sd) %>% 
+  select(treatment, seeds_cap, seeds_cap_sd) %>% 
   distinct()
 
 #### Making transitions ####
