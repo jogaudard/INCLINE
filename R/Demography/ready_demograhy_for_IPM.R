@@ -120,11 +120,12 @@ Seeds_per_capsule_SP <- Seeds_per_capsule %>%
                           Site == "GUD" ~ "Gud",
                           Site == "SKJ" ~ "Skj")) %>% 
   left_join(Sib_pro_coef, by = c("Site" = "siteID")) %>% 
-  mutate(size = Intercept + Leaf_stock_length_mm*LSL_coef + Number_of_leaves*NL_coef + Leaf_length_mm* LL_coef)
+  mutate(size = Intercept + Leaf_stock_length_mm*LSL_coef + Number_of_leaves*NL_coef + Leaf_length_mm* LL_coef) %>% 
+  mutate(ID = paste0(Site, "_", Species, "_", Individual))
 
-seed1 <- lm(Number_of_seeds ~ size, data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on biomass, it does not.
+seed1 <- lmer(Number_of_seeds ~ size + (1|ID), data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on biomass, it does not.
 summary(seed1)
-seed2 <- lm(Number_of_seeds ~ Site, data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on location, it does not.
+seed2 <- lmer(Number_of_seeds ~ Site + (1|ID), data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on location, it does not.
 summary(seed2)
 
 Seeds_per_capsule_SP %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm", linetype = "dashed") + ggtitle("Number of seeds by size for Sibbaldia procumbens") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
@@ -142,20 +143,22 @@ Seeds_per_capsule_VA <- Seeds_per_capsule %>%
   mutate(mean_seeds = mean(Number_of_seeds, na.rm = TRUE)) %>%
   bind_cols(Ver_alp_coef) %>%
   mutate(size = Intercept + Shoot_height_mm * SH_coef + Number_of_leaves * NL_coef + Leaf_length_mm * LL_coef + Leaf_width_mm * WL_coef) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
-  filter(!(Site == "SKJ" & Individual == "9"))
+  #filter(!(Site == "SKJ" & Individual == "9")) %>%  #testing with and without this outlier. If we exclude this outlier, or have individual as a random effect the effect of size on number of seeds goes away.
+  mutate(ID = paste0(Site, "_", Species, "_", Individual))
 
-seed_VA_1 <- lm(Number_of_seeds ~ Site, data = Seeds_per_capsule_VA)
+seed_VA_1 <- lmer(Number_of_seeds ~ Site + (1|ID), data = Seeds_per_capsule_VA)
 summary(seed_VA_1)
-seed_VA_2 <- lm(Number_of_seeds ~ size, data = Seeds_per_capsule_VA)
+seed_VA_2 <- lmer(Number_of_seeds ~ size + (1|ID), data = Seeds_per_capsule_VA)
 summary(seed_VA_2)
 
-Seeds_per_capsule_VA_coef <- coef(seed_VA_2) %>% 
-  as.data.frame() %>% 
-  rownames_to_column() %>% 
-  pivot_wider(names_from = "rowname", values_from = ".") %>% 
-  rename(Intercept_seeds = "(Intercept)", size_seed = size)
 
 Seeds_per_capsule_VA %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm", linetype = "dashed") + ggtitle("Number of seeds by size for Veronica_alpina") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
+
+Seeds_per_capsule_VA <- Seeds_per_capsule_VA %>% 
+  select(mean_seeds) %>% 
+  unique()
+
+Seeds_per_capsule_VA <- Seeds_per_capsule_VA$mean_seeds
   
 #### Seedling establishment coefficients ####
 #This section calculate the seedling establishment rate for each species in the warmed and unwarmed plots (using the data from the vegetated plots further in the analysis)
@@ -344,7 +347,7 @@ Sib_pro_2018_2019 <- Sib_pro_2018 %>%
   mutate(transition = "2018-2019")
 
 test <- Sib_pro_2018_2019 %>% 
-  filter(!plotID == c("Lav_5_5", "Lav_6_6")) %>% 
+  #filter(!plotID %in% c("Lav_5_5", "Lav_6_6")) %>% 
   group_by(transition, plotID) %>% 
   nest() %>% 
   mutate(x = map(data, ~ {
@@ -359,11 +362,11 @@ test <- Sib_pro_2018_2019 %>%
 
 child <- Sib_pro_2018_2019 %>% 
   filter(is.na(size) & sizeNext > 0) %>% 
-  filter(plotID == "Lav_6_6") %>% 
+  filter(plotID == "Lav_5_5") %>% 
   select(unique_IDS, X_next, Y_next, sizeNext)
 
 parent <- Sib_pro_2018_2019 %>% 
-  filter(plotID == "Lav_6_6") %>% 
+  filter(plotID == "Lav_5_5") %>% 
   filter(seedling == "no", juvenile == "no") %>% 
   select(unique_IDS, X, Y, size)
 
@@ -394,8 +397,14 @@ clone_function <- function(child, parent){
   
   if(nrow(child) == 0){
     return(child %>% 
-               mutate(distance = numeric(0)) %>% 
+               mutate(distance = NA) %>% 
                bind_cols(parent[0,]))
+  }
+  
+  if(nrow(parent) == 0){
+    return(child %>% 
+             mutate(distance = NA) %>% 
+             bind_cols(add_row(parent)))
   }
   # Make a solution for when there are no parents
   
