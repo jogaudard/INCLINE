@@ -42,6 +42,7 @@ INCLINE_metadata <- INCLINE_metadata %>%
 Sib_pro <- Sib_pro %>% 
   rename(siteID = Site, block = Block, plot = Plot, year = Year, date = Date, regitrator = Registrator, seedling = seedl) %>%  #Rename to lower capital, and correct naming convention for the INCLINE project
   mutate(plotID = paste0(siteID, "_", block, "_", plot)) %>% #creating unique plotID variable
+  mutate(blockID = paste0(siteID, "-", block)) %>%  #creating unique blockID variable
   mutate(unique_IDS = paste0(plotID, "_", IDS)) %>% #creating unique individual ID
   left_join(INCLINE_metadata, by = "plotID") %>% #adding treatment info from INCLINE metadata file
   select(!Treat) %>% #removing treatment column from the original dataset
@@ -58,6 +59,7 @@ Sib_pro <- Sib_pro %>%
 Ver_alp <- Ver_alp %>% 
   rename(siteID = Site, block = Block, plot = Plot, year = Year, date = Date, regitrator = Registrator, seedling = seedl) %>%  #Rename to lower capital, and correct naming convention for the INCLINE project
   mutate(plotID = paste0(siteID, "_", block, "_", plot)) %>% #creating unique plotID variable
+  mutate(blockID = paste0(siteID, "-", block)) %>%  #creating unique blockID variable
   mutate(unique_IDS = paste0(plotID, "_", IDS)) %>% #creating unique individual ID
   left_join(INCLINE_metadata, by = "plotID") %>% #adding treatment info from INCLINE metadata file
   select(!Treat) %>% #removing treatment column from the original dataset
