@@ -343,7 +343,7 @@ Sib_pro_2018_2019 <- Sib_pro_2018 %>%
   mutate(transition = "2018-2019")
 
 test <- Sib_pro_2018_2019 %>% 
-  filter(!plotID == "Lav_5_5") %>% 
+  filter(!plotID == c("Lav_5_5", "Lav_6_6")) %>% 
   group_by(transition, plotID) %>% 
   nest() %>% 
   mutate(x = map(data, ~ {
@@ -358,11 +358,11 @@ test <- Sib_pro_2018_2019 %>%
 
 child <- Sib_pro_2018_2019 %>% 
   filter(is.na(size) & sizeNext > 0) %>% 
-  filter(plotID == "Lav_5_5") %>% 
+  filter(plotID == "Lav_6_6") %>% 
   select(unique_IDS, X_next, Y_next, sizeNext)
 
 parent <- Sib_pro_2018_2019 %>% 
-  filter(plotID == "Lav_5_5") %>% 
+  filter(plotID == "Lav_6_6") %>% 
   filter(seedling == "no", juvenile == "no") %>% 
   select(unique_IDS, X, Y, size)
 
