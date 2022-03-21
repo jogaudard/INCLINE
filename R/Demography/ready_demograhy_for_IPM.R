@@ -189,7 +189,7 @@ seedling_est_background <- seedling_est1 %>%
   rename(number = "n()") %>% 
   ungroup() %>% 
   group_by(Species, OTC, treatment) %>% 
-  mutate(seedling_est_rate = mean(number))
+  mutate(seedling_est_rate = mean(number)) #Need to make a decision for how to incorporate background germination - NOT DONE
 
 seedling_est <- seedling_est1 %>% 
   filter(Plot %in% c("C", "OTC")) %>% 
@@ -197,10 +197,10 @@ seedling_est <- seedling_est1 %>%
 
 ###### Veronica alpina ######
 
-seedling_est_VA <- seedling_est1 %>% 
+seedling_est_VA <- seedling_est %>% 
   filter(Species == "Ver_alp") %>% 
   filter(campaign_number == "second") %>% 
-  group_by(Site, Block, Warming, PlotID, Vegetation) %>% 
+  group_by(Site, Block, Warming, plotID, Vegetation) %>% 
   mutate(count = case_when(Present == "yes" ~ 1,
                            Present == "no" ~ 0)) %>% 
   mutate(total_germinated = sum(count)) %>% 
@@ -211,9 +211,10 @@ seedling_est_VA <- seedling_est1 %>%
   unique() %>% 
   mutate(Vegetation = case_when(Vegetation == "yes" ~ "Veg",
                                 Vegetation == "no" ~ "NoVeg")) %>% 
-  mutate(Treatment = paste0(Warming, "_", Vegetation))
+  mutate(Treatment = paste0(Warming, "_", Vegetation)) %>% 
+  mutate(blockID = paste0(Site, "_", Block))
 
-model1 <- lmer(germination_percentage ~ Warming + Vegetation +(1|Site), data = seedling_est_VA)
+model1 <- lmer(germination_percentage ~ Warming + Vegetation +(1|Site) + (1|blockID), data = seedling_est_VA)
 summary(model1)
 
 seedling_est_VA %>% ggplot(aes(x = Warming, y = germination_percentage, fill = Warming)) + geom_violin() + geom_jitter(alpha = 0.5, width = 0.10) + facet_grid(~Vegetation) + theme_bw() + ggtitle("Germination success in different treatments for Veronica alpina") + scale_fill_manual(values = c("lightblue", "darkred"))
@@ -240,7 +241,7 @@ seedling_est_VA <- seedling_est_VA%>%
 seedling_est_SP <- seedling_est %>% 
   filter(Species == "Sib_pro") %>% 
   filter(campaign_number == "second") %>%
-  group_by(Site, Block, Warming, PlotID, Vegetation) %>% 
+  group_by(Site, Block, Warming, plotID, Vegetation) %>% 
   mutate(count = case_when(Present == "yes" ~ 1,
                            Present == "no" ~ 0)) %>% 
   mutate(total_germinated = sum(count)) %>% 
@@ -251,7 +252,8 @@ seedling_est_SP <- seedling_est %>%
   unique() %>% 
   mutate(Vegetation = case_when(Vegetation == "yes" ~ "Veg",
                                 Vegetation == "no" ~ "NoVeg")) %>% 
-  mutate(Treatment = paste0(Warming, "_", Vegetation))
+  mutate(Treatment = paste0(Warming, "_", Vegetation)) %>% 
+  #mutate(blockID = paste0(Site, "_", Block)) #Tested with the blockID as random effect, but it is not able to pick up anything on that - still det same results as if it was just site, so removed blockID from the model
 
 model2 <- lmer(germination_percentage ~ Warming + Vegetation + (1|Site), data = seedling_est_SP)
 summary(model2)
