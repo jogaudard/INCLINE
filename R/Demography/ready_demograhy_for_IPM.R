@@ -165,19 +165,39 @@ Seeds_per_capsule_VA <- Seeds_per_capsule_VA$mean_seeds
 
 #seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv") 
 
-seedling_est <- seedling_est %>% 
+seedling_est1 <- seedling_est %>% 
   filter(Year == 2020) %>% 
-  filter(Plot %in% c("C", "OTC")) %>% 
   select(Site, Block, Plot, PlotID, Date, Species, ID, Vegetation, Present) %>% 
   mutate(Date = dmy(Date)) %>% 
   mutate(campaign_number = if_else(Date == "2020-06-29" | Date == "2020-06-30" | Date == "2020-07-13" | Date == "2020-07-14" | Date == "2020-07-17", "first",
                                    if_else(Date == "2020-08-05" | Date == "2020-08-07" | Date == "2020-08-12" | Date == "2020-08-13" | Date == "2020-08-14", "second",
                                          if_else(Date == "2020-08-26" | Date == "2020-08-24" | Date == "2020-08-25" | Date == "2020-08-27", "third", "NA")))) %>% 
-  rename(Warming = Plot) 
+  mutate(Site = case_when(Site == "LAV" ~ "Lav",
+                          Site == "ULV" ~ "Ulv",
+                          Site == "GUD" ~ "Gud",
+                          Site == "SKJ" ~ "Skj")) %>% 
+  mutate(plotID = paste0(Site, "_", Block, "_", Plot)) %>% 
+  select(-PlotID)
+
+seedling_est_background <- seedling_est1 %>% 
+  filter(!Plot %in% c("C", "OTC")) %>% 
+  filter(campaign_number == "second") %>% 
+  filter(Present == "yes") %>% 
+  left_join(INCLINE_metadata, by = "plotID") %>% 
+  group_by(Species, Site, OTC, treatment, plotID) %>% 
+  summarise(n()) %>%
+  rename(number = "n()") %>% 
+  ungroup() %>% 
+  group_by(Species, OTC, treatment) %>% 
+  mutate(seedling_est_rate = mean(number))
+
+seedling_est <- seedling_est1 %>% 
+  filter(Plot %in% c("C", "OTC")) %>% 
+  rename(Warming = Plot)
 
 ###### Veronica alpina ######
 
-seedling_est_VA <- seedling_est %>% 
+seedling_est_VA <- seedling_est1 %>% 
   filter(Species == "Ver_alp") %>% 
   filter(campaign_number == "second") %>% 
   group_by(Site, Block, Warming, PlotID, Vegetation) %>% 
