@@ -402,11 +402,11 @@ test <- Sib_pro_2018_2019 %>%
 
 child <- Sib_pro_2018_2019 %>% 
   filter(is.na(size) & sizeNext > 0) %>% 
-  filter(plotID == "Lav_5_5") %>% 
+  filter(plotID == "Gud_1_4") %>% 
   select(unique_IDS, X_next, Y_next, sizeNext)
 
 parent <- Sib_pro_2018_2019 %>% 
-  filter(plotID == "Lav_5_5") %>% 
+  filter(plotID == "Gud_1_4") %>% 
   filter(seedling == "no", juvenile == "no") %>% 
   select(unique_IDS, X, Y, size)
 
@@ -422,7 +422,7 @@ parent <- Sib_pro_2018_2019 %>%
 clone_function <- function(child, parent){
   
   child <- child %>% 
-    rename(unique_IDS_c = unique_IDS)
+    rename(unique_IDS_child = unique_IDS)
   
   child2 <- child %>% 
     select(X_next, Y_next) %>% 
@@ -430,23 +430,23 @@ clone_function <- function(child, parent){
     filter(!is.na(X) & !is.na(Y))
   
   parent <- parent %>% 
-    rename(unique_IDS_p = unique_IDS)
+    rename(unique_IDS_parent = unique_IDS, size_parent = size)
   
   parent2 <- parent %>% 
     select(X, Y)
   
+  
   if(nrow(child) == 0){
     return(child %>% 
-               mutate(distance = NA) %>% 
+               mutate(distance_parent = NA) %>% 
                bind_cols(parent[0,]))
   }
   
   if(nrow(parent) == 0){
     return(child %>% 
-             mutate(distance = NA) %>% 
+             mutate(distance_parent = NA) %>% 
              bind_cols(add_row(parent)))
   }
-  # Make a solution for when there are no parents
   
   
   dis_matrix <- bind_rows(child2, parent2) %>%
@@ -459,7 +459,8 @@ clone_function <- function(child, parent){
     apply(MARGIN = 2, which.min) #finds the right parent to the right child
   
   child2 %>% 
-    mutate(distance = apply(dis_matrix, MARGIN = 2, min)) %>% 
+    mutate(distance_parent = apply(dis_matrix, MARGIN = 2, min)) %>% 
+    rename(X_next = X, Y_next = Y) %>% #Need to change names so that the names don't crash
     bind_cols(parent[matched, ]) #combine data set of children and mothers
   
 }
