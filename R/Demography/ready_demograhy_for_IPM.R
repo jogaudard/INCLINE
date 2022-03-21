@@ -284,26 +284,35 @@ seedling_est_SP <- seedling_est_SP%>%
 ###### Sibaldia procumbens ######
 
 Seedling_info_SP <- Sib_pro %>% 
-  filter(seedling == "yes") %>%  #There are some seedlings that lack informaiton in LSL, NL or LL. Do we need to gap fill the data here?
+  filter(seedling == "yes") %>%  #There are some seedlings that lack information in LSL, NL or LL. Do we need to gap fill the data here?
+  group_by(OTC, treatment) %>% 
+  mutate(mean_LSL = round(mean(LSL, na.rm = TRUE)),
+         mean_NL = round(mean(NL, na.rm = TRUE)),
+         mean_LL = round(mean(LL, na.rm = TRUE))) %>%
+  mutate(LSL = case_when(LSL == 0 ~ mean_LSL,   #Filling in gaps with the mean for each treatments - might have to attack this differently later
+                         LSL > 0 ~ LSL)) %>% 
+  mutate(NL = case_when(NL == 0 ~ mean_NL,
+                        NL > 0 ~ NL)) %>% 
+  mutate(LL = case_when(LL == 0 ~ mean_LL,
+                        LL > 0 ~ LL)) %>%
   left_join(Sib_pro_coef, by = "siteID") %>% 
   mutate(size = Intercept + LSL * LSL_coef + NL * NL_coef + LL * LL_coef) #Making biomass estimate with intercept and coefficients from biomass regression
 
-model1_seedling <- lmer(size ~ OTC + treatment + (1|siteID), data = Seedling_info_SP)
+model1_seedling <- lmer(size ~ OTC + treatment + (1|siteID/plotID), data = Seedling_info_SP)
 summary(model1_seedling) #Seedlings grow larger in extant and novel transplant, but smaller in removal transplant
 
-model_seedling <- lmer(size ~ treatment + (1|siteID), data = Seedling_info_SP)
+model_seedling <- lmer(size ~ treatment + (1|siteID/plotID), data = Seedling_info_SP)
 summary(model_seedling) #Seedlings grow larger in extant and novel transplant, but smaller in removal transplant
 
 Seedling_info_SP %>%  ggplot(aes(x = treatment, y = size)) +  geom_jitter(alpha= 0.2) + geom_violin(aes(fill = treatment, alpha = 0.5), draw_quantiles = c(0.25, 0.5, 0.75)) + facet_wrap(OTC~siteID, nrow = 2) + ggtitle("Seedling size by treatment for Sibbaldia procumbens") + ylab("size") + scale_fill_viridis_d() + theme_bw()
 
 Seedling_info_SP <- Seedling_info_SP %>%
-  group_by(treatment) %>% 
+  ungroup() %>% 
   mutate(seeds_cap = mean(size, na.rm = TRUE),
          seeds_cap_sd = sd(size, na.rm = TRUE)) %>%
-  ungroup() %>% 
   # mutate(seedling_establishment_rate = if_else(OTC == "C", seedling_est_SP_C,
   #                                              if_else(OTC == "W", seedling_est_SP_W, 0))) %>% 
-  select(treatment, seeds_cap, seeds_cap_sd) %>% 
+  select(seeds_cap, seeds_cap_sd) %>% 
   distinct()
 
 ###### Veronica alpina ######
