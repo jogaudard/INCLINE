@@ -178,6 +178,6 @@ Sib_pro_germ <- Sib_pro_germ %>%
   select(!Remove_whole_petridish & !Flag) %>% #Remove old flag columns
   rename(comment = Comment, harvest_comment = Harvest_comment, weighing_comment = Weighing_comments) %>% 
   group_by(petri_dish) %>% 
-  fill(flag_whole_petridish, .direction = "downup") #Give whole petridish comment too all seeds in the same petri dish
+  fill(flag_whole_petridish, .direction = "downup") #Give whole petri dish comment too all seeds in the same petri dish
 
 
