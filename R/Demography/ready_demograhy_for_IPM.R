@@ -33,7 +33,7 @@ get_file(node = "zhk3m",
 
 Seeds_per_capsule <- read_csv2("data/Demography/Seeds_per_capsule.csv")
 biomass_Sib_pro <- read_csv2("data/Demography/Biomass_Sib_pro.csv")
-biomass_Ver_alp <- read_delim("data/Demography/SeedClim_Ver_alp_biomass_regression.txt")
+#biomass_Ver_alp <- read_delim("data/Demography/SeedClim_Ver_alp_biomass_regression.txt")
 #biomass_Ver_alp_INCLINE <- read_csv2("data/Demography/SG.19_above-below_allocation.csv") #Not using this because some of the biomass rotted while collecting data, so biomass might not be correct
 seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv") 
 biomass_Ver_alp2 <- read_csv2("data/Demography/VeronicaAlpina_Biomass_Seedclim_edited.csv") #from SeedClim not on INCLINE OSF
@@ -71,10 +71,10 @@ Sib_pro_coef <- Sib_pro_coef %>%
 ##### Veronica alpina #####
 
 #Using placeholder data from SeedClim for the biomass regressions there
-Ver_alp_coef <- biomass_Ver_alp %>% 
-  filter(species == "valp") %>% 
-  select(!species) %>% 
-  rename(Intercept = "(Intercept)", SH_coef = SH, NL_coef = NL, LL_coef = LL, WL_coef = WL)
+# Ver_alp_coef <- biomass_Ver_alp %>% 
+#   filter(species == "valp") %>% 
+#   select(!species) %>% 
+#   rename(Intercept = "(Intercept)", SH_coef = SH, NL_coef = NL, LL_coef = LL, WL_coef = WL)
 
 # biomass Ver_alp
 
@@ -567,8 +567,8 @@ Ver_alp_2018_2019 <- Ver_alp_2018 %>%
   rename(X = X_2018, Y = Y_2018, X_next = X_2019, Y_next = Y_2019, seedling = seedling_2018, juvenile = juvenile_2018, seedling_next = seedling_2019, juvenile_next = juvenile_2019, MS = MS_2018, MS_next = MS_2019) %>% 
   add_column(Ver_alp_coef) %>% 
   add_column(Seeds_per_capsule_VA_coef) %>% 
-  mutate(size = Intercept + SH_2018 * SH_coef + NL_2018 * NL_coef + LL_2018 * LL_coef + WL_2018 * WL_coef, 
-         sizeNext = Intercept + SH_2019 * SH_coef + NL_2019 * NL_coef + LL_2019 * LL_coef + WL_2019 * WL_coef,
+  mutate(size = Intercept + (SH_2018 * SH_coef) + (NL_2018 * NL_coef) + (LL_2018 * LL_coef) + (WL_2018 * WL_coef), 
+         sizeNext = Intercept + (SH_2019 * SH_coef) + (NL_2019 * NL_coef) + (LL_2019 * LL_coef) + (WL_2019 * WL_coef),
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
   mutate(flo.no = rowSums(dplyr::select(., NB_2018, NFL_2018, NC_2018), na.rm=TRUE),
@@ -587,8 +587,8 @@ Ver_alp_2019_2020 <- Ver_alp_2019 %>%
   rename(X = X_2019, Y = Y_2019, X_next = X_2020, Y_next = Y_2020, seedling = seedling_2019, juvenile = juvenile_2019, seedling_next = seedling_2020, juvenile_next = juvenile_2020, MS = MS_2019, MS_next = MS_2020) %>% 
   add_column(Ver_alp_coef) %>% 
   add_column(Seeds_per_capsule_VA_coef) %>% 
-  mutate(size = Intercept + SH_2019 * SH_coef + NL_2019 * NL_coef + LL_2019 * LL_coef + WL_2019 * WL_coef, 
-         sizeNext = Intercept + SH_2020 * SH_coef + NL_2020 * NL_coef + LL_2020 * LL_coef + WL_2020 * WL_coef, 
+  mutate(size = Intercept + (SH_2019 * SH_coef) + (NL_2019 * NL_coef) + (LL_2019 * LL_coef) + (WL_2019 * WL_coef), 
+         sizeNext = Intercept + (SH_2020 * SH_coef) + (NL_2020 * NL_coef) + (LL_2020 * LL_coef) + (WL_2020 * WL_coef), 
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
   mutate(flo.no = rowSums(dplyr::select(., NB_2019, NFL_2019, NC_2019), na.rm=TRUE),
@@ -607,8 +607,8 @@ Ver_alp_2020_2021 <- Ver_alp_2020 %>%
   rename(X = X_2020, Y = Y_2020, X_next = X_2021, Y_next = Y_2021, seedling = seedling_2020, juvenile = juvenile_2020, seedling_next = seedling_2021, juvenile_next = juvenile_2021, MS = MS_2020, MS_next = MS_2021) %>% 
   add_column(Ver_alp_coef) %>% 
   add_column(Seeds_per_capsule_VA_coef) %>% 
-  mutate(size = Intercept + SH_2020 * SH_coef + NL_2020 * NL_coef + LL_2020 * LL_coef + WL_2020 * WL_coef, 
-         sizeNext = Intercept + SH_2021 * SH_coef + NL_2021 * NL_coef + LL_2021 * LL_coef + WL_2021 * WL_coef, 
+  mutate(size = Intercept + (SH_2020 * SH_coef) + (NL_2020 * NL_coef) + (LL_2020 * LL_coef) + (WL_2020 * WL_coef), 
+         sizeNext = Intercept + (SH_2021 * SH_coef) + (NL_2021 * NL_coef) + (LL_2021 * LL_coef) + (WL_2021 * WL_coef), 
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
   mutate(flo.no = rowSums(dplyr::select(., NB_2020, NFL_2020, NC_2020), na.rm=TRUE),
@@ -660,9 +660,9 @@ Ver_alp_test <- Ver_alp_2018_2021 %>%
 
 
 #Some plots fro visualization/checking
-Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = flo.if)) + geom_point() + geom_abline()
-Sib_pro_2018_2021 %>% filter(seedling == "yes") %>% ggplot(aes(y = sizeNext, x = size)) + geom_point() + geom_abline()
-Sib_pro_2018_2021 %>% filter(offspringNext == "clone") %>% filter(distance_parent < 15) %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
+Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = flo.if)) + geom_point() + geom_abline()
+Ver_alp_2018_2021 %>% filter(seedling == "yes") %>% ggplot(aes(y = sizeNext, x = size)) + geom_point() + geom_abline()
+Ver_alp_2018_2021 %>% filter(offspringNext == "clone") %>% filter(distance_parent < 15) %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
 Ver_alp_test %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline()
 Ver_alp_test %>% ggplot(aes(x = sizeNext, fill = offspringNext, alpha = 0.5)) + geom_density()
 
