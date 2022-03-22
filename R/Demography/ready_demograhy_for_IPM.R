@@ -424,24 +424,24 @@ clone_function <- function(child, parent){
 
 Sib_pro_2018 <- Sib_pro %>% 
   filter(year == 2018) %>% 
-  select(siteID, plotID, unique_IDS, X, Y, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
+  select(siteID, blockID, plotID, unique_IDS, X, Y, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
 
 Sib_pro_2019 <- Sib_pro %>% 
   filter(year == 2019) %>% 
-   select(siteID, plotID, unique_IDS, X, Y, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
+   select(siteID, blockID, plotID, unique_IDS, X, Y, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
 
 Sib_pro_2020 <- Sib_pro %>% 
   filter(year == 2020) %>% 
-  select(siteID, plotID, unique_IDS, X, Y, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile) 
+  select(siteID, blockID, plotID, unique_IDS, X, Y, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile) 
 
 Sib_pro_2021 <- Sib_pro %>% 
   filter(year == 2021) %>% 
-  select(siteID, plotID, unique_IDS, X, Y, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
+  select(siteID, blockID, plotID, unique_IDS, X, Y, MS, OTC, treatment, year, LSL, NL, LL, NFL, NB, NC, NAC, seedling, juvenile)
 
 
 #2018-2019 transition
 Sib_pro_2018_2019 <- Sib_pro_2018 %>% 
-  full_join(Sib_pro_2019, by = c("unique_IDS", "plotID", "OTC", "treatment", "siteID"), suffix = c("_2018", "_2019")) %>%
+  full_join(Sib_pro_2019, by = c("unique_IDS", "plotID", "OTC", "treatment", "siteID", "blockID"), suffix = c("_2018", "_2019")) %>%
   rename(X = X_2018, Y = Y_2018, X_next = X_2019, Y_next = Y_2019, seedling = seedling_2018, juvenile = juvenile_2018, seedling_next = seedling_2019, juvenile_next = juvenile_2019, MS = MS_2018, MS_next = MS_2019) %>% 
   left_join(Sib_pro_coef, by = "siteID") %>% 
   mutate(size = Intercept + (NL_2018 * NL_coef) + (LL_2018 * LL_coef),
@@ -455,12 +455,12 @@ Sib_pro_2018_2019 <- Sib_pro_2018 %>%
                               ifelse(juvenile_next == "yes" & is.na(size), "sexual",
                                      ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>%
 ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
-  select(siteID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
+  select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
   mutate(transition = "2018-2019")
 
 #2019-2020 transition
 Sib_pro_2019_2020 <- Sib_pro_2019 %>% 
-  full_join(Sib_pro_2020, by = c("unique_IDS", "plotID", "OTC", "treatment", "siteID"), suffix = c("_2019", "_2020")) %>% 
+  full_join(Sib_pro_2020, by = c("unique_IDS", "plotID", "OTC", "treatment", "siteID", "blockID"), suffix = c("_2019", "_2020")) %>% 
   rename(X = X_2019, Y = Y_2019, X_next = X_2020, Y_next = Y_2020, seedling = seedling_2019, juvenile = juvenile_2019, seedling_next = seedling_2020, juvenile_next = juvenile_2020, MS = MS_2019, MS_next = MS_2020) %>% 
   left_join(Sib_pro_coef, by = "siteID") %>% 
   mutate(size = Intercept + NL_2019 * NL_coef + LL_2019 * LL_coef,
@@ -474,12 +474,12 @@ Sib_pro_2019_2020 <- Sib_pro_2019 %>%
                                 ifelse(juvenile_next == "yes" & is.na(size), "sexual",
                                        ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>%
   ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
-  select(siteID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
+  select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
   mutate(transition = "2019-2020")
 
 #2020-2021 transition
 Sib_pro_2020_2021 <- Sib_pro_2020 %>% 
-  full_join(Sib_pro_2021, by = c("unique_IDS", "plotID", "OTC", "treatment", "siteID"), suffix = c("_2020", "_2021")) %>% 
+  full_join(Sib_pro_2021, by = c("unique_IDS", "plotID", "OTC", "treatment", "siteID", "blockID"), suffix = c("_2020", "_2021")) %>% 
   rename(X = X_2020, Y = Y_2020, X_next = X_2021, Y_next = Y_2021, seedling = seedling_2020, juvenile = juvenile_2020, seedling_next = seedling_2021, juvenile_next = juvenile_2021, MS = MS_2020, MS_next = MS_2021) %>% 
   left_join(Sib_pro_coef, by = "siteID") %>% 
   mutate(size = Intercept + NL_2020 * NL_coef + LL_2020 * LL_coef,
@@ -493,7 +493,7 @@ Sib_pro_2020_2021 <- Sib_pro_2020 %>%
                                 ifelse(juvenile_next == "yes" & is.na(size), "sexual",
                                        ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
   ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
-  select(siteID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>% 
+  select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>% 
   mutate(transition = "2020-2021")
 
 
@@ -501,7 +501,7 @@ Sib_pro_2020_2021 <- Sib_pro_2020 %>%
 Sib_pro_2018_2021 <- bind_rows(Sib_pro_2018_2019, Sib_pro_2019_2020, Sib_pro_2020_2021)
 
 #adding clonal information
-clones <- Sib_pro_2018_2021 %>% 
+clones_SP <- Sib_pro_2018_2021 %>% 
   group_by(transition, plotID) %>% 
   nest() %>% 
   mutate(clonal_information = map(data, ~ {
@@ -518,19 +518,20 @@ clones <- Sib_pro_2018_2021 %>%
     clone_function(child, parent)
   }))
 
-clonal_information <- clones %>%
+clonal_information_SP <- clones_SP %>%
   unnest(cols = clonal_information) %>% 
   select(-data)
 
-Sib_pro_2018_2021 <- clones %>% 
+Sib_pro_2018_2021 <- clones_SP %>% 
   select(-clonal_information) %>% 
   unnest(data)
 
 Sib_pro_2018_2021 <- Sib_pro_2018_2021 %>% 
-  left_join(clonal_information, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_child", "X_next", "Y_next", "sizeNext"))
+  left_join(clonal_information_SP, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_child", "X_next", "Y_next", "sizeNext"))
 
 Sib_pro_test <- Sib_pro_2018_2021 %>% 
-  mutate(size = case_when(offspringNext == "clone" ~ size_parent,
+  mutate(size = case_when((offspringNext == "clone" & distance_parent < 10) ~ size_parent,
+                          (offspringNext == "clone" & distance_parent > 10) ~ size,
                           offspringNext %in% c(NA, "sexual") ~ size))
 
 
@@ -539,31 +540,33 @@ Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = flo.if)) + geom
 Sib_pro_2018_2021 %>% filter(seedling == "yes") %>% ggplot(aes(y = sizeNext, x = size)) + geom_point() + geom_abline()
 Sib_pro_2018_2021 %>% filter(offspringNext == "clone") %>% filter(distance_parent < 15) %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
 Sib_pro_test %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline()
+Sib_pro_test %>% ggplot(aes(x = sizeNext, fill = offspringNext, alpha = 0.5)) + geom_density()
 
 
 ##### Veronica alpina #####
 
 Ver_alp_2018 <- Ver_alp %>% 
   filter(year == 2018) %>% 
-  select(plotID, unique_IDS, OTC, treatment, year, SH, NL, LL, WL, NFL, NB, NC, NAC, seedling, juvenile)
+  select(siteID, blockID, plotID, unique_IDS, X, Y, MS, OTC, treatment, year, SH, NL, LL, WL, NFL, NB, NC, NAC, seedling, juvenile)
 
 Ver_alp_2019 <- Ver_alp %>% 
   filter(year == 2019) %>% 
-  select(plotID, unique_IDS, OTC, treatment, year, SH, NL, LL, WL, NFL, NB, NC, NAC, seedling, juvenile)
+  select(siteID, blockID, plotID, unique_IDS, X, Y, MS, OTC, treatment, year, SH, NL, LL, WL, NFL, NB, NC, NAC, seedling, juvenile)
 
 Ver_alp_2020 <- Ver_alp %>% 
   filter(year == 2020) %>% 
-  select(plotID, unique_IDS, OTC, treatment, year, SH, NL, LL, WL, NFL, NB, NC, NAC, seedling, juvenile)
+  select(siteID, blockID, plotID, unique_IDS, X, Y, MS, OTC, treatment, year, SH, NL, LL, WL, NFL, NB, NC, NAC, seedling, juvenile)
 
 Ver_alp_2021 <- Ver_alp %>% 
   filter(year == 2021) %>% 
-  select(plotID, unique_IDS, OTC, treatment, year, SH, NL, LL, WL, NFL, NB, NC, NAC, seedling, juvenile)
+  select(siteID, blockID, plotID, unique_IDS, X, Y, MS, OTC, treatment, year, SH, NL, LL, WL, NFL, NB, NC, NAC, seedling, juvenile)
 
-
+#2018-2019 transition
 Ver_alp_2018_2019 <- Ver_alp_2018 %>% 
+  full_join(Ver_alp_2019, by = c("unique_IDS", "plotID", "OTC", "treatment", "siteID", "blockID"), suffix = c("_2018", "_2019")) %>% 
+  rename(X = X_2018, Y = Y_2018, X_next = X_2019, Y_next = Y_2019, seedling = seedling_2018, juvenile = juvenile_2018, seedling_next = seedling_2019, juvenile_next = juvenile_2019, MS = MS_2018, MS_next = MS_2019) %>% 
   add_column(Ver_alp_coef) %>% 
   add_column(Seeds_per_capsule_VA_coef) %>% 
-  full_join(Ver_alp_2019, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2018", "_2019")) %>% 
   mutate(size = Intercept + SH_2018 * SH_coef + NL_2018 * NL_coef + LL_2018 * LL_coef + WL_2018 * WL_coef, 
          sizeNext = Intercept + SH_2019 * SH_coef + NL_2019 * NL_coef + LL_2019 * LL_coef + WL_2019 * WL_coef,
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
@@ -571,18 +574,19 @@ Ver_alp_2018_2019 <- Ver_alp_2018 %>%
   mutate(flo.no = rowSums(dplyr::select(., NB_2018, NFL_2018, NC_2018), na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
          fec = ((Intercept_seeds + size * size_seed)  * flo.no)) %>%
-  mutate(offspringNext = ifelse(seedling_2019 == "yes" & is.na(size), "sexual",
-                                ifelse(juvenile_2019 == "yes" & is.na(size), "sexual",
+  mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
+                                ifelse(juvenile_next == "yes" & is.na(size), "sexual",
                                        ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
   ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
-  select(unique_IDS, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling_2019, juvenile_2019) %>% 
-  rename(seedlingNext = seedling_2019, juvenileNext = juvenile_2019) %>% 
+  select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
   mutate(transition = "2018-2019")
 
+#2019-2020 transition
 Ver_alp_2019_2020 <- Ver_alp_2019 %>% 
+  full_join(Ver_alp_2020, by = c("unique_IDS", "plotID", "OTC", "treatment", "siteID", "blockID"), suffix = c("_2019", "_2020")) %>% 
+  rename(X = X_2019, Y = Y_2019, X_next = X_2020, Y_next = Y_2020, seedling = seedling_2019, juvenile = juvenile_2019, seedling_next = seedling_2020, juvenile_next = juvenile_2020, MS = MS_2019, MS_next = MS_2020) %>% 
   add_column(Ver_alp_coef) %>% 
   add_column(Seeds_per_capsule_VA_coef) %>% 
-  full_join(Ver_alp_2020, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2019", "_2020")) %>% 
   mutate(size = Intercept + SH_2019 * SH_coef + NL_2019 * NL_coef + LL_2019 * LL_coef + WL_2019 * WL_coef, 
          sizeNext = Intercept + SH_2020 * SH_coef + NL_2020 * NL_coef + LL_2020 * LL_coef + WL_2020 * WL_coef, 
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
@@ -590,18 +594,19 @@ Ver_alp_2019_2020 <- Ver_alp_2019 %>%
   mutate(flo.no = rowSums(dplyr::select(., NB_2019, NFL_2019, NC_2019), na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
          fec = ((Intercept_seeds + size * size_seed)  * flo.no)) %>%
-  mutate(offspringNext = ifelse(seedling_2020 == "yes" & is.na(size), "sexual",
-                                ifelse(juvenile_2020 == "yes" & is.na(size), "sexual",
+  mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
+                                ifelse(juvenile_next == "yes" & is.na(size), "sexual",
                                        ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
   ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
-  select(unique_IDS, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling_2020, juvenile_2020) %>% 
-  rename(seedlingNext = seedling_2020, juvenileNext = juvenile_2020) %>% 
+  select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
   mutate(transition = "2019-2020")
 
+#2020-2021 transition
 Ver_alp_2020_2021 <- Ver_alp_2020 %>% 
+  full_join(Ver_alp_2021, by = c("unique_IDS", "plotID", "OTC", "treatment", "siteID", "blockID"), suffix = c("_2020", "_2021")) %>% 
+  rename(X = X_2020, Y = Y_2020, X_next = X_2021, Y_next = Y_2021, seedling = seedling_2020, juvenile = juvenile_2020, seedling_next = seedling_2021, juvenile_next = juvenile_2021, MS = MS_2020, MS_next = MS_2021) %>% 
   add_column(Ver_alp_coef) %>% 
   add_column(Seeds_per_capsule_VA_coef) %>% 
-  full_join(Ver_alp_2021, by = c("unique_IDS", "plotID", "OTC", "treatment"), suffix = c("_2020", "_2021")) %>% 
   mutate(size = Intercept + SH_2020 * SH_coef + NL_2020 * NL_coef + LL_2020 * LL_coef + WL_2020 * WL_coef, 
          sizeNext = Intercept + SH_2021 * SH_coef + NL_2021 * NL_coef + LL_2021 * LL_coef + WL_2021 * WL_coef, 
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
@@ -609,14 +614,55 @@ Ver_alp_2020_2021 <- Ver_alp_2020 %>%
   mutate(flo.no = rowSums(dplyr::select(., NB_2020, NFL_2020, NC_2020), na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
          fec = ((Intercept_seeds + size * size_seed)  * flo.no)) %>%
-  mutate(offspringNext = ifelse(seedling_2021 == "yes" & is.na(size), "sexual",
-                                ifelse(juvenile_2021 == "yes" & is.na(size), "sexual",
+  mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
+                                ifelse(juvenile_next == "yes" & is.na(size), "sexual",
                                        ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
-  ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
-  select(unique_IDS, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling_2021, juvenile_2021) %>% 
-  rename(seedlingNext = seedling_2021, juvenileNext = juvenile_2021)%>% 
+  select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>% 
   mutate(transition = "2020-2021")
 
 
+#Combining all transitions together
 Ver_alp_2018_2021 <- bind_rows(Ver_alp_2018_2019, Ver_alp_2019_2020, Ver_alp_2020_2021)
+
+#adding clonal information
+clones_VA <- Ver_alp_2018_2021 %>% 
+  group_by(transition, plotID) %>% 
+  nest() %>% 
+  mutate(clonal_information = map(data, ~ {
+    child <- .x %>% 
+      filter(is.na(size) & sizeNext > 0) %>% 
+      filter(offspringNext == "clone")
+    
+    parent <- .x %>% 
+      filter(seedling == "no", juvenile == "no") %>% 
+      select(unique_IDS, X, Y, size) %>% 
+      filter(size > (Seedling_info_SP$seeds_cap + Seedling_info_SP$seeds_cap_sd))
+    
+    
+    clone_function(child, parent)
+  }))
+
+clonal_information_VA <- clones_VA %>%
+  unnest(cols = clonal_information) %>% 
+  select(-data)
+
+Ver_alp_2018_2021 <- clones_VA %>% 
+  select(-clonal_information) %>% 
+  unnest(data)
+
+Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
+  left_join(clonal_information_VA, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_child", "X_next", "Y_next", "sizeNext"))
+
+Ver_alp_test <- Ver_alp_2018_2021 %>% 
+  mutate(size = case_when((offspringNext == "clone" & distance_parent < 10) ~ size_parent,
+                          (offspringNext == "clone" & distance_parent > 10) ~ size,
+                          offspringNext %in% c(NA, "sexual") ~ size))
+
+
+#Some plots fro visualization/checking
+Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = flo.if)) + geom_point() + geom_abline()
+Sib_pro_2018_2021 %>% filter(seedling == "yes") %>% ggplot(aes(y = sizeNext, x = size)) + geom_point() + geom_abline()
+Sib_pro_2018_2021 %>% filter(offspringNext == "clone") %>% filter(distance_parent < 15) %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
+Ver_alp_test %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline()
+Ver_alp_test %>% ggplot(aes(x = sizeNext, fill = offspringNext, alpha = 0.5)) + geom_density()
 
