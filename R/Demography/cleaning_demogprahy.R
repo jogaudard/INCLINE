@@ -54,7 +54,8 @@ Sib_pro <- Sib_pro %>%
                               seedling == "no" ~ "no")) %>% 
   mutate(juvenile = case_when(is.na(juvenile) ~ "no",
                               juvenile == "yes" ~ "yes",
-                              juvenile == "no" ~ "no"))
+                              juvenile == "no" ~ "no")) %>% 
+  mutate(MS = case_when(MS %in% c(1:100) ~ paste0(plotID, "_", MS))) 
 
 Ver_alp <- Ver_alp %>% 
   rename(siteID = Site, block = Block, plot = Plot, year = Year, date = Date, regitrator = Registrator, seedling = seedl) %>%  #Rename to lower capital, and correct naming convention for the INCLINE project
@@ -69,7 +70,10 @@ Ver_alp <- Ver_alp %>%
                               seedling == "no" ~ "no")) %>% 
   mutate(juvenile = case_when(is.na(juvenile) ~ "no",
                               juvenile == "yes" ~ "yes",
-                              juvenile == "no" ~ "no"))
+                              juvenile == "no" ~ "no")) %>% 
+  mutate(MS = case_when(MS %in% c(1:100) ~ paste0(plotID, "_", MS))) %>% 
+  select(!...25:...32)
+
 
 #### Changing variable types ####
 
