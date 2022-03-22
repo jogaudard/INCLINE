@@ -512,7 +512,7 @@ clones_SP <- Sib_pro_2018_2021 %>%
     parent <- .x %>% 
       filter(seedling == "no", juvenile == "no") %>% 
       select(unique_IDS, X, Y, size) %>% 
-      filter(size > (Seedling_info_SP$seeds_cap + Seedling_info_SP$seeds_cap_sd))
+      filter(size > (Seedling_info_SP$seeds_cap + 2*Seedling_info_SP$seeds_cap_sd))
     
     
     clone_function(child, parent)
@@ -636,7 +636,7 @@ clones_VA <- Ver_alp_2018_2021 %>%
     parent <- .x %>% 
       filter(seedling == "no", juvenile == "no") %>% 
       select(unique_IDS, X, Y, size) %>% 
-      filter(size > (Seedling_info_SP$seeds_cap + Seedling_info_SP$seeds_cap_sd))
+      filter(size > (Seedling_info_SP$seeds_cap + 2*Seedling_info_SP$seeds_cap_sd))
     
     
     clone_function(child, parent)
