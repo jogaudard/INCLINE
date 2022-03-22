@@ -511,7 +511,8 @@ clones <- Sib_pro_2018_2021 %>%
     
     parent <- .x %>% 
       filter(seedling == "no", juvenile == "no") %>% 
-      select(unique_IDS, X, Y, size) 
+      select(unique_IDS, X, Y, size) %>% 
+      filter(size > (Seedling_info_SP$seeds_cap + Seedling_info_SP$seeds_cap_sd))
     
     
     clone_function(child, parent)
@@ -528,10 +529,17 @@ Sib_pro_2018_2021 <- clones %>%
 Sib_pro_2018_2021 <- Sib_pro_2018_2021 %>% 
   left_join(clonal_information, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_child", "X_next", "Y_next", "sizeNext"))
 
+Sib_pro_test <- Sib_pro_2018_2021 %>% 
+  mutate(size = case_when(offspringNext == "clone" ~ size_parent,
+                          offspringNext %in% c(NA, "sexual") ~ size))
+
 
 #Some plots fro visualization/checking
 Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = flo.if)) + geom_point() + geom_abline()
-Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = seedlingNext)) + geom_point() + geom_abline()
+Sib_pro_2018_2021 %>% filter(seedling == "yes") %>% ggplot(aes(y = sizeNext, x = size)) + geom_point() + geom_abline()
+Sib_pro_2018_2021 %>% filter(offspringNext == "clone") %>% filter(distance_parent < 15) %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
+Sib_pro_test %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline()
+
 
 ##### Veronica alpina #####
 
