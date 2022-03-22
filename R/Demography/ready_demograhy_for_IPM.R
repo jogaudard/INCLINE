@@ -392,36 +392,31 @@ test <- Sib_pro_2018_2019 %>%
   nest() %>% 
   mutate(x = map(data, ~ {
     child <- .x %>% 
-      filter(is.na(size) & sizeNext > 0)
+      filter(is.na(size) & sizeNext > 0) %>% 
+      filter(seedling_2019 == "no") %>% 
+      filter(juvenile_2019 == "no")
     
     parent <- .x %>% 
-      filter(seedling == "no", juvenile == "no")
+      filter(seedling == "no", juvenile == "no") %>% 
+      select(unique_IDS, X, Y, size) 
+      
     
     clone_function(child, parent)
   }))
 
 child <- Sib_pro_2018_2019 %>% 
   filter(is.na(size) & sizeNext > 0) %>% 
-  filter(plotID == "Gud_1_4") %>% 
-  select(unique_IDS, X_next, Y_next, sizeNext)
+  filter(plotID == "Gud_2_4") 
 
 parent <- Sib_pro_2018_2019 %>% 
-  filter(plotID == "Gud_1_4") %>% 
-  filter(seedling == "no", juvenile == "no") %>% 
-  select(unique_IDS, X, Y, size)
-
-
-### Make a function for clones ###
-
-# group_by(transition, plotID) %>% 
-#   nesting ?? %>% 
-#   map(mutate, identify children and parents) %>% 
-#   map(clone_function) %>% 
+  filter(plotID == "Gud_2_4") %>% 
+  filter(seedling == "no", juvenile == "no") 
 
 
 clone_function <- function(child, parent){
   
   child <- child %>% 
+    select(unique_IDS, X_next, Y_next, sizeNext) %>% 
     rename(unique_IDS_child = unique_IDS)
   
   child2 <- child %>% 
@@ -430,6 +425,7 @@ clone_function <- function(child, parent){
     filter(!is.na(X) & !is.na(Y))
   
   parent <- parent %>% 
+    select(unique_IDS, X, Y, size) %>% 
     rename(unique_IDS_parent = unique_IDS, size_parent = size)
   
   parent2 <- parent %>% 
@@ -443,9 +439,12 @@ clone_function <- function(child, parent){
   }
   
   if(nrow(parent) == 0){
+    
+    parent <- parent[1:nrow(child),]
+    
     return(child %>% 
              mutate(distance_parent = NA) %>% 
-             bind_cols(add_row(parent)))
+             bind_cols(add_row(parent[0,])))
   }
   
   
@@ -458,9 +457,9 @@ clone_function <- function(child, parent){
   matched <- dis_matrix %>% 
     apply(MARGIN = 2, which.min) #finds the right parent to the right child
   
-  child2 %>% 
+  child %>% 
     mutate(distance_parent = apply(dis_matrix, MARGIN = 2, min)) %>% 
-    rename(X_next = X, Y_next = Y) %>% #Need to change names so that the names don't crash
+    #rename(X_next = X, Y_next = Y) %>% #Need to change names so that the names don't crash
     bind_cols(parent[matched, ]) #combine data set of children and mothers
   
 }
