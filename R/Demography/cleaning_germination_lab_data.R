@@ -81,9 +81,12 @@ Ver_alp_germ <- Ver_alp_germ %>%
          Leaf_date = plyr::mapvalues(Leaf_date, from = VA_mistakes$old, to = VA_mistakes$new)) %>% 
   mutate(petri_dish = paste(Species, Site, Water_potential, Replicate, sep = "_")) %>% 
   filter(!petri_dish %in% c("VA_GUD_6_7X", "VA_LAV_9_9X")) %>% #These are extra petri dishes that do not have any data - so I do not think there actually were extra petri dishes, removing them.
-  mutate(Start_date = case_when(unique_ID == "VA_LAV_5_6_18" ~ "18022020")) %>%  #One individual that was missing information in the start date column, manually found the right date and entered it here
-  mutate(Germination_date = case_when(Germination_date == "21.feb" ~ "21.02.2020")) %>% #Getting date in right order
-  mutate(Cotelydon_date = case_when(Cotelydon_date == "13.apr" ~ "13.04.2020"))
+  mutate(Start_date = case_when(unique_ID == "VA_LAV_5_6_18" ~ "18022020",
+                                TRUE ~ as.character(Start_date))) %>%  #One individual that was missing information in the start date column, manually found the right date and entered it here
+  mutate(Germination_date = case_when(Germination_date == "21.feb" ~ "21.02.2020",
+                                      TRUE ~ as.character(Germination_date))) %>% #Getting date in right order
+  mutate(Cotelydon_date = case_when(Cotelydon_date == "13.apr" ~ "13.04.2020",
+                                    TRUE ~ as.character(Cotelydon_date)))
 
 # Make new variables
 
@@ -131,7 +134,7 @@ SP_mistakes <- read.table(header = TRUE, stringsAsFactors = FALSE, text =
 
 #Removing wrongly enetered data, fixing wrong dates and making new variables
 
-Sib_pro_germ1 <- Sib_pro_germ %>% 
+Sib_pro_germ <- Sib_pro_germ %>% 
   mutate(Germination_date = plyr::mapvalues(Germination_date, from = SP_mistakes$old, to = SP_mistakes$new)) %>% 
   mutate(Cotelydon_date = plyr::mapvalues(Cotelydon_date, from = SP_mistakes$old, to = SP_mistakes$new)) %>%
   mutate(Leaf_date = plyr::mapvalues(Leaf_date, from = SP_mistakes$old, to = SP_mistakes$new)) %>% 
@@ -154,10 +157,7 @@ Sib_pro_germ1 <- Sib_pro_germ %>%
 #### Deal with comments. Categorize them ####
 ## Entering information in flag columns from comment section. I have three columns, flags for the germination (when seeds rotted, or became sick, or when we believe there are mistakes in the dates), seedlings (when the plant has started rotting, or died before seedlings where harvested - to be used for filtering seedlings out of the final data set), and whole petri dish flags - when a shole petridish needs removing because of drying out or mold. Options for flags are: Remove_duplicate, Dead_plant, Sick_plant,  Missing_date, Possible_mistakes_in_ID, Biomass_mistakes, Moldy, Agar_issues and Other. Using dictionaries to translate between comments and flags.
 
-Sib_pro_germ2 <- Sib_pro_germ1 %>% 
-  # mutate(flag_germination = NA,
-  #        flag_seedling = NA,
-  #        flag_whole_petridish = NA) %>% 
+Sib_pro_germ <- Sib_pro_germ %>% 
   left_join(comment_dict_SP, by = c("Comment")) %>% #Translate from the comment column via dictionary
   left_join(harvest_comment_dict_SP, by = c("Harvest_comment")) %>% #translate from the harvest_comment column via dictionary
   left_join(weighing_comment_dict_SP, by = c("Weighing_comments")) %>% #translate from the weighing_comment column via
@@ -179,4 +179,5 @@ Sib_pro_germ2 <- Sib_pro_germ1 %>%
   rename(comment = Comment, harvest_comment = Harvest_comment, weighing_comment = Weighing_comments) %>% 
   group_by(petri_dish) %>% 
   fill(flag_whole_petridish, .direction = "downup") #Give whole petridish comment too all seeds in the same petri dish
+
 
