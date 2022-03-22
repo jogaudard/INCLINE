@@ -353,6 +353,67 @@ Seedling_info_VA <- Seedling_info_VA %>%
 #### Making transitions ####
 #This section calculates the size of individuals, estimates of seed number. And cleaning the data so that we have the correct variables, and variable names for the analysis.
 
+# Clone function to match new individuals with parents and calculate the distance between child and parent
+
+# For testing the function:
+# child <- Sib_pro_2018_2019 %>% 
+#   filter(is.na(size) & sizeNext > 0) %>% 
+#   filter(plotID == "Gud_2_4") 
+# 
+# parent <- Sib_pro_2018_2019 %>% 
+#   filter(plotID == "Gud_2_4") %>% 
+#   filter(seedling == "no", juvenile == "no") 
+
+clone_function <- function(child, parent){
+  
+  child <- child %>% 
+    select(unique_IDS, X_next, Y_next, sizeNext) %>% 
+    rename(unique_IDS_child = unique_IDS)
+  
+  child2 <- child %>% 
+    select(X_next, Y_next) %>% 
+    rename(X = X_next, Y = Y_next) %>% 
+    filter(!is.na(X) & !is.na(Y))
+  
+  parent <- parent %>% 
+    select(unique_IDS, X, Y, size) %>% 
+    rename(unique_IDS_parent = unique_IDS, size_parent = size)
+  
+  parent2 <- parent %>% 
+    select(X, Y)
+  
+  
+  if(nrow(child) == 0){
+    return(child %>% 
+             mutate(distance_parent = NA) %>% 
+             bind_cols(parent[0,]))
+  }
+  
+  if(nrow(parent) == 0){
+    
+    parent <- parent[1:nrow(child),]
+    
+    return(child %>% 
+             mutate(distance_parent = NA) %>% 
+             bind_cols(add_row(parent[0,])))
+  }
+  
+  
+  dis_matrix <- bind_rows(child2, parent2) %>%
+    dist() %>%  #calculates distance between child and potential mother
+    as.matrix()
+  
+  dis_matrix <- dis_matrix[-(1:nrow(child2)), 1:nrow(child2), drop = FALSE]
+  
+  matched <- dis_matrix %>% 
+    apply(MARGIN = 2, which.min) #finds the right parent to the right child
+  
+  child %>% 
+    mutate(distance_parent = apply(dis_matrix, MARGIN = 2, min)) %>% 
+    #rename(X_next = X, Y_next = Y) %>% #Need to change names so that the names don't crash
+    bind_cols(parent[matched, ]) #combine data set of children and mothers
+  
+}
 
 
 
@@ -384,10 +445,17 @@ Sib_pro_2018_2019 <- Sib_pro_2018 %>%
          fec = (Seeds_per_capsule_SP * NFL_2018) + (Seeds_per_capsule_SP * NB_2018) + (Seeds_per_capsule_SP * NC_2018),
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
+  mutate(flo.no = rowSums(dplyr::select(., NB_2018, NFL_2018, NC_2018), na.rm=TRUE),
+        flo.if = ifelse(flo.no > 0, 1, 0)) %>%
+  mutate(offspringNext = ifelse(seedling_2019 == "yes" & is.na(size), "sexual",
+                              ifelse(juvenile_2019 == "yes" & is.na(size), "sexual",
+                                     ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>%
+## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
+  select(siteID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_2019, juvenile_2019, MS_2018, MS_2019) %>%
+  rename(seedlingNext = seedling_2019, juvenileNext = juvenile_2019) %>%
   mutate(transition = "2018-2019")
 
 test <- Sib_pro_2018_2019 %>% 
-  #filter(!plotID %in% c("Lav_5_5", "Lav_6_6")) %>% 
   group_by(transition, plotID) %>% 
   nest() %>% 
   mutate(x = map(data, ~ {
@@ -403,77 +471,6 @@ test <- Sib_pro_2018_2019 %>%
     
     clone_function(child, parent)
   }))
-
-child <- Sib_pro_2018_2019 %>% 
-  filter(is.na(size) & sizeNext > 0) %>% 
-  filter(plotID == "Gud_2_4") 
-
-parent <- Sib_pro_2018_2019 %>% 
-  filter(plotID == "Gud_2_4") %>% 
-  filter(seedling == "no", juvenile == "no") 
-
-
-clone_function <- function(child, parent){
-  
-  child <- child %>% 
-    select(unique_IDS, X_next, Y_next, sizeNext) %>% 
-    rename(unique_IDS_child = unique_IDS)
-  
-  child2 <- child %>% 
-    select(X_next, Y_next) %>% 
-    rename(X = X_next, Y = Y_next) %>% 
-    filter(!is.na(X) & !is.na(Y))
-  
-  parent <- parent %>% 
-    select(unique_IDS, X, Y, size) %>% 
-    rename(unique_IDS_parent = unique_IDS, size_parent = size)
-  
-  parent2 <- parent %>% 
-    select(X, Y)
-  
-  
-  if(nrow(child) == 0){
-    return(child %>% 
-               mutate(distance_parent = NA) %>% 
-               bind_cols(parent[0,]))
-  }
-  
-  if(nrow(parent) == 0){
-    
-    parent <- parent[1:nrow(child),]
-    
-    return(child %>% 
-             mutate(distance_parent = NA) %>% 
-             bind_cols(add_row(parent[0,])))
-  }
-  
-  
-  dis_matrix <- bind_rows(child2, parent2) %>%
-    dist() %>%  #calculates distance between child and potential mother
-    as.matrix()
-  
-  dis_matrix <- dis_matrix[-(1:nrow(child2)), 1:nrow(child2), drop = FALSE]
-  
-  matched <- dis_matrix %>% 
-    apply(MARGIN = 2, which.min) #finds the right parent to the right child
-  
-  child %>% 
-    mutate(distance_parent = apply(dis_matrix, MARGIN = 2, min)) %>% 
-    #rename(X_next = X, Y_next = Y) %>% #Need to change names so that the names don't crash
-    bind_cols(parent[matched, ]) #combine data set of children and mothers
-  
-}
-
-#%>%
-  # mutate(flo.no = rowSums(dplyr::select(., NB_2018, NFL_2018, NC_2018), na.rm=TRUE),
-  #        flo.if = ifelse(flo.no > 0, 1, 0)) %>%
-  # mutate(offspringNext = ifelse(seedling_2019 == "yes" & is.na(size), "sexual",
-  #                               ifelse(juvenile_2019 == "yes" & is.na(size), "sexual",
-  #                                      ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
-  # ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
-  # select(unique_IDS, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling_2019, juvenile_2019, MS_2018, MS_2019) %>% 
-  # rename(seedlingNext = seedling_2019, juvenileNext = juvenile_2019) %>% 
-  # mutate(transition = "2018-2019")
 
 Sib_pro_2019_2020 <- Sib_pro_2019 %>% 
   full_join(Sib_pro_2020, by = c("unique_IDS", "plotID", "OTC", "treatment", "siteID"), suffix = c("_2019", "_2020")) %>% 
