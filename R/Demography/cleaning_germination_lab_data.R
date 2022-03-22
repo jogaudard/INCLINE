@@ -78,7 +78,12 @@ Ver_alp_germ <- Ver_alp_germ %>%
          Dry_mass_g_total = ifelse(Dry_mass_g_total %in% c("two roots; two seedlings; second seedling: Dry_mass_g_root=0.00036, Dry_mass_g_above_ground=0.00022","two roots","3 roots"), NA, Dry_mass_g_total)) %>% 
   mutate(Germination_date = plyr::mapvalues(Germination_date, from = VA_mistakes$old, to = VA_mistakes$new), #Using dictionary to change dates from wrongly entered to correct
          Cotelydon_date = plyr::mapvalues(Cotelydon_date, from = VA_mistakes$old, to = VA_mistakes$new),
-         Leaf_date = plyr::mapvalues(Leaf_date, from = VA_mistakes$old, to = VA_mistakes$new))
+         Leaf_date = plyr::mapvalues(Leaf_date, from = VA_mistakes$old, to = VA_mistakes$new)) %>% 
+  mutate(petri_dish = paste(Species, Site, Water_potential, Replicate, sep = "_")) %>% 
+  filter(!petri_dish %in% c("VA_GUD_6_7X", "VA_LAV_9_9X")) %>% #These are extra petri dishes that do not have any data - so I do not think there actually were extra petri dishes, removing them.
+  mutate(Start_date = case_when(unique_ID == "VA_LAV_5_6_18" ~ "18022020")) %>%  #One individual that was missing information in the start date column, manually found the right date and entered it here
+  mutate(Germination_date = case_when(Germination_date == "21.feb" ~ "21.02.2020")) %>% #Getting date in right order
+  mutate(Cotelydon_date = case_when(Cotelydon_date == "13.apr" ~ "13.04.2020"))
 
 # Make new variables
 
@@ -101,7 +106,7 @@ Ver_alp_germ <- Ver_alp_germ %>%
 #### Deal with comments. Categorize them ####
 ## Entering information in flag columns from comment section. I have three columns, flags for the germination (when seeds rotted, or became sick, or when we believe there are mistakes in the dates), seedlings (when the plant has started rotting, or died before seedlings where harvested - to be used for filtering seedlings out of the final data set), and whole petri dish flags - when a shole petridish needs removing because of drying out or mold. Options for flags are: Remove_duplicate, Dead_plant, Sick_plant,  Missing_date, Possible_mistakes_in_ID, Biomass_mistakes, Moldy, Agar_issues and Other. Using dictionaries to translate between comments and flags.
 
-Ver_alp_germ1 <- Ver_alp_germ %>% 
+Ver_alp_germ <- Ver_alp_germ %>% 
   mutate(flag_germination = case_when(flag %in% c("Duplicate_remove", "Remove_duplicate", "Remove_Duplicate", "Remove_duplicat", "Remove_unsureID", "	No germination date. 2 seeds.; seed#2 germinated with cotyledons 23.03.2020'", "Might have two versions of this, becasue this one was not crossed out (18.05.2020) Agar dried out, crossed out dish 07.05.2020") ~ "Remove_duplicate")) %>% #Change the few comments in the flag column to match the generalized flags
   mutate(flag_seedling = case_when(flag == "Remove_rotten" ~ "Dead_plant")) %>% #Change the few comments in the flag column to match the generalized flags
   left_join(comment_dict_VA, by = c("comment", "flag_germination", "flag_seedling")) %>% #Translate from the comment column via dictionary
