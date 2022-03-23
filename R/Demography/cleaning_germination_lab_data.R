@@ -23,6 +23,36 @@ get_file(node = "zhk3m",
          remote_path = "RawData/Germination_lab_experiment")
 
 get_file(node = "zhk3m",
+         file = "comment_dictionary_VA.csv",
+         path = "data/Germination",
+         remote_path = "RawData/Germination_lab_experiment")
+
+get_file(node = "zhk3m",
+         file = "comment_dictionary_SP.csv",
+         path = "data/Germination",
+         remote_path = "RawData/Germination_lab_experiment")
+
+get_file(node = "zhk3m",
+         file = "harvest_comment_dictionary_VA.csv",
+         path = "data/Germination",
+         remote_path = "RawData/Germination_lab_experiment")
+
+get_file(node = "zhk3m",
+         file = "harvest_comment_dictionary_SP.csv",
+         path = "data/Germination",
+         remote_path = "RawData/Germination_lab_experiment")
+
+get_file(node = "zhk3m",
+         file = "dish_comment_dictionary_VA.csv",
+         path = "data/Germination",
+         remote_path = "RawData/Germination_lab_experiment")
+
+get_file(node = "zhk3m",
+         file = "weighing_comment_dictionary_SP.csv",
+         path = "data/Germination",
+         remote_path = "RawData/Germination_lab_experiment")
+
+get_file(node = "zhk3m",
          file = "INCLINE_metadata_LoggerDates.csv",
          path = "data",
          remote_path = "RawData")
