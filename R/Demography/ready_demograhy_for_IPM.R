@@ -36,7 +36,7 @@ biomass_Sib_pro <- read_csv2("data/Demography/Biomass_Sib_pro.csv")
 #biomass_Ver_alp <- read_delim("data/Demography/SeedClim_Ver_alp_biomass_regression.txt")
 #biomass_Ver_alp_INCLINE <- read_csv2("data/Demography/SG.19_above-below_allocation.csv") #Not using this because some of the biomass rotted while collecting data, so biomass might not be correct
 seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv") 
-biomass_Ver_alp2 <- read_csv2("data/Demography/VeronicaAlpina_Biomass_Seedclim_edited.csv") #from SeedClim not on INCLINE OSF
+biomass_Ver_alp <- read_csv2("data/Demography/VeronicaAlpina_Biomass_Seedclim_edited.csv") #from SeedClim not on INCLINE OSF
 
 
 #### Biomass regressions ####
@@ -78,7 +78,7 @@ Sib_pro_coef <- Sib_pro_coef %>%
 
 # biomass Ver_alp
 
-biomass_Ver_alp2 <- biomass_Ver_alp2 %>% 
+biomass_Ver_alp <- biomass_Ver_alp %>% 
   select(siteID, IDS, SH, NL, LL, WL, ag) %>% 
   filter(!ag == 0) %>% 
   mutate(ag = log2(ag))
@@ -86,7 +86,7 @@ biomass_Ver_alp2 <- biomass_Ver_alp2 %>%
 # Ver_alp_biomass_regression <- lmer(ag ~ SH + NL + LL + WL + (1|siteID), data = biomass_Ver_alp2)  #Not using this as it came with a singularity warning. Mixed effect model and linear model gives the same intercept and slopes for each variable.
 # summary(Ver_alp_biomass_regression)
 
-Ver_alp_biomass_regression_lm <- lm(ag ~ SH + NL + LL + WL, data = biomass_Ver_alp2) 
+Ver_alp_biomass_regression_lm <- lm(ag ~ SH + NL + LL + WL , data = biomass_Ver_alp) 
 summary(Ver_alp_biomass_regression_lm)
 
 Ver_alp_coef <- coef(Ver_alp_biomass_regression_lm) %>% 
