@@ -127,6 +127,8 @@ seed1 <- lmer(Number_of_seeds ~ size +(1|ID), data = Seeds_per_capsule_SP) #Test
 summary(seed1)
 seed2 <- lmer(Number_of_seeds ~ Site + (1|ID), data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on location, it does not.
 summary(seed2)
+seed_3 <- lmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on number of capsule for each individual, it does not.
+summary(seed_3)
 
 Seeds_per_capsule_SP %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm", linetype = "dashed") + ggtitle("Number of seeds by size for Sibbaldia procumbens") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
 
@@ -145,10 +147,12 @@ Seeds_per_capsule_VA <- Seeds_per_capsule %>%
   mutate(size = Intercept + (Shoot_height_mm * SH_coef) + (Number_of_leaves * NL_coef) + (Leaf_length_mm * LL_coef) + (Leaf_width_mm * WL_coef)) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
   mutate(ID = paste0(Site, "_", Species, "_", Individual))
 
-seed_VA_1 <- lmer(Number_of_seeds ~ Site + (1|ID), data = Seeds_per_capsule_VA)
+seed_VA_1 <- lmer(Number_of_seeds ~ size + Site + (1|ID), data = Seeds_per_capsule_VA) #Testing if seeds per capsule depends on biomass and site, it does not. But size is close to significant, so trying a model with only that
 summary(seed_VA_1)
-seed_VA_2 <- lmer(Number_of_seeds ~ size + (1|ID), data = Seeds_per_capsule_VA)
+seed_VA_2 <- lmer(Number_of_seeds ~ size + (1|ID), data = Seeds_per_capsule_VA) #Testing if seeds per capsule depends on biomass alone, it does not.
 summary(seed_VA_2)
+seed_VA_3 <- lmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_VA) #Testing if seeds per capsule depends on number of capsule for each individual, it does not.
+summary(seed_VA_3)
 
 
 Seeds_per_capsule_VA %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm", linetype = "dashed") + ggtitle("Number of seeds by size for Veronica_alpina") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
