@@ -220,8 +220,6 @@ seedling_est_VA <- seedling_est2 %>%
   mutate(total_germinated = total_germinated - background_germination) %>% 
   mutate(total_seeds = 20) %>% 
   mutate(germination_percentage = total_germinated/total_seeds) %>% 
-  # select(-ID) %>% 
-  # unique() %>% 
   mutate(Vegetation = case_when(Vegetation == "yes" ~ "Veg",
                                 Vegetation == "no" ~ "NoVeg")) %>% 
   mutate(Treatment = paste0(Warming, "_", Vegetation)) %>% 
@@ -254,7 +252,7 @@ seedling_est_VA <- seedling_est_VA%>%
 # seedling_est_VA_Veg <- seedling_est_VA_Veg$germination_percentage
   
 ###### Sibbaldia procumbens ######
-seedling_est_SP <- seedling_est %>% 
+seedling_est_SP <- seedling_est2 %>% 
   filter(Species == "Sib_pro") %>% 
   filter(campaign_number == "second") %>%
   group_by(Site, Block, Warming, plotID, Vegetation) %>% 
@@ -262,14 +260,18 @@ seedling_est_SP <- seedling_est %>%
                            Present == "no" ~ 0)) %>% 
   mutate(total_germinated = sum(count)) %>% 
   ungroup() %>% 
+  mutate(total_germinated = total_germinated - background_germination) %>% 
   mutate(total_seeds = 20) %>% 
   mutate(germination_percentage = total_germinated/total_seeds) %>% 
-  select(-ID) %>% 
-  unique() %>% 
   mutate(Vegetation = case_when(Vegetation == "yes" ~ "Veg",
                                 Vegetation == "no" ~ "NoVeg")) %>% 
   mutate(Treatment = paste0(Warming, "_", Vegetation)) %>% 
-  #mutate(blockID = paste0(Site, "_", Block)) #Tested with the blockID as random effect, but it is not able to pick up anything on that - still det same results as if it was just site, so removed blockID from the model
+  
+  mutate(blockID = paste0(Site, "_", Block)) %>% 
+  select(Site, blockID, plotID, Warming, Vegetation, germination_percentage) %>% 
+  unique() %>% 
+  ungroup()
+  #mutate(blockID = paste0(Site, "_", Block)) #Tested with the blockID as random effect, but it is not able to pick up anything on that - still the same results as if it was just site, so removed blockID from the model
 
 model2 <- lmer(germination_percentage ~ Warming + Vegetation + (1|Site), data = seedling_est_SP)
 summary(model2)
