@@ -43,9 +43,6 @@ weighing_comment_dict_SP <- read_delim("data/Germination/weighing_comment_dictio
 
 #### Fixing mistakes in dataset ####
 
-
-Ver_alp_germ <- read_delim("data/Germination/INCLINE_Germination_Seedling_Experiment_Data_Va.csv")
-
 Ver_alp_germ <- Ver_alp_germ %>%
   mutate(Start_date = case_when(unique_ID == "VA_LAV_5_6_18" ~ "18022020",
                                 TRUE ~ as.character(Start_date))) %>% #One individual that was missing information in the start date column, manually found the right date and entered it here
