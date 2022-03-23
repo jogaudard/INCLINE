@@ -123,7 +123,7 @@ Seeds_per_capsule_SP <- Seeds_per_capsule %>%
   mutate(size = Intercept + Leaf_stock_length_mm*LSL_coef + Number_of_leaves*NL_coef + Leaf_length_mm* LL_coef) %>% 
   mutate(ID = paste0(Site, "_", Species, "_", Individual))
 
-seed1 <- lmer(Number_of_seeds ~ size + (1|ID), data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on biomass, it does not.
+seed1 <- lmer(Number_of_seeds ~ size +(1|ID), data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on biomass, it does not.
 summary(seed1)
 seed2 <- lmer(Number_of_seeds ~ Site + (1|ID), data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on location, it does not.
 summary(seed2)
@@ -142,8 +142,7 @@ Seeds_per_capsule_VA <- Seeds_per_capsule %>%
   filter(Species == "Ver_alp") %>% 
   mutate(mean_seeds = mean(Number_of_seeds, na.rm = TRUE)) %>%
   bind_cols(Ver_alp_coef) %>%
-  mutate(size = Intercept + Shoot_height_mm * SH_coef + Number_of_leaves * NL_coef + Leaf_length_mm * LL_coef + Leaf_width_mm * WL_coef) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
-  #filter(!(Site == "SKJ" & Individual == "9")) %>%  #testing with and without this outlier. If we exclude this outlier, or have individual as a random effect the effect of size on number of seeds goes away.
+  mutate(size = Intercept + (Shoot_height_mm * SH_coef) + (Number_of_leaves * NL_coef) + (Leaf_length_mm * LL_coef) + (Leaf_width_mm * WL_coef)) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
   mutate(ID = paste0(Site, "_", Species, "_", Individual))
 
 seed_VA_1 <- lmer(Number_of_seeds ~ Site + (1|ID), data = Seeds_per_capsule_VA)
