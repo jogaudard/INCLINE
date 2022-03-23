@@ -84,7 +84,7 @@ Ver_alp_germ <- Ver_alp_germ %>%
   mutate(Start_date = case_when(unique_ID == "VA_LAV_5_6_18" ~ "18022020",
                                 TRUE ~ as.character(Start_date))) %>%  #One individual that was missing information in the start date column, manually found the right date and entered it here
   mutate(Germination_date = case_when(Germination_date == "21.feb" ~ "21.02.2020",
-                                      TRUE ~ as.character(Germination_date))) %>% #Getting date in right order
+                                      TRUE ~ as.character(Germination_date))) %>% #Getting date in right format
   mutate(Cotelydon_date = case_when(Cotelydon_date == "13.apr" ~ "13.04.2020",
                                     TRUE ~ as.character(Cotelydon_date)))
 
@@ -141,11 +141,10 @@ Sib_pro_germ <- Sib_pro_germ %>%
                                      TRUE ~ as.character(Leaf_date))) %>% #Fixing one date mistake
   filter(!is.na(Water_potential)) %>%  #Removing a row with only NAs
   mutate(Dry_mass_g_root = str_replace_all(string = Dry_mass_g_root, pattern = ",", replacement = "."),
-         Wet_mass_g_root = str_replace_all(string = Dry_mass_g_root, pattern = ",", replacement = "."),
-         Total.wet.mass = str_replace_all(string = Dry_mass_g_root, pattern = ",", replacement = ".")) %>% #Fixing a comma mistake
+         Wet_mass_g_root = str_replace_all(string = Wet_mass_g_root, pattern = ",", replacement = ".")) %>% #Fixing a comma mistake
   mutate(Dry_mass_g_root = as.numeric(Dry_mass_g_root),
-         Wet_mass_g_root = as.numeric(Wet_mass_g_root),
-         Total.wet.mass = as.numeric(Total.wet.mass))  %>% 
+         Wet_mass_g_root = as.numeric(Wet_mass_g_root))  %>%
+  mutate(Total.wet.mass = Wet_mass_g_root + Wet_mass_g_True.leaf + Wet_mass_g_rest) %>% 
   mutate(Germination_date = plyr::mapvalues(Germination_date, from = SP_mistakes$old, to = SP_mistakes$new)) %>% 
   mutate(Cotelydon_date = plyr::mapvalues(Cotelydon_date, from = SP_mistakes$old, to = SP_mistakes$new)) %>%
   mutate(Leaf_date = plyr::mapvalues(Leaf_date, from = SP_mistakes$old, to = SP_mistakes$new)) %>% 
@@ -168,7 +167,10 @@ Sib_pro_germ <- Sib_pro_germ %>%
   mutate(dry_mass = dry_mass_g_root + dry_mass_g_above_ground) %>% 
   mutate(dry_mass_g_total = case_when(dry_mass_g_total == 0 ~ dry_mass_g_total,
                                       dry_mass_g_total > 0 ~ dry_mass_g_total,
-                                      is.na(dry_mass_g_total) ~ dry_mass))
+                                      is.na(dry_mass_g_total) ~ dry_mass)) %>% 
+  mutate(dry_mass_g_total = case_when(ID == "SP_GUD_1_7_18" ~ dry_mass,
+                                      ID != "SP_GUD_1_7_18" ~ dry_mass_g_total)) %>% 
+  select(-dry_mass)
 
 
 
@@ -200,15 +202,67 @@ Sib_pro_germ <- Sib_pro_germ %>%
 
 
 #Plots for looking at data and looking for mistakes
+
+#Plot to check if all dry mass are smaller than wet masses - they are
+Sib_pro_germ %>% 
+  ggplot(aes(x = wet_mass_g_total, y = dry_mass_g_total))+
+  geom_point() +
+  geom_abline()
+
+#Plot to check if total dry mass is larger than the different parts of the plant
+Sib_pro_germ %>% 
+  ggplot(aes(x = dry_mass_g_total, y = dry_mass_g_above_ground))+
+  geom_point() +
+  geom_abline()
+
+Sib_pro_germ %>% 
+  ggplot(aes(x = dry_mass_g_total, y = dry_mass_g_root))+
+  geom_point() +
+  geom_abline()
+
+Sib_pro_germ %>% 
+  ggplot(aes(x = dry_mass_g_above_ground, y = dry_mass_g_root, color = water_potential))+
+  geom_point() +
+  geom_abline() +
+  scale_color_viridis_d()
+
+#Plots looking at distribution of dayes to germination/cotyledons/true leaves with water potential
+Sib_pro_germ %>% 
+  ggplot(aes(y = days_to_germination, x = water_potential)) +
+  geom_boxplot()
+
 Sib_pro_germ %>% 
   ggplot(aes(x = days_to_germination)) +
   geom_density(aes(fill = water_potential, alpha = 0.2)) +
   scale_fill_viridis_d()
 
 Sib_pro_germ %>% 
-  ggplot(aes(y = days_to_germination, x = water_potential)) +
-  geom_boxplot() 
+  ggplot(aes(y = days_to_cotelydon, x = water_potential)) +
+  geom_boxplot()
 
 Sib_pro_germ %>% 
-  ggplot(aes(x = dry_mass_g_total, y = dry_mass_g_root))+
-  geom_point()
+  ggplot(aes(x = days_to_cotelydon)) +
+  geom_density(aes(fill = water_potential, alpha = 0.2)) +
+  scale_fill_viridis_d()
+
+Sib_pro_germ %>% 
+  ggplot(aes(y = days_to_leaf, x = water_potential)) +
+  geom_boxplot()
+
+Sib_pro_germ %>% 
+  ggplot(aes(x = days_to_leaf)) +
+  geom_density(aes(fill = water_potential, alpha = 0.2)) +
+  scale_fill_viridis_d()
+
+#Plots looking at size of plants with water potential
+
+Sib_pro_germ %>% 
+  ggplot(aes(y = dry_mass_g_total, x = water_potential, fill = water_potential)) +
+  geom_violin(draw_quantiles = c(0.75, 0.5, 0.25)) +
+  scale_fill_viridis_d()
+
+Sib_pro_germ %>% 
+  ggplot(aes(y = dry_mass_g_root/dry_mass_g_above_ground, x = water_potential, fill = water_potential)) +
+  geom_violin(draw_quantiles = c(0.75, 0.5, 0.25)) +
+  scale_fill_viridis_d()
+
