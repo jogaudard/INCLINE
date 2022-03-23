@@ -67,7 +67,9 @@ Ver_alp_germ <- Ver_alp_germ %>%
   mutate(Water_potential = as.factor(Water_potential)) %>% 
   group_by(Species, Site, Water_potential, Replicate) %>% 
   mutate(seeds_in_dish = n())  %>% 
-  #rename(unique_ID = X) %>% 
+  mutate(Dry_mass_g_total = case_when(!is.na(Dry_mass_g_total) ~ Dry_mass_g_total,
+                                      is.na(Dry_mass_g_total) ~ Dry_mass_g_root + Dry_mass_g_above_ground)) %>% 
+  mutate(root_shoot_ratio = Dry_mass_g_root/Dry_mass_g_above_ground) %>% 
   rename(species = Species, siteID = Site, water_potential = Water_potential, replicate = Replicate, seed_nr = Seed, start_date = Start_date, germination_date = Germination_date, comment = Comment, cotelydon_date = Cotelydon_date, leaf_date = Leaf_date, harvest_date = Harvest_date, harvest_comment = Harvest_comment, wet_mass_g_root = Wet_mass_g_root, wet_mass_g = Wet_mass_g_, dry_mass_g_root = Dry_mass_g_root, dry_mass_g_above_ground = Dry_mass_g_above_ground, dry_mass_g_total = Dry_mass_g_total, weighing_comments = Weighing_comments, notes = Notes, removel_whole_petridish = Remove_whole_petridish, seed_viable = Seed_viable, lights_off = "Lights_off (Yes/no)", flag = Flag)
 
 #### Deal with comments. Categorize them ####
@@ -91,7 +93,51 @@ Ver_alp_germ <- Ver_alp_germ %>%
   group_by(petri_dish) %>% 
   fill(flag_whole_petridish, .direction = "downup") #Give whole petridish comment too all seeds in the same petri dish
 
+#Plots for looking at data and looking for mistakes
 
+#Plot to check if total dry mass is larger than the different parts of the plant
+Ver_alp_germ %>% 
+  ggplot(aes(x = dry_mass_g_total, y = dry_mass_g_above_ground))+
+  geom_point() +
+  geom_abline()
+
+Ver_alp_germ %>% 
+  ggplot(aes(x = dry_mass_g_total, y = dry_mass_g_root))+
+  geom_point() +
+  geom_abline()
+
+Ver_alp_germ %>% 
+  ggplot(aes(x = dry_mass_g_above_ground, y = dry_mass_g_root, color = water_potential))+
+  geom_point() +
+  geom_abline() +
+  scale_color_viridis_d()
+
+#Plots looking at distribution of dayes to germination/cotyledons/true leaves with water potential
+Ver_alp_germ %>% 
+  ggplot(aes(y = days_to_germination, x = water_potential)) +
+  geom_boxplot()
+
+Ver_alp_germ %>% 
+  ggplot(aes(y = days_to_cotelydon, x = water_potential)) +
+  geom_boxplot()
+
+Ver_alp_germ %>% 
+  ggplot(aes(y = days_to_leaf, x = water_potential)) +
+  geom_boxplot()
+
+
+#Plots looking at size of plants with water potential
+
+Ver_alp_germ %>% 
+  ggplot(aes(y = dry_mass_g_total, x = water_potential, fill = water_potential)) +
+  geom_violin(draw_quantiles = c(0.75, 0.5, 0.25)) +
+  scale_fill_viridis_d() +
+  geom_jitter(aes(alpha = 0.1))
+
+Ver_alp_germ %>% 
+  ggplot(aes(y = root_shoot_ratio, x = water_potential, fill = water_potential)) +
+  geom_boxplot()
+  scale_fill_viridis_d()
 
 ##### Sibbaldia procumbens #####
 
@@ -135,6 +181,7 @@ Sib_pro_germ <- Sib_pro_germ %>%
   group_by(Species, Site, Water_potential, Replicate) %>% 
   mutate(seeds_in_dish = n()) %>% 
   ungroup() %>% 
+  mutate(root_shoot_ratio = Dry_mass_g_root/Dry_mass_g_above_ground) %>% 
   rename(species = Species, siteID = Site, water_potential = Water_potential, replicate = Replicate, seed_nr = Seed, start_date = Start_date, germination_date = Germination_date, cotelydon_date = Cotelydon_date, leaf_date = Leaf_date, harvest_date = Harvest_date, wet_mass_g_root = Wet_mass_g_root, wet_mass_g_above_ground = Wet_mass_g_rest, wet_mass_g_total = Total.wet.mass, wet_mass_g_true_leaf = Wet_mass_g_True.leaf, dry_mass_g_root = Dry_mass_g_root, dry_mass_g_above_ground = Dry_mass_g_above_ground, dry_mass_g_total = Dry_mass_g_total, seed_viable = Viable_seeds, lights_off = Lights_off..Yes.no.) %>%
   mutate(dry_mass = dry_mass_g_root + dry_mass_g_above_ground) %>% 
   mutate(dry_mass_g_total = case_when(dry_mass_g_total == 0 ~ dry_mass_g_total,
@@ -234,7 +281,7 @@ Sib_pro_germ %>%
   scale_fill_viridis_d()
 
 Sib_pro_germ %>% 
-  ggplot(aes(y = dry_mass_g_root/dry_mass_g_above_ground, x = water_potential, fill = water_potential)) +
+  ggplot(aes(y = root_shoot_ratio, x = water_potential, fill = water_potential)) +
   geom_violin(draw_quantiles = c(0.75, 0.5, 0.25)) +
   scale_fill_viridis_d()
 
