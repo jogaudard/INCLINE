@@ -180,27 +180,36 @@ seedling_est1 <- seedling_est %>%
                           Site == "GUD" ~ "Gud",
                           Site == "SKJ" ~ "Skj")) %>% 
   mutate(plotID = paste0(Site, "_", Block, "_", Plot)) %>% 
-  select(-PlotID)
+  left_join(INCLINE_metadata, by = c("plotID")) %>%
+  mutate(treatment = case_when(is.na(treatment) ~ Vegetation,
+                               treatment == "N" ~ Vegetation,
+                               treatment == "C" ~ "yes",
+                               treatment == "R" ~ "no")) %>% 
+  select(-Vegetation) %>% 
+  rename(Vegetation = treatment)
+  
 
 seedling_est_background <- seedling_est1 %>% 
   filter(!Plot %in% c("C", "OTC")) %>% 
   filter(campaign_number == "second") %>% 
-  filter(Present == "yes") %>% 
-  left_join(INCLINE_metadata, by = "plotID") %>% 
-  group_by(Species, Site, OTC, treatment, plotID) %>% 
-  summarise(n()) %>%
-  rename(number = "n()") %>% 
+  mutate(Present = case_when(Present == "yes" ~ 1,
+                             Present == "no" ~ 0)) %>% 
+  group_by(Species, Site, OTC, Vegetation, plotID) %>% 
+  mutate(germinated = sum(Present)) %>% 
   ungroup() %>% 
-  group_by(Species, OTC, treatment) %>% 
-  mutate(seedling_est_rate = mean(number)) #Need to make a decision for how to incorporate background germination - NOT DONE
+  group_by(Species, Vegetation) %>% 
+  mutate(background_germination = mean(germinated)) %>% 
+  select(Species, Vegetation, background_germination) %>% 
+  unique()
 
-seedling_est <- seedling_est1 %>% 
+seedling_est2 <- seedling_est1 %>% 
   filter(Plot %in% c("C", "OTC")) %>% 
-  rename(Warming = Plot)
+  rename(Warming = Plot) %>% 
+  left_join(seedling_est_background, by = c("Species", "Vegetation")) 
 
 ###### Veronica alpina ######
 
-seedling_est_VA <- seedling_est %>% 
+seedling_est_VA <- seedling_est2 %>% 
   filter(Species == "Ver_alp") %>% 
   filter(campaign_number == "second") %>% 
   group_by(Site, Block, Warming, plotID, Vegetation) %>% 
@@ -208,14 +217,18 @@ seedling_est_VA <- seedling_est %>%
                            Present == "no" ~ 0)) %>% 
   mutate(total_germinated = sum(count)) %>% 
   ungroup() %>% 
+  mutate(total_germinated = total_germinated - background_germination) %>% 
   mutate(total_seeds = 20) %>% 
   mutate(germination_percentage = total_germinated/total_seeds) %>% 
-  select(-ID) %>% 
-  unique() %>% 
+  # select(-ID) %>% 
+  # unique() %>% 
   mutate(Vegetation = case_when(Vegetation == "yes" ~ "Veg",
                                 Vegetation == "no" ~ "NoVeg")) %>% 
   mutate(Treatment = paste0(Warming, "_", Vegetation)) %>% 
-  mutate(blockID = paste0(Site, "_", Block))
+  mutate(blockID = paste0(Site, "_", Block)) %>% 
+  select(Site, blockID, plotID, Warming, Vegetation, germination_percentage) %>% 
+  unique() %>% 
+  ungroup()
 
 model1 <- lmer(germination_percentage ~ Warming + Vegetation +(1|Site) + (1|blockID), data = seedling_est_VA)
 summary(model1)
@@ -223,8 +236,8 @@ summary(model1)
 seedling_est_VA %>% ggplot(aes(x = Warming, y = germination_percentage, fill = Warming)) + geom_violin() + geom_jitter(alpha = 0.5, width = 0.10) + facet_grid(~Vegetation) + theme_bw() + ggtitle("Germination success in different treatments for Veronica alpina") + scale_fill_manual(values = c("lightblue", "darkred"))
 
 seedling_est_VA <- seedling_est_VA%>% 
-  select(Vegetation, Warming, germination_percentage) %>% 
-  group_by(Vegetation, Warming) %>% 
+  select(Vegetation, germination_percentage) %>% 
+  group_by(Vegetation) %>% 
   mutate(germination_percentage = mean(germination_percentage)) %>% 
   unique()
 
