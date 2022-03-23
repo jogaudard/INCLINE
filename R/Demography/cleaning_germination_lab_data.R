@@ -134,25 +134,43 @@ SP_mistakes <- read.table(header = TRUE, stringsAsFactors = FALSE, text =
 
 #Removing wrongly enetered data, fixing wrong dates and making new variables
 
-Sib_pro_germ <- Sib_pro_germ %>% 
+Sib_pro_germ <- read.delim("data/Germination/INCLINE_Germination_Seedling_Experiment_Data_SP.csv", sep = ";", dec = ".")
+
+Sib_pro_germ <- Sib_pro_germ %>%
+  mutate(Leaf_date = case_when(Leaf_date == "05.02.2020" ~ "05.03.2020",
+                                     TRUE ~ as.character(Leaf_date))) %>% #Fixing one date mistake
+  filter(!is.na(Water_potential)) %>%  #Removing a row with only NAs
+  mutate(Dry_mass_g_root = str_replace_all(string = Dry_mass_g_root, pattern = ",", replacement = "."),
+         Wet_mass_g_root = str_replace_all(string = Dry_mass_g_root, pattern = ",", replacement = "."),
+         Total.wet.mass = str_replace_all(string = Dry_mass_g_root, pattern = ",", replacement = ".")) %>% #Fixing a comma mistake
+  mutate(Dry_mass_g_root = as.numeric(Dry_mass_g_root),
+         Wet_mass_g_root = as.numeric(Wet_mass_g_root),
+         Total.wet.mass = as.numeric(Total.wet.mass))  %>% 
   mutate(Germination_date = plyr::mapvalues(Germination_date, from = SP_mistakes$old, to = SP_mistakes$new)) %>% 
   mutate(Cotelydon_date = plyr::mapvalues(Cotelydon_date, from = SP_mistakes$old, to = SP_mistakes$new)) %>%
   mutate(Leaf_date = plyr::mapvalues(Leaf_date, from = SP_mistakes$old, to = SP_mistakes$new)) %>% 
-  mutate(Replicate = as.factor(Replicate)) %>% 
-  mutate(Start_date = dmy(Start_date)) %>% 
-  mutate(Germination_date = dmy(Germination_date)) %>% 
-  mutate(Cotelydon_date = dmy(Cotelydon_date)) %>% 
-  mutate(Leaf_date = dmy(Leaf_date)) %>% 
-  mutate(petri_dish = paste(Species, Site, Water_potential, Replicate, sep = "_")) %>% 
+  mutate(Start_date = dmy(Start_date),
+         Germination_date = dmy(Germination_date),
+         Cotelydon_date = dmy(Cotelydon_date),
+         Leaf_date = dmy(Leaf_date),
+         Harvest_date = dmy(Harvest_date)) %>% 
   mutate(days_to_germination = Germination_date - Start_date,
          days_to_cotelydon = Cotelydon_date - Start_date,
          days_to_leaf = Leaf_date - Start_date) %>% 
-  mutate(site_WP = paste(Site, Water_potential)) %>% 
-  mutate(Water_potential = as.factor(Water_potential)) %>% 
+  mutate(site_WP = paste(Site, Water_potential),
+         petri_dish = paste(Species, Site, Water_potential, Replicate, sep = "_")) %>% 
+  mutate(Water_potential = as.factor(Water_potential),
+         Replicate = as.factor(Replicate)) %>% 
   group_by(Species, Site, Water_potential, Replicate) %>% 
   mutate(seeds_in_dish = n()) %>% 
   ungroup() %>% 
-  rename(species = Species, siteID = Site, water_potential = Water_potential, replicate = Replicate, seed_nr = Seed, start_date = Start_date, germination_date = Germination_date, cotelydon_date = Cotelydon_date, leaf_date = Leaf_date, harvest_date = Harvest_date, wet_mass_g_root = Wet_mass_g_root, wet_mass_g_above_ground = Wet_mass_g_rest, wet_mass_g_total = "Total wet mass", wet_mass_g_true_leaf = "Wet_mass_g_True leaf", dry_mass_g_root = Dry_mass_g_root, dry_mass_g_above_ground = Dry_mass_g_above_ground, dry_mass_g_total = Dry_mass_g_total, seed_viable = Viable_seeds, lights_off = "Lights_off (Yes/no)")
+  rename(species = Species, siteID = Site, water_potential = Water_potential, replicate = Replicate, seed_nr = Seed, start_date = Start_date, germination_date = Germination_date, cotelydon_date = Cotelydon_date, leaf_date = Leaf_date, harvest_date = Harvest_date, wet_mass_g_root = Wet_mass_g_root, wet_mass_g_above_ground = Wet_mass_g_rest, wet_mass_g_total = Total.wet.mass, wet_mass_g_true_leaf = Wet_mass_g_True.leaf, dry_mass_g_root = Dry_mass_g_root, dry_mass_g_above_ground = Dry_mass_g_above_ground, dry_mass_g_total = Dry_mass_g_total, seed_viable = Viable_seeds, lights_off = Lights_off..Yes.no.) %>%
+  mutate(dry_mass = dry_mass_g_root + dry_mass_g_above_ground) %>% 
+  mutate(dry_mass_g_total = case_when(dry_mass_g_total == 0 ~ dry_mass_g_total,
+                                      dry_mass_g_total > 0 ~ dry_mass_g_total,
+                                      is.na(dry_mass_g_total) ~ dry_mass))
+
+
 
 #### Deal with comments. Categorize them ####
 ## Entering information in flag columns from comment section. I have three columns, flags for the germination (when seeds rotted, or became sick, or when we believe there are mistakes in the dates), seedlings (when the plant has started rotting, or died before seedlings where harvested - to be used for filtering seedlings out of the final data set), and whole petri dish flags - when a shole petridish needs removing because of drying out or mold. Options for flags are: Remove_duplicate, Dead_plant, Sick_plant,  Missing_date, Possible_mistakes_in_ID, Biomass_mistakes, Moldy, Agar_issues and Other. Using dictionaries to translate between comments and flags.
@@ -181,3 +199,16 @@ Sib_pro_germ <- Sib_pro_germ %>%
   fill(flag_whole_petridish, .direction = "downup") #Give whole petri dish comment too all seeds in the same petri dish
 
 
+#Plots for looking at data and looking for mistakes
+Sib_pro_germ %>% 
+  ggplot(aes(x = days_to_germination)) +
+  geom_density(aes(fill = water_potential, alpha = 0.2)) +
+  scale_fill_viridis_d()
+
+Sib_pro_germ %>% 
+  ggplot(aes(y = days_to_germination, x = water_potential)) +
+  geom_boxplot() 
+
+Sib_pro_germ %>% 
+  ggplot(aes(x = dry_mass_g_total, y = dry_mass_g_root))+
+  geom_point()
