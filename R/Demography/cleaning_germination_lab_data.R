@@ -161,12 +161,11 @@ Ver_alp_germ %>%
 Ver_alp_germ %>% 
   ggplot(aes(y = dry_mass_g_total, x = water_potential, fill = water_potential)) +
   geom_violin(draw_quantiles = c(0.75, 0.5, 0.25)) +
-  scale_fill_viridis_d() +
-  geom_jitter(aes(alpha = 0.1))
+  scale_fill_viridis_d()
 
 Ver_alp_germ %>% 
   ggplot(aes(y = root_shoot_ratio, x = water_potential, fill = water_potential)) +
-  geom_boxplot()
+  geom_boxplot() +
   scale_fill_viridis_d()
 
 ##### Sibbaldia procumbens #####
@@ -181,8 +180,6 @@ SP_mistakes <- read.table(header = TRUE, stringsAsFactors = FALSE, text =
   08.06 08.06.2020")
 
 #Removing wrongly enetered data, fixing wrong dates and making new variables
-
-Sib_pro_germ <- read.delim("data/Germination/INCLINE_Germination_Seedling_Experiment_Data_SP.csv", sep = ";", dec = ".")
 
 Sib_pro_germ <- Sib_pro_germ %>%
   mutate(Leaf_date = case_when(Leaf_date == "05.02.2020" ~ "05.03.2020",
@@ -220,8 +217,6 @@ Sib_pro_germ <- Sib_pro_germ %>%
   mutate(dry_mass_g_total = case_when(ID == "SP_GUD_1_7_18" ~ dry_mass,
                                       ID != "SP_GUD_1_7_18" ~ dry_mass_g_total)) %>% 
   select(-dry_mass)
-
-
 
 #### Deal with comments. Categorize them ####
 ## Entering information in flag columns from comment section. I have three columns, flags for the germination (when seeds rotted, or became sick, or when we believe there are mistakes in the dates), seedlings (when the plant has started rotting, or died before seedlings where harvested - to be used for filtering seedlings out of the final data set), and whole petri dish flags - when a shole petridish needs removing because of drying out or mold. Options for flags are: Remove_duplicate, Dead_plant, Sick_plant,  Missing_date, Possible_mistakes_in_ID, Biomass_mistakes, Moldy, Agar_issues and Other. Using dictionaries to translate between comments and flags.
