@@ -112,7 +112,7 @@ Ver_alp_coef <- coef(Ver_alp_biomass_regression_lm) %>%
 
 ###### Sibbaldia procumbens ######
 
-Seeds_per_capsule_SP <- Seeds_per_capsule %>% 
+Seeds_per_capsule_SP_dat <- Seeds_per_capsule %>% 
   filter(Species == "Sib_pro") %>% 
   mutate(mean_seeds = mean(Number_of_seeds, na.rm = TRUE)) %>% 
   mutate(Site = case_when(Site == "LAV" ~ "Lav",
@@ -123,16 +123,16 @@ Seeds_per_capsule_SP <- Seeds_per_capsule %>%
   mutate(size = Intercept + Leaf_stock_length_mm*LSL_coef + Number_of_leaves*NL_coef + Leaf_length_mm* LL_coef) %>% 
   mutate(ID = paste0(Site, "_", Species, "_", Individual))
 
-seed1 <- lmer(Number_of_seeds ~ size +(1|ID), data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on biomass, it does not.
+seed1 <- lmer(Number_of_seeds ~ size +(1|ID), data = Seeds_per_capsule_SP_dat) #Testing if seeds per capsule depends on biomass, it does not.
 summary(seed1)
-seed2 <- lmer(Number_of_seeds ~ Site + (1|ID), data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on location, it does not.
+seed2 <- lmer(Number_of_seeds ~ Site + (1|ID), data = Seeds_per_capsule_SP_dat) #Testing if seeds per capsule depends on location, it does not.
 summary(seed2)
-seed_3 <- lmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_SP) #Testing if seeds per capsule depends on number of capsule for each individual, it does not.
+seed_3 <- lmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_SP_dat) #Testing if seeds per capsule depends on number of capsule for each individual, it does not.
 summary(seed_3)
 
-Seeds_per_capsule_SP %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm", linetype = "dashed") + ggtitle("Number of seeds by size for Sibbaldia procumbens") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
+Seeds_per_capsule_SP_dat %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm", linetype = "dashed") + ggtitle("Number of seeds by size for Sibbaldia procumbens") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
 
-Seeds_per_capsule_SP <- Seeds_per_capsule_SP %>% 
+Seeds_per_capsule_SP <- Seeds_per_capsule_SP_dat %>% 
   select(mean_seeds) %>% 
   unique()
 
@@ -140,24 +140,24 @@ Seeds_per_capsule_SP <- Seeds_per_capsule_SP$mean_seeds
 
 ###### Veronica alpina ######
 
-Seeds_per_capsule_VA <- Seeds_per_capsule %>% 
+Seeds_per_capsule_VA_dat <- Seeds_per_capsule %>% 
   filter(Species == "Ver_alp") %>% 
   mutate(mean_seeds = mean(Number_of_seeds, na.rm = TRUE)) %>%
   bind_cols(Ver_alp_coef) %>%
   mutate(size = Intercept + (Shoot_height_mm * SH_coef) + (Number_of_leaves * NL_coef) + (Leaf_length_mm * LL_coef) + (Leaf_width_mm * WL_coef)) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
   mutate(ID = paste0(Site, "_", Species, "_", Individual))
 
-seed_VA_1 <- lmer(Number_of_seeds ~ size + Site + (1|ID), data = Seeds_per_capsule_VA) #Testing if seeds per capsule depends on biomass and site, it does not. But size is close to significant, so trying a model with only that
+seed_VA_1 <- lmer(Number_of_seeds ~ size + Site + (1|ID), data = Seeds_per_capsule_VA_dat) #Testing if seeds per capsule depends on biomass and site, it does not. But size is close to significant, so trying a model with only that
 summary(seed_VA_1)
-seed_VA_2 <- lmer(Number_of_seeds ~ size + (1|ID), data = Seeds_per_capsule_VA) #Testing if seeds per capsule depends on biomass alone, it does not.
+seed_VA_2 <- lmer(Number_of_seeds ~ size + (1|ID), data = Seeds_per_capsule_VA_dat) #Testing if seeds per capsule depends on biomass alone, it does not.
 summary(seed_VA_2)
-seed_VA_3 <- lmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_VA) #Testing if seeds per capsule depends on number of capsule for each individual, it does not.
+seed_VA_3 <- lmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_VA_dat) #Testing if seeds per capsule depends on number of capsule for each individual, it does not.
 summary(seed_VA_3)
 
 
 Seeds_per_capsule_VA %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm", linetype = "dashed") + ggtitle("Number of seeds by size for Veronica_alpina") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
 
-Seeds_per_capsule_VA <- Seeds_per_capsule_VA %>% 
+Seeds_per_capsule_VA <- Seeds_per_capsule_VA_dat %>% 
   select(mean_seeds) %>% 
   unique()
 
@@ -209,7 +209,7 @@ seedling_est2 <- seedling_est1 %>%
 
 ###### Veronica alpina ######
 
-seedling_est_VA <- seedling_est2 %>% 
+seedling_est_VA_dat <- seedling_est2 %>% 
   filter(Species == "Ver_alp") %>% 
   filter(campaign_number == "second") %>% 
   group_by(Site, Block, Warming, plotID, Vegetation) %>% 
@@ -228,12 +228,12 @@ seedling_est_VA <- seedling_est2 %>%
   unique() %>% 
   ungroup()
 
-model1 <- lmer(germination_percentage ~ Warming + Vegetation +(1|Site) + (1|blockID), data = seedling_est_VA)
+model1 <- lmer(germination_percentage ~ Warming + Vegetation +(1|Site) + (1|blockID), data = seedling_est_VA_dat)
 summary(model1)
 
-seedling_est_VA %>% ggplot(aes(x = Warming, y = germination_percentage, fill = Warming)) + geom_violin() + geom_jitter(alpha = 0.5, width = 0.10) + facet_grid(~Vegetation) + theme_bw() + ggtitle("Germination success in different treatments for Veronica alpina") + scale_fill_manual(values = c("lightblue", "darkred"))
+seedling_est_VA_dat %>% ggplot(aes(x = Warming, y = germination_percentage, fill = Warming)) + geom_violin() + geom_jitter(alpha = 0.5, width = 0.10) + facet_grid(~Vegetation) + theme_bw() + ggtitle("Germination success in different treatments for Veronica alpina") + scale_fill_manual(values = c("lightblue", "darkred"))
 
-seedling_est_VA <- seedling_est_VA%>% 
+seedling_est_VA <- seedling_est_VA_dat %>% 
   select(Vegetation, germination_percentage) %>% 
   group_by(Vegetation) %>% 
   mutate(germination_percentage = mean(germination_percentage)) %>% 
@@ -252,7 +252,7 @@ seedling_est_VA <- seedling_est_VA%>%
 # seedling_est_VA_Veg <- seedling_est_VA_Veg$germination_percentage
   
 ###### Sibbaldia procumbens ######
-seedling_est_SP <- seedling_est2 %>% 
+seedling_est_SP_dat <- seedling_est2 %>% 
   filter(Species == "Sib_pro") %>% 
   filter(campaign_number == "second") %>%
   group_by(Site, Block, Warming, plotID, Vegetation) %>% 
@@ -273,12 +273,12 @@ seedling_est_SP <- seedling_est2 %>%
   ungroup()
   #mutate(blockID = paste0(Site, "_", Block)) #Tested with the blockID as random effect, but it is not able to pick up anything on that - still the same results as if it was just site, so removed blockID from the model
 
-model2 <- lmer(germination_percentage ~ Warming + Vegetation + (1|Site), data = seedling_est_SP)
+model2 <- lmer(germination_percentage ~ Warming + Vegetation + (1|Site), data = seedling_est_SP_dat)
 summary(model2)
 
-seedling_est_SP %>% ggplot(aes(x = Warming, y = germination_percentage, fill = Warming)) + geom_violin() + geom_jitter(alpha = 0.5, width = 0.10) + facet_grid(~Vegetation) + theme_bw() + ggtitle("Germination success in different treatments for Sibbaldia procumbens") + scale_fill_manual(values = c("lightblue", "darkred"))
+seedling_est_SP_dat %>% ggplot(aes(x = Warming, y = germination_percentage, fill = Warming)) + geom_violin() + geom_jitter(alpha = 0.5, width = 0.10) + facet_grid(~Vegetation) + theme_bw() + ggtitle("Germination success in different treatments for Sibbaldia procumbens") + scale_fill_manual(values = c("lightblue", "darkred"))
 
-seedling_est_SP <- seedling_est_SP%>% 
+seedling_est_SP <- seedling_est_SP_dat %>% 
   select(Vegetation, germination_percentage) %>% 
   group_by(Vegetation) %>% 
   mutate(germination_percentage = mean(germination_percentage)) %>% 
