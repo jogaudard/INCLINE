@@ -122,7 +122,8 @@ Ver_alp_germ <- Ver_alp_germ %>%
   rename(flag_germination = flag_germination.x, flag_seedling = flag_seedling.y) %>% 
   select(!flag)  %>% #Remove old flag column
   group_by(petri_dish) %>% 
-  fill(flag_whole_petridish, .direction = "downup") #Give whole petridish comment too all seeds in the same petri dish
+  fill(flag_whole_petridish, .direction = "downup") %>%  #Give whole petridish comment too all seeds in the same petri dish
+  unique() #the joining makes multiple copies of some rows (have not figured out why yet), using this to fix the problem.
 
 #Plots for looking at data and looking for mistakes
 
@@ -222,7 +223,7 @@ Sib_pro_germ <- Sib_pro_germ %>%
 #### Deal with comments. Categorize them ####
 ## Entering information in flag columns from comment section. I have three columns, flags for the germination (when seeds rotted, or became sick, or when we believe there are mistakes in the dates), seedlings (when the plant has started rotting, or died before seedlings where harvested - to be used for filtering seedlings out of the final data set), and whole petri dish flags - when a shole petridish needs removing because of drying out or mold. Options for flags are: Remove_duplicate, Dead_plant, Sick_plant,  Missing_date, Possible_mistakes_in_ID, Biomass_mistakes, Moldy, Agar_issues and Other. Using dictionaries to translate between comments and flags.
 
-Sib_pro_germ1 <- Sib_pro_germ %>% 
+Sib_pro_germ <- Sib_pro_germ %>% 
   left_join(comment_dict_SP, by = c("Comment")) %>% #Translate from the comment column via dictionary
   left_join(harvest_comment_dict_SP, by = c("Harvest_comment")) %>% #translate from the harvest_comment column via dictionary
   left_join(weighing_comment_dict_SP, by = c("Weighing_comments")) %>% #translate from the weighing_comment column via
@@ -315,9 +316,144 @@ Sib_pro_germ %>%
 
 #### Make germination metrics ####
 
-Sib_pro_germ %>% 
+Germination_Ver_alp <- Ver_alp_germ %>% 
   mutate(germinated = case_when(is.na(germination_date) ~ 0,
                                 !is.na(germination_date) ~ 1)) %>% 
   group_by(petri_dish) %>% 
-  mutate(n_germinated = sum(germinated)) %>% view()
+  mutate(n_germinated = sum(germinated),
+         n_seeds_total = n(),
+         germ_percent = n_germinated/n_seeds_total) %>% 
+  ungroup() %>% 
+  group_by(petri_dish, days_to_germination) %>% 
+  mutate(n_germinated_timestep = sum(germinated)) %>% 
+  ungroup() %>% 
+  group_by(petri_dish) %>% 
+  mutate(germ_prop_timestep = n_germinated_timestep/n_seeds_total) %>%
+  select(petri_dish, siteID, water_potential, replicate, days_to_germination, germ_prop_timestep, germ_percent) %>% 
+  unique() %>% 
+  filter(!is.na(days_to_germination)) %>% 
+  arrange(days_to_germination) %>% 
+  mutate(cum_germ_percent = cumsum(germ_prop_timestep)) %>% 
+  mutate(half_percent = germ_percent/2) %>% 
+  mutate(dist = round(cum_germ_percent-half_percent, digits = 3),
+         pos_dist = ifelse(dist > 0, dist, 
+                           ifelse(dist == 0, dist, NA)),
+         neg_dist = abs(ifelse(dist < 0, dist,
+                           ifelse(dist == 0, dist, NA))),
+         T50_pos = min(pos_dist, na.rm = TRUE),
+         T50_neg = min(neg_dist, na.rm = TRUE),
+         T50_pos = ifelse(T50_pos == pos_dist, days_to_germination, NA),
+         T50_neg = ifelse(T50_neg == neg_dist, days_to_germination, NA),
+         T50 = T50_pos) %>% 
+  select(-pos_dist, -neg_dist) %>% 
+  mutate(dist = abs(dist),
+         relative_dist = max(dist) - dist,
+         T50 = ifelse(!is.na(T50_pos), T50_pos, T50_neg),
+         T502 = weighted.mean(T50, w = relative_dist, na.rm = TRUE),
+         T50 = ifelse(is.nan(T502), T50, T502),
+         T50 = round(T50, digits = 0),
+         days_to_max_germination = max(days_to_germination)) %>% 
+  group_by(petri_dish) %>% 
+  fill(T50, .direction = "downup") %>% 
+  select(-T502, -T50_neg, -T50_pos, -dist, -relative_dist)
+
+Germination_Sib_pro <- Sib_pro_germ %>% 
+  mutate(germinated = case_when(is.na(germination_date) ~ 0,
+                                !is.na(germination_date) ~ 1)) %>% 
+  group_by(petri_dish) %>% 
+  mutate(n_germinated = sum(germinated),
+         n_seeds_total = n(),
+         germ_percent = n_germinated/n_seeds_total) %>% 
+  ungroup() %>% 
+  group_by(petri_dish, days_to_germination) %>% 
+  mutate(n_germinated_timestep = sum(germinated)) %>% 
+  ungroup() %>% 
+  group_by(petri_dish) %>% 
+  mutate(germ_prop_timestep = n_germinated_timestep/n_seeds_total) %>%
+  select(petri_dish, siteID, water_potential, replicate, days_to_germination, germ_prop_timestep, germ_percent) %>% 
+  unique() %>% 
+  filter(!is.na(days_to_germination)) %>% 
+  arrange(days_to_germination) %>% 
+  mutate(cum_germ_percent = cumsum(germ_prop_timestep)) %>% 
+  mutate(half_percent = germ_percent/2) %>% 
+  mutate(dist = round(cum_germ_percent-half_percent, digits = 3),
+         pos_dist = ifelse(dist > 0, dist, 
+                           ifelse(dist == 0, dist, NA)),
+         neg_dist = abs(ifelse(dist < 0, dist,
+                               ifelse(dist == 0, dist, NA))),
+         T50_pos = min(pos_dist, na.rm = TRUE),
+         T50_neg = min(neg_dist, na.rm = TRUE),
+         T50_pos = ifelse(T50_pos == pos_dist, days_to_germination, NA),
+         T50_neg = ifelse(T50_neg == neg_dist, days_to_germination, NA),
+         T50 = T50_pos) %>% 
+  select(-pos_dist, -neg_dist) %>% 
+  mutate(dist = abs(dist),
+         relative_dist = max(dist) - dist,
+         T50 = ifelse(!is.na(T50_pos), T50_pos, T50_neg),
+         T502 = weighted.mean(T50, w = relative_dist, na.rm = TRUE),
+         T50 = ifelse(is.nan(T502), T50, T502),
+         T50 = round(T50, digits = 0),
+         days_to_max_germination = max(days_to_germination)) %>% 
+  group_by(petri_dish) %>% 
+  fill(T50, .direction = "downup") %>% 
+  select(-T502, -T50_neg, -T50_pos, -dist, -relative_dist)
+
+
+WP_names <- c(
+  "1" = "WP 1 (-0.25 MPa)",
+  "2" = "WP 2 (-0.33 MPa)",
+  "3" = "WP 3 (-0.42 MPa)",
+  "4" = "WP 4 (-0.50 MPa)",
+  "5" = "WP 5 (-0.57 MPa)",
+  "6" = "WP 6 (-0.70 MPa)",
+  "7" = "WP 7 (-0.95 MPa)",
+  "8" = "WP 8 (-1.20 MPa)",
+  "9" = "WP 9 (-1.45 MPa)",
+  "10" = "WP 10 (-1.70 MPa)",
+  "SKJ" = "SKJ",
+  "LAV" = "LAV",
+  "GUD" = "GUD",
+  "ULV" = "ULV"
+)
+
+Germination_Sib_pro %>% 
+  filter(siteID == "LAV") %>% 
+ggplot(aes(x = sort(as.integer(days_to_germination)), y = cum_germ_percent, group = replicate, color = replicate)) +
+    geom_line() +
+    geom_point(aes(x = T50, y = half_percent)) +
+    facet_wrap(~ water_potential, labeller = as_labeller(WP_names)) +
+    xlab("Days to germination") +
+    ylab("Germination %") +
+   # ggtitle(paste(species, "from", site)) +
+    theme(plot.title = element_text(hjust = 0.5),
+          panel.background = element_rect(fill = "white",
+                                          colour = "white",
+                                          size = 0.5,
+                                          linetype = "solid"),
+          panel.grid.major = element_line(size = 0.25,
+                                          linetype = 'solid',
+                                          colour = "lightgrey")) +
+  scale_color_viridis_d()
+
+Germination_Ver_alp %>% 
+  filter(water_potential %in% c(1:5)) %>% 
+  mutate(siteID = factor(siteID, levels = c("ULV", "LAV", "GUD", "SKJ"))) %>% 
+  ggplot(aes(x = sort(as.integer(days_to_germination)), y = cum_germ_percent, group = replicate, color = T50)) +
+  geom_line() +
+  geom_point(aes(x = T50, y = half_percent)) +
+  facet_grid(water_potential ~ siteID, labeller = as_labeller(WP_names)) +
+  xlab("Days to germination") +
+  ylab("Germination %") +
+  # ggtitle(paste(species, "from", site)) +
+  theme(plot.title = element_text(hjust = 0.5),
+        panel.background = element_rect(fill = "white",
+                                        colour = "white",
+                                        size = 0.5,
+                                        linetype = "solid"),
+        panel.grid.major = element_line(size = 0.25,
+                                        linetype = 'solid',
+                                        colour = "lightgrey")) +
+  scale_color_viridis_c()
+  
+
 
