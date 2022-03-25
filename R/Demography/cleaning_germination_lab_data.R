@@ -7,6 +7,7 @@ library(tidyverse)
 library(dataDownloader)
 library(osfr)
 library(lubridate)
+library(germinationmetrics)
 
 #### Downloading data from OSF ####
 
@@ -221,7 +222,7 @@ Sib_pro_germ <- Sib_pro_germ %>%
 #### Deal with comments. Categorize them ####
 ## Entering information in flag columns from comment section. I have three columns, flags for the germination (when seeds rotted, or became sick, or when we believe there are mistakes in the dates), seedlings (when the plant has started rotting, or died before seedlings where harvested - to be used for filtering seedlings out of the final data set), and whole petri dish flags - when a shole petridish needs removing because of drying out or mold. Options for flags are: Remove_duplicate, Dead_plant, Sick_plant,  Missing_date, Possible_mistakes_in_ID, Biomass_mistakes, Moldy, Agar_issues and Other. Using dictionaries to translate between comments and flags.
 
-Sib_pro_germ <- Sib_pro_germ %>% 
+Sib_pro_germ1 <- Sib_pro_germ %>% 
   left_join(comment_dict_SP, by = c("Comment")) %>% #Translate from the comment column via dictionary
   left_join(harvest_comment_dict_SP, by = c("Harvest_comment")) %>% #translate from the harvest_comment column via dictionary
   left_join(weighing_comment_dict_SP, by = c("Weighing_comments")) %>% #translate from the weighing_comment column via
@@ -242,7 +243,8 @@ Sib_pro_germ <- Sib_pro_germ %>%
   select(!Remove_whole_petridish & !Flag) %>% #Remove old flag columns
   rename(comment = Comment, harvest_comment = Harvest_comment, weighing_comment = Weighing_comments) %>% 
   group_by(petri_dish) %>% 
-  fill(flag_whole_petridish, .direction = "downup") #Give whole petri dish comment too all seeds in the same petri dish
+  fill(flag_whole_petridish, .direction = "downup") %>%  #Give whole petri dish comment too all seeds in the same petri dish
+  unique() #the joining makes multiple copies of some rows (have not figured out why yet), using this to fix the problem.
 
 
 #Plots for looking at data and looking for mistakes
@@ -309,4 +311,13 @@ Sib_pro_germ %>%
   ggplot(aes(y = root_shoot_ratio, x = water_potential, fill = water_potential)) +
   geom_violin(draw_quantiles = c(0.75, 0.5, 0.25)) +
   scale_fill_viridis_d()
+
+
+#### Make germination metrics ####
+
+Sib_pro_germ %>% 
+  mutate(germinated = case_when(is.na(germination_date) ~ 0,
+                                !is.na(germination_date) ~ 1)) %>% 
+  group_by(petri_dish) %>% 
+  mutate(n_germinated = sum(germinated)) %>% view()
 
