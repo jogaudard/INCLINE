@@ -204,18 +204,24 @@ seedling_est_background <- seedling_est1 %>%
 
 seedling_est2 <- seedling_est1 %>% 
   filter(Plot %in% c("C", "OTC")) %>% 
-  rename(Warming = Plot) %>% 
-  left_join(seedling_est_background, by = c("Species", "Vegetation")) 
+  rename(Warming = Plot) 
 
-# binomial_seedlings <- seedling_est2 %>% 
-#   select(Site, Block, Warming, PlotID, plotID, Species, Vegetation, campaign_number) %>%
-#   filter(campaign_number == "second") %>%
-#   unique() %>%
-#   mutate(ID = NA) %>% 
-#   group_by(Site, Block, Warming, PlotID, plotID, Species, Vegetation, campaign_number) %>%
-#   nest() %>%
-#   ungroup() %>% 
-#   map(~add_row(ID = c(1:20)))
+binomial_seedlings <- seedling_est2 %>%
+  select(Site, Block, Warming, PlotID, plotID, Species, Vegetation, campaign_number) %>%
+  filter(campaign_number == "second") %>%
+  unique() %>%
+  slice(rep(1:n(), each = 20)) %>% 
+  group_by(Site, Block, Warming, PlotID, plotID, Species, Vegetation, campaign_number) %>%
+  mutate(ID = c(1:20)) %>% 
+  mutate(ID = as.character(ID))
+
+binomial_seedling_data <- seedling_est2 %>% 
+  full_join(binomial_seedlings, by = c("Site", "Block", "Warming", "PlotID", "plotID", "Species", "Vegetation", "campaign_number", "ID")) %>% 
+  mutate(Present = case_when(is.na(Present) ~ "no",
+                             !is.na(Present) ~ Present)) %>% 
+  left_join(seedling_est_background, by = c("Species", "Vegetation")) %>% 
+  group_by(Site, Block, Warming, PlotID, plotID, Species, Vegetation, campaign_number, OTC) %>%
+  fill(Date, .direction = "downup") 
 
 ###### Veronica alpina ######
 
