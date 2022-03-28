@@ -207,6 +207,16 @@ seedling_est2 <- seedling_est1 %>%
   rename(Warming = Plot) %>% 
   left_join(seedling_est_background, by = c("Species", "Vegetation")) 
 
+# binomial_seedlings <- seedling_est2 %>% 
+#   select(Site, Block, Warming, PlotID, plotID, Species, Vegetation, campaign_number) %>%
+#   filter(campaign_number == "second") %>%
+#   unique() %>%
+#   mutate(ID = NA) %>% 
+#   group_by(Site, Block, Warming, PlotID, plotID, Species, Vegetation, campaign_number) %>%
+#   nest() %>%
+#   ungroup() %>% 
+#   map(~add_row(ID = c(1:20)))
+
 ###### Veronica alpina ######
 
 seedling_est_VA_dat <- seedling_est2 %>% 
