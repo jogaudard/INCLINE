@@ -255,6 +255,26 @@ seedling_est_VA <- seedling_est_VA_dat %>%
   mutate(germination_percentage = mean(germination_percentage)) %>% 
   unique()
 
+## Binomial data
+
+seedling_est_bi_VA_dat <- binomial_seedling_data %>% 
+  filter(Species == "Ver_alp") %>% 
+  filter(campaign_number == "second") %>% 
+  group_by(Site, Block, Warming, plotID, Vegetation) %>% 
+  mutate(count = case_when(Present == "yes" ~ 1,
+                           Present == "no" ~ 0)) %>% 
+  mutate(total_germinated = sum(count)) %>% 
+  ungroup() %>% 
+  mutate(total_germinated = total_germinated - background_germination) %>% 
+  mutate(Vegetation = case_when(Vegetation == "yes" ~ "Veg",
+                                Vegetation == "no" ~ "NoVeg")) %>% 
+  mutate(Treatment = paste0(Warming, "_", Vegetation)) %>% 
+  mutate(blockID = paste0(Site, "_", Block)) 
+
+model_ssedl_VA_bi <- glmer(count ~ Warming + Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_VA_dat)
+summary(model_ssedl_VA_bi)
+
+
 # Need to make this in a format that can be added in the model later
 
 # seedling_est_VA_NoVeg <- seedling_est_VA %>% 
@@ -299,6 +319,26 @@ seedling_est_SP <- seedling_est_SP_dat %>%
   group_by(Vegetation) %>% 
   mutate(germination_percentage = mean(germination_percentage)) %>% 
   unique()
+
+## Binomial data
+
+seedling_est_bi_SP_dat <- binomial_seedling_data %>% 
+  filter(Species == "Sib_pro") %>% 
+  filter(campaign_number == "second") %>% 
+  group_by(Site, Block, Warming, plotID, Vegetation) %>% 
+  mutate(count = case_when(Present == "yes" ~ 1,
+                           Present == "no" ~ 0)) %>% 
+  mutate(total_germinated = sum(count)) %>% 
+  ungroup() %>% 
+  mutate(total_germinated = total_germinated - background_germination) %>% 
+  mutate(Vegetation = case_when(Vegetation == "yes" ~ "Veg",
+                                Vegetation == "no" ~ "NoVeg")) %>% 
+  mutate(Treatment = paste0(Warming, "_", Vegetation)) %>% 
+  mutate(blockID = paste0(Site, "_", Block)) 
+
+model_ssedl_SP_bi <- glmer(count ~ Warming + Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_SP_dat)
+summary(model_ssedl_SP_bi)
+
 
 # Need to make this in a format that can be added in the model later
 
