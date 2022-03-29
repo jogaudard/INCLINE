@@ -14,6 +14,7 @@ library(conflicted)
 #### Select preferences for conflicts ####
 
 conflict_prefer("select", "dplyr")
+conflict_prefer("lmer", "lmerTest")
 
 
 #### Downloading data from OSF ####
