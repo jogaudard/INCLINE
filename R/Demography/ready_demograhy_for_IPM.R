@@ -238,38 +238,6 @@ binomial_seedling_data <- seedling_est2 %>%
 
 ###### Veronica alpina ######
 
-seedling_est_VA_dat <- seedling_est2 %>% 
-  filter(Species == "Ver_alp") %>% 
-  filter(campaign_number == "second") %>% 
-  group_by(Site, Block, Warming, plotID, Vegetation) %>% 
-  mutate(count = case_when(Present == "yes" ~ 1,
-                           Present == "no" ~ 0)) %>% 
-  mutate(total_germinated = sum(count)) %>% 
-  ungroup() %>% 
-  mutate(total_germinated = total_germinated - background_germination) %>% 
-  mutate(total_seeds = 20) %>% 
-  mutate(germination_percentage = total_germinated/total_seeds) %>% 
-  mutate(Vegetation = case_when(Vegetation == "yes" ~ "Veg",
-                                Vegetation == "no" ~ "NoVeg")) %>% 
-  mutate(Treatment = paste0(Warming, "_", Vegetation)) %>% 
-  mutate(blockID = paste0(Site, "_", Block)) %>% 
-  select(Site, blockID, plotID, Warming, Vegetation, germination_percentage) %>% 
-  unique() %>% 
-  ungroup()
-
-model1 <- lmer(germination_percentage ~ Warming + Vegetation +(1|Site) + (1|blockID), data = seedling_est_VA_dat)
-summary(model1)
-
-seedling_est_VA_dat %>% ggplot(aes(x = Warming, y = germination_percentage, fill = Warming)) + geom_violin() + geom_jitter(alpha = 0.5, width = 0.10) + facet_grid(~Vegetation) + theme_bw() + ggtitle("Germination success in different treatments for Veronica alpina") + scale_fill_manual(values = c("lightblue", "darkred"))
-
-seedling_est_VA <- seedling_est_VA_dat %>% 
-  select(Vegetation, germination_percentage) %>% 
-  group_by(Vegetation) %>% 
-  mutate(germination_percentage = mean(germination_percentage)) %>% 
-  unique()
-
-## Binomial data
-
 seedling_est_bi_VA_dat <- binomial_seedling_data %>% 
   filter(Species == "Ver_alp") %>% 
   filter(campaign_number == "second") %>% 
