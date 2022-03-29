@@ -152,21 +152,21 @@ Seeds_per_capsule_VA_dat <- Seeds_per_capsule %>%
   bind_cols(Ver_alp_coef) %>%
   mutate(size = Intercept + (Shoot_height_mm * SH_coef) + (Number_of_leaves * NL_coef) + (Leaf_length_mm * LL_coef) + (Leaf_width_mm * WL_coef)) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
   mutate(ID = paste0(Site, "_", Species, "_", Individual))
-
-seed_VA_1 <- glmer(Number_of_seeds ~ size * Site + (1|Site) + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Model failed to converge, remove Site as random effect
-summary(seed_VA_1)
-
-seed_VA_2 <- glmer(Number_of_seeds ~ size * Site + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Failed to converge, remove the interacation between size and Site.
-summary(seed_VA_2)
-
-seed_VA_3 <- glmer(Number_of_seeds ~ size + Site + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on biomass and site - biomass is significant (0.0386).
-summary(seed_VA_3)
+# 
+# seed_VA_1 <- glmer(Number_of_seeds ~ size * Site + (1|Site) + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Model failed to converge, remove Site as random effect
+# summary(seed_VA_1)
+# 
+# seed_VA_2 <- glmer(Number_of_seeds ~ size * Site + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Failed to converge, remove the interacation between size and Site.
+# summary(seed_VA_2)
+# 
+# seed_VA_3 <- glmer(Number_of_seeds ~ size + Site + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on biomass and site - biomass is significant (0.0386).
+# summary(seed_VA_3)
 
 seed_VA_4 <- glmer(Number_of_seeds ~ size + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on biomass alone, right above significant (0.065)
 summary(seed_VA_4)
 
-seed_VA_5 <- glmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on number of capsule for each individual, it does not.
-summary(seed_VA_5)
+# seed_VA_5 <- glmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on number of capsule for each individual, it does not.
+# summary(seed_VA_5)
 
 Seeds_per_capsule_VA <- as.data.frame(fixef(seed_VA_4)) %>% 
   rownames_to_column() %>% 
@@ -360,7 +360,7 @@ summary(model_seedling_SPnull)
 
 Seedling_info_SP_mean <- as.numeric(fixef(model_seedling_SPnull))
 
-Seedling_info_SP_sd <- sigma.hat(model_seedling_SPnull)$sigma$data
+Seedling_info_SP_sd <- arm::sigma.hat(model_seedling_SPnull)$sigma$data
 
 Seedling_info_SP <- as.data.frame(Seedling_info_SP_mean) %>% 
    add_column(Seedling_info_SP_sd)
@@ -411,6 +411,9 @@ Seedling_info_VA_dat <- Ver_alp %>%
 model_seedling_VA6 <- lmer(size ~ Vegetation + (1|plotID), data = Seedling_info_VA_dat)
 summary(model_seedling_VA6)
 
+# model_seedling_VA7 <- lmer(size ~ OTC + (1|plotID), data = Seedling_info_VA_dat)
+# summary(model_seedling_VA7)
+
 Seedling_info_VA_mean <- fixef(model_seedling_VA6)%>% 
   as.data.frame() %>% 
   rownames_to_column() %>% 
@@ -423,7 +426,7 @@ mean_NoVeg <- Seedling_info_VA_mean$Intercept
 
 mean_Veg <- Seedling_info_VA_mean$Intercept + Seedling_info_VA_mean$Veg
 
-sd <- sigma.hat(model_seedling_VA6)$sigma$data #can we get different standard diviations for different groups? google this with lmer.
+sd <- arm::sigma.hat(model_seedling_VA6)$sigma$data #can we get different standard diviations for different groups? google this with lmer.
 
 Seedling_info_VA <- as.data.frame(mean_NoVeg) %>% 
   add_column(mean_Veg) %>% 
@@ -549,10 +552,7 @@ Sib_pro_2018_2019 <- Sib_pro_2018 %>%
   #mutate(flo.no = case_when(is.na(flo.if) ~ NA, !is.na(flo.if) ~ flo.no))
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                               ifelse(juvenile_next == "yes" & is.na(size), "sexual",
-                                     ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>%
-  mutate(clo.no =,
-         clo.if = 
-         )
+                                     ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
 ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
   select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
   mutate(transition = "2018-2019")
@@ -595,7 +595,6 @@ Sib_pro_2020_2021 <- Sib_pro_2020 %>%
   select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>% 
   mutate(transition = "2020-2021")
 
-
 #Combining all transitions together
 Sib_pro_2018_2021 <- bind_rows(Sib_pro_2018_2019, Sib_pro_2019_2020, Sib_pro_2020_2021)
 
@@ -611,7 +610,7 @@ clones_SP <- Sib_pro_2018_2021 %>%
     parent <- .x %>% 
       filter(seedling == "no", juvenile == "no") %>% 
       select(unique_IDS, X, Y, size) %>% 
-      filter(size > (Seedling_info_SP$seeds_cap + 2*Seedling_info_SP$seeds_cap_sd))
+      filter(size > (SP_max_seedling_size$max_seedling_size))
     
     
     clone_function(child, parent)
@@ -631,8 +630,34 @@ Sib_pro_2018_2021 <- Sib_pro_2018_2021 %>%
 Sib_pro_test <- Sib_pro_2018_2021 %>% 
   mutate(size = case_when((offspringNext == "clone" & distance_parent < 5) ~ size_parent,
                           (offspringNext == "clone" & distance_parent > 5) ~ size,
-                          offspringNext %in% c(NA, "sexual") ~ size))
+                          offspringNext %in% c(NA, "sexual") ~ size)) %>% 
+  mutate(distance_parent = case_when(distance_parent > 5 ~ NA_real_,
+                                     distance_parent < 5 ~ distance_parent,
+                                     distance_parent == 5 ~ distance_parent,
+                                     TRUE ~ NA_real_)) %>% 
+  mutate(unique_IDS_parent = case_when(is.na(distance_parent) ~ NA_character_,
+                                       TRUE ~ unique_IDS_parent)) %>% 
+  mutate(X_parent = case_when(is.na(distance_parent) ~ NA_real_,
+                                       TRUE ~ X_parent)) %>% 
+  mutate(Y_parent = case_when(is.na(distance_parent) ~ NA_real_,
+                                       TRUE ~ Y_parent)) %>% 
+  mutate(size_parent = case_when(is.na(distance_parent) ~ NA_real_,
+                              TRUE ~ size_parent)) %>% 
+  mutate(offspringNext = case_when(offspringNext == "clone" & is.na(unique_IDS_parent) ~ "orphan",
+                                   TRUE ~ offspringNext))
 #make clo.if and clo.no
+
+clone_information_SP <- Sib_pro_test %>% 
+  select(plotID, transition, unique_IDS_parent) %>% 
+  filter(!is.na(unique_IDS_parent)) %>%
+  group_by(plotID, transition, unique_IDS_parent) %>%
+  summarise(n()) %>%
+  rename(clo.no = "n()")
+
+Sib_pro_test <- Sib_pro_test %>% 
+  left_join(clone_information_SP, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_parent")) %>% 
+  mutate(clo.if = case_when(clo.no > 0.1 ~ 1,
+                            is.na(clo.no) ~ 0))
 
 
 #Some plots fro visualization/checking
@@ -736,7 +761,7 @@ clones_VA <- Ver_alp_2018_2021 %>%
     parent <- .x %>% 
       filter(seedling == "no", juvenile == "no") %>% 
       select(unique_IDS, X, Y, size) %>% 
-      filter(size > (Seedling_info_VA[3,]$seeds_cap + 2*Seedling_info_VA[3,]$seeds_cap_sd))
+      filter(size > (VA_max_seedling_size$max_seedling_size))
     
     
     clone_function(child, parent)
