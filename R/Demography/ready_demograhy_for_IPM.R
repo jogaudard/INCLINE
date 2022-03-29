@@ -9,6 +9,12 @@ library(tidyverse)
 library(lme4)
 library(lmerTest)
 library(lubridate)
+library(conflicted)
+
+#### Select preferences for conflicts ####
+
+conflict_prefer("select", "dplyr")
+
 
 #### Downloading data from OSF ####
 
@@ -339,14 +345,14 @@ Seedling_info_SP_dat <- Sib_pro %>%
   ungroup() %>% 
   mutate(max_seedling_size = max(size, na.rm = TRUE))
 
-model_seedling_SP1 <- lmer(size ~ OTC * treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
-summary(model_seedling_SP1) #Nothing was significant, removing the interaction to see if there is something on the single factors
-
-model_seedling_SP2 <- lmer(size ~ OTC + treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
-summary(model_seedling_SP2)
-
-model_seedling_SP3 <- lmer(size ~ treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
-summary(model_seedling_SP3) 
+# model_seedling_SP1 <- lmer(size ~ OTC * treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
+# summary(model_seedling_SP1) #Nothing was significant, removing the interaction to see if there is something on the single factors
+# 
+# model_seedling_SP2 <- lmer(size ~ OTC + treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
+# summary(model_seedling_SP2)
+# 
+# model_seedling_SP3 <- lmer(size ~ treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
+# summary(model_seedling_SP3) 
 
 model_seedling_SPnull <- lmer(size ~ 1 + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
 summary(model_seedling_SPnull)
@@ -386,40 +392,53 @@ Seedling_info_VA_dat <- Ver_alp %>%
   mutate(Vegetation = case_when(treatment %in% c("C", "E", "N") ~ "Veg",
                                 treatment == "R" ~ "NoVeg"))
 
-model_seedling_VA1 <- lmer(size ~ OTC + treatment + (1|siteID/blockID/plotID), data = Seedling_info_VA_dat)
-summary(model_seedling_VA1)
-
-model_seedling_VA2 <- lmer(size ~ OTC + treatment + (1|blockID/plotID), data = Seedling_info_VA_dat)
-summary(model_seedling_VA2)
-
-model_seedling_VA3 <- lmer(size ~ OTC * treatment + (1|plotID), data = Seedling_info_VA_dat)
-summary(model_seedling_VA3)
-
-model_seedling_VA4 <- lmer(size ~ OTC + treatment + (1|plotID), data = Seedling_info_VA_dat)
-summary(model_seedling_VA4)
-
-model_seedling_VA5 <- lmer(size ~ treatment + (1|plotID), data = Seedling_info_VA_dat)
-summary(model_seedling_VA5)
+# model_seedling_VA1 <- lmer(size ~ OTC * treatment + (1|siteID/blockID/plotID), data = Seedling_info_VA_dat)
+# summary(model_seedling_VA1)
+# 
+# model_seedling_VA2 <- lmer(size ~ OTC * treatment + (1|blockID/plotID), data = Seedling_info_VA_dat)
+# summary(model_seedling_VA2)
+# 
+# model_seedling_VA3 <- lmer(size ~ OTC * treatment + (1|plotID), data = Seedling_info_VA_dat)
+# summary(model_seedling_VA3)
+# 
+# model_seedling_VA4 <- lmer(size ~ OTC + treatment + (1|plotID), data = Seedling_info_VA_dat)
+# summary(model_seedling_VA4)
+# 
+# model_seedling_VA5 <- lmer(size ~ treatment + (1|plotID), data = Seedling_info_VA_dat)
+# summary(model_seedling_VA5)
 
 model_seedling_VA6 <- lmer(size ~ Vegetation + (1|plotID), data = Seedling_info_VA_dat)
 summary(model_seedling_VA6)
 
-Seedling_info_VA_mean <- fixef(model_seedling_VA6) #Make means for Veg and NoVeg by adding the VegetationVeg coefficient to to intercept.
+Seedling_info_VA_mean <- fixef(model_seedling_VA6)%>% 
+  as.data.frame() %>% 
+  rownames_to_column() %>% 
+  pivot_wider(names_from = "rowname", values_from = ".") %>% 
+  rename(Intercept = "(Intercept)", Veg = VegetationVeg) 
 
-Seedling_info_VA_sd <- sigma.hat(model_seedling_VA6)$sigma$data #can we get different standard diviations for different groups. google this with lmer.
+# Need to make this in a format that can be added in the model later
+
+mean_NoVeg <- Seedling_info_VA_mean$Intercept
+
+mean_Veg <- Seedling_info_VA_mean$Intercept + Seedling_info_VA_mean$Veg
+
+sd <- sigma.hat(model_seedling_VA6)$sigma$data #can we get different standard diviations for different groups? google this with lmer.
+
+Seedling_info_VA <- as.data.frame(mean_NoVeg) %>% 
+  add_column(mean_Veg) %>% 
+  add_column(sd)
 
 
-Seedling_info_VA_dat %>%  ggplot(aes(x = treatment, y = size)) +  geom_jitter(alpha= 0.2) + geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) + ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") + scale_fill_manual(values = c("lightblue", "darkred")) + theme_bw()
+Seedling_info_VA_dat %>%  
+  ggplot(aes(x = Vegetation, y = size, fill = Vegetation)) + 
+  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_jitter(alpha= 0.2) +
+  geom_hline(yintercept = mean_NoVeg,  size = 2, linetype = "dashed") +
+  geom_hline(yintercept = mean_Veg, size = 2) +
+  ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") +
+  scale_fill_manual(values = c("lightgreen", "darkgreen")) +
+  theme_bw()
 
-Seedling_info_VA <- Seedling_info_VA_dat %>% 
-  mutate(Vegetation = case_when(treatment %in% c("C", "E", "N") ~ "Veg",
-                                treatment == "R" ~ "NoVeg")) %>% 
-  group_by(Vegetation) %>% 
-  mutate(seeds_cap = mean(size, na.rm = TRUE),
-         seeds_cap_sd = sd(size, na.rm = TRUE)) %>% 
-  ungroup() %>% 
-  select(treatment, seeds_cap, seeds_cap_sd) %>% 
-  distinct()
 
 VA_max_seedling_size <- Seedling_info_VA_dat %>% 
   select(max_seedling_size) %>%  #change seedlings to non seedling when SH is larger than 20 and number of leaves is larger than 6.
