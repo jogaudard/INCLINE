@@ -276,39 +276,6 @@ seedling_est_VA_OTC_Veg <- exp(seedling_est_VA$Intercept + seedling_est_VA$OTC +
 
   
 ###### Sibbaldia procumbens ######
-seedling_est_SP_dat <- seedling_est2 %>% 
-  filter(Species == "Sib_pro") %>% 
-  filter(campaign_number == "second") %>%
-  group_by(Site, Block, Warming, plotID, Vegetation) %>% 
-  mutate(count = case_when(Present == "yes" ~ 1,
-                           Present == "no" ~ 0)) %>% 
-  mutate(total_germinated = sum(count)) %>% 
-  ungroup() %>% 
-  mutate(total_germinated = total_germinated - background_germination) %>% 
-  mutate(total_seeds = 20) %>% 
-  mutate(germination_percentage = total_germinated/total_seeds) %>% 
-  mutate(Vegetation = case_when(Vegetation == "yes" ~ "Veg",
-                                Vegetation == "no" ~ "NoVeg")) %>% 
-  mutate(Treatment = paste0(Warming, "_", Vegetation)) %>% 
-  
-  mutate(blockID = paste0(Site, "_", Block)) %>% 
-  select(Site, blockID, plotID, Warming, Vegetation, germination_percentage) %>% 
-  unique() %>% 
-  ungroup()
-  #mutate(blockID = paste0(Site, "_", Block)) #Tested with the blockID as random effect, but it is not able to pick up anything on that - still the same results as if it was just site, so removed blockID from the model
-
-model2 <- lmer(germination_percentage ~ Warming + Vegetation + (1|Site), data = seedling_est_SP_dat)
-summary(model2)
-
-seedling_est_SP_dat %>% ggplot(aes(x = Warming, y = germination_percentage, fill = Warming)) + geom_violin() + geom_jitter(alpha = 0.5, width = 0.10) + facet_grid(~Vegetation) + theme_bw() + ggtitle("Germination success in different treatments for Sibbaldia procumbens") + scale_fill_manual(values = c("lightblue", "darkred"))
-
-seedling_est_SP <- seedling_est_SP_dat %>% 
-  select(Vegetation, germination_percentage) %>% 
-  group_by(Vegetation) %>% 
-  mutate(germination_percentage = mean(germination_percentage)) %>% 
-  unique()
-
-## Binomial data
 
 seedling_est_bi_SP_dat <- binomial_seedling_data %>% 
   filter(Species == "Sib_pro") %>% 
