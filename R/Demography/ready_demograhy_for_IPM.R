@@ -266,13 +266,13 @@ seedling_est_VA <- fixef(model_seedl_VA2) %>%
 
 # Need to make this in a format that can be added in the model later
 
-seedling_est_VA_C_NoVeg <- seedling_est_VA$Intercept
+seedling_est_VA_C_NoVeg <- exp(seedling_est_VA$Intercept)
 
-seedling_est_VA_C_Veg <- seedling_est_VA$Intercept + seedling_est_VA$Veg
+seedling_est_VA_C_Veg <- exp(seedling_est_VA$Intercept + seedling_est_VA$Veg)
 
-seedling_est_VA_OTC_NoVeg <- seedling_est_VA$Intercept + seedling_est_VA$OTC
+seedling_est_VA_OTC_NoVeg <- exp(seedling_est_VA$Intercept + seedling_est_VA$OTC)
 
-seedling_est_VA_OTC_Veg <- seedling_est_VA$Intercept + seedling_est_VA$OTC + seedling_est_VA$Veg
+seedling_est_VA_OTC_Veg <- exp(seedling_est_VA$Intercept + seedling_est_VA$OTC + seedling_est_VA$Veg)
 
   
 ###### Sibbaldia procumbens ######
