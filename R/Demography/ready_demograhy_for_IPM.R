@@ -161,16 +161,20 @@ summary(seed_VA_4)
 seed_VA_5 <- glmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on number of capsule for each individual, it does not.
 summary(seed_VA_5)
 
-Seeds_per_capsule_VA <- fixef(seed_VA_3)
+Seeds_per_capsule_VA <- as.data.frame(fixef(seed_VA_4)) %>% 
+  rownames_to_column() %>% 
+  pivot_wider(names_from = "rowname", values_from = "fixef(seed_VA_4)") %>% 
+  rename(Intercept = "(Intercept)", seed_number_coef = size)
 
+Seeds_per_capsule_VA_dat %>%  
+  ggplot(aes(x = size, y = Number_of_seeds)) + 
+  geom_point(aes(color = Site)) + 
+  geom_abline(intercept = exp(Seeds_per_capsule_VA$Intercept), slope = exp(Seeds_per_capsule_VA$seed_number_coef)) +
+  ggtitle("Number of seeds by size for Veronica_alpina") + 
+  xlab("log2(size)") + 
+  ylab("Seed per individual") + 
+  scale_color_viridis_d()
 
-Seeds_per_capsule_VA_dat %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm", linetype = "dashed") + ggtitle("Number of seeds by size for Veronica_alpina") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
-
-# Seeds_per_capsule_VA <- Seeds_per_capsule_VA_dat %>% 
-#   select(mean_seeds) %>% 
-#   unique()
-# 
-# Seeds_per_capsule_VA <- Seeds_per_capsule_VA$mean_seeds
   
 #### Seedling establishment coefficients ####
 #This section calculate the seedling establishment rate for each species in the warmed and unwarmed plots (using the data from the vegetated plots further in the analysis)
