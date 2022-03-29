@@ -252,23 +252,28 @@ seedling_est_bi_VA_dat <- binomial_seedling_data %>%
   mutate(Treatment = paste0(Warming, "_", Vegetation)) %>% 
   mutate(blockID = paste0(Site, "_", Block)) 
 
-model_seedl_VA_bi <- glmer(count ~ Warming + Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_VA_dat)
-summary(model_seedl_VA_bi)
+# model_seedl_VA1 <- glmer(count ~ Warming * Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_VA_dat)
+# summary(model_seedl_VA1) #Intercation between warming and vegetation is not significant, removing it
 
-seedling_est_VA_final <- fixef(model_seedl_VA_bi)
+model_seedl_VA2 <- glmer(count ~ Warming + Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_VA_dat)
+summary(model_seedl_VA2)
 
+seedling_est_VA <- fixef(model_seedl_VA2) %>% 
+  as.data.frame() %>% 
+  rownames_to_column() %>% 
+  pivot_wider(names_from = "rowname", values_from = ".") %>% 
+  rename(Intercept = "(Intercept)", OTC = WarmingOTC, Veg = VegetationVeg)
 
 # Need to make this in a format that can be added in the model later
 
-# seedling_est_VA_NoVeg <- seedling_est_VA %>% 
-#   filter(Vegetation == "NoVeg")
-# 
-# seedling_est_VA_NoVeg <- seedling_est_VA_NoVeg$germination_percentage
-# 
-# seedling_est_VA_Veg <- seedling_est_VA %>% 
-#   filter(Vegetation == "Veg")
-# 
-# seedling_est_VA_Veg <- seedling_est_VA_Veg$germination_percentage
+seedling_est_VA_C_NoVeg <- seedling_est_VA$Intercept
+
+seedling_est_VA_C_Veg <- seedling_est_VA$Intercept + seedling_est_VA$Veg
+
+seedling_est_VA_OTC_NoVeg <- seedling_est_VA$Intercept + seedling_est_VA$OTC
+
+seedling_est_VA_OTC_Veg <- seedling_est_VA$Intercept + seedling_est_VA$OTC + seedling_est_VA$Veg
+
   
 ###### Sibbaldia procumbens ######
 seedling_est_SP_dat <- seedling_est2 %>% 
