@@ -370,7 +370,9 @@ Seedling_info_SP_dat <- Sib_pro %>%
   mutate(LL = case_when(LL == 0 ~ mean_LL,
                         LL > 0 ~ LL)) %>%
   left_join(Sib_pro_coef, by = "siteID") %>% 
-  mutate(size = Intercept + LSL * LSL_coef + NL * NL_coef + LL * LL_coef) #Making biomass estimate with intercept and coefficients from biomass regression
+  mutate(size = Intercept + LSL * LSL_coef + NL * NL_coef + LL * LL_coef) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
+  ungroup() %>% 
+  mutate(max_seedling_size = max(size, na.rm = TRUE))
 
 model1_seedling <- lmer(size ~ OTC + treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
 summary(model1_seedling) #Seedlings grow larger in extant and novel transplant, but smaller in removal transplant
@@ -389,6 +391,10 @@ Seedling_info_SP <- Seedling_info_SP_dat %>%
   select(seeds_cap, seeds_cap_sd) %>% 
   distinct()
 
+SP_max_seedling_size <- Seedling_info_SP_dat %>% 
+  select(max_seedling_size) %>% 
+  unique()
+
 ###### Veronica alpina ######
 
 Seedling_info_VA_dat <- Ver_alp %>% 
@@ -398,7 +404,7 @@ Seedling_info_VA_dat <- Ver_alp %>%
          mean_NL = round(mean(NL, na.rm = TRUE)),
          mean_LL = round(mean(LL, na.rm = TRUE)),
          mean_WL = round(mean(WL, na.rm = TRUE))) %>%
-  mutate(LSL = case_when(SH == 0 ~ mean_SH,   #Filling in gaps with the mean for each treatments - might have to attack this differently later
+  mutate(SH = case_when(SH == 0 ~ mean_SH,   #Filling in gaps with the mean for each treatments - might have to attack this differently later
                          SH > 0 ~ SH)) %>% 
   mutate(NL = case_when(NL == 0 ~ mean_NL,
                         NL > 0 ~ NL)) %>% 
@@ -407,7 +413,9 @@ Seedling_info_VA_dat <- Ver_alp %>%
   mutate(LL = case_when(WL == 0 ~ mean_WL,
                         WL > 0 ~ WL)) %>% 
   add_column(Ver_alp_coef) %>%
-  mutate(size = Intercept + SH * SH_coef + NL * NL_coef + LL * LL_coef + WL * WL_coef) #Making biomass estimate with intercept and coefficients from biomass regression
+  mutate(size = Intercept + SH * SH_coef + NL * NL_coef + LL * LL_coef + WL * WL_coef) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
+  ungroup() %>% 
+  mutate(max_seedling_size = max(size, na.rm = TRUE))
 
 model_seedling_VA <- lmer(size ~ treatment + (1|siteID/plotID), data = Seedling_info_VA_dat)
 summary(model_seedling_VA)
@@ -423,6 +431,10 @@ Seedling_info_VA <- Seedling_info_VA_dat %>%
   ungroup() %>% 
   select(treatment, seeds_cap, seeds_cap_sd) %>% 
   distinct()
+
+VA_max_seedling_size <- Seedling_info_VA_dat %>% 
+  select(max_seedling_size) %>% 
+  unique()
 
 #### Making transitions ####
 #This section calculates the size of individuals, estimates of seed number. And cleaning the data so that we have the correct variables, and variable names for the analysis.
