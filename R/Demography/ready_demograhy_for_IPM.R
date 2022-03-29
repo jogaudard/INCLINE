@@ -172,7 +172,7 @@ Seeds_per_capsule_VA_dat %>%
   geom_abline(intercept = exp(Seeds_per_capsule_VA$Intercept), slope = exp(Seeds_per_capsule_VA$seed_number_coef)) +
   ggtitle("Number of seeds by size for Veronica_alpina") + 
   xlab("log2(size)") + 
-  ylab("Seed per individual") + 
+  ylab("Seed per capsule") + 
   scale_color_viridis_d()
 
   
@@ -339,33 +339,24 @@ Seedling_info_SP_dat <- Sib_pro %>%
   ungroup() %>% 
   mutate(max_seedling_size = max(size, na.rm = TRUE))
 
-model1_seedling <- lmer(size ~ OTC + treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
-summary(model1_seedling) #Seedlings grow larger in extant and novel transplant, but smaller in removal transplant
+model_seedling_SP1 <- lmer(size ~ OTC * treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
+summary(model_seedling_SP1) #Nothing was significant, removing the interaction to see if there is something on the single factors
 
-model_seedling <- lmer(size ~ treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
-summary(model_seedling) 
+model_seedling_SP2 <- lmer(size ~ OTC + treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
+summary(model_seedling_SP2)
 
-model_seedling_null <- lmer(size ~ 1 + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
-summary(model_seedling_null)
+model_seedling_SP3 <- lmer(size ~ treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
+summary(model_seedling_SP3) 
 
-Seedling_info_SP_mean <- as.numeric(fixef(model_seedling_null))
+model_seedling_SPnull <- lmer(size ~ 1 + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
+summary(model_seedling_SPnull)
 
-Seedling_info_SP_sd <- sigma.hat(model_seedling_null)$sigma$data
+Seedling_info_SP_mean <- as.numeric(fixef(model_seedling_SPnull))
 
-# Seedling_info_SP <- Seedling_info_SP_mean 
-#   add_column(Seedling_info_SP_sd)
+Seedling_info_SP_sd <- sigma.hat(model_seedling_SPnull)$sigma$data
 
-
-Seedling_info_SP_dat %>%  ggplot(aes(x = treatment, y = size)) +  geom_jitter(alpha= 0.2) + geom_violin(aes(fill = treatment, alpha = 0.5), draw_quantiles = c(0.25, 0.5, 0.75)) + facet_wrap(OTC~siteID, nrow = 2) + ggtitle("Seedling size by treatment for Sibbaldia procumbens") + ylab("size") + scale_fill_viridis_d() + theme_bw()
-
-Seedling_info_SP <- Seedling_info_SP_dat %>%
-  ungroup() %>% 
-  mutate(seeds_cap = mean(size, na.rm = TRUE),
-         seeds_cap_sd = sd(size, na.rm = TRUE)) %>%
-  # mutate(seedling_establishment_rate = if_else(OTC == "C", seedling_est_SP_C,
-  #                                              if_else(OTC == "W", seedling_est_SP_W, 0))) %>% 
-  dplyr::select(seeds_cap, seeds_cap_sd) %>% 
-  distinct()
+Seedling_info_SP <- as.data.frame(Seedling_info_SP_mean) %>% 
+   add_column(Seedling_info_SP_sd)
 
 SP_max_seedling_size <- Seedling_info_SP_dat %>% 
   dplyr::select(max_seedling_size) %>% 
