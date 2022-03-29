@@ -130,7 +130,7 @@ summary(seed_SP2)
 seed_SP_null <- glmer(Number_of_seeds ~ 1 + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log"))
 summary(seed_SP_null)
 
-Seeds_per_capsule_SP <- exp(fixef(seed_SP_null))
+Seeds_per_capsule_SP <- as.numeric(exp(fixef(seed_SP_null)))
 
 
 # Seeds_per_capsule_SP_dat %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm", linetype = "dashed") + ggtitle("Number of seeds by size for Sibbaldia procumbens") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
@@ -159,14 +159,16 @@ summary(seed_VA_2)
 seed_VA_3 <- glmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on number of capsule for each individual, it does not.
 summary(seed_VA_3)
 
+Seeds_per_capsule_VA <- fixef(seed_VA_2)
 
-Seeds_per_capsule_VA %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm", linetype = "dashed") + ggtitle("Number of seeds by size for Veronica_alpina") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
 
-Seeds_per_capsule_VA <- Seeds_per_capsule_VA_dat %>% 
-  select(mean_seeds) %>% 
-  unique()
+Seeds_per_capsule_VA_dat %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm", linetype = "dashed") + ggtitle("Number of seeds by size for Veronica_alpina") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
 
-Seeds_per_capsule_VA <- Seeds_per_capsule_VA$mean_seeds
+# Seeds_per_capsule_VA <- Seeds_per_capsule_VA_dat %>% 
+#   select(mean_seeds) %>% 
+#   unique()
+# 
+# Seeds_per_capsule_VA <- Seeds_per_capsule_VA$mean_seeds
   
 #### Seedling establishment coefficients ####
 #This section calculate the seedling establishment rate for each species in the warmed and unwarmed plots (using the data from the vegetated plots further in the analysis)
@@ -276,8 +278,10 @@ seedling_est_bi_VA_dat <- binomial_seedling_data %>%
   mutate(Treatment = paste0(Warming, "_", Vegetation)) %>% 
   mutate(blockID = paste0(Site, "_", Block)) 
 
-model_ssedl_VA_bi <- glmer(count ~ Warming + Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_VA_dat)
-summary(model_ssedl_VA_bi)
+model_seedl_VA_bi <- glmer(count ~ Warming + Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_VA_dat)
+summary(model_seedl_VA_bi)
+
+seedling_est_VA_final <- fixef(model_seedl_VA_bi)
 
 
 # Need to make this in a format that can be added in the model later
@@ -341,8 +345,12 @@ seedling_est_bi_SP_dat <- binomial_seedling_data %>%
   mutate(Treatment = paste0(Warming, "_", Vegetation)) %>% 
   mutate(blockID = paste0(Site, "_", Block)) 
 
-model_ssedl_SP_bi <- glmer(count ~ Warming + Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_SP_dat)
-summary(model_ssedl_SP_bi)
+model_seedl_SP_bi <- glmer(count ~ Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_SP_dat)
+summary(model_seedl_SP_bi)
+
+seedling_est_SP_final <- as.data.frame(fixef(model_seedl_SP_bi))
+
+###expit <- function(L) exp(L) / (1+exp(L)) #Transforming from logit link from binomial models
 
 
 # Need to make this in a format that can be added in the model later
@@ -385,7 +393,18 @@ summary(model1_seedling) #Seedlings grow larger in extant and novel transplant, 
 model_seedling <- lmer(size ~ treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
 summary(model_seedling) 
 
-Seedling_info_SP %>%  ggplot(aes(x = treatment, y = size)) +  geom_jitter(alpha= 0.2) + geom_violin(aes(fill = treatment, alpha = 0.5), draw_quantiles = c(0.25, 0.5, 0.75)) + facet_wrap(OTC~siteID, nrow = 2) + ggtitle("Seedling size by treatment for Sibbaldia procumbens") + ylab("size") + scale_fill_viridis_d() + theme_bw()
+model_seedling_null <- lmer(size ~ 1 + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
+summary(model_seedling_null)
+
+Seedling_info_SP_mean <- as.numeric(fixef(model_seedling_null))
+
+Seedling_info_SP_sd <- sigma.hat(model_seedling_null)$sigma$data
+
+# Seedling_info_SP <- Seedling_info_SP_mean 
+#   add_column(Seedling_info_SP_sd)
+
+
+Seedling_info_SP_dat %>%  ggplot(aes(x = treatment, y = size)) +  geom_jitter(alpha= 0.2) + geom_violin(aes(fill = treatment, alpha = 0.5), draw_quantiles = c(0.25, 0.5, 0.75)) + facet_wrap(OTC~siteID, nrow = 2) + ggtitle("Seedling size by treatment for Sibbaldia procumbens") + ylab("size") + scale_fill_viridis_d() + theme_bw()
 
 Seedling_info_SP <- Seedling_info_SP_dat %>%
   ungroup() %>% 
@@ -393,11 +412,11 @@ Seedling_info_SP <- Seedling_info_SP_dat %>%
          seeds_cap_sd = sd(size, na.rm = TRUE)) %>%
   # mutate(seedling_establishment_rate = if_else(OTC == "C", seedling_est_SP_C,
   #                                              if_else(OTC == "W", seedling_est_SP_W, 0))) %>% 
-  select(seeds_cap, seeds_cap_sd) %>% 
+  dplyr::select(seeds_cap, seeds_cap_sd) %>% 
   distinct()
 
 SP_max_seedling_size <- Seedling_info_SP_dat %>% 
-  select(max_seedling_size) %>% 
+  dplyr::select(max_seedling_size) %>% 
   unique()
 
 ###### Veronica alpina ######
@@ -420,10 +439,32 @@ Seedling_info_VA_dat <- Ver_alp %>%
   add_column(Ver_alp_coef) %>%
   mutate(size = Intercept + SH * SH_coef + NL * NL_coef + LL * LL_coef + WL * WL_coef) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
   ungroup() %>% 
-  mutate(max_seedling_size = max(size, na.rm = TRUE))
+  mutate(max_seedling_size = max(size, na.rm = TRUE)) %>% 
+  mutate(Vegetation = case_when(treatment %in% c("C", "E", "N") ~ "Veg",
+                                treatment == "R" ~ "NoVeg"))
 
-model_seedling_VA <- lmer(size ~ treatment + (1|siteID/plotID), data = Seedling_info_VA_dat)
-summary(model_seedling_VA)
+model_seedling_VA1 <- lmer(size ~ OTC + treatment + (1|siteID/blockID/plotID), data = Seedling_info_VA_dat)
+summary(model_seedling_VA1)
+
+model_seedling_VA2 <- lmer(size ~ OTC + treatment + (1|blockID/plotID), data = Seedling_info_VA_dat)
+summary(model_seedling_VA2)
+
+model_seedling_VA3 <- lmer(size ~ OTC * treatment + (1|plotID), data = Seedling_info_VA_dat)
+summary(model_seedling_VA3)
+
+model_seedling_VA4 <- lmer(size ~ OTC + treatment + (1|plotID), data = Seedling_info_VA_dat)
+summary(model_seedling_VA4)
+
+model_seedling_VA5 <- lmer(size ~ treatment + (1|plotID), data = Seedling_info_VA_dat)
+summary(model_seedling_VA5)
+
+model_seedling_VA6 <- lmer(size ~ Vegetation + (1|plotID), data = Seedling_info_VA_dat)
+summary(model_seedling_VA6)
+
+Seedling_info_VA_mean <- fixef(model_seedling_VA6) #Make means for Veg and NoVeg by adding the VegetationVeg coefficient to to intercept.
+
+Seedling_info_VA_sd <- sigma.hat(model_seedling_VA6)$sigma$data #can we get different standard diviations for different groups. google this with lmer.
+
 
 Seedling_info_VA_dat %>%  ggplot(aes(x = treatment, y = size)) +  geom_jitter(alpha= 0.2) + geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) + ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") + scale_fill_manual(values = c("lightblue", "darkred")) + theme_bw()
 
@@ -438,7 +479,7 @@ Seedling_info_VA <- Seedling_info_VA_dat %>%
   distinct()
 
 VA_max_seedling_size <- Seedling_info_VA_dat %>% 
-  select(max_seedling_size) %>% 
+  select(max_seedling_size) %>%  #change seedlings to non seedling when SH is larger than 20 and number of leaves is larger than 6.
   unique()
 
 #### Making transitions ####
@@ -542,9 +583,13 @@ Sib_pro_2018_2019 <- Sib_pro_2018 %>%
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
   mutate(flo.no = rowSums(dplyr::select(., NB_2018, NFL_2018, NC_2018), na.rm=TRUE),
         flo.if = ifelse(flo.no > 0, 1, 0)) %>%
+  #mutate(flo.no = case_when(is.na(flo.if) ~ NA, !is.na(flo.if) ~ flo.no))
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                               ifelse(juvenile_next == "yes" & is.na(size), "sexual",
                                      ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>%
+  mutate(clo.no =,
+         clo.if = 
+         )
 ## Make clonal information (clo.if, clo.no and transfer the size of the mother to size)
   select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
   mutate(transition = "2018-2019")
@@ -624,6 +669,7 @@ Sib_pro_test <- Sib_pro_2018_2021 %>%
   mutate(size = case_when((offspringNext == "clone" & distance_parent < 5) ~ size_parent,
                           (offspringNext == "clone" & distance_parent > 5) ~ size,
                           offspringNext %in% c(NA, "sexual") ~ size))
+#make clo.if and clo.no
 
 
 #Some plots fro visualization/checking
