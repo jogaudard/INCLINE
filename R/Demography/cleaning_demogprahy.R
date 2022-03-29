@@ -60,7 +60,11 @@ Sib_pro <- Sib_pro %>%
   mutate(juvenile = case_when(is.na(juvenile) ~ "no",
                               juvenile == "yes" ~ "yes",
                               juvenile == "no" ~ "no")) %>% 
-  mutate(MS = case_when(MS %in% c(1:100) ~ paste0(plotID, "_", MS))) 
+  mutate(MS = case_when(MS %in% c(1:100) ~ paste0(plotID, "_", MS))) %>% 
+  mutate(seedling = case_when(seedling == "yes" & LL > 10 ~ "no",
+                              seedling == "yes" & NL > 4 ~ "no",
+                              seedling == "yes" ~ seedling,
+                              seedling == "no" ~ seedling)) #Removing individuals from the seedling category if they have to large leaf length or to many leaves as we do not think these are actually seedlings.
 
 Ver_alp <- Ver_alp %>% 
   rename(siteID = Site, block = Block, plot = Plot, year = Year, date = Date, regitrator = Registrator, seedling = seedl) %>%  #Rename to lower capital, and correct naming convention for the INCLINE project
