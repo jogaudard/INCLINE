@@ -7,6 +7,11 @@ library(tidyverse)
 library(dataDownloader)
 library(osfr)
 library(lubridate)
+library(conflicted)
+
+#### Select preferences for conflicts ####
+
+conflict_prefer("select", "dplyr")
 
 #### Downloading data from OSF ####
 
@@ -72,8 +77,11 @@ Ver_alp <- Ver_alp %>%
                               juvenile == "yes" ~ "yes",
                               juvenile == "no" ~ "no")) %>% 
   mutate(MS = case_when(MS %in% c(1:100) ~ paste0(plotID, "_", MS))) %>% 
-  select(!...25:...32)
-
+  select(!...25:...32) %>% 
+  mutate(seedling = case_when(seedling == "yes" & SH > 20 ~ "no",
+                              seedling == "yes" & NL > 6 ~ "no",
+                              seedling == "yes" ~ seedling,
+                              seedling == "no" ~ seedling)) #Removing individuals from the seedling category if they have to large shoot height or to many leaves as we do not think these are actually seedlings.
 
 #### Changing variable types ####
 
