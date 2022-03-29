@@ -181,6 +181,9 @@ Seeds_per_capsule_VA_dat %>%
 
 #seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv") 
 
+#Function needed to transform back after binomial model used on data
+expit <- function(L) exp(L) / (1+exp(L)) 
+
 seedling_est1 <- seedling_est %>% 
   filter(Year == 2020) %>% 
   select(Site, Block, Plot, PlotID, Date, Species, ID, Vegetation, Present) %>% 
@@ -266,13 +269,13 @@ seedling_est_VA <- fixef(model_seedl_VA2) %>%
 
 # Need to make this in a format that can be added in the model later
 
-seedling_est_VA_C_NoVeg <- exp(seedling_est_VA$Intercept)
+seedling_est_VA_C_NoVeg <- expit(seedling_est_VA$Intercept)
 
-seedling_est_VA_C_Veg <- exp(seedling_est_VA$Intercept + seedling_est_VA$Veg)
+seedling_est_VA_C_Veg <- expit(seedling_est_VA$Intercept + seedling_est_VA$Veg)
 
-seedling_est_VA_OTC_NoVeg <- exp(seedling_est_VA$Intercept + seedling_est_VA$OTC)
+seedling_est_VA_OTC_NoVeg <- expit(seedling_est_VA$Intercept + seedling_est_VA$OTC)
 
-seedling_est_VA_OTC_Veg <- exp(seedling_est_VA$Intercept + seedling_est_VA$OTC + seedling_est_VA$Veg)
+seedling_est_VA_OTC_Veg <- expit(seedling_est_VA$Intercept + seedling_est_VA$OTC + seedling_est_VA$Veg)
 
   
 ###### Sibbaldia procumbens ######
@@ -291,27 +294,30 @@ seedling_est_bi_SP_dat <- binomial_seedling_data %>%
   mutate(Treatment = paste0(Warming, "_", Vegetation)) %>% 
   mutate(blockID = paste0(Site, "_", Block)) 
 
-model_seedl_SP_bi <- glmer(count ~ Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_SP_dat)
-summary(model_seedl_SP_bi)
+# model_seedl_SP1 <- glmer(count ~ Warming * Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_SP_dat)
+# summary(model_seedl_SP1) #Neither interaction nor warming is significant. Remove intercation in the first step.
 
-seedling_est_SP_final <- as.data.frame(fixef(model_seedl_SP_bi))
+# model_seedl_SP2 <- glmer(count ~ Warming + Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_SP_dat)
+# summary(model_seedl_SP2) #Warming is not significant, remove it in the next step
 
-###expit <- function(L) exp(L) / (1+exp(L)) #Transforming from logit link from binomial models
+model_seedl_SP3 <- glmer(count ~ Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_SP_dat)
+summary(model_seedl_SP3)
 
+seedling_est_SP <- fixef(model_seedl_SP3) %>% 
+  as.data.frame() %>% 
+  rownames_to_column() %>% 
+  pivot_wider(names_from = "rowname", values_from = ".") %>% 
+  rename(Intercept = "(Intercept)", Veg = VegetationVeg)
 
 # Need to make this in a format that can be added in the model later
 
-# seedling_est_SP_W <- seedling_est_SP %>% 
-#   filter(Warming == "OTC")
-# 
-# seedling_est_SP_W <- seedling_est_SP_W$germination_percentage
-# 
-# seedling_est_SP_C <- seedling_est_SP %>% 
-#   filter(Warming == "C")
-# 
-# seedling_est_SP_C <- seedling_est_SP_C$germination_percentage
+seedling_est_SP_NoVeg <- expit(seedling_est_SP$Intercept)
+
+seedling_est_SP_Veg <- expit(seedling_est_VA$Intercept + seedling_est_VA$Veg)
+
 
 #### Making seedling size information ####
+
 #This section calculates the average seedlings size of each species, and adding in the seedling establishment rate in the same dataset to have all seedling data together
 
 ###### Sibaldia procumbens ######
