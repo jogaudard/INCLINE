@@ -130,13 +130,18 @@ summary(seed_SP2)
 seed_SP_null <- glmer(Number_of_seeds ~ 1 + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log"))
 summary(seed_SP_null)
 
-Seeds_per_capsule_SP_dat %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm", linetype = "dashed") + ggtitle("Number of seeds by size for Sibbaldia procumbens") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
+Seeds_per_capsule_SP <- exp(fixef(seed_SP_null))
 
-Seeds_per_capsule_SP <- Seeds_per_capsule_SP_dat %>% 
-  select(mean_seeds) %>% 
-  unique()
 
-Seeds_per_capsule_SP <- Seeds_per_capsule_SP$mean_seeds
+# Seeds_per_capsule_SP_dat %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm", linetype = "dashed") + ggtitle("Number of seeds by size for Sibbaldia procumbens") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
+
+# Seeds_per_capsule_SP <- Seeds_per_capsule_SP_dat %>% 
+#   dplyr::select(mean_seeds) %>% 
+#   unique()
+# 
+# Seeds_per_capsule_SP <- Seeds_per_capsule_SP$mean_seeds
+
+
 
 ###### Veronica alpina ######
 
