@@ -146,14 +146,22 @@ Seeds_per_capsule_VA_dat <- Seeds_per_capsule %>%
   mutate(size = Intercept + (Shoot_height_mm * SH_coef) + (Number_of_leaves * NL_coef) + (Leaf_length_mm * LL_coef) + (Leaf_width_mm * WL_coef)) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
   mutate(ID = paste0(Site, "_", Species, "_", Individual))
 
-seed_VA_1 <- glmer(Number_of_seeds ~ size + Site + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on biomass and site - biomass is significant (0.0386).
+seed_VA_1 <- glmer(Number_of_seeds ~ size * Site + (1|Site) + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Model failed to converge, remove Site as random effect
 summary(seed_VA_1)
-seed_VA_2 <- glmer(Number_of_seeds ~ size + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on biomass alone, right above significant (0.065)
+
+seed_VA_2 <- glmer(Number_of_seeds ~ size * Site + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Failed to converge, remove the interacation between size and Site.
 summary(seed_VA_2)
-seed_VA_3 <- glmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on number of capsule for each individual, it does not.
+
+seed_VA_3 <- glmer(Number_of_seeds ~ size + Site + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on biomass and site - biomass is significant (0.0386).
 summary(seed_VA_3)
 
-Seeds_per_capsule_VA <- fixef(seed_VA_2)
+seed_VA_4 <- glmer(Number_of_seeds ~ size + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on biomass alone, right above significant (0.065)
+summary(seed_VA_4)
+
+seed_VA_5 <- glmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on number of capsule for each individual, it does not.
+summary(seed_VA_5)
+
+Seeds_per_capsule_VA <- fixef(seed_VA_3)
 
 
 Seeds_per_capsule_VA_dat %>%  ggplot(aes(x = size, y = Number_of_seeds)) + geom_point(aes(color = Site)) + geom_smooth(method = "lm", linetype = "dashed") + ggtitle("Number of seeds by size for Veronica_alpina") + xlab("log2(size)") + ylab("Seed per individual") + scale_color_viridis_d()
