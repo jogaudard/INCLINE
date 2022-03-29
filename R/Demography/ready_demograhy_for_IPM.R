@@ -33,7 +33,6 @@ get_file(node = "zhk3m",
 
 Seeds_per_capsule <- read_csv2("data/Demography/Seeds_per_capsule.csv")
 biomass_Sib_pro <- read_csv2("data/Demography/Biomass_Sib_pro.csv")
-#biomass_Ver_alp <- read_delim("data/Demography/SeedClim_Ver_alp_biomass_regression.txt")
 #biomass_Ver_alp_INCLINE <- read_csv2("data/Demography/SG.19_above-below_allocation.csv") #Not using this because some of the biomass rotted while collecting data, so biomass might not be correct
 seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv") 
 biomass_Ver_alp <- read_csv2("data/Demography/VeronicaAlpina_Biomass_Seedclim_edited.csv") #from SeedClim not on INCLINE OSF
@@ -83,8 +82,8 @@ biomass_Ver_alp <- biomass_Ver_alp %>%
   filter(!ag == 0) %>% 
   mutate(ag = log2(ag))
 
-# Ver_alp_biomass_regression <- lmer(ag ~ SH + NL + LL + WL + (1|siteID), data = biomass_Ver_alp2)  #Not using this as it came with a singularity warning. Mixed effect model and linear model gives the same intercept and slopes for each variable.
-# summary(Ver_alp_biomass_regression)
+ Ver_alp_biomass_regression <- lmer(ag ~ SH + NL + LL + WL + (1|siteID), data = biomass_Ver_alp2)  #Not using this as it came with a singularity warning. Mixed effect model and linear model gives the same intercept and slopes for each variable.
+ summary(Ver_alp_biomass_regression)
 
 Ver_alp_biomass_regression_lm <- lm(ag ~ SH + NL + LL + WL , data = biomass_Ver_alp) 
 summary(Ver_alp_biomass_regression_lm)
@@ -95,17 +94,6 @@ Ver_alp_coef <- coef(Ver_alp_biomass_regression_lm) %>%
   pivot_wider(names_from = "rowname", values_from = ".") %>% 
   rename(Intercept = "(Intercept)", SH_coef = SH, NL_coef = NL, LL_coef = LL, WL_coef = WL)
 
-#INCLINE data for biomass regressions - we do not trust this data, using old data from SeedClim
-# biomass_Ver_alp_INCLINE1 <- biomass_Ver_alp_INCLINE %>% 
-#   filter(Species == "Veralp") %>% 
-#   select(Site, SH, NL, LL, WL, AB, BB) %>% 
-#   filter(!is.na(AB)) %>% 
-#   mutate(AB = log2(AB))
-# 
-# Ver_alp_biomass_regression <- lm(AB ~ SH + NL + LL + WL, data = biomass_Ver_alp_INCLINE1)
-# Ver_alp_biomass_regression <- lm(AB ~ SH + NL, data = biomass_Ver_alp_INCLINE1)
-# 
-# summary(Ver_alp_biomass_regression)
 
 #### Seeds per capsules coefficients ####
 #This section calculate the amount of seeds per capsule, and test if that is related to size of the mother or site. If it is related make regression and find coefficients for calculating it later (Veronica), if not, use the mean seed number per capsule (Sibbaldia).
@@ -123,10 +111,18 @@ Seeds_per_capsule_SP_dat <- Seeds_per_capsule %>%
   mutate(size = Intercept + Leaf_stock_length_mm*LSL_coef + Number_of_leaves*NL_coef + Leaf_length_mm* LL_coef) %>% 
   mutate(ID = paste0(Site, "_", Species, "_", Individual))
 
-seed_SP1 <- glmer(Number_of_seeds ~ size + Site + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log"))
-summary(seed_SP1) #Testing if seeds per capsule depends on size for each individual, or site - it does not.Although the model gives a warning that it fails to converge, but it looks good from inspection.
-seed_SP2 <- glmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on number of capsule for each individual, it does not.
-summary(seed_SP2)
+# seed_SP1 <- glmer(Number_of_seeds ~ size + Site + (1|Site) + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log"))
+# summary(seed_SP1) #Removed site as random effect because model complains about singularity
+# 
+# seed_SP2 <- glmer(Number_of_seeds ~ size + Site + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log"))
+# summary(seed_SP2) #Testing if seeds per capsule depends on size for each individual, or site - it does not. Although the model gives a warning that it fails to converge, but it looks good from inspection.
+# 
+# seed_SP3 <- glmer(Number_of_seeds ~ Number_of_capsules + (1|Site) + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on number of capsule for each individual, it does not.
+# summary(seed_SP3)
+# 
+# seed_SP4 <- glmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on number of capsule for each individual, it does not.
+# summary(seed_SP4)
+
 seed_SP_null <- glmer(Number_of_seeds ~ 1 + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log"))
 summary(seed_SP_null)
 
