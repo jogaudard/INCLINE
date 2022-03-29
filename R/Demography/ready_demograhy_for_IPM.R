@@ -356,6 +356,9 @@ Seedling_info_SP_dat <- Sib_pro %>%
 # 
 # model_seedling_SP3 <- lmer(size ~ treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
 # summary(model_seedling_SP3) 
+#
+# model_seedling_SP4 <- lmer(size ~ OTC + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
+# summary(model_seedling_SP4) 
 
 model_seedling_SPnull <- lmer(size ~ 1 + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
 summary(model_seedling_SPnull)
@@ -368,7 +371,7 @@ Seedling_info_SP <- as.data.frame(Seedling_info_SP_mean) %>%
    add_column(Seedling_info_SP_sd)
 
 SP_max_seedling_size <- Seedling_info_SP_dat %>% 
-  dplyr::select(max_seedling_size) %>% 
+  select(max_seedling_size) %>% 
   unique()
 
 ###### Veronica alpina ######
