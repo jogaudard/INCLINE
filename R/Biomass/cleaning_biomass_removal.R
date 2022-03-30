@@ -30,7 +30,13 @@ removal1 <- removal %>%
          FunctionalGroup = factor(FunctionalGroup, levels = c("Graminoid", "Forb", "Fern","Woody", "Bryophyte", "Lichen", "Litter"))) %>%  #Ordering the functional groups like I wan them in the figure
   group_by(Year, plotID, FunctionalGroup) %>% 
   mutate(value = sum(value))
-  
+
+
+#### Calculate numbers for biomass information in manuscripts ####
+removal1 %>% group_by(Year, Site, plotID) %>% mutate(total_biomass = sum(value, na.rm = TRUE)) %>% ungroup() %>% group_by(Year) %>% mutate(mean_biomass = mean(total_biomass)) %>%  ungroup() %>%  select(Year,  mean_biomass) %>% unique() 
+
+removal1 %>% group_by(Year, Site, plotID) %>% mutate(total_biomass = sum(value, na.rm = TRUE)) %>% ungroup() %>% group_by(Year, Treatment) %>% mutate(mean_biomass_treatment = mean(total_biomass)) %>%  ungroup() %>%  select(Year, Treatment, mean_biomass_treatment) %>% unique() 
+
 
 #### Plot data ####
 
