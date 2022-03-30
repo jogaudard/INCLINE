@@ -56,7 +56,8 @@ biomass_Sib_pro <- biomass_Sib_pro %>%
   mutate(vegetative_mass = log2(vegetative_mass)) %>% 
   mutate(full_leaf_mass = leaf_mass+leaf_stalk_mass) %>% 
   mutate(full_leaf_mass = log2(full_leaf_mass)) %>% 
-  filter(!is.na(siteID))
+   filter(!is.na(siteID)) %>% 
+  mutate(NL = round(NL/3))  #Had counted leaflets, but we want to count leaves. So it is divided by 3. Round to give integers, in case some leaves had two leaflets.
 
 Sib_pro_biomass_regression <- lmer(full_leaf_mass ~ LSL + NL + LL + (1|siteID), data = biomass_Sib_pro)
 
@@ -91,6 +92,8 @@ biomass_Ver_alp <- biomass_Ver_alp %>%
 
  # Ver_alp_biomass_regression <- lmer(ag ~ SH + NL + LL + WL + (1|siteID), data = biomass_Ver_alp)  #Not using this as it came with a singularity warning. Mixed effect model and linear model gives the same intercept and slopes for each variable.
  # summary(Ver_alp_biomass_regression)
+# Ver_alp_biomass_regression_lm <- lm(ag ~ SH + NL + LL + WL + siteID, data = biomass_Ver_alp) #biomass is not significantly different between sites is not significantly different.
+# summary(Ver_alp_biomass_regression_lm)
 
 Ver_alp_biomass_regression_lm <- lm(ag ~ SH + NL + LL + WL , data = biomass_Ver_alp) 
 summary(Ver_alp_biomass_regression_lm)
