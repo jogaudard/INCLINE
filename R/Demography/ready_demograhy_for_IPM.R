@@ -89,8 +89,8 @@ biomass_Ver_alp <- biomass_Ver_alp %>%
   filter(!ag == 0) %>% 
   mutate(ag = log2(ag))
 
- Ver_alp_biomass_regression <- lmer(ag ~ SH + NL + LL + WL + (1|siteID), data = biomass_Ver_alp2)  #Not using this as it came with a singularity warning. Mixed effect model and linear model gives the same intercept and slopes for each variable.
- summary(Ver_alp_biomass_regression)
+ # Ver_alp_biomass_regression <- lmer(ag ~ SH + NL + LL + WL + (1|siteID), data = biomass_Ver_alp)  #Not using this as it came with a singularity warning. Mixed effect model and linear model gives the same intercept and slopes for each variable.
+ # summary(Ver_alp_biomass_regression)
 
 Ver_alp_biomass_regression_lm <- lm(ag ~ SH + NL + LL + WL , data = biomass_Ver_alp) 
 summary(Ver_alp_biomass_regression_lm)
@@ -151,7 +151,7 @@ Seeds_per_capsule_VA_dat <- Seeds_per_capsule %>%
   mutate(mean_seeds = mean(Number_of_seeds, na.rm = TRUE)) %>%
   bind_cols(Ver_alp_coef) %>%
   mutate(size = Intercept + (Shoot_height_mm * SH_coef) + (Number_of_leaves * NL_coef) + (Leaf_length_mm * LL_coef) + (Leaf_width_mm * WL_coef)) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
-  mutate(ID = paste0(Site, "_", Species, "_", Individual))
+  mutate(ID = paste0(Site, "_", Species, "_", Individual)) 
 # 
 # seed_VA_1 <- glmer(Number_of_seeds ~ size * Site + (1|Site) + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Model failed to converge, remove Site as random effect
 # summary(seed_VA_1)
@@ -161,24 +161,24 @@ Seeds_per_capsule_VA_dat <- Seeds_per_capsule %>%
 # 
 # seed_VA_3 <- glmer(Number_of_seeds ~ size + Site + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on biomass and site - biomass is significant (0.0386).
 # summary(seed_VA_3)
+# 
+# seed_VA_4 <- glmer(Number_of_seeds ~ size + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on biomass alone, right above significant (0.065)
+# summary(seed_VA_4)
 
-seed_VA_4 <- glmer(Number_of_seeds ~ size + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on biomass alone, right above significant (0.065)
-summary(seed_VA_4)
+seed_VA_null <- glmer(Number_of_seeds ~ 1 + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Using the null model because the near significant effect of size in model 4 dissapeared when we excluded the small sized outlier individual, with a p-value for size going from 0.065 to 0.2. Null model is also the visually best fit for the data. See plot below
+summary(seed_VA_null)
 
 # seed_VA_5 <- glmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")) #Testing if seeds per capsule depends on number of capsule for each individual, it does not.
 # summary(seed_VA_5)
 
-Seeds_per_capsule_VA <- as.data.frame(fixef(seed_VA_4)) %>% 
-  rownames_to_column() %>% 
-  pivot_wider(names_from = "rowname", values_from = "fixef(seed_VA_4)") %>% 
-  rename(Intercept_seeds = "(Intercept)", seed_number_coef = size) %>% 
-  mutate(Intercept_seeds = exp(Intercept_seeds),
-         seed_number_coef = exp(seed_number_coef))
+
+Seeds_per_capsule_VA_null <- as.numeric(exp(fixef(seed_VA_null)))
 
 Seeds_per_capsule_VA_dat %>%  
   ggplot(aes(x = size, y = Number_of_seeds)) + 
   geom_point(aes(color = Site)) + 
-  geom_abline(intercept = Seeds_per_capsule_VA$Intercept_seeds, slope = Seeds_per_capsule_VA$seed_number_coef) +
+  geom_hline(aes(yintercept = Seeds_per_capsule_VA_null)) + 
+  #geom_abline(intercept = Seeds_per_capsule_VA$Intercept_seeds, slope = Seeds_per_capsule_VA$seed_number_coef) +
   ggtitle("Number of seeds by size for Veronica_alpina") + 
   xlab("log2(size)") + 
   ylab("Seed per capsule") + 
