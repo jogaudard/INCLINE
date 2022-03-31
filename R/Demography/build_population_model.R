@@ -28,7 +28,7 @@ conflict_prefer("lmer", "lmerTest")
 x<-seq(from=0,to=10,length=1001)
 x0<-data.frame(size=x,size2=x*x)
 minSize<-min(Ver_alp_2018_2021$size,na.rm=T)-1
-maxSize<-max(Ver_alp_2018_2021$size,na.rm=T)+2
+maxSize<-max(Ver_alp_2018_2021$sizeNext,na.rm=T)+2
 
 # To understand the data, we plot survival, growth/shrinkage/stasis, number of seeds, and size of recruits:
 par(mfrow=c(2,2),mar=c(4,4,2,1))
@@ -40,55 +40,354 @@ plot(Ver_alp_2018_2021$size, Ver_alp_2018_2021$fec,xlab="Size (t)",ylab="Number 
 Ver_alp_2018_2021 %>% filter(offspringNext == "sexual") %>% ggplot(aes( x = sizeNext)) + geom_histogram() + ylab("Seedling size")
 Ver_alp_2018_2021 %>% filter(offspringNext == "clone") %>% ggplot(aes( x = sizeNext)) + geom_histogram() + ylab("Clone size")
 
+VA_CC <- Ver_alp_2018_2021 %>% filter(OTC == "C" & treatment == "C")
+VA_CR <- Ver_alp_2018_2021 %>% filter(OTC == "C" & treatment == "R")
+VA_CE <- Ver_alp_2018_2021 %>% filter(OTC == "C" & treatment == "E")
+VA_CN <- Ver_alp_2018_2021 %>% filter(OTC == "C" & treatment == "N")
+VA_WC <- Ver_alp_2018_2021 %>% filter(OTC == "W" & treatment == "C")
+VA_WR <- Ver_alp_2018_2021 %>% filter(OTC == "W" & treatment == "R")
+VA_WE <- Ver_alp_2018_2021 %>% filter(OTC == "W" & treatment == "E")
+VA_WN <- Ver_alp_2018_2021 %>% filter(OTC == "W" & treatment == "N")
+
+##### P matrix #####
+
+#### Ambient temperature control ####
 
 # The first step in constructing an IPM with IPMpack is a survival analysis. We use the function ‘survModelComp’ to explore whether survival is related to size, as illustrated in this figure:
+x11()
 par(mfrow=c(1,1))
-survModelComp(dataf=Ver_alp_2018_2021, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
+survModelComp(dataf= VA_CC, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
 
 # Based on this simple analysis we select the following survival model since it has the lowest AIC value:
-so <- makeSurvObj(Ver_alp_2018_2021, surv ~ 1)
+so_CC <- makeSurvObj(VA_CC, surv ~ 1)
 
 # We next model growth, conditional on survival. Here, ’growth’ is the process relating size in year t+1 to size in year t. We use the following code to illustrate it in a figure:
-growthModelComp(dataf=Ver_alp_2018_2021, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
+growthModelComp(dataf=VA_CC, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
 
 # Based on this simple model comparison, we select the following growth model:
-go <- makeGrowthObj(Ver_alp_2018_2021, sizeNext~size)
+go_CC <- makeGrowthObj(VA_CC, sizeNext ~ size)
 
 # With these survival and growth objects in hand, we build a survival/growth (P) matrix.
-Pmatrix<-makeIPMPmatrix(survObj=so,growObj=go,minSize=minSize,maxSize=maxSize)
+Pmatrix_CC <- makeIPMPmatrix(survObj=so_CC, growObj=go_CC, minSize=minSize, maxSize=maxSize)
 
 # We plot this P-matrix using the ’image.plot’ function of the fields package:
 
-image.plot(Pmatrix@meshpoints,
-           Pmatrix@meshpoints,
-           t(Pmatrix),
+image.plot(Pmatrix_CC@meshpoints,
+           Pmatrix_CC@meshpoints,
+           t(Pmatrix_CC),
            main = "Pmatrix: survival and growth",
            xlab = "Size at t",
            ylab = "Size at t+1")
 abline(0,1,lty=2,lwd=3)
 
-diagnosticsPmatrix(Pmatrix, growObj=go, survObj=so, correction="constant")
-#Looks good - binwidth and range is ok.
+diagnosticsPmatrix(Pmatrix_CC, growObj=go_CC, survObj=so_CC, correction="constant") 
+
+#Bindwidth looks ok, range size could maybe be fixed
+
+#### Ambient temperature removal ####
+
+# The first step in constructing an IPM with IPMpack is a survival analysis. We use the function ‘survModelComp’ to explore whether survival is related to size, as illustrated in this figure:
+x11()
+par(mfrow=c(1,1))
+survModelComp(dataf= VA_CR, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
+
+# Based on this simple analysis we select the following survival model since it has the lowest AIC value:
+so_CR <- makeSurvObj(VA_CR, surv ~ 1)
+
+# We next model growth, conditional on survival. Here, ’growth’ is the process relating size in year t+1 to size in year t. We use the following code to illustrate it in a figure:
+growthModelComp(dataf=VA_CR, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
+
+# Based on this simple model comparison, we select the following growth model:
+go_CR <- makeGrowthObj(VA_CR, sizeNext ~ size + size2)
+
+# With these survival and growth objects in hand, we build a survival/growth (P) matrix.
+Pmatrix_CR <- makeIPMPmatrix(survObj=so_CR, growObj=go_CR, minSize=minSize, maxSize=maxSize)
+
+# We plot this P-matrix using the ’image.plot’ function of the fields package:
+
+image.plot(Pmatrix_CR@meshpoints,
+           Pmatrix_CR@meshpoints,
+           t(Pmatrix_CR),
+           main = "Pmatrix: survival and growth",
+           xlab = "Size at t",
+           ylab = "Size at t+1")
+abline(0,1,lty=2,lwd=3)
+
+diagnosticsPmatrix(Pmatrix_CR, growObj=go_CR, survObj=so_CR, correction="constant") 
+
+#Bindwidth looks ok, range size could maybe be fixed
+
+
+#### Ambient temperature extant ####
+
+# The first step in constructing an IPM with IPMpack is a survival analysis. We use the function ‘survModelComp’ to explore whether survival is related to size, as illustrated in this figure:
+x11()
+par(mfrow=c(1,1))
+survModelComp(dataf= VA_CE, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
+
+# Based on this simple analysis we select the following survival model since it has the lowest AIC value:
+so_CE <- makeSurvObj(VA_CE, surv ~ 1)
+
+# We next model growth, conditional on survival. Here, ’growth’ is the process relating size in year t+1 to size in year t. We use the following code to illustrate it in a figure:
+growthModelComp(dataf=VA_CE, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
+
+# Based on this simple model comparison, we select the following growth model:
+go_CE <- makeGrowthObj(VA_CE, sizeNext ~ size + size2)
+
+# With these survival and growth objects in hand, we build a survival/growth (P) matrix.
+Pmatrix_CE <- makeIPMPmatrix(survObj=so_CE, growObj=go_CE, minSize=minSize, maxSize=maxSize)
+
+# We plot this P-matrix using the ’image.plot’ function of the fields package:
+
+image.plot(Pmatrix_CE@meshpoints,
+           Pmatrix_CE@meshpoints,
+           t(Pmatrix_CE),
+           main = "Pmatrix: survival and growth",
+           xlab = "Size at t",
+           ylab = "Size at t+1")
+abline(0,1,lty=2,lwd=3)
+
+diagnosticsPmatrix(Pmatrix_CE, growObj=go_CE, survObj=so_CE, correction="constant") 
+
+#Bindwidth looks ok, range size could maybe be fixed
+
+
+#### Ambient temperature novel ####
+
+# The first step in constructing an IPM with IPMpack is a survival analysis. We use the function ‘survModelComp’ to explore whether survival is related to size, as illustrated in this figure:
+x11()
+par(mfrow=c(1,1))
+survModelComp(dataf= VA_CN, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
+
+# Based on this simple analysis we select the following survival model since it has the lowest AIC value:
+so_CN <- makeSurvObj(VA_CN, surv ~ 1)
+
+# We next model growth, conditional on survival. Here, ’growth’ is the process relating size in year t+1 to size in year t. We use the following code to illustrate it in a figure:
+growthModelComp(dataf=VA_CN, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
+
+# Based on this simple model comparison, we select the following growth model:
+go_CN <- makeGrowthObj(VA_CN, sizeNext ~ size + size2)
+
+# With these survival and growth objects in hand, we build a survival/growth (P) matrix.
+Pmatrix_CN <- makeIPMPmatrix(survObj=so_CN, growObj=go_CN, minSize=minSize, maxSize=maxSize)
+
+# We plot this P-matrix using the ’image.plot’ function of the fields package:
+
+image.plot(Pmatrix_CN@meshpoints,
+           Pmatrix_CN@meshpoints,
+           t(Pmatrix_CN),
+           main = "Pmatrix: survival and growth",
+           xlab = "Size at t",
+           ylab = "Size at t+1")
+abline(0,1,lty=2,lwd=3)
+
+diagnosticsPmatrix(Pmatrix_CN, growObj=go_CN, survObj=so_CN, correction="constant") 
+
+#Bindwidth looks ok, range size could maybe be fixed
+
+
+#### Warm control ####
+
+# The first step in constructing an IPM with IPMpack is a survival analysis. We use the function ‘survModelComp’ to explore whether survival is related to size, as illustrated in this figure:
+x11()
+par(mfrow=c(1,1))
+survModelComp(dataf= VA_WC, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
+
+# Based on this simple analysis we select the following survival model since it has the lowest AIC value:
+so_WC <- makeSurvObj(VA_WC, surv ~ 1)
+
+# We next model growth, conditional on survival. Here, ’growth’ is the process relating size in year t+1 to size in year t. We use the following code to illustrate it in a figure:
+growthModelComp(dataf=VA_WC, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
+
+# Based on this simple model comparison, we select the following growth model:
+go_WC <- makeGrowthObj(VA_WC, sizeNext ~ size + size2)
+
+# With these survival and growth objects in hand, we build a survival/growth (P) matrix.
+Pmatrix_WC <- makeIPMPmatrix(survObj=so_WC, growObj=go_WC, minSize=minSize, maxSize=maxSize)
+
+# We plot this P-matrix using the ’image.plot’ function of the fields package:
+
+image.plot(Pmatrix_WC@meshpoints,
+           Pmatrix_WC@meshpoints,
+           t(Pmatrix_WC),
+           main = "Pmatrix: survival and growth",
+           xlab = "Size at t",
+           ylab = "Size at t+1")
+abline(0,1,lty=2,lwd=3)
+
+diagnosticsPmatrix(Pmatrix_WC, growObj=go_WC, survObj=so_WC, correction="constant") 
+
+#Bindwidth looks ok, range size could maybe be fixed
+
+
+#### Ambient temperature removal ####
+
+# The first step in constructing an IPM with IPMpack is a survival analysis. We use the function ‘survModelComp’ to explore whether survival is related to size, as illustrated in this figure:
+x11()
+par(mfrow=c(1,1))
+survModelComp(dataf= VA_WR, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
+
+# Based on this simple analysis we select the following survival model since it has the lowest AIC value:
+so_WR <- makeSurvObj(VA_WR, surv ~ size)
+
+# We next model growth, conditional on survival. Here, ’growth’ is the process relating size in year t+1 to size in year t. We use the following code to illustrate it in a figure:
+growthModelComp(dataf=VA_WR, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
+
+# Based on this simple model comparison, we select the following growth model:
+go_WR <- makeGrowthObj(VA_WR, sizeNext ~ size)
+
+# With these survival and growth objects in hand, we build a survival/growth (P) matrix.
+Pmatrix_WR <- makeIPMPmatrix(survObj=so_WR, growObj=go_WR, minSize=minSize, maxSize=maxSize)
+
+# We plot this P-matrix using the ’image.plot’ function of the fields package:
+
+image.plot(Pmatrix_WR@meshpoints,
+           Pmatrix_WR@meshpoints,
+           t(Pmatrix_WR),
+           main = "Pmatrix: survival and growth",
+           xlab = "Size at t",
+           ylab = "Size at t+1")
+abline(0,1,lty=2,lwd=3)
+
+diagnosticsPmatrix(Pmatrix_WR, growObj=go_WR, survObj=so_WR, correction="constant") 
+
+#Bindwidth looks ok, range size could maybe be fixed
+
+
+#### Ambient temperature extant ####
+
+# The first step in constructing an IPM with IPMpack is a survival analysis. We use the function ‘survModelComp’ to explore whether survival is related to size, as illustrated in this figure:
+x11()
+par(mfrow=c(1,1))
+survModelComp(dataf= VA_WE, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
+
+# Based on this simple analysis we select the following survival model since it has the lowest AIC value:
+so_WE <- makeSurvObj(VA_WE, surv ~ 1)
+
+# We next model growth, conditional on survival. Here, ’growth’ is the process relating size in year t+1 to size in year t. We use the following code to illustrate it in a figure:
+growthModelComp(dataf=VA_WE, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
+
+# Based on this simple model comparison, we select the following growth model:
+go_WE <- makeGrowthObj(VA_WE, sizeNext ~ size)
+
+# With these survival and growth objects in hand, we build a survival/growth (P) matrix.
+Pmatrix_WE <- makeIPMPmatrix(survObj=so_WE, growObj=go_WE, minSize=minSize, maxSize=maxSize)
+
+# We plot this P-matrix using the ’image.plot’ function of the fields package:
+
+image.plot(Pmatrix_WE@meshpoints,
+           Pmatrix_WE@meshpoints,
+           t(Pmatrix_WE),
+           main = "Pmatrix: survival and growth",
+           xlab = "Size at t",
+           ylab = "Size at t+1")
+abline(0,1,lty=2,lwd=3)
+
+diagnosticsPmatrix(Pmatrix_WE, growObj=go_WE, survObj=so_CE, correction="constant") 
+
+#Bindwidth looks ok, range size could maybe be fixed
+
+
+#### Ambient temperature novel ####
+
+# The first step in constructing an IPM with IPMpack is a survival analysis. We use the function ‘survModelComp’ to explore whether survival is related to size, as illustrated in this figure:
+x11()
+par(mfrow=c(1,1))
+survModelComp(dataf= VA_WN, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
+
+# Based on this simple analysis we select the following survival model since it has the lowest AIC value:
+so_WN <- makeSurvObj(VA_WN, surv ~ size) #although the surv ~ size + size2 has the lowest AIC the shape of it does not make biological sense.
+
+# We next model growth, conditional on survival. Here, ’growth’ is the process relating size in year t+1 to size in year t. We use the following code to illustrate it in a figure:
+growthModelComp(dataf=VA_WN, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
+
+# Based on this simple model comparison, we select the following growth model:
+go_WN <- makeGrowthObj(VA_WN, sizeNext ~ size)
+
+# With these survival and growth objects in hand, we build a survival/growth (P) matrix.
+Pmatrix_WN <- makeIPMPmatrix(survObj=so_WN, growObj=go_WN, minSize=minSize, maxSize=maxSize)
+
+# We plot this P-matrix using the ’image.plot’ function of the fields package:
+
+image.plot(Pmatrix_WN@meshpoints,
+           Pmatrix_WN@meshpoints,
+           t(Pmatrix_WN),
+           main = "Pmatrix: survival and growth",
+           xlab = "Size at t",
+           ylab = "Size at t+1")
+abline(0,1,lty=2,lwd=3)
+
+diagnosticsPmatrix(Pmatrix_WN, growObj=go_WN, survObj=so_CN, correction="constant") 
+
+#Bindwidth looks ok, range size could maybe be fixed
 
 
 # FECUNDITY KERNEL
 # The fecundity component of an IPM requires analysis of each step of the process of reproduction. Here we start with the first step: whether or not individuals flower in year t (a binomial response). We reemphasize that the population was censused during flowering, and thus we construct the population model based on a pre-reproductive census. Since IPMpack does not have a fecundity model comparison function yet, we must perform model comparison manually:
-fo1<-makeFecObj(Ver_alp_2018_2021, Formula=flo.if~1, Family = "binomial") # Intercept only model 
-fo2<-makeFecObj(Ver_alp_2018_2021, Formula=flo.if~size, Family = "binomial") 
-fo3<-makeFecObj(Ver_alp_2018_2021, Formula=flo.if~size+size2, Family = "binomial")
 
-# We plot these models for comparison
-fs <- order(Ver_alp_2018_2021$size)
-fs.fec <- (Ver_alp_2018_2021$flo.no)[fs]
-fs.size <- (Ver_alp_2018_2021$size)[fs]
-pfz <- tapply(fs.size, as.numeric(cut(fs.size, 21)), mean, na.rm = TRUE)
-ps <- tapply(fs.fec, as.numeric(cut(fs.size, 21)), mean, na.rm = TRUE)
-plot(as.numeric(pfz), as.numeric(ps), pch = 19, cex=2, col="blue",ylim=c(0,1),
-     xlab="size", ylab="proportion flowering", main="")
-y0<-predict(fo1@fitFec[[1]],newdata=x0,type="response")
-lines(x,y0,col="red")
-y0<-predict(fo2@fitFec[[1]],newdata=x0,type="response")
-lines(x,y0,col="green")
-y0<-predict(fo3@fitFec[[1]],newdata=x0,type="response")
-lines(x,y0,col="blue")
-legend("topleft", legend = sprintf("%s: %s = %.1f",c("1","size","size+size2"), c("AIC"),c(AIC(fo1@fitFec[[1]]),AIC(fo2@fitFec[[1]]),AIC(fo3@fitFec[[1]]))), col = c(2:4),lty = 1, xjust = 1, bg = "white")
+### This does not work
+
+# Ver_alp_2018_2021_flo <- Ver_alp_2018_2021 %>% 
+#   mutate(stage = "continous",
+#          stageNext = "continous") %>% 
+#   ungroup() %>% 
+#   as.data.frame()
+# 
+# fo1<-makeFecObj(Ver_alp_2018_2021_flo, Formula=flo.if~1, Family = "binomial") # Intercept only model 
+# fo2<-makeFecObj(Ver_alp_2018_2021_flo, Formula=flo.if~size, Family = "binomial") 
+# fo3<-makeFecObj(Ver_alp_2018_2021_flo, Formula=flo.if~size+size2, Family = "binomial")
+
+AIC(glm(flo.if~1, family = 'binomial', data = Ver_alp_2018_2021))
+AIC(glm(flo.if~size, family = 'binomial', data = Ver_alp_2018_2021))
+AIC(glm(flo.if~size+I(size^2), family = 'binomial', data = Ver_alp_2018_2021))
+AIC(glm(flo.if~size+I(size^2)+I(size^3), family = 'binomial', data = Ver_alp_2018_2021))
+floweringChosenModel <- flo.if ~ size + size2 #Chosen based on AIC
+
+
+
+
+
+# # We plot these models for comparison
+# fs <- order(Ver_alp_2018_2021$size)
+# fs.fec <- (Ver_alp_2018_2021$flo.no)[fs]
+# fs.size <- (Ver_alp_2018_2021$size)[fs]
+# pfz <- tapply(fs.size, as.numeric(cut(fs.size, 21)), mean, na.rm = TRUE)
+# ps <- tapply(fs.fec, as.numeric(cut(fs.size, 21)), mean, na.rm = TRUE)
+# plot(as.numeric(pfz), as.numeric(ps), pch = 19, cex=2, col="blue",ylim=c(0,1),
+#      xlab="size", ylab="proportion flowering", main="")
+# y0<-predict(fo1@fitFec[[1]],newdata=x0,type="response")
+# lines(x,y0,col="red")
+# y0<-predict(fo2@fitFec[[1]],newdata=x0,type="response")
+# lines(x,y0,col="green")
+# y0<-predict(fo3@fitFec[[1]],newdata=x0,type="response")
+# lines(x,y0,col="blue")
+# legend("topleft", legend = sprintf("%s: %s = %.1f",c("1","size","size+size2"), c("AIC"),c(AIC(fo1@fitFec[[1]]),AIC(fo2@fitFec[[1]]),AIC(fo3@fitFec[[1]]))), col = c(2:4),lty = 1, xjust = 1, bg = "white")
+
+# The third step in the fecundity process is the number of inflorescences (heads) per stem. Here too, the data consist of counts, so we assume a Poisson distribution.
+# 
+# fo1<-makeFecObj(Sp2, Formula=c(fec1Bolt~size,fec2Stem~size,fec3Head~1), 
+#                 Family = c("binomial","poisson","poisson"),
+#                 Transform = c("none","-1","none"))
+# fo2<-makeFecObj(Sp2, Formula=c(fec1Bolt~size,fec2Stem~size,fec3Head~size),
+#                 Family = c("binomial","poisson","poisson"),
+#                 Transform = c("none","-1","none"))
+# fo3<-makeFecObj(Sp2, Formula=c(fec1Bolt~size,fec2Stem~size,fec3Head~size+size2),
+#                 Family = c("binomial","poisson","poisson"),
+#                 Transform = c("none","-1","none"))
+
+Ver_alp_2018_2021_2 <- Ver_alp_2018_2021 %>% filter(flo.if == 1)
+
+AIC(glm(flo.no~1,family='poisson',data=Ver_alp_2018_2021_2))
+AIC(glm(flo.no~size,family='poisson',data=Ver_alp_2018_2021_2))
+AIC(glm(flo.no~size+I(size^2),family='poisson',data=Ver_alp_2018_2021_2))
+AIC(glm(flo.no~size+I(size^2)+I(size^3),family='poisson',data=Ver_alp_2018_2021_2))
+flowersChosenModel <- flo.no ~ size + size2 + size3 #Chosen based on AIC and plot
+
+plot(x = Ver_alp_2018_2021_2$size, y = Ver_alp_2018_2021_2$flo.no)
+
+#The combined fecundity model is:
+fo<-makeFecObj(Ver_alp_2018_2021, 
+               Formula=c(floweringChosenModel, flowersChosenModel), 
+               Family = c("binomial","poisson"), 
+               Transform = c("none","none"), 
+               fecConstants = data.frame(seedsPerHead=50,seedlingEstablishmentRate= 0.02))
