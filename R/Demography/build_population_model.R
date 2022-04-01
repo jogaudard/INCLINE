@@ -41,6 +41,10 @@ plot(Ver_alp_2018_2021$size, Ver_alp_2018_2021$fec,xlab="Size (t)",ylab="Number 
 Ver_alp_2018_2021 %>% filter(offspringNext == "sexual") %>% ggplot(aes( x = sizeNext)) + geom_histogram() + ylab("Seedling size")
 Ver_alp_2018_2021 %>% filter(offspringNext == "clone") %>% ggplot(aes( x = sizeNext)) + geom_histogram() + ylab("Clone size")
 
+Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
+   ungroup() %>% 
+   as.data.frame()
+
 VA_CC <- Ver_alp_2018_2021 %>% filter(OTC == "C" & treatment == "C")
 VA_CR <- Ver_alp_2018_2021 %>% filter(OTC == "C" & treatment == "R")
 VA_CE <- Ver_alp_2018_2021 %>% filter(OTC == "C" & treatment == "E")
@@ -322,66 +326,437 @@ diagnosticsPmatrix(Pmatrix_WN, growObj=go_WN, survObj=so_CN, correction="constan
 
 #Bindwidth looks ok, range size could maybe be fixed
 
-
-# FECUNDITY KERNEL
+##### F matrix #####
 # The fecundity component of an IPM requires analysis of each step of the process of reproduction. Here we start with the first step: whether or not individuals flower in year t (a binomial response). We reemphasize that the population was censused during flowering, and thus we construct the population model based on a pre-reproductive census. Since IPMpack does not have a fecundity model comparison function yet, we must perform model comparison manually:
 
-### This does not work
+#### Ambient temperature control ####
 
- Ver_alp_2018_2021_flo <- Ver_alp_2018_2021 %>% 
-   ungroup() %>% 
-   as.data.frame()
-# 
-
-
-
-AIC(glm(flo.if~1, family = 'binomial', data = Ver_alp_2018_2021_flo))
-AIC(glm(flo.if~size, family = 'binomial', data = Ver_alp_2018_2021_flo))
-mod1 <- glm(flo.if~size+I(size^2), family = 'binomial', data = Ver_alp_2018_2021_flo)
-AIC(mod1)
-AIC(glm(flo.if~size+I(size^2)+I(size^3), family = 'binomial', data = Ver_alp_2018_2021_flo))
+AIC(glm(flo.if~1, family = 'binomial', data = VA_CC))
+AIC(glm(flo.if~size, family = 'binomial', data = VA_CC))
+AIC(glm(flo.if~size+I(size^2), family = 'binomial', data = VA_CC))
+AIC(glm(flo.if~size+I(size^2)+I(size^3), family = 'binomial', data = VA_CC))
 floweringChosenModel <- flo.if ~ size + size2 #Chosen based on AIC
+
+mod1_VA_CC <- glm(flo.if~size, family = 'binomial', data = VA_CC)
 
 par(mfrow=c(1,1))
-with(Ver_alp_2018_2021_flo, 
+with(VA_CC, 
       plot(size, jitter(flo.if)))
 points(seq(-10, 45, 0.01),
-       predict(mod1, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       predict(mod1_VA_CC, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
        type = "l", col = "red")
 
 
+AIC(glm(flo.no~1, family = 'poisson', data = VA_CC))
+AIC(glm(flo.no~size, family = 'poisson', data = VA_CC))
+AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_CC))
+AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_CC))
+flowerNumberChosenModel <- flo.if ~ size  #Chosen based on biology by looking at the data
 
-AIC(glm(flo.no~1, family = 'poisson', data = Ver_alp_2018_2021_flo))
-AIC(glm(flo.no~size, family = 'poisson', data = Ver_alp_2018_2021_flo))
-mod2 <- glm(flo.no~size+I(size^2), family = 'poisson', data = Ver_alp_2018_2021_flo)
-AIC(mod2)
-AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = Ver_alp_2018_2021_flo))
-floweringChosenModel <- flo.if ~ size + size2 #Chosen based on AIC
+mod2_VA_CC <- glm(flo.no~size, family = 'poisson', data = VA_CC)
 
-with(Ver_alp_2018_2021_flo, 
+with(VA_CC, 
      plot(size, jitter(flo.no)))
 points(seq(-10, 45, 0.01),
-       predict(mod2, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       predict(mod2_VA_CC, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
        type = "l", col = "red")
 
 
 
-fo <-makeFecObj(Ver_alp_2018_2021_flo, 
-                Formula= c(flo.if~size+size2, flo.no~size+size2),
+fo_VA_CC <-makeFecObj(VA_CC, 
+                Formula= c(floweringChosenModel, flowerNumberChosenModel),
                 Family = c("binomial", "poisson"),
                 fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_VA_null,
                                           seedlingEstablishmentRate = seedling_est_VA_C_Veg), 
                 meanOffspringSize = Seedling_info_VA$mean_Veg,
                 sdOffspringSize = Seedling_info_VA$sd)
 
-Fmatrix <- makeIPMFmatrix(fecObj=fo, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
+Fmatrix_VA_CC <- makeIPMFmatrix(fecObj=fo_VA_CC, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
 
 # We plot this P-matrix using the ’image.plot’ function of the fields package:
 
-image.plot(Fmatrix@meshpoints,
-           Fmatrix@meshpoints,
-           t(Fmatrix),
+image.plot(Fmatrix_VA_CC@meshpoints,
+           Fmatrix_VA_CC@meshpoints,
+           t(Fmatrix_VA_CC),
            main = "Fmatrix: flower and seedlings",
            xlab = "Size at t",
            ylab = "Size at t+1")
-abline(0,1,lty=2,lwd=3)
+
+#### Ambient temperature removal ####
+
+
+AIC(glm(flo.if~1, family = 'binomial', data = VA_CR))
+AIC(glm(flo.if~size, family = 'binomial', data = VA_CR))
+AIC(glm(flo.if~size+I(size^2), family = 'binomial', data = VA_CR))
+AIC(glm(flo.if~size+I(size^2)+I(size^3), family = 'binomial', data = VA_CR))
+floweringChosenModel_VA_CR <- flo.if ~ size #Chosen based on AIC
+
+mod1_VA_CR <- glm(flo.if~size, family = 'binomial', data = VA_CR)
+
+par(mfrow=c(1,1))
+with(VA_CR, 
+     plot(size, jitter(flo.if)))
+points(seq(-10, 45, 0.01),
+       predict(mod1_VA_CR, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+
+AIC(glm(flo.no~1, family = 'poisson', data = VA_CR))
+AIC(glm(flo.no~size, family = 'poisson', data = VA_CR))
+AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_CR))
+AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_CR))
+flowerNumberChosenModel_VA_CR <- flo.if ~ size  #Chosen based on biology by looking at the data
+
+mod2_VA_CR <- glm(flo.no~size, family = 'poisson', data = VA_CR)
+
+with(VA_CR, 
+     plot(size, jitter(flo.no)))
+points(seq(-10, 45, 0.01),
+       predict(mod2_VA_CR, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+
+
+fo_VA_CR <-makeFecObj(VA_CR, 
+                      Formula= c(floweringChosenModel, flowerNumberChosenModel),
+                      Family = c("binomial", "poisson"),
+                      fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_VA_null,
+                                                seedlingEstablishmentRate = seedling_est_VA_C_NoVeg), 
+                      meanOffspringSize = Seedling_info_VA$mean_Veg,
+                      sdOffspringSize = Seedling_info_VA$sd)
+
+Fmatrix_VA_CR <- makeIPMFmatrix(fecObj=fo_VA_CR, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
+
+# We plot this P-matrix using the ’image.plot’ function of the fields package:
+
+image.plot(Fmatrix_VA_CR@meshpoints,
+           Fmatrix_VA_CR@meshpoints,
+           t(Fmatrix_VA_CR),
+           main = "Fmatrix: flower and seedlings",
+           xlab = "Size at t",
+           ylab = "Size at t+1")
+
+#### Ambient temperature extant transplant ####
+
+
+AIC(glm(flo.if~1, family = 'binomial', data = VA_CE))
+AIC(glm(flo.if~size, family = 'binomial', data = VA_CE))
+AIC(glm(flo.if~size+I(size^2), family = 'binomial', data = VA_CE))
+AIC(glm(flo.if~size+I(size^2)+I(size^3), family = 'binomial', data = VA_CE))
+floweringChosenModel_VA_CE <- flo.if ~ size + size2 #Chosen based on AIC
+
+mod1_VA_CE <- glm(flo.if ~ size + I(size^2), family = 'binomial', data = VA_CE)
+
+par(mfrow=c(1,1))
+with(VA_CE, 
+     plot(size, jitter(flo.if)))
+points(seq(-10, 45, 0.01),
+       predict(mod1_VA_CE, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+
+AIC(glm(flo.no~1, family = 'poisson', data = VA_CE))
+AIC(glm(flo.no~size, family = 'poisson', data = VA_CE))
+AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_CE))
+AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_CE))
+flowerNumberChosenModel_VA_CE <- flo.if ~ size  #Chosen based on AIC
+
+mod2_VA_CE <- glm(flo.no~size, family = 'poisson', data = VA_CE)
+
+with(VA_CE, 
+     plot(size, jitter(flo.no)))
+points(seq(-10, 45, 0.01),
+       predict(mod2_VA_CE, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+
+
+fo_VA_CE <-makeFecObj(VA_CE, 
+                      Formula= c(floweringChosenModel, flowerNumberChosenModel),
+                      Family = c("binomial", "poisson"),
+                      fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_VA_null,
+                                                seedlingEstablishmentRate = seedling_est_VA_C_Veg), 
+                      meanOffspringSize = Seedling_info_VA$mean_Veg,
+                      sdOffspringSize = Seedling_info_VA$sd)
+
+Fmatrix_VA_CE <- makeIPMFmatrix(fecObj=fo_VA_CE, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
+
+# We plot this P-matrix using the ’image.plot’ function of the fields package:
+
+image.plot(Fmatrix_VA_CE@meshpoints,
+           Fmatrix_VA_CE@meshpoints,
+           t(Fmatrix_VA_CE),
+           main = "Fmatrix: flower and seedlings",
+           xlab = "Size at t",
+           ylab = "Size at t+1")
+
+
+#### Ambient temperature novel transplant ####
+
+
+AIC(glm(flo.if~1, family = 'binomial', data = VA_CN))
+AIC(glm(flo.if~size, family = 'binomial', data = VA_CN))
+AIC(glm(flo.if~size+I(size^2), family = 'binomial', data = VA_CN))
+AIC(glm(flo.if~size+I(size^2)+I(size^3), family = 'binomial', data = VA_CN))
+floweringChosenModel_VA_CN <- flo.if ~ size #Chosen based on biology
+
+mod1_VA_CN <- glm(flo.if ~ size, family = 'binomial', data = VA_CN)
+
+par(mfrow=c(1,1))
+with(VA_CN, 
+     plot(size, jitter(flo.if)))
+points(seq(-10, 45, 0.01),
+       predict(mod1_VA_CN, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+
+AIC(glm(flo.no~1, family = 'poisson', data = VA_CN))
+AIC(glm(flo.no~size, family = 'poisson', data = VA_CN))
+AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_CN))
+AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_CN))
+flowerNumberChosenModel_VA_CN <- flo.if ~ size  #Chosen based on AIC
+
+mod2_VA_CN <- glm(flo.no~size, family = 'poisson', data = VA_CN)
+
+with(VA_CN, 
+     plot(size, jitter(flo.no)))
+points(seq(-10, 45, 0.01),
+       predict(mod2_VA_CN, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+
+
+fo_VA_CN <-makeFecObj(VA_CN, 
+                      Formula= c(floweringChosenModel, flowerNumberChosenModel),
+                      Family = c("binomial", "poisson"),
+                      fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_VA_null,
+                                                seedlingEstablishmentRate = seedling_est_VA_C_Veg), 
+                      meanOffspringSize = Seedling_info_VA$mean_Veg,
+                      sdOffspringSize = Seedling_info_VA$sd)
+
+Fmatrix_VA_CN <- makeIPMFmatrix(fecObj=fo_VA_CN, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
+
+# We plot this P-matrix using the ’image.plot’ function of the fields package:
+
+image.plot(Fmatrix_VA_CN@meshpoints,
+           Fmatrix_VA_CN@meshpoints,
+           t(Fmatrix_VA_CN),
+           main = "Fmatrix: flower and seedlings",
+           xlab = "Size at t",
+           ylab = "Size at t+1")
+
+#### Warming control ####
+
+AIC(glm(flo.if~1, family = 'binomial', data = VA_WC))
+AIC(glm(flo.if~size, family = 'binomial', data = VA_WC))
+AIC(glm(flo.if~size+I(size^2), family = 'binomial', data = VA_WC))
+AIC(glm(flo.if~size+I(size^2)+I(size^3), family = 'binomial', data = VA_WC))
+floweringChosenModel <- flo.if ~ size  #Chosen based on AIC
+
+mod1_VA_WC <- glm(flo.if~size, family = 'binomial', data = VA_WC)
+
+par(mfrow=c(1,1))
+with(VA_WC, 
+     plot(size, jitter(flo.if)))
+points(seq(-10, 45, 0.01),
+       predict(mod1_VA_WC, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+
+AIC(glm(flo.no~1, family = 'poisson', data = VA_CC))
+AIC(glm(flo.no~size, family = 'poisson', data = VA_CC))
+AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_CC))
+AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_CC))
+flowerNumberChosenModel <- flo.if ~ size  #Chosen based on biology by looking at the data
+
+mod2_VA_CC <- glm(flo.no~size, family = 'poisson', data = VA_CC)
+
+with(VA_CC, 
+     plot(size, jitter(flo.no)))
+points(seq(-10, 45, 0.01),
+       predict(mod2_VA_CC, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+
+
+fo_VA_CC <-makeFecObj(VA_CC, 
+                      Formula= c(floweringChosenModel, flowerNumberChosenModel),
+                      Family = c("binomial", "poisson"),
+                      fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_VA_null,
+                                                seedlingEstablishmentRate = seedling_est_VA_C_Veg), 
+                      meanOffspringSize = Seedling_info_VA$mean_Veg,
+                      sdOffspringSize = Seedling_info_VA$sd)
+
+Fmatrix_VA_CC <- makeIPMFmatrix(fecObj=fo_VA_CC, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
+
+# We plot this P-matrix using the ’image.plot’ function of the fields package:
+
+image.plot(Fmatrix_VA_CC@meshpoints,
+           Fmatrix_VA_CC@meshpoints,
+           t(Fmatrix_VA_CC),
+           main = "Fmatrix: flower and seedlings",
+           xlab = "Size at t",
+           ylab = "Size at t+1")
+
+#### Ambient temperature removal ####
+
+
+AIC(glm(flo.if~1, family = 'binomial', data = VA_CR))
+AIC(glm(flo.if~size, family = 'binomial', data = VA_CR))
+AIC(glm(flo.if~size+I(size^2), family = 'binomial', data = VA_CR))
+AIC(glm(flo.if~size+I(size^2)+I(size^3), family = 'binomial', data = VA_CR))
+floweringChosenModel_VA_CR <- flo.if ~ size #Chosen based on AIC
+
+mod1_VA_CR <- glm(flo.if~size, family = 'binomial', data = VA_CR)
+
+par(mfrow=c(1,1))
+with(VA_CR, 
+     plot(size, jitter(flo.if)))
+points(seq(-10, 45, 0.01),
+       predict(mod1_VA_CR, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+
+AIC(glm(flo.no~1, family = 'poisson', data = VA_CR))
+AIC(glm(flo.no~size, family = 'poisson', data = VA_CR))
+AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_CR))
+AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_CR))
+flowerNumberChosenModel_VA_CR <- flo.if ~ size  #Chosen based on biology by looking at the data
+
+mod2_VA_CR <- glm(flo.no~size, family = 'poisson', data = VA_CR)
+
+with(VA_CR, 
+     plot(size, jitter(flo.no)))
+points(seq(-10, 45, 0.01),
+       predict(mod2_VA_CR, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+
+
+fo_VA_CR <-makeFecObj(VA_CR, 
+                      Formula= c(floweringChosenModel, flowerNumberChosenModel),
+                      Family = c("binomial", "poisson"),
+                      fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_VA_null,
+                                                seedlingEstablishmentRate = seedling_est_VA_C_NoVeg), 
+                      meanOffspringSize = Seedling_info_VA$mean_Veg,
+                      sdOffspringSize = Seedling_info_VA$sd)
+
+Fmatrix_VA_CR <- makeIPMFmatrix(fecObj=fo_VA_CR, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
+
+# We plot this P-matrix using the ’image.plot’ function of the fields package:
+
+image.plot(Fmatrix_VA_CR@meshpoints,
+           Fmatrix_VA_CR@meshpoints,
+           t(Fmatrix_VA_CR),
+           main = "Fmatrix: flower and seedlings",
+           xlab = "Size at t",
+           ylab = "Size at t+1")
+
+#### Ambient temperature extant transplant ####
+
+
+AIC(glm(flo.if~1, family = 'binomial', data = VA_CE))
+AIC(glm(flo.if~size, family = 'binomial', data = VA_CE))
+AIC(glm(flo.if~size+I(size^2), family = 'binomial', data = VA_CE))
+AIC(glm(flo.if~size+I(size^2)+I(size^3), family = 'binomial', data = VA_CE))
+floweringChosenModel_VA_CE <- flo.if ~ size + size2 #Chosen based on AIC
+
+mod1_VA_CE <- glm(flo.if ~ size + I(size^2), family = 'binomial', data = VA_CE)
+
+par(mfrow=c(1,1))
+with(VA_CE, 
+     plot(size, jitter(flo.if)))
+points(seq(-10, 45, 0.01),
+       predict(mod1_VA_CE, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+
+AIC(glm(flo.no~1, family = 'poisson', data = VA_CE))
+AIC(glm(flo.no~size, family = 'poisson', data = VA_CE))
+AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_CE))
+AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_CE))
+flowerNumberChosenModel_VA_CE <- flo.if ~ size  #Chosen based on AIC
+
+mod2_VA_CE <- glm(flo.no~size, family = 'poisson', data = VA_CE)
+
+with(VA_CE, 
+     plot(size, jitter(flo.no)))
+points(seq(-10, 45, 0.01),
+       predict(mod2_VA_CE, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+
+
+fo_VA_CE <-makeFecObj(VA_CE, 
+                      Formula= c(floweringChosenModel, flowerNumberChosenModel),
+                      Family = c("binomial", "poisson"),
+                      fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_VA_null,
+                                                seedlingEstablishmentRate = seedling_est_VA_C_Veg), 
+                      meanOffspringSize = Seedling_info_VA$mean_Veg,
+                      sdOffspringSize = Seedling_info_VA$sd)
+
+Fmatrix_VA_CE <- makeIPMFmatrix(fecObj=fo_VA_CE, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
+
+# We plot this P-matrix using the ’image.plot’ function of the fields package:
+
+image.plot(Fmatrix_VA_CE@meshpoints,
+           Fmatrix_VA_CE@meshpoints,
+           t(Fmatrix_VA_CE),
+           main = "Fmatrix: flower and seedlings",
+           xlab = "Size at t",
+           ylab = "Size at t+1")
+
+
+#### Ambient temperature novel transplant ####
+
+
+AIC(glm(flo.if~1, family = 'binomial', data = VA_CN))
+AIC(glm(flo.if~size, family = 'binomial', data = VA_CN))
+AIC(glm(flo.if~size+I(size^2), family = 'binomial', data = VA_CN))
+AIC(glm(flo.if~size+I(size^2)+I(size^3), family = 'binomial', data = VA_CN))
+floweringChosenModel_VA_CN <- flo.if ~ size #Chosen based on biology
+
+mod1_VA_CN <- glm(flo.if ~ size, family = 'binomial', data = VA_CN)
+
+par(mfrow=c(1,1))
+with(VA_CN, 
+     plot(size, jitter(flo.if)))
+points(seq(-10, 45, 0.01),
+       predict(mod1_VA_CN, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+
+AIC(glm(flo.no~1, family = 'poisson', data = VA_CN))
+AIC(glm(flo.no~size, family = 'poisson', data = VA_CN))
+AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_CN))
+AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_CN))
+flowerNumberChosenModel_VA_CN <- flo.if ~ size  #Chosen based on AIC
+
+mod2_VA_CN <- glm(flo.no~size, family = 'poisson', data = VA_CN)
+
+with(VA_CN, 
+     plot(size, jitter(flo.no)))
+points(seq(-10, 45, 0.01),
+       predict(mod2_VA_CN, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+
+
+fo_VA_CN <-makeFecObj(VA_CN, 
+                      Formula= c(floweringChosenModel, flowerNumberChosenModel),
+                      Family = c("binomial", "poisson"),
+                      fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_VA_null,
+                                                seedlingEstablishmentRate = seedling_est_VA_C_Veg), 
+                      meanOffspringSize = Seedling_info_VA$mean_Veg,
+                      sdOffspringSize = Seedling_info_VA$sd)
+
+Fmatrix_VA_CN <- makeIPMFmatrix(fecObj=fo_VA_CN, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
+
+# We plot this P-matrix using the ’image.plot’ function of the fields package:
+
+image.plot(Fmatrix_VA_CN@meshpoints,
+           Fmatrix_VA_CN@meshpoints,
+           t(Fmatrix_VA_CN),
+           main = "Fmatrix: flower and seedlings",
+           xlab = "Size at t",
+           ylab = "Size at t+1")
