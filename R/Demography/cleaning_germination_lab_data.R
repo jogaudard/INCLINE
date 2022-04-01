@@ -451,7 +451,7 @@ Ver_alp_germination_traits <- Ver_alp_germ %>%
   filter()
 
 Ver_alp_germination_traits <- Ver_alp_germination_traits %>% 
-  filter(!is.na(flag_germination))
+  filter(is.na(flag_germination))
 
 #### Make germination metrics Sib pro ####
 
