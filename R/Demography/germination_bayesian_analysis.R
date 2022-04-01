@@ -12,16 +12,16 @@ library(broom.mixed)
 #Take out NAs in the data that you don't want to model
 
 # group level effects
-# site <- factor(data$siteID)
-# petridish <- factor(data$petridish)
+ site <- factor(Ver_alp_germination_traits$siteID)
+ petridish <- factor(Ver_alp_germination_traits$petri_dish)
 
 # independent variables
-#WP <- as.numeric(data$WP)
-#Precip <- as.numeric(data$precip)
+WP <- as.numeric(Ver_alp_germination_traits$water_potential)
+Precip <- as.numeric(Ver_alp_germination_traits$precip)
 
 # dependent variables
-#GermN <- as.numeric(data$GermN)
-#NumSeedDish <- as.numeric(data$NumSeedDish)  Viability test information needs to be inculded here
+#GermN <- as.numeric(data$GermN) #How is this supposed to be: a column with the number of seeds that did germinate? meaning it will be replicated for all the seeds in each petridish. Or 1 if it gerinated and 0 if it didn't?
+NumSeedDish <- as.numeric(data$seeds_in_dish)  #Viability test information needs to be inculded here
 #N <- as.numeric(length(GermMax))
 
 #jags.data <- list("site", "WP", "Precip", "GermMax", "N")
