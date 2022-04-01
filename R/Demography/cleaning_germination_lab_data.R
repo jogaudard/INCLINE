@@ -373,7 +373,7 @@ Germination_Ver_alp <- Ver_alp_germ %>%
   ungroup() %>% 
   group_by(petri_dish) %>% 
   mutate(germ_prop_timestep = n_germinated_timestep/n_seeds_total) %>%
-  dplyr::select(petri_dish, siteID, water_potential, replicate, days_to_germination, germ_prop_timestep, germ_percent) %>% 
+  dplyr::select(petri_dish, siteID, water_potential, replicate, days_to_germination, germ_prop_timestep, germ_percent, n_germinated, n_seeds_total) %>% 
   unique() %>% 
   filter(!is.na(days_to_germination)) %>% 
   arrange(days_to_germination) %>% 
@@ -443,15 +443,19 @@ Germination_Ver_alp %>%
   scale_color_viridis_c()
 
 Germination_Ver_alp_1 <- Germination_Ver_alp %>% 
-  dplyr::select(petri_dish, germ_percent, T50, days_to_max_germination) %>% 
+  dplyr::select(petri_dish, germ_percent, T50, days_to_max_germination, n_germinated) %>% 
   unique()
 
 Ver_alp_germination_traits <- Ver_alp_germ %>% 
   left_join(Germination_Ver_alp_1, by = c("petri_dish")) %>% 
-  filter()
+  mutate(n_germinated = case_when(is.na(n_germinated) ~ 0,
+                                   !is.na(n_germinated) ~ n_germinated))
 
 Ver_alp_germination_traits <- Ver_alp_germination_traits %>% 
-  filter(is.na(flag_germination))
+  filter(is.na(flag_germination)) %>% 
+  dplyr::select(petri_dish, species, siteID, water_potential, replicate, precip,  seeds_in_dish, n_germinated,  days_to_max_germination, germ_percent, T50) %>% 
+  unique() %>% 
+  mutate(precip = precip/1000)
 
 #### Make germination metrics Sib pro ####
 
