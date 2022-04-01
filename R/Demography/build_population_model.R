@@ -25,10 +25,11 @@ conflict_prefer("lmer", "lmerTest")
 #Load data 
 
 # We define a new size axis for the midpoint evaluation of the IPMs:
-x<-seq(from=0,to=10,length=1001)
+minSize<-min(Ver_alp_2018_2021$size, na.rm=T)-1
+maxSize<-max(Ver_alp_2018_2021$sizeNext, na.rm=T)+2
+x<-seq(from=round(minSize),to=round(maxSize),length=100)
 x0<-data.frame(size=x,size2=x*x)
-minSize<-min(Ver_alp_2018_2021$size,na.rm=T)-1
-maxSize<-max(Ver_alp_2018_2021$sizeNext,na.rm=T)+2
+
 
 # To understand the data, we plot survival, growth/shrinkage/stasis, number of seeds, and size of recruits:
 par(mfrow=c(2,2),mar=c(4,4,2,1))
@@ -59,7 +60,7 @@ par(mfrow=c(1,1))
 survModelComp(dataf= VA_CC, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
 
 # Based on this simple analysis we select the following survival model since it has the lowest AIC value:
-so_CC <- makeSurvObj(VA_CC, surv ~ 1)
+so_CC <- makeSurvObj(VA_CC, surv ~ size)
 
 # We next model growth, conditional on survival. Here, ’growth’ is the process relating size in year t+1 to size in year t. We use the following code to illustrate it in a figure:
 growthModelComp(dataf=VA_CC, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
@@ -68,7 +69,7 @@ growthModelComp(dataf=VA_CC, makePlot=TRUE, legendPos="bottomright", mainTitle="
 go_CC <- makeGrowthObj(VA_CC, sizeNext ~ size)
 
 # With these survival and growth objects in hand, we build a survival/growth (P) matrix.
-Pmatrix_CC <- makeIPMPmatrix(survObj=so_CC, growObj=go_CC, minSize=minSize, maxSize=maxSize)
+Pmatrix_CC <- makeIPMPmatrix(survObj=so_CC, growObj=go_CC, minSize=minSize, maxSize=maxSize, correction = "constant")
 
 # We plot this P-matrix using the ’image.plot’ function of the fields package:
 
@@ -80,9 +81,9 @@ image.plot(Pmatrix_CC@meshpoints,
            ylab = "Size at t+1")
 abline(0,1,lty=2,lwd=3)
 
-diagnosticsPmatrix(Pmatrix_CC, growObj=go_CC, survObj=so_CC, correction="constant") 
+diagnosticsPmatrix(Pmatrix_CC, growObj=go_CC, survObj=so_CC, correction="constant", dff = VA_CC) 
 
-#Bindwidth looks ok, range size could maybe be fixed
+#Bindwidth and range size looks ok
 
 #### Ambient temperature removal ####
 
@@ -92,7 +93,7 @@ par(mfrow=c(1,1))
 survModelComp(dataf= VA_CR, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
 
 # Based on this simple analysis we select the following survival model since it has the lowest AIC value:
-so_CR <- makeSurvObj(VA_CR, surv ~ 1)
+so_CR <- makeSurvObj(VA_CR, surv ~ size)
 
 # We next model growth, conditional on survival. Here, ’growth’ is the process relating size in year t+1 to size in year t. We use the following code to illustrate it in a figure:
 growthModelComp(dataf=VA_CR, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
@@ -101,7 +102,7 @@ growthModelComp(dataf=VA_CR, makePlot=TRUE, legendPos="bottomright", mainTitle="
 go_CR <- makeGrowthObj(VA_CR, sizeNext ~ size + size2)
 
 # With these survival and growth objects in hand, we build a survival/growth (P) matrix.
-Pmatrix_CR <- makeIPMPmatrix(survObj=so_CR, growObj=go_CR, minSize=minSize, maxSize=maxSize)
+Pmatrix_CR <- makeIPMPmatrix(survObj=so_CR, growObj=go_CR, minSize=minSize, maxSize=maxSize, correction = "constant")
 
 # We plot this P-matrix using the ’image.plot’ function of the fields package:
 
@@ -113,9 +114,9 @@ image.plot(Pmatrix_CR@meshpoints,
            ylab = "Size at t+1")
 abline(0,1,lty=2,lwd=3)
 
-diagnosticsPmatrix(Pmatrix_CR, growObj=go_CR, survObj=so_CR, correction="constant") 
+diagnosticsPmatrix(Pmatrix_CR, growObj=go_CR, survObj=so_CR, correction="constant", dff = VA_CR) 
 
-#Bindwidth looks ok, range size could maybe be fixed
+#Bindwidth and range size looks ok
 
 
 #### Ambient temperature extant ####
@@ -327,67 +328,60 @@ diagnosticsPmatrix(Pmatrix_WN, growObj=go_WN, survObj=so_CN, correction="constan
 
 ### This does not work
 
-# Ver_alp_2018_2021_flo <- Ver_alp_2018_2021 %>% 
-#   mutate(stage = "continous",
-#          stageNext = "continous") %>% 
-#   ungroup() %>% 
-#   as.data.frame()
+ Ver_alp_2018_2021_flo <- Ver_alp_2018_2021 %>% 
+   ungroup() %>% 
+   as.data.frame()
 # 
-# fo1<-makeFecObj(Ver_alp_2018_2021_flo, Formula=flo.if~1, Family = "binomial") # Intercept only model 
-# fo2<-makeFecObj(Ver_alp_2018_2021_flo, Formula=flo.if~size, Family = "binomial") 
-# fo3<-makeFecObj(Ver_alp_2018_2021_flo, Formula=flo.if~size+size2, Family = "binomial")
 
-AIC(glm(flo.if~1, family = 'binomial', data = Ver_alp_2018_2021))
-AIC(glm(flo.if~size, family = 'binomial', data = Ver_alp_2018_2021))
-AIC(glm(flo.if~size+I(size^2), family = 'binomial', data = Ver_alp_2018_2021))
-AIC(glm(flo.if~size+I(size^2)+I(size^3), family = 'binomial', data = Ver_alp_2018_2021))
+
+
+AIC(glm(flo.if~1, family = 'binomial', data = Ver_alp_2018_2021_flo))
+AIC(glm(flo.if~size, family = 'binomial', data = Ver_alp_2018_2021_flo))
+mod1 <- glm(flo.if~size+I(size^2), family = 'binomial', data = Ver_alp_2018_2021_flo)
+AIC(mod1)
+AIC(glm(flo.if~size+I(size^2)+I(size^3), family = 'binomial', data = Ver_alp_2018_2021_flo))
 floweringChosenModel <- flo.if ~ size + size2 #Chosen based on AIC
 
+par(mfrow=c(1,1))
+with(Ver_alp_2018_2021_flo, 
+      plot(size, jitter(flo.if)))
+points(seq(-10, 45, 0.01),
+       predict(mod1, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
 
 
 
+AIC(glm(flo.no~1, family = 'poisson', data = Ver_alp_2018_2021_flo))
+AIC(glm(flo.no~size, family = 'poisson', data = Ver_alp_2018_2021_flo))
+mod2 <- glm(flo.no~size+I(size^2), family = 'poisson', data = Ver_alp_2018_2021_flo)
+AIC(mod2)
+AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = Ver_alp_2018_2021_flo))
+floweringChosenModel <- flo.if ~ size + size2 #Chosen based on AIC
 
-# # We plot these models for comparison
-# fs <- order(Ver_alp_2018_2021$size)
-# fs.fec <- (Ver_alp_2018_2021$flo.no)[fs]
-# fs.size <- (Ver_alp_2018_2021$size)[fs]
-# pfz <- tapply(fs.size, as.numeric(cut(fs.size, 21)), mean, na.rm = TRUE)
-# ps <- tapply(fs.fec, as.numeric(cut(fs.size, 21)), mean, na.rm = TRUE)
-# plot(as.numeric(pfz), as.numeric(ps), pch = 19, cex=2, col="blue",ylim=c(0,1),
-#      xlab="size", ylab="proportion flowering", main="")
-# y0<-predict(fo1@fitFec[[1]],newdata=x0,type="response")
-# lines(x,y0,col="red")
-# y0<-predict(fo2@fitFec[[1]],newdata=x0,type="response")
-# lines(x,y0,col="green")
-# y0<-predict(fo3@fitFec[[1]],newdata=x0,type="response")
-# lines(x,y0,col="blue")
-# legend("topleft", legend = sprintf("%s: %s = %.1f",c("1","size","size+size2"), c("AIC"),c(AIC(fo1@fitFec[[1]]),AIC(fo2@fitFec[[1]]),AIC(fo3@fitFec[[1]]))), col = c(2:4),lty = 1, xjust = 1, bg = "white")
+with(Ver_alp_2018_2021_flo, 
+     plot(size, jitter(flo.no)))
+points(seq(-10, 45, 0.01),
+       predict(mod2, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
 
-# The third step in the fecundity process is the number of inflorescences (heads) per stem. Here too, the data consist of counts, so we assume a Poisson distribution.
-# 
-# fo1<-makeFecObj(Sp2, Formula=c(fec1Bolt~size,fec2Stem~size,fec3Head~1), 
-#                 Family = c("binomial","poisson","poisson"),
-#                 Transform = c("none","-1","none"))
-# fo2<-makeFecObj(Sp2, Formula=c(fec1Bolt~size,fec2Stem~size,fec3Head~size),
-#                 Family = c("binomial","poisson","poisson"),
-#                 Transform = c("none","-1","none"))
-# fo3<-makeFecObj(Sp2, Formula=c(fec1Bolt~size,fec2Stem~size,fec3Head~size+size2),
-#                 Family = c("binomial","poisson","poisson"),
-#                 Transform = c("none","-1","none"))
 
-Ver_alp_2018_2021_2 <- Ver_alp_2018_2021 %>% filter(flo.if == 1)
 
-AIC(glm(flo.no~1,family='poisson',data=Ver_alp_2018_2021_2))
-AIC(glm(flo.no~size,family='poisson',data=Ver_alp_2018_2021_2))
-AIC(glm(flo.no~size+I(size^2),family='poisson',data=Ver_alp_2018_2021_2))
-AIC(glm(flo.no~size+I(size^2)+I(size^3),family='poisson',data=Ver_alp_2018_2021_2))
-flowersChosenModel <- flo.no ~ size + size2 + size3 #Chosen based on AIC and plot
+fo <-makeFecObj(Ver_alp_2018_2021_flo, 
+                Formula= c(flo.if~size+size2, flo.no~size+size2),
+                Family = c("binomial", "poisson"),
+                fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_VA_null,
+                                          seedlingEstablishmentRate = seedling_est_VA_C_Veg), 
+                meanOffspringSize = Seedling_info_VA$mean_Veg,
+                sdOffspringSize = Seedling_info_VA$sd)
 
-plot(x = Ver_alp_2018_2021_2$size, y = Ver_alp_2018_2021_2$flo.no)
+Fmatrix <- makeIPMFmatrix(fecObj=fo, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
 
-#The combined fecundity model is:
-fo<-makeFecObj(Ver_alp_2018_2021, 
-               Formula=c(floweringChosenModel, flowersChosenModel), 
-               Family = c("binomial","poisson"), 
-               Transform = c("none","none"), 
-               fecConstants = data.frame(seedsPerHead=50,seedlingEstablishmentRate= 0.02))
+# We plot this P-matrix using the ’image.plot’ function of the fields package:
+
+image.plot(Fmatrix@meshpoints,
+           Fmatrix@meshpoints,
+           t(Fmatrix),
+           main = "Fmatrix: flower and seedlings",
+           xlab = "Size at t",
+           ylab = "Size at t+1")
+abline(0,1,lty=2,lwd=3)
