@@ -118,9 +118,9 @@ Ver_alp_germ <- Ver_alp_germ %>%
                                      is.na(flag_seedling.y) ~ flag_seedling),
          flag_whole_petridish = case_when(!is.na(flag_whole_petridish) ~ flag_whole_petridish,
                                           is.na(flag_whole_petridish) ~ flag_whole_petridish.x)) %>% 
-  select(-flag_germination, -flag_germination.y, -flag_seedling, -flag_seedling.x, -flag_whole_petridish.x, -flag_whole_petridish.y) %>% 
+  dplyr::select(-flag_germination, -flag_germination.y, -flag_seedling, -flag_seedling.x, -flag_whole_petridish.x, -flag_whole_petridish.y) %>% 
   rename(flag_germination = flag_germination.x, flag_seedling = flag_seedling.y) %>% 
-  select(!flag)  %>% #Remove old flag column
+  dplyr::select(!flag)  %>% #Remove old flag column
   group_by(petri_dish) %>% 
   fill(flag_whole_petridish, .direction = "downup") %>%  #Give whole petridish comment too all seeds in the same petri dish
   unique() #the joining makes multiple copies of some rows (have not figured out why yet), using this to fix the problem.
@@ -218,7 +218,7 @@ Sib_pro_germ <- Sib_pro_germ %>%
                                       is.na(dry_mass_g_total) ~ dry_mass)) %>% 
   mutate(dry_mass_g_total = case_when(ID == "SP_GUD_1_7_18" ~ dry_mass,
                                       ID != "SP_GUD_1_7_18" ~ dry_mass_g_total)) %>% 
-  select(-dry_mass)
+  dplyr::select(-dry_mass)
 
 #### Deal with comments. Categorize them ####
 ## Entering information in flag columns from comment section. I have three columns, flags for the germination (when seeds rotted, or became sick, or when we believe there are mistakes in the dates), seedlings (when the plant has started rotting, or died before seedlings where harvested - to be used for filtering seedlings out of the final data set), and whole petri dish flags - when a shole petridish needs removing because of drying out or mold. Options for flags are: Remove_duplicate, Dead_plant, Sick_plant,  Missing_date, Possible_mistakes_in_ID, Biomass_mistakes, Moldy, Agar_issues and Other. Using dictionaries to translate between comments and flags.
@@ -232,7 +232,7 @@ Sib_pro_germ <- Sib_pro_germ %>%
                                       !is.na(flag_germination) ~ flag_germination)) %>% 
   mutate(flag_seedling = case_when(is.na(flag_seedling) ~ flag_seedling.x,
                                    !is.na(flag_seedling) ~ flag_seedling)) %>% 
-  select(!flag_seedling.z & !flag_germination.y & !flag_seedling.x) %>% 
+  dplyr::select(-flag_seedling.z, -flag_germination.y, -flag_seedling.x) %>% 
   mutate(flag_germination = case_when(is.na(flag_germination) & Remove_whole_petridish == "Remove_duplicate" ~ "Remove_duplicate",
                                       is.na(flag_germination) & Flag %in% c("Remove_duplicate", "Remove_flag") ~ "Remove_duplicate",
                                       !is.na(flag_germination) ~ flag_germination)) %>%
@@ -241,12 +241,48 @@ Sib_pro_germ <- Sib_pro_germ %>%
                                    !is.na(flag_seedling) ~flag_seedling)) %>% 
   mutate(flag_whole_petridish = case_when(is.na(flag_whole_petridish) & Remove_whole_petridish %in% c("Dried out, remove", "dried out, remove") ~ "Agar_issues",
                                           !is.na(flag_whole_petridish) ~ flag_whole_petridish)) %>% #Move the few comments in the flag and remove-whole-petridish column to new flag columns 
-  select(!Remove_whole_petridish & !Flag) %>% #Remove old flag columns
+  dplyr::select(-Remove_whole_petridish, -Flag) %>% #Remove old flag columns
   rename(comment = Comment, harvest_comment = Harvest_comment, weighing_comment = Weighing_comments) %>% 
   group_by(petri_dish) %>% 
   fill(flag_whole_petridish, .direction = "downup") %>%  #Give whole petri dish comment too all seeds in the same petri dish
   unique() #the joining makes multiple copies of some rows (have not figured out why yet), using this to fix the problem.
 
+
+Non_viable_seeds_SP <- Sib_pro_germ %>% 
+  filter(water_potential == 1) %>% 
+  dplyr::select(ID, petri_dish, seed_viable, siteID) %>% 
+  group_by(petri_dish) %>% 
+  mutate(viable = case_when(seed_viable == "yes" ~ 1,
+                            seed_viable == "no" ~ 0)) %>% 
+  mutate(n_seeds_total = n(), 
+         nonviable = n_seeds_total - sum(viable)) %>% 
+  ungroup() %>% 
+  dplyr::select(-ID) %>% 
+  unique() %>% 
+  group_by(siteID) %>% 
+  mutate(mean_non_viable = mean(nonviable)) %>% 
+  ungroup() %>% 
+  dplyr::select(siteID, mean_non_viable) %>% 
+  unique()
+
+Non_viable_seeds_VA <- Ver_alp_germ %>% 
+  ungroup() %>% 
+  filter(water_potential == 1) %>% 
+  dplyr::select(unique_ID, petri_dish, seed_viable, siteID) %>% 
+  filter(!petri_dish %in% c("VA_LAV_1_3", "VA_LAV_1_4")) %>% 
+  group_by(petri_dish) %>% 
+  mutate(viable = case_when(seed_viable == "Yes" ~ 1,
+                            seed_viable == "No" ~ 0)) %>% 
+  mutate(n_seeds_total = n(), 
+         nonviable = n_seeds_total - sum(viable)) %>% 
+  ungroup() %>% 
+  dplyr::select(-unique_ID) %>% 
+  unique() %>% 
+  group_by(siteID) %>% 
+  mutate(mean_non_viable = mean(nonviable)) %>% 
+  ungroup() %>% 
+  dplyr::select(siteID, mean_non_viable) %>% 
+  unique()
 
 #Plots for looking at data and looking for mistakes
 
@@ -314,7 +350,7 @@ Sib_pro_germ %>%
   scale_fill_viridis_d()
 
 
-#### Make germination metrics ####
+#### Make germination metrics Ver alp ####
 
 Germination_Ver_alp <- Ver_alp_germ %>% 
   mutate(germinated = case_when(is.na(germination_date) ~ 0,
@@ -329,7 +365,7 @@ Germination_Ver_alp <- Ver_alp_germ %>%
   ungroup() %>% 
   group_by(petri_dish) %>% 
   mutate(germ_prop_timestep = n_germinated_timestep/n_seeds_total) %>%
-  select(petri_dish, siteID, water_potential, replicate, days_to_germination, germ_prop_timestep, germ_percent) %>% 
+  dplyr::select(petri_dish, siteID, water_potential, replicate, days_to_germination, germ_prop_timestep, germ_percent) %>% 
   unique() %>% 
   filter(!is.na(days_to_germination)) %>% 
   arrange(days_to_germination) %>% 
@@ -345,7 +381,7 @@ Germination_Ver_alp <- Ver_alp_germ %>%
          T50_pos = ifelse(T50_pos == pos_dist, days_to_germination, NA),
          T50_neg = ifelse(T50_neg == neg_dist, days_to_germination, NA),
          T50 = T50_pos) %>% 
-  select(-pos_dist, -neg_dist) %>% 
+  dplyr::select(-pos_dist, -neg_dist) %>% 
   mutate(dist = abs(dist),
          relative_dist = max(dist) - dist,
          T50 = ifelse(!is.na(T50_pos), T50_pos, T50_neg),
@@ -355,49 +391,11 @@ Germination_Ver_alp <- Ver_alp_germ %>%
          days_to_max_germination = max(days_to_germination)) %>% 
   group_by(petri_dish) %>% 
   fill(T50, .direction = "downup") %>% 
-  select(-T502, -T50_neg, -T50_pos, -dist, -relative_dist)
+  dplyr::select(-T502, -T50_neg, -T50_pos, -dist, -relative_dist) %>% 
+  mutate(days_to_germination = as.numeric(days_to_germination),
+         days_to_max_germination = as.numeric(days_to_max_germination))
 
-Germination_Sib_pro <- Sib_pro_germ %>% 
-  mutate(germinated = case_when(is.na(germination_date) ~ 0,
-                                !is.na(germination_date) ~ 1)) %>% 
-  group_by(petri_dish) %>% 
-  mutate(n_germinated = sum(germinated),
-         n_seeds_total = n(),
-         germ_percent = n_germinated/n_seeds_total) %>% 
-  ungroup() %>% 
-  group_by(petri_dish, days_to_germination) %>% 
-  mutate(n_germinated_timestep = sum(germinated)) %>% 
-  ungroup() %>% 
-  group_by(petri_dish) %>% 
-  mutate(germ_prop_timestep = n_germinated_timestep/n_seeds_total) %>%
-  select(petri_dish, siteID, water_potential, replicate, days_to_germination, germ_prop_timestep, germ_percent) %>% 
-  unique() %>% 
-  filter(!is.na(days_to_germination)) %>% 
-  arrange(days_to_germination) %>% 
-  mutate(cum_germ_percent = cumsum(germ_prop_timestep)) %>% 
-  mutate(half_percent = germ_percent/2) %>% 
-  mutate(dist = round(cum_germ_percent-half_percent, digits = 3),
-         pos_dist = ifelse(dist > 0, dist, 
-                           ifelse(dist == 0, dist, NA)),
-         neg_dist = abs(ifelse(dist < 0, dist,
-                               ifelse(dist == 0, dist, NA))),
-         T50_pos = min(pos_dist, na.rm = TRUE),
-         T50_neg = min(neg_dist, na.rm = TRUE),
-         T50_pos = ifelse(T50_pos == pos_dist, days_to_germination, NA),
-         T50_neg = ifelse(T50_neg == neg_dist, days_to_germination, NA),
-         T50 = T50_pos) %>% 
-  select(-pos_dist, -neg_dist) %>% 
-  mutate(dist = abs(dist),
-         relative_dist = max(dist) - dist,
-         T50 = ifelse(!is.na(T50_pos), T50_pos, T50_neg),
-         T502 = weighted.mean(T50, w = relative_dist, na.rm = TRUE),
-         T50 = ifelse(is.nan(T502), T50, T502),
-         T50 = round(T50, digits = 0),
-         days_to_max_germination = max(days_to_germination)) %>% 
-  group_by(petri_dish) %>% 
-  fill(T50, .direction = "downup") %>% 
-  select(-T502, -T50_neg, -T50_pos, -dist, -relative_dist)
-
+#### Make plot of germination ####
 
 WP_names <- c(
   "1" = "WP 1 (-0.25 MPa)",
@@ -415,25 +413,6 @@ WP_names <- c(
   "GUD" = "GUD",
   "ULV" = "ULV"
 )
-
-Germination_Sib_pro %>% 
-  filter(siteID == "LAV") %>% 
-ggplot(aes(x = sort(as.integer(days_to_germination)), y = cum_germ_percent, group = replicate, color = replicate)) +
-    geom_line() +
-    geom_point(aes(x = T50, y = half_percent)) +
-    facet_wrap(~ water_potential, labeller = as_labeller(WP_names)) +
-    xlab("Days to germination") +
-    ylab("Germination %") +
-   # ggtitle(paste(species, "from", site)) +
-    theme(plot.title = element_text(hjust = 0.5),
-          panel.background = element_rect(fill = "white",
-                                          colour = "white",
-                                          size = 0.5,
-                                          linetype = "solid"),
-          panel.grid.major = element_line(size = 0.25,
-                                          linetype = 'solid',
-                                          colour = "lightgrey")) +
-  scale_color_viridis_d()
 
 Germination_Ver_alp %>% 
   filter(water_potential %in% c(1:5)) %>% 
@@ -454,6 +433,82 @@ Germination_Ver_alp %>%
                                         linetype = 'solid',
                                         colour = "lightgrey")) +
   scale_color_viridis_c()
-  
+
+Germination_Ver_alp_1 <- Germination_Ver_alp %>% 
+  dplyr::select(petri_dish, germ_percent, T50, days_to_max_germination) %>% 
+  unique()
+
+Ver_alp_germination_traits <- Ver_alp_germ %>% 
+  left_join(Germination_Ver_alp_1, by = c("petri_dish")) %>% 
+  filter()
+
+Ver_alp_germination_traits <- Ver_alp_germination_traits %>% 
+  ungroup() %>% 
+  dplyr::select(flag_germination) %>%
+  filter(!is.na(flag_germination))
+
+#### Make germination metrics Sib pro ####
+
+Germination_Sib_pro <- Sib_pro_germ %>% 
+  mutate(germinated = case_when(is.na(germination_date) ~ 0,
+                                !is.na(germination_date) ~ 1)) %>% 
+  group_by(petri_dish) %>% 
+  mutate(n_germinated = sum(germinated),
+         n_seeds_total = n(),
+         germ_percent = n_germinated/n_seeds_total) %>% 
+  ungroup() %>% 
+  group_by(petri_dish, days_to_germination) %>% 
+  mutate(n_germinated_timestep = sum(germinated)) %>% 
+  ungroup() %>% 
+  group_by(petri_dish) %>% 
+  mutate(germ_prop_timestep = n_germinated_timestep/n_seeds_total) %>%
+  dplyr::select(petri_dish, siteID, water_potential, replicate, days_to_germination, germ_prop_timestep, germ_percent) %>% 
+  unique() %>% 
+  filter(!is.na(days_to_germination)) %>% 
+  arrange(days_to_germination) %>% 
+  mutate(cum_germ_percent = cumsum(germ_prop_timestep)) %>% 
+  mutate(half_percent = germ_percent/2) %>% 
+  mutate(dist = round(cum_germ_percent-half_percent, digits = 3),
+         pos_dist = ifelse(dist > 0, dist, 
+                           ifelse(dist == 0, dist, NA)),
+         neg_dist = abs(ifelse(dist < 0, dist,
+                               ifelse(dist == 0, dist, NA))),
+         T50_pos = min(pos_dist, na.rm = TRUE),
+         T50_neg = min(neg_dist, na.rm = TRUE),
+         T50_pos = ifelse(T50_pos == pos_dist, days_to_germination, NA),
+         T50_neg = ifelse(T50_neg == neg_dist, days_to_germination, NA),
+         T50 = T50_pos) %>% 
+  dplyr::select(-pos_dist, -neg_dist) %>% 
+  mutate(dist = abs(dist),
+         relative_dist = max(dist) - dist,
+         T50 = ifelse(!is.na(T50_pos), T50_pos, T50_neg),
+         T502 = weighted.mean(T50, w = relative_dist, na.rm = TRUE),
+         T50 = ifelse(is.nan(T502), T50, T502),
+         T50 = round(T50, digits = 0),
+         days_to_max_germination = max(days_to_germination)) %>% 
+  group_by(petri_dish) %>% 
+  fill(T50, .direction = "downup") %>% 
+  dplyr::select(-T502, -T50_neg, -T50_pos, -dist, -relative_dist)
+
+
+#### Make plot of germination ####
+Germination_Sib_pro %>% 
+  filter(siteID == "LAV") %>% 
+ggplot(aes(x = sort(as.integer(days_to_germination)), y = cum_germ_percent, group = replicate, color = T50)) +
+    geom_line() +
+    geom_point(aes(x = T50, y = half_percent)) +
+    facet_wrap(~ water_potential, labeller = as_labeller(WP_names), ncol = 1) +
+    xlab("Days to germination") +
+    ylab("Germination %") +
+   # ggtitle(paste(species, "from", site)) +
+    theme(plot.title = element_text(hjust = 0.5),
+          panel.background = element_rect(fill = "white",
+                                          colour = "white",
+                                          size = 0.5,
+                                          linetype = "solid"),
+          panel.grid.major = element_line(size = 0.25,
+                                          linetype = 'solid',
+                                          colour = "lightgrey")) +
+  scale_color_viridis_c()
 
 
