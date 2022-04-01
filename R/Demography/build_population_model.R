@@ -335,7 +335,7 @@ AIC(glm(flo.if~1, family = 'binomial', data = VA_CC))
 AIC(glm(flo.if~size, family = 'binomial', data = VA_CC))
 AIC(glm(flo.if~size+I(size^2), family = 'binomial', data = VA_CC))
 AIC(glm(flo.if~size+I(size^2)+I(size^3), family = 'binomial', data = VA_CC))
-floweringChosenModel <- flo.if ~ size + size2 #Chosen based on AIC
+floweringChosenModel_VA_CC <- flo.if ~ size #Chosen based on AIC
 
 mod1_VA_CC <- glm(flo.if~size, family = 'binomial', data = VA_CC)
 
@@ -351,7 +351,7 @@ AIC(glm(flo.no~1, family = 'poisson', data = VA_CC))
 AIC(glm(flo.no~size, family = 'poisson', data = VA_CC))
 AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_CC))
 AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_CC))
-flowerNumberChosenModel <- flo.if ~ size  #Chosen based on biology by looking at the data
+flowerNumberChosenModel_VA_CC <- flo.if ~ size  #Chosen based on biology by looking at the data
 
 mod2_VA_CC <- glm(flo.no~size, family = 'poisson', data = VA_CC)
 
@@ -364,7 +364,7 @@ points(seq(-10, 45, 0.01),
 
 
 fo_VA_CC <-makeFecObj(VA_CC, 
-                Formula= c(floweringChosenModel, flowerNumberChosenModel),
+                Formula= c(floweringChosenModel_VA_CC, flowerNumberChosenModel_VA_CC),
                 Family = c("binomial", "poisson"),
                 fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_VA_null,
                                           seedlingEstablishmentRate = seedling_est_VA_C_Veg), 
@@ -472,7 +472,7 @@ points(seq(-10, 45, 0.01),
 
 
 fo_VA_CE <-makeFecObj(VA_CE, 
-                      Formula= c(floweringChosenModel, flowerNumberChosenModel),
+                      Formula= c(floweringChosenModel_VA_CE, flowerNumberChosenModel_VA_CE),
                       Family = c("binomial", "poisson"),
                       fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_VA_null,
                                                 seedlingEstablishmentRate = seedling_est_VA_C_Veg), 
@@ -527,7 +527,7 @@ points(seq(-10, 45, 0.01),
 
 
 fo_VA_CN <-makeFecObj(VA_CN, 
-                      Formula= c(floweringChosenModel, flowerNumberChosenModel),
+                      Formula= c(floweringChosenModel_VA_CN, flowerNumberChosenModel_VA_CN),
                       Family = c("binomial", "poisson"),
                       fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_VA_null,
                                                 seedlingEstablishmentRate = seedling_est_VA_C_Veg), 
@@ -643,9 +643,9 @@ Fmatrix_VA_WR <- makeIPMFmatrix(fecObj=fo_VA_WR, minSize=minSize, maxSize=maxSiz
 
 # We plot this P-matrix using the ’image.plot’ function of the fields package:
 
-image.plot(Fmatrix_VA_CR@meshpoints,
-           Fmatrix_VA_CR@meshpoints,
-           t(Fmatrix_VA_CR),
+image.plot(Fmatrix_VA_WR@meshpoints,
+           Fmatrix_VA_WR@meshpoints,
+           t(Fmatrix_VA_WR),
            main = "Fmatrix: flower and seedlings",
            xlab = "Size at t",
            ylab = "Size at t+1")
@@ -741,7 +741,7 @@ points(seq(-10, 45, 0.01),
 
 
 fo_VA_WN <-makeFecObj(VA_WN, 
-                      Formula= c(floweringChosenModel, flowerNumberChosenModel),
+                      Formula= c(floweringChosenModel_VA_WN, flowerNumberChosenModel_VA_WN),
                       Family = c("binomial", "poisson"),
                       fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_VA_null,
                                                 seedlingEstablishmentRate = seedling_est_VA_OTC_Veg), 
