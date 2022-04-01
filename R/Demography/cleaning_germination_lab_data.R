@@ -101,7 +101,11 @@ Ver_alp_germ <- Ver_alp_germ %>%
   mutate(Dry_mass_g_total = case_when(!is.na(Dry_mass_g_total) ~ Dry_mass_g_total,
                                       is.na(Dry_mass_g_total) ~ Dry_mass_g_root + Dry_mass_g_above_ground)) %>% 
   mutate(root_shoot_ratio = Dry_mass_g_root/Dry_mass_g_above_ground) %>% 
-  rename(species = Species, siteID = Site, water_potential = Water_potential, replicate = Replicate, seed_nr = Seed, start_date = Start_date, germination_date = Germination_date, comment = Comment, cotelydon_date = Cotelydon_date, leaf_date = Leaf_date, harvest_date = Harvest_date, harvest_comment = Harvest_comment, wet_mass_g_root = Wet_mass_g_root, wet_mass_g = Wet_mass_g_, dry_mass_g_root = Dry_mass_g_root, dry_mass_g_above_ground = Dry_mass_g_above_ground, dry_mass_g_total = Dry_mass_g_total, weighing_comments = Weighing_comments, notes = Notes, removel_whole_petridish = Remove_whole_petridish, seed_viable = Seed_viable, lights_off = "Lights_off (Yes/no)", flag = Flag)
+  rename(species = Species, siteID = Site, water_potential = Water_potential, replicate = Replicate, seed_nr = Seed, start_date = Start_date, germination_date = Germination_date, comment = Comment, cotelydon_date = Cotelydon_date, leaf_date = Leaf_date, harvest_date = Harvest_date, harvest_comment = Harvest_comment, wet_mass_g_root = Wet_mass_g_root, wet_mass_g = Wet_mass_g_, dry_mass_g_root = Dry_mass_g_root, dry_mass_g_above_ground = Dry_mass_g_above_ground, dry_mass_g_total = Dry_mass_g_total, weighing_comments = Weighing_comments, notes = Notes, removel_whole_petridish = Remove_whole_petridish, seed_viable = Seed_viable, lights_off = "Lights_off (Yes/no)", flag = Flag) %>% 
+  mutate(precip = case_when(siteID == "SKJ" ~ 3402,
+                            siteID == "GUD" ~ 2130,
+                            siteID == "LAV" ~ 1561,
+                            siteID == "ULV" ~ 1226))
 
 #### Deal with comments. Categorize them ####
 ## Entering information in flag columns from comment section. I have three columns, flags for the germination (when seeds rotted, or became sick, or when we believe there are mistakes in the dates), seedlings (when the plant has started rotting, or died before seedlings where harvested - to be used for filtering seedlings out of the final data set), and whole petri dish flags - when a shole petridish needs removing because of drying out or mold. Options for flags are: Remove_duplicate, Dead_plant, Sick_plant,  Missing_date, Possible_mistakes_in_ID, Biomass_mistakes, Moldy, Agar_issues and Other. Using dictionaries to translate between comments and flags.
@@ -218,7 +222,11 @@ Sib_pro_germ <- Sib_pro_germ %>%
                                       is.na(dry_mass_g_total) ~ dry_mass)) %>% 
   mutate(dry_mass_g_total = case_when(ID == "SP_GUD_1_7_18" ~ dry_mass,
                                       ID != "SP_GUD_1_7_18" ~ dry_mass_g_total)) %>% 
-  dplyr::select(-dry_mass)
+  dplyr::select(-dry_mass) %>% 
+  mutate(precip = case_when(siteID == "SKJ" ~ 3402,
+                            siteID == "GUD" ~ 2130,
+                            siteID == "LAV" ~ 1561,
+                            siteID == "ULV" ~ 1226))
 
 #### Deal with comments. Categorize them ####
 ## Entering information in flag columns from comment section. I have three columns, flags for the germination (when seeds rotted, or became sick, or when we believe there are mistakes in the dates), seedlings (when the plant has started rotting, or died before seedlings where harvested - to be used for filtering seedlings out of the final data set), and whole petri dish flags - when a shole petridish needs removing because of drying out or mold. Options for flags are: Remove_duplicate, Dead_plant, Sick_plant,  Missing_date, Possible_mistakes_in_ID, Biomass_mistakes, Moldy, Agar_issues and Other. Using dictionaries to translate between comments and flags.
@@ -443,8 +451,6 @@ Ver_alp_germination_traits <- Ver_alp_germ %>%
   filter()
 
 Ver_alp_germination_traits <- Ver_alp_germination_traits %>% 
-  ungroup() %>% 
-  dplyr::select(flag_germination) %>%
   filter(!is.na(flag_germination))
 
 #### Make germination metrics Sib pro ####
