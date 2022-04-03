@@ -349,7 +349,9 @@ Seedling_info_SP_dat <- Sib_pro %>%
   left_join(Sib_pro_coef, by = "siteID") %>% 
   mutate(size = Intercept + LSL * LSL_coef + NL * NL_coef + LL * LL_coef) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
   ungroup() %>% 
-  mutate(max_seedling_size = max(size, na.rm = TRUE))
+  mutate(max_seedling_size = max(size, na.rm = TRUE)) %>% 
+  mutate(Vegetation = case_when(treatment %in% c("C", "E", "N") ~ "Veg",
+                                treatment == "R" ~ "NoVeg"))
 
 # model_seedling_SP1 <- lmer(size ~ OTC * treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
 # summary(model_seedling_SP1) #Nothing was significant, removing the interaction to see if there is something on the single factors
@@ -363,15 +365,24 @@ Seedling_info_SP_dat <- Sib_pro %>%
 # model_seedling_SP4 <- lmer(size ~ OTC + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
 # summary(model_seedling_SP4) 
 
-model_seedling_SPnull <- lmer(size ~ 1 + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
-summary(model_seedling_SPnull)
+ model_seedling_SP5 <- lmer(size ~ Vegetation + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat)
+ summary(model_seedling_SP5) 
 
-Seedling_info_SP_mean <- as.numeric(fixef(model_seedling_SPnull))
+Seedling_info_SP_mean <- fixef(model_seedling_SP5)%>% 
+  as.data.frame() %>% 
+  rownames_to_column() %>% 
+  pivot_wider(names_from = "rowname", values_from = ".") %>% 
+  rename(Intercept = "(Intercept)", Veg = VegetationVeg) 
 
-Seedling_info_SP_sd <- arm::sigma.hat(model_seedling_SPnull)$sigma$data
+mean_NoVeg <- Seedling_info_SP_mean$Intercept
 
-Seedling_info_SP <- as.data.frame(Seedling_info_SP_mean) %>% 
-   add_column(Seedling_info_SP_sd)
+mean_Veg <- Seedling_info_SP_mean$Intercept + Seedling_info_SP_mean$Veg
+
+sd <- arm::sigma.hat(model_seedling_SP5)$sigma$data #can we get different standard diviations for different groups? google this with lmer.
+
+Seedling_info_SP <- as.data.frame(mean_NoVeg) %>% 
+  add_column(mean_Veg) %>% 
+  add_column(sd)
 
 SP_max_seedling_size <- Seedling_info_SP_dat %>% 
   select(max_seedling_size) %>% 
