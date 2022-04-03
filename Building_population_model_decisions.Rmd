@@ -293,54 +293,78 @@ seedling_est_SP_Veg
 
 ###Sibbaldia procumbens  
 
-Investigated whether seedlings size changed between treatments (control, extant trait transplants, novel trait transplants, removal), and warmed and unwarmed plots. Using nested site/block/plot as random effect.
+Investigated whether seedlings size changed between treatments (control, extant trait transplants, novel trait transplants, removal), and warmed and unwarmed plots. Using nested site/block/plot as random effect. Using backward selection to eliminated variables.
 
+```{r}
+summary(lmer(size ~ OTC * treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat))
+```
 ```{r}
 summary(lmer(size ~ OTC + treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat))
 ```
-
-None of the treatments gave a significant difference in size, so we calculate the mean size of the seedlings, and the standard deviation to use in the population model.
-
 ```{r}
-Seedling_info_SP <- Seedling_info_SP_dat %>%
-  ungroup() %>% 
-  mutate(seeds_cap = mean(size, na.rm = TRUE),
-         seeds_cap_sd = sd(size, na.rm = TRUE)) %>%
-  select(seeds_cap, seeds_cap_sd) %>% 
-  distinct()
-
-Seedling_info_SP
+summary(lmer(size ~ treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat))
+```
+```{r}
+summary(lmer(size ~ OTC + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat))
 ```
 
+Neither warming nor treatment did significantly change the seedling size for Sibbaldia procumbens. So we combined the vegetated plots and tested if they differed from the non-vegetated plots. This ended up being the final model
+
+```{r}
+summary(lmer(size ~ Vegetation + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat))
+```
+
+We calculated the mean seedling size for the vegetated and non-vegetated plots, and the sd from the model.
+
+```{r}
+Seedling_info_SP 
+```
+
+We also calculated maximum seedling size from the data, as a cut off when assigning parents of the clonal offsprings.
+
+```{r}
+
+SP_max_seedling_size
+```
 
 ### Veronica alpina  
 
-Investigated whether seedlings size changed between treatments (control, extant trait transplants, novel trait transplants, removal), and warmed and unwarmed plots. Using nested site/block/plot as random effect.
+Investigated whether seedlings size changed between treatments (control, extant trait transplants, novel trait transplants, removal), and warmed and unwarmed plots. Using nested site/block/plot as random effect. Using backward selection to eliminated variables, starting with random efects, then interactions, then fixed effects.
 
 ```{r}
-summary(lmer(size ~ treatment + (1|siteID/blockID/plotID), data = Seedling_info_VA_dat))
+summary(lmer(size ~ OTC * treatment + (1|siteID/blockID/plotID), data = Seedling_info_VA_dat))
+```
+```{r}
+summary(lmer(size ~ OTC * treatment + (1|blockID/plotID), data = Seedling_info_VA_dat))
+```
+```{r}
+summary(lmer(size ~ OTC * treatment + (1|plotID), data = Seedling_info_VA_dat))
+```
+```{r}
+summary(lmer(size ~ OTC + treatment + (1|plotID), data = Seedling_info_VA_dat))
+```
+```{r}
+summary(lmer(size ~ treatment + (1|plotID), data = Seedling_info_VA_dat))
 ```
 
-Came back with singularity warning for blockID, so I made the model without blockID. Still has the same results as the one including blockID.
+Neither warming nor treatment did significantly change the seedling size for Veronica alpina. So we combined the vegetated plots and tested if they differed from the non-vegetated plots. This ended up being the final model
 
 ```{r}
-summary(lmer(size ~ treatment + (1|siteID/plotID), data = Seedling_info_VA_dat))
+summary(lmer(size ~ Vegetation + (1|plotID), data = Seedling_info_VA_dat))
 ```
 
-Seedlings are significantly smaller in non-vegetated plots. Calculating a mean size and standard deviation for the non-vegetated plots, and across all the vegetated plots (control, extant and novel transplant).
+
+We calculated the mean seedling size for the vegetated and non-vegetated plots, and the sd from the model.
 
 ```{r}
-Seedling_info_VA <- Seedling_info_VA_dat %>% 
-  mutate(Vegetation = case_when(treatment %in% c("C", "E", "N") ~ "Veg",
-                                treatment == "R" ~ "NoVeg")) %>% 
-  group_by(Vegetation) %>% 
-  mutate(seeds_cap = mean(size, na.rm = TRUE),
-         seeds_cap_sd = sd(size, na.rm = TRUE)) %>% 
-  ungroup() %>% 
-  select(treatment, seeds_cap, seeds_cap_sd) %>% 
-  distinct()
-
 Seedling_info_VA
+```
+
+We also calculated maximum seedling size from the data, as a cut off when assigning parents of the clonal offsprings.
+
+```{r}
+
+VA_max_seedling_size
 ```
 
 
