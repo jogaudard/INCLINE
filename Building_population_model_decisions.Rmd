@@ -121,7 +121,7 @@ summary(glmer(Number_of_seeds ~ size * Site + (1|Site) + (1|ID), data = Seeds_pe
 summary(glmer(Number_of_seeds ~ size + Site + (1|Site) + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
 ```
 ```{r}
-summry(glmer(Number_of_seeds ~ size * Site + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
+summary(glmer(Number_of_seeds ~ size * Site + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
 
 ```
 ```{r}
