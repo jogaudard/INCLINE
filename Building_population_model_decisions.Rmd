@@ -12,11 +12,13 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = "O:/PhD/R_stats/INCLINE_2.0")
 
-library(lme4)
-library(lmerTest)
-library(readr)
-library(lubridate)
-library(tidyverse)
+# library(lme4)
+# library(lmerTest)
+# library(readr)
+# library(lubridate)
+# library(tidyverse)
+
+source("R/Demography/cleaning_demogprahy.R", local = knitr::knit_global())
 
 ```
 
