@@ -66,8 +66,11 @@ Based of data collections done in 2020 where we collected 10 reproductive indivi
 
 ###Sibbaldia procumbens  
 
-Ran mixed effect models with seed per capsule explained by size, site or number of capsules produced by the mother. Starting with using site and individual ID as random effects. Using a backward selection to remove variables in the model until We end up with a null model = seeds per capsules does not depend on size, site or number of capsules in the mother.
+Ran mixed effect models with seed per capsule explained by size, site or number of capsules produced by the mother. Starting with using site and individual ID as random effects. When model failed to converge we either removed random variables or interactions between variables. Then we used a backward selection to remove variables in the model until we ended up with the null model = seeds per capsules does not depend on size, site or number of capsules in the mother.
 
+```{r}
+summary(glmer(Number_of_seeds ~ size * Site + (1|Site) + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log")))
+```
 ```{r}
 
 summary(glmer(Number_of_seeds ~ size + Site + (1|Site) + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log")))
@@ -88,14 +91,15 @@ Hence, I choose the predicted number of seeds per capsule from the model
 ```{r}
 seed_SP_null <- glmer(Number_of_seeds ~ 1 + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log"))
 summary(seed_SP_null)
-
+```
+```{r}
 Seeds_per_capsule_SP <- as.numeric(exp(fixef(seed_SP_null)))
 
 Seeds_per_capsule_SP
 ```
 
 
-```{r}
+```{r, echo = FALSE}
 Seeds_per_capsule_SP_dat %>%  
   ggplot(aes(x = size, y = Number_of_seeds)) + 
   geom_point(aes(color = Site)) + 
@@ -108,36 +112,82 @@ Seeds_per_capsule_SP_dat %>%
 
 ###Veronica alpina  
 
-Ran mixed effect models with seeds per capsule explained by size and site, and with individual ID as random effects. 
+Ran mixed effect models with seed per capsule explained by size, site or number of capsules produced by the mother. Starting with using site and individual ID as random effects. When models failed to converge we removed the random variables or the intercation between variables. Then we used backward selection to remove variables in the model until we ended up with a model with seeds per capsule depending on size. However, this trend was driven by one individual with a very low biomass. When we removed this outlier the trend was not significant. Since the trend was already very little significant when we included this individual we decided to go for the null model for Veronica alpina as well.
 
 ```{r}
-summary(lmer(Number_of_seeds ~ size + Site + (1|ID), data = Seeds_per_capsule_VA_dat))
+summary(glmer(Number_of_seeds ~ size * Site + (1|Site) + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
+```
+```{r}
+summary(glmer(Number_of_seeds ~ size + Site + (1|Site) + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
+```
+```{r}
+summry(glmer(Number_of_seeds ~ size * Site + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
+
+```
+```{r}
+summary(glmer(Number_of_seeds ~ size + Site + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
+ 
+```
+```{r}
+summary(glmer(Number_of_seeds ~ size + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
+```
+
+Running the model on the data without the outlier individual:
+
+```{r}
+
+summary(glmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = (Seeds_per_capsule_VA_dat %>% filter(size >10)), family = poisson(link = "log")))
 ```
 
 
-Size was nearly significant, so I ran a model with only size and individual ID as random effect. Size was still not significant in this model.
+I also ran a model with seeds per capsule explained by number of capsules, but number of capsules did not affect the number of seeds per capsule.
 
 ```{r}
-summary(lmer(Number_of_seeds ~ size + (1|ID), data = Seeds_per_capsule_VA_dat))
+summary(glmer(Number_of_seeds ~ Number_of_capsules + (1|Site) + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
+```
+```{r}
+summary(glmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
 ```
 
-I also ran a model with seeds per capsule explained by number of capsules with individual ID as random effect, but number of capsules did not affect the number of seeds per capsule.
+
+Hence, I choose the predicted number of seeds per capsule from the model
 
 ```{r}
-summary(lmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_VA_dat))
+summary(glmer(Number_of_seeds ~ 1 + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
+
 ```
 
-Hence, I choose to use one mean value for seeds per capsule across the whole dataset
-
 ```{r}
-Seeds_per_capsule_VA <- Seeds_per_capsule_VA_dat %>% 
-  select(mean_seeds) %>% 
-  unique()
+Seeds_per_capsule_VA_null <- as.numeric(exp(fixef(seed_VA_null)))
 
-Seeds_per_capsule_VA <- Seeds_per_capsule_VA$mean_seeds
+```
 
-Seeds_per_capsule_VA
+With the outlier
+```{r, echo = FALSE}
+Seeds_per_capsule_VA_dat %>%  
+  ggplot(aes(x = size, y = Number_of_seeds)) + 
+  geom_point(aes(color = Site)) + 
+  geom_hline(aes(yintercept = Seeds_per_capsule_VA_null)) + 
+  #geom_abline(intercept = Seeds_per_capsule_VA$Intercept_seeds, slope = Seeds_per_capsule_VA$seed_number_coef) +
+  ggtitle("Number of seeds by size for Veronica_alpina") + 
+  xlab("log2(size)") + 
+  ylab("Seed per capsule") + 
+  scale_color_viridis_d()
+```
 
+Without the outlier
+
+```{r, echo = FALSE}
+Seeds_per_capsule_VA_dat %>%
+  filter(size > 10) %>% 
+  ggplot(aes(x = size, y = Number_of_seeds)) + 
+  geom_point(aes(color = Site)) + 
+  geom_hline(aes(yintercept = Seeds_per_capsule_VA_null)) + 
+  #geom_abline(intercept = Seeds_per_capsule_VA$Intercept_seeds, slope = Seeds_per_capsule_VA$seed_number_coef) +
+  ggtitle("Number of seeds by size for Veronica_alpina") + 
+  xlab("log2(size)") + 
+  ylab("Seed per capsule") + 
+  scale_color_viridis_d()
 ```
 
 
