@@ -194,7 +194,7 @@ Seeds_per_capsule_VA_dat %>%
 ##Seedling establishment rate  
 
 
-These data come from an add on experiment where we sowed out 20 seeds of each species in vegetated and non-vegetated plots, inside and outside of the OTC. We have five replicates of each treatment combination. Seeds were glued to toothpicks to stop the seeds from blowing away. To control for background seed rain we used subplot 3 in each of the control and removal plot of the overall INCLINE experiment. The seeds were sowed out in September (2019) and checked for germination at three intervals in 2020: a couple of weeks after snow melt out, in the peak growing season and in the end of the growing season. Here we use the data from the peak growing season check-point. 
+These data come from an add on experiment where we sowed out 20 seeds of each species in vegetated and non-vegetated plots, inside and outside of the OTC. We have five replicates of each treatment combination. Seeds were glued to toothpicks to stop the seeds from blowing away. To control for background seed rain we used subplot 3 in each of the control and removal plot of the overall INCLINE experiment. The seeds were sowed out in September (2019) and checked for germination at three intervals in 2020: i) a couple of weeks after snow melt out, ii) in the peak growing season and iii) in the end of the growing season. Here we use the data from the peak growing season check-point. 
 We calculated background seed rain from the overall INCLINE experiment. There was a marked difference between the removal and control plots, so we decided to calculate an average background germination rate for each species in removal and controls. We used these numbers and subtracted that number of seedlings from every replicate in the germination experiment.
 
 ```{r}
@@ -204,61 +204,89 @@ seedling_est_background
 
 ###Veronica alpina  
 
-We calculated the germination percentage and tested if it was different in warmed and unwarmed plots, and in plots with and without vegetation, using site and blockID as random effects. Without vegetation gave significantly higher germination rate than with vegetation, while warming was close to significant. 
+We calculated the germination percentage and tested if it was different in warmed and unwarmed plots, and in plots with and without vegetation, using site and blockID as random effects. By backward selection we remove interactions and variables until we find the right model.
 
 ```{r}
-summary(lmer(germination_percentage ~ Warming + Vegetation +(1|Site) + (1|blockID), data = seedling_est_VA_dat))
+summary(glmer(count ~ Warming * Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_VA_dat))
+```
+```{r}
+summary(glmer(count ~ Warming + Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_VA_dat))
+```
+Warming and Vegetation was significant, but not interactively. We calculated the seedling establishment rate in warmed and unwarmed plots, and vegetated and unvegetated plots base don the model.
+
+```{r}
+seedling_est_VA <- fixef(model_seedl_VA2) %>% 
+  as.data.frame() %>% 
+  rownames_to_column() %>% 
+  pivot_wider(names_from = "rowname", values_from = ".") %>% 
+  rename(Intercept = "(Intercept)", OTC = WarmingOTC, Veg = VegetationVeg)
+
+seedling_est_VA_C_NoVeg <- expit(seedling_est_VA$Intercept)
+
+seedling_est_VA_C_Veg <- expit(seedling_est_VA$Intercept + seedling_est_VA$Veg)
+
+seedling_est_VA_OTC_NoVeg <- expit(seedling_est_VA$Intercept + seedling_est_VA$OTC)
+
+seedling_est_VA_OTC_Veg <- expit(seedling_est_VA$Intercept + seedling_est_VA$OTC + seedling_est_VA$Veg)
+
 ```
 
-I tested the model with warming alone (removing Vegetation), but warming was not significant in that model.
-
+Seedling establishment in cold and non-vegetated plots:
 ```{r}
-summary(lmer(germination_percentage ~ Warming +(1|Site) + (1|blockID), data = seedling_est_VA_dat))
+seedling_est_VA_C_NoVeg
 ```
-
-However, this model came back with singularity warning, and 0 in ranif for blockID. So I ran the model without blockID as well, but warming was still not significant.
-
+Seedling establishment in cold and vegetated plots:
 ```{r}
-summary(lmer(germination_percentage ~ Warming +(1|Site), data = seedling_est_VA_dat))
+seedling_est_VA_C_Veg
 ```
-
-We calculated the seedling establishment rate in vegetation and unvegetated plots for Veronica alpina
-
+Seedling establishment in warm and non-vegetated plots:
 ```{r}
-seedling_est_VA <- seedling_est_VA_dat %>% 
-  select(Vegetation, germination_percentage) %>% 
-  group_by(Vegetation) %>% 
-  mutate(germination_percentage = mean(germination_percentage)) %>% 
-  unique()
+seedling_est_VA_OTC_NoVeg
+```
+Seedling establishment in warm and vegetated plots:
+```{r}
 
-seedling_est_VA
-
+seedling_est_VA_OTC_Veg
 ```
 
 
 ###Sibbaldia procumbens  
 
-We calculated the germination percentage and tested if it was different in warmed and unwarmed plots, and in plots with and without vegetation, using site and blockID as random effects. This model came back with singularity warning with 0 ranif for blockID. Removed blockID as random effect and ran the model again (which gave the same results for significance). Without vegetation gave significantly higher germination rate than with vegetation.
+We calculated the germination percentage and tested if it was different in warmed and unwarmed plots, and in plots with and without vegetation, using site and blockID as random effects. By backward selection we remove interactions and variables until we find the right model.
 
 ```{r}
-summary(lmer(germination_percentage ~ Warming + Vegetation + (1|Site) + (1|blockID), data = seedling_est_SP_dat))
+summary(glmer(count ~ Warming * Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_SP_dat))
 ```
 ```{r}
-summary(lmer(germination_percentage ~ Warming + Vegetation + (1|Site), data = seedling_est_SP_dat))
+summary(glmer(count ~ Warming + Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_SP_dat))
 ```
+```{r}
+summary(glmer(count ~ Vegetation + (1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_SP_dat))
+```
+
 
 Hence, we calculated the seedling establishment rate in vegetation and unvegetated plots for Sibbaldia procumbens:
 
 ```{r}
-seedling_est_SP <- seedling_est_SP_dat %>% 
-  select(Vegetation, germination_percentage) %>% 
-  group_by(Vegetation) %>% 
-  mutate(germination_percentage = mean(germination_percentage)) %>% 
-  unique()
+seedling_est_SP <- fixef(model_seedl_SP3) %>% 
+  as.data.frame() %>% 
+  rownames_to_column() %>% 
+  pivot_wider(names_from = "rowname", values_from = ".") %>% 
+  rename(Intercept = "(Intercept)", Veg = VegetationVeg)
 
-seedling_est_SP
+seedling_est_SP_NoVeg <- expit(seedling_est_SP$Intercept)
+
+seedling_est_SP_Veg <- expit(seedling_est_VA$Intercept + seedling_est_VA$Veg)
 ```
 
+Seedling establishment in non-vegetated plots:
+```{r}
+seedling_est_SP_NoVeg
+```
+Seedling establishment in vegetated plots:
+```{r}
+seedling_est_SP_Veg
+```
 
 ##Seedling size information  
 
