@@ -327,6 +327,18 @@ We also calculated maximum seedling size from the data, as a cut off when assign
 SP_max_seedling_size
 ```
 
+```{r, echo = FALSE}
+Seedling_info_SP_dat %>%  
+  ggplot(aes(x = Vegetation, y = size, fill = Vegetation)) + 
+  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_jitter(alpha= 0.2) +
+  geom_hline(yintercept = mean_NoVeg_SP,  size = 2, color = "lightgreen") +
+  geom_hline(yintercept = mean_Veg_SP, size = 2, color = "darkgreen") +
+  ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") +
+  scale_fill_manual(values = c("lightgreen", "darkgreen")) +
+  theme_bw()
+```
+
 ### Veronica alpina  
 
 Investigated whether seedlings size changed between treatments (control, extant trait transplants, novel trait transplants, removal), and warmed and unwarmed plots. Using nested site/block/plot as random effect. Using backward selection to eliminated variables, starting with random efects, then interactions, then fixed effects.
@@ -365,6 +377,18 @@ We also calculated maximum seedling size from the data, as a cut off when assign
 ```{r}
 
 VA_max_seedling_size
+```
+
+```{r, echo = FALSE}
+Seedling_info_VA_dat %>%  
+  ggplot(aes(x = Vegetation, y = size, fill = Vegetation)) + 
+  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_jitter(alpha= 0.2) +
+  geom_hline(yintercept = mean_NoVeg_VA,  size = 2, color = "lightgreen") +
+  geom_hline(yintercept = mean_Veg_VA, size = 2, color = "darkgreen") +
+  ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") +
+  scale_fill_manual(values = c("lightgreen", "darkgreen")) +
+  theme_bw()
 ```
 
 
