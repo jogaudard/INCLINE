@@ -41,16 +41,17 @@ Sib_pro_coef
 
 
 ### Veronica alpina  
-Here we use Tessa Bargmanns data from her masters in SeedClim from 2009 (because of the biomass problems in Lasses master thesis). We are using biomass of above ground structures, without the reproductive parts (only leaves and stems) to match with Sibbaldia procumbens. When we used a mixed effect model, we got a warning message about singularity. Switched to a linear model which gave the exact same intercept and slopes.
+Here we use Tessa Bargmanns data from her masters in SeedClim from 2009 (because of the biomass problems in Lasses master thesis). We are using biomass of above ground structures, without the reproductive parts (only leaves and stems) to match with Sibbaldia procumbens. When we used a mixed effect model, we got a warning message about singularity. Switched to a linear model.
 
 ```{r}
-summary(lmer(ag ~ SH + NL + LL + WL +(1|siteID), data = biomass_Ver_alp))
+summary(lmer(ag ~ SH + NL + LL + WL + (1|siteID), data = biomass_Ver_alp))
 ```
+
 ```{r}
 summary(lm(ag ~ SH + NL + LL + WL , data = biomass_Ver_alp))
 ```
 
-Choosing to use coefficients from all traits and same intercepts for each site:
+Choosing to use coefficients from all traits and same intercepts for each site from the model:
 
 ```{r}
 Ver_alp_coef
@@ -60,52 +61,48 @@ Ver_alp_coef
 ##Seeds per capsule  
 
 
-Based of data collections done in 2020 where we collected 10 reproductive individuals of each species at each site. We measured the same size traits as in the demography dataset in the field. The we brought them back to the lab and counted how many seeds there were in each capsule. There were between `r min(Seeds_per_capsule_VA_dat$Number_of_capsules)` and `r max(Seeds_per_capsule_VA_dat$Number_of_capsules)` capsules for Veronica alpina, and between `r min(Seeds_per_capsule_SP_dat$Number_of_capsules)`and `r max(Seeds_per_capsule_SP_dat$Number_of_capsules)` capsules for Sibbaldia procumbens. Althought the highest number for Sibbaldia was quite an outlier, so the next max number is: `r  Seeds_per_capsule_SP_dat %>% filter(!Number_of_capsules == 32) %>% mutate(max = max(Number_of_capsules)) %>% select(max) %>% unique() %>% pull()`.
+Based of data collections done in 2020 where we collected 10 reproductive individuals of each species at each site. We measured the same size traits as in the demography dataset in the field. Then we brought them back to the lab and counted how many seeds there were in each capsule. There were between `r min(Seeds_per_capsule_VA_dat$Number_of_capsules)` and `r max(Seeds_per_capsule_VA_dat$Number_of_capsules)` capsules for Veronica alpina, and between `r min(Seeds_per_capsule_SP_dat$Number_of_capsules)`and `r max(Seeds_per_capsule_SP_dat$Number_of_capsules)` capsules for Sibbaldia procumbens. Althought the highest number for Sibbaldia was quite an outlier, so the next max number is: `r  Seeds_per_capsule_SP_dat %>% filter(!Number_of_capsules == 32) %>% mutate(max = max(Number_of_capsules)) %>% select(max) %>% unique() %>% pull()`.
 
 
 ###Sibbaldia procumbens  
 
-Ran mixed effect models with seed per capsule explained by size and site, using individual_ID as random effect. Nothing was significant.
+Ran mixed effect models with seed per capsule explained by size, site or number of capsules produced by the mother. Starting with using site and individual ID as random effects. Using a backward selection to remove variables in the model until We end up with a null model = seeds per capsules does not depend on size, site or number of capsules in the mother.
 
 ```{r}
-glmer(Number_of_seeds ~ size + Site + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log"))
-```
 
+summary(glmer(Number_of_seeds ~ size + Site + (1|Site) + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log")))
+
+```
 ```{r}
 summary(glmer(Number_of_seeds ~ size + Site + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log")))
 ```
-
-
-Ran mixed effect models with seeds per capsule explained by size, and with site and individual_ID as random effects. Came back with singularity warning, and site had a ranef of 0, so excluded site as random effect, but kept individual_ID.
-
 ```{r}
-summary(lmer(Number_of_seeds ~ size + (1|Site) + (1|ID), data = Seeds_per_capsule_SP_dat))
+summary(glmer(Number_of_seeds ~ Number_of_capsules + (1|Site) + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log")))
 ```
 ```{r}
-summary(lmer(Number_of_seeds ~ size + (1|ID), data = Seeds_per_capsule_SP_dat))
+summary(glmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log")))
 ```
 
-I also ran a model with seeds per capsule explained by site with individual_ID as random effect, but none of the sites were significantly different from each other. 
 
+Hence, I choose the predicted number of seeds per capsule from the model
 ```{r}
-summary(lmer(Number_of_seeds ~ Site + (1|ID), data = Seeds_per_capsule_SP_dat)) 
+seed_SP_null <- glmer(Number_of_seeds ~ 1 + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log"))
+summary(seed_SP_null)
+
+Seeds_per_capsule_SP <- as.numeric(exp(fixef(seed_SP_null)))
+
+Seeds_per_capsule_SP
 ```
 
-I also ran a model with seeds per capsule explained by number of capsules with individual_ID as random effect, but number of capsules did not affect the number of seeds per capsule.
 
 ```{r}
-summary(lmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_SP_dat))
-```
-
-Hence, I choose to use one mean value for seeds per capsule across the whole dataset 
-```{r}
-Seeds_per_capsule_SP <- Seeds_per_capsule_SP_dat %>% 
-  select(mean_seeds) %>% 
-  unique()
-
-Seeds_per_capsule_SP <- Seeds_per_capsule_SP$mean_seeds
-
-Seeds_per_capsule_SP 
+Seeds_per_capsule_SP_dat %>%  
+  ggplot(aes(x = size, y = Number_of_seeds)) + 
+  geom_point(aes(color = Site)) + 
+  geom_hline(aes(yintercept = Seeds_per_capsule_SP)) + 
+  ggtitle("Number of seeds by size for Sibbaldia procumbens") + 
+  xlab("log2(size)") +
+  ylab("Seed per capsule") + scale_color_viridis_d()
 ```
 
 
