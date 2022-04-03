@@ -145,7 +145,7 @@ Seeds_per_capsule_SP_dat %>%
   geom_hline(aes(yintercept = Seeds_per_capsule_SP)) + 
   ggtitle("Number of seeds by size for Sibbaldia procumbens") + 
   xlab("log2(size)") +
-  ylab("Seed per individual") + scale_color_viridis_d()
+  ylab("Seed per capsule") + scale_color_viridis_d()
 
 ###### Veronica alpina ######
 
