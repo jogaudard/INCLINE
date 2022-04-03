@@ -17,20 +17,20 @@ conflict_prefer("select", "dplyr")
 
 #osf_auth(token = "get from my document every time you run the code") 
 
-get_file(node = "zhk3m",
-         file = "Sib_pro_2018-2021.csv",
-         path = "data/Demography",
-         remote_path = "RawData/Demography")
-
-get_file(node = "zhk3m",
-         file = "Ver_alp_2018-2021.csv",
-         path = "data/Demography",
-         remote_path = "RawData/Demography")
-
-get_file(node = "zhk3m",
-         file = "INCLINE_metadata_LoggerDates.csv",
-         path = "data",
-         remote_path = "RawData")
+# get_file(node = "zhk3m",
+#          file = "Sib_pro_2018-2021.csv",
+#          path = "data/Demography",
+#          remote_path = "RawData/Demography")
+# 
+# get_file(node = "zhk3m",
+#          file = "Ver_alp_2018-2021.csv",
+#          path = "data/Demography",
+#          remote_path = "RawData/Demography")
+# 
+# get_file(node = "zhk3m",
+#          file = "INCLINE_metadata_LoggerDates.csv",
+#          path = "data",
+#          remote_path = "RawData")
 
 #### Load data ####
 
