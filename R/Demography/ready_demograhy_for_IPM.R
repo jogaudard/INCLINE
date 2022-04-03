@@ -21,20 +21,20 @@ conflict_prefer("lmer", "lmerTest")
 
 #osf_auth(token = "get from my document every time you run the code") 
 
-get_file(node = "zhk3m",
-         file = "Seeds_per_capsule.csv",
-         path = "data/Demography",
-         remote_path = "RawData/Demography")
-
-get_file(node = "zhk3m",
-         file = "INCLINE_seedling_data.csv",
-         path = "data/Demography",
-         remote_path = "RawData/Germination_field_experiment")
-
-get_file(node = "zhk3m",
-         file = "Biomass_Sib_pro.csv",
-         path = "data/Demography",
-         remote_path = "RawData/Demography")
+# get_file(node = "zhk3m",
+#          file = "Seeds_per_capsule.csv",
+#          path = "data/Demography",
+#          remote_path = "RawData/Demography")
+# 
+# get_file(node = "zhk3m",
+#          file = "INCLINE_seedling_data.csv",
+#          path = "data/Demography",
+#          remote_path = "RawData/Germination_field_experiment")
+# 
+# get_file(node = "zhk3m",
+#          file = "Biomass_Sib_pro.csv",
+#          path = "data/Demography",
+#          remote_path = "RawData/Demography")
 
 #### Load data ####
 
