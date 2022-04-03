@@ -396,15 +396,15 @@ Seedling_info_VA_dat %>%
 
 
 For both species:
-Finding all the clones by selecting individuals that has a size in the next year, but not the start year. For each plot we identify the potential parents by excluding all individuals that was recorded as seedlings or juveniles, pluss any individuals that have a size smaller than the mean seedling size + two times the standard deviation of seedlings. For Veronica the seedling size changed between treatments, so there I used the seedlings size of the seedlings in the vegetated plots (as they were bigger than in the non-vegetated plots). The distance between each clone and potential parents was calculated, and the parent with the shortest distance was picked. We then added the size of the parent to the first-year size of the clone. Afterwards we filtered out the parents that were more than 5 cm away from the clone.
+Finding all the clones by selecting individuals that has a size in the next year, but not the start year. For each plot we identify the potential parents by excluding all individuals that was recorded as seedlings or juveniles, pluss any individuals that have a size smaller than the maximum seedling size for that species. The distance between each clone and potential parents was calculated, and the parent with the shortest distance was picked. We then added the size of the parent to the first-year size of the clone. Afterwards we filtered out the parents that were more than 5 cm away from the clone.
 
 
 ```{r, echo = FALSE}
-Sib_pro_test %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline() +
+Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline() +
   ggtitle("Size of clones and other individuals of Sibbaldia procumbens")
 ```
 ```{r, echo = FALSE}
-Ver_alp_test %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline() +
+Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline() +
   ggtitle("Size of clones and other individuals of Veronica alpina")
 ```
 
