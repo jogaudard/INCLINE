@@ -335,7 +335,7 @@ seedling_est_SP_Veg <- expit(seedling_est_VA$Intercept + seedling_est_VA$Veg)
 ###### Sibaldia procumbens ######
 
 Seedling_info_SP_dat <- Sib_pro %>% 
-  filter(seedling == "yes") %>%  #There are some seedlings that lack information in LSL, NL or LL. Do we need to gap fill the data here?
+  filter(seedling == "yes") %>%   #There are some seedlings that lack information in LSL, NL or LL. Do we need to gap fill the data here?
   group_by(OTC, treatment) %>% 
   mutate(mean_LSL = round(mean(LSL, na.rm = TRUE)),
          mean_NL = round(mean(NL, na.rm = TRUE)),
@@ -476,7 +476,7 @@ Seedling_info_VA_dat %>%
 
 
 VA_max_seedling_size <- Seedling_info_VA_dat %>% 
-  select(max_seedling_size) %>%  #change seedlings to non seedling when SH is larger than 20 and number of leaves is larger than 6.
+  select(max_seedling_size) %>% 
   unique()
 
 #### Making transitions ####
@@ -815,7 +815,7 @@ Ver_alp_2018_2021 <- clones_VA %>%
 Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
   left_join(clonal_information_VA, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_child", "X_next", "Y_next", "sizeNext"))
 
-Ver_alp_test <- Ver_alp_2018_2021 %>% 
+Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
   mutate(size = case_when((offspringNext == "clone" & distance_parent < 5) ~ size_parent,
                           (offspringNext == "clone" & distance_parent > 5) ~ size,
                           offspringNext %in% c(NA, "sexual") ~ size)) %>% 
@@ -834,14 +834,14 @@ Ver_alp_test <- Ver_alp_2018_2021 %>%
   mutate(offspringNext = case_when(offspringNext == "clone" & is.na(unique_IDS_parent) ~ "orphan",
                                    TRUE ~ offspringNext))
 
-clone_information_VA <- Ver_alp_test %>% 
+clone_information_VA <- Ver_alp_2018_2021 %>% 
   select(plotID, transition, unique_IDS_parent) %>% 
   filter(!is.na(unique_IDS_parent)) %>%
   group_by(plotID, transition, unique_IDS_parent) %>%
   summarise(n()) %>%
   rename(clo.no = "n()")
 
-Ver_alp_test <- Ver_alp_test %>% 
+Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
   left_join(clone_information_VA, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_parent")) %>% 
   mutate(clo.if = case_when(clo.no > 0.1 ~ 1,
                             is.na(clo.no) ~ 0))
