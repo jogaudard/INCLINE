@@ -8,10 +8,12 @@ library(dataDownloader)
 library(osfr)
 library(lubridate)
 library(conflicted)
+library(here)
 
 #### Select preferences for conflicts ####
 
 conflict_prefer("select", "dplyr")
+conflict_prefer("filter", "dplyr")
 
 #### Downloading data from OSF ####
 
