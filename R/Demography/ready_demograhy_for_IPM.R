@@ -374,19 +374,30 @@ Seedling_info_SP_mean <- fixef(model_seedling_SP5)%>%
   pivot_wider(names_from = "rowname", values_from = ".") %>% 
   rename(Intercept = "(Intercept)", Veg = VegetationVeg) 
 
-mean_NoVeg <- Seedling_info_SP_mean$Intercept
+mean_NoVeg_SP <- Seedling_info_SP_mean$Intercept
 
-mean_Veg <- Seedling_info_SP_mean$Intercept + Seedling_info_SP_mean$Veg
+mean_Veg_SP <- Seedling_info_SP_mean$Intercept + Seedling_info_SP_mean$Veg
 
-sd <- arm::sigma.hat(model_seedling_SP5)$sigma$data #can we get different standard diviations for different groups? google this with lmer.
+sd_SP <- arm::sigma.hat(model_seedling_SP5)$sigma$data #can we get different standard diviations for different groups? google this with lmer.
 
-Seedling_info_SP <- as.data.frame(mean_NoVeg) %>% 
-  add_column(mean_Veg) %>% 
-  add_column(sd)
+Seedling_info_SP <- as.data.frame(mean_NoVeg_SP) %>% 
+  add_column(mean_Veg_SP) %>% 
+  add_column(sd_SP) %>% 
+  rename(mean_NoVeg = mean_NoVeg_SP, mean_Veg = mean_Veg_SP, sd = sd_SP)
 
 SP_max_seedling_size <- Seedling_info_SP_dat %>% 
   select(max_seedling_size) %>% 
   unique()
+
+Seedling_info_SP_dat %>%  
+  ggplot(aes(x = Vegetation, y = size, fill = Vegetation)) + 
+  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_jitter(alpha= 0.2) +
+  geom_hline(yintercept = mean_NoVeg_SP,  size = 2, color = "lightgreen") +
+  geom_hline(yintercept = mean_Veg_SP, size = 2, color = "darkgreen") +
+  ggtitle("Seedling size by treatment for Sibbaldia procumbens") + ylab("size") +
+  scale_fill_manual(values = c("lightgreen", "darkgreen")) +
+  theme_bw()
 
 ###### Veronica alpina ######
 
@@ -441,23 +452,24 @@ Seedling_info_VA_mean <- fixef(model_seedling_VA6)%>%
 
 # Need to make this in a format that can be added in the model later
 
-mean_NoVeg <- Seedling_info_VA_mean$Intercept
+mean_NoVeg_VA <- Seedling_info_VA_mean$Intercept
 
-mean_Veg <- Seedling_info_VA_mean$Intercept + Seedling_info_VA_mean$Veg
+mean_Veg_VA <- Seedling_info_VA_mean$Intercept + Seedling_info_VA_mean$Veg
 
-sd <- arm::sigma.hat(model_seedling_VA6)$sigma$data #can we get different standard diviations for different groups? google this with lmer.
+sd_VA <- arm::sigma.hat(model_seedling_VA6)$sigma$data #can we get different standard diviations for different groups? google this with lmer.
 
-Seedling_info_VA <- as.data.frame(mean_NoVeg) %>% 
-  add_column(mean_Veg) %>% 
-  add_column(sd)
+Seedling_info_VA <- as.data.frame(mean_NoVeg_VA) %>% 
+  add_column(mean_Veg_VA) %>% 
+  add_column(sd_VA) %>% 
+  rename(mean_NoVeg = mean_NoVeg_VA, mean_Veg = mean_Veg_VA, sd = sd_VA)
 
 
 Seedling_info_VA_dat %>%  
   ggplot(aes(x = Vegetation, y = size, fill = Vegetation)) + 
   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
   geom_jitter(alpha= 0.2) +
-  geom_hline(yintercept = mean_NoVeg,  size = 2, linetype = "dashed") +
-  geom_hline(yintercept = mean_Veg, size = 2) +
+  geom_hline(yintercept = mean_NoVeg_VA,  size = 2, color = "lightgreen") +
+  geom_hline(yintercept = mean_Veg_VA, size = 2, color = "darkgreen") +
   ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") +
   scale_fill_manual(values = c("lightgreen", "darkgreen")) +
   theme_bw()
