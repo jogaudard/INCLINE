@@ -2,7 +2,7 @@
 ### Script for making demography data ready for IPM analysis ###
 ################################################################
 
-#source("R/Demography/cleaning_demography.R")
+source("R/Demography/cleaning_demogprahy.R")
 
 #### Libraries ####
 library(tidyverse)
@@ -676,9 +676,7 @@ Sib_pro_2018_2021 <- Sib_pro_2018_2021 %>%
   mutate(Y_parent = case_when(is.na(distance_parent) ~ NA_real_,
                                        TRUE ~ Y_parent)) %>% 
   mutate(size_parent = case_when(is.na(distance_parent) ~ NA_real_,
-                              TRUE ~ size_parent)) %>% 
-  mutate(offspringNext = case_when(offspringNext == "clone" & is.na(unique_IDS_parent) ~ "orphan",
-                                   TRUE ~ offspringNext))
+                              TRUE ~ size_parent)) 
 
 clone_information_SP <- Sib_pro_2018_2021 %>% 
   select(plotID, transition, unique_IDS_parent) %>% 
@@ -830,9 +828,7 @@ Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>%
   mutate(Y_parent = case_when(is.na(distance_parent) ~ NA_real_,
                               TRUE ~ Y_parent)) %>% 
   mutate(size_parent = case_when(is.na(distance_parent) ~ NA_real_,
-                                 TRUE ~ size_parent)) %>% 
-  mutate(offspringNext = case_when(offspringNext == "clone" & is.na(unique_IDS_parent) ~ "orphan",
-                                   TRUE ~ offspringNext))
+                                 TRUE ~ size_parent))
 
 clone_information_VA <- Ver_alp_2018_2021 %>% 
   select(plotID, transition, unique_IDS_parent) %>% 
