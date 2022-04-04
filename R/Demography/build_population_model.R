@@ -2,6 +2,9 @@
 ### Script for building population models for the INCLINE experiment ###
 ########################################################################
 
+#### Source files ####
+source("R/Demography/cleaning_demogprahy.R")
+source("R/Demography/ready_demograhy_for_IPM.R")
 
 #### Libraries ####
 library(tidyverse)
@@ -31,15 +34,15 @@ x<-seq(from=round(minSize),to=round(maxSize),length=100)
 x0<-data.frame(size=x,size2=x*x)
 
 
-# To understand the data, we plot survival, growth/shrinkage/stasis, number of seeds, and size of recruits:
-par(mfrow=c(2,2),mar=c(4,4,2,1))
-plot(Ver_alp_2018_2021$size,jitter(Ver_alp_2018_2021$surv),xlab="Size (t)", ylab="Survival to t+1")
-plot(Ver_alp_2018_2021$size, Ver_alp_2018_2021$sizeNext,xlab="Size (t)",ylab="Size (t+1)") 
-plot(Ver_alp_2018_2021$size,jitter(Ver_alp_2018_2021$flo.if),xlab="Size (t)", ylab="Flowering probability") 
-plot(Ver_alp_2018_2021$size, Ver_alp_2018_2021$fec,xlab="Size (t)",ylab="Number of seeds") 
-
-Ver_alp_2018_2021 %>% filter(offspringNext == "sexual") %>% ggplot(aes( x = sizeNext)) + geom_histogram() + ylab("Seedling size")
-Ver_alp_2018_2021 %>% filter(offspringNext == "clone") %>% ggplot(aes( x = sizeNext)) + geom_histogram() + ylab("Clone size")
+# # To understand the data, we plot survival, growth/shrinkage/stasis, number of seeds, and size of recruits:
+# par(mfrow=c(2,2),mar=c(4,4,2,1))
+# plot(Ver_alp_2018_2021$size,jitter(Ver_alp_2018_2021$surv),xlab="Size (t)", ylab="Survival to t+1")
+# plot(Ver_alp_2018_2021$size, Ver_alp_2018_2021$sizeNext,xlab="Size (t)",ylab="Size (t+1)") 
+# plot(Ver_alp_2018_2021$size,jitter(Ver_alp_2018_2021$flo.if),xlab="Size (t)", ylab="Flowering probability") 
+# plot(Ver_alp_2018_2021$size, Ver_alp_2018_2021$fec,xlab="Size (t)",ylab="Number of seeds") 
+# 
+# Ver_alp_2018_2021 %>% filter(offspringNext == "sexual") %>% ggplot(aes( x = sizeNext)) + geom_histogram() + ylab("Seedling size")
+# Ver_alp_2018_2021 %>% filter(offspringNext == "clone") %>% ggplot(aes( x = sizeNext)) + geom_histogram() + ylab("Clone size")
 
 Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
    ungroup() %>% 
@@ -191,7 +194,7 @@ diagnosticsPmatrix(Pmatrix_CN, growObj=go_CN, survObj=so_CN, correction="constan
 #Bindwidth looks ok, range size could maybe be fixed
 
 
-#### Warm control ####
+#### Warming control ####
 
 # The first step in constructing an IPM with IPMpack is a survival analysis. We use the function ‘survModelComp’ to explore whether survival is related to size, as illustrated in this figure:
 x11()
@@ -225,7 +228,7 @@ diagnosticsPmatrix(Pmatrix_WC, growObj=go_WC, survObj=so_WC, correction="constan
 #Bindwidth looks ok, range size could maybe be fixed
 
 
-#### Ambient temperature removal ####
+#### Warming and removal ####
 
 # The first step in constructing an IPM with IPMpack is a survival analysis. We use the function ‘survModelComp’ to explore whether survival is related to size, as illustrated in this figure:
 x11()
@@ -259,7 +262,7 @@ diagnosticsPmatrix(Pmatrix_WR, growObj=go_WR, survObj=so_WR, correction="constan
 #Bindwidth looks ok, range size could maybe be fixed
 
 
-#### Ambient temperature extant ####
+#### Warming and extant ####
 
 # The first step in constructing an IPM with IPMpack is a survival analysis. We use the function ‘survModelComp’ to explore whether survival is related to size, as illustrated in this figure:
 x11()
@@ -293,7 +296,7 @@ diagnosticsPmatrix(Pmatrix_WE, growObj=go_WE, survObj=so_CE, correction="constan
 #Bindwidth looks ok, range size could maybe be fixed
 
 
-#### Ambient temperature novel ####
+#### Warming and novel ####
 
 # The first step in constructing an IPM with IPMpack is a survival analysis. We use the function ‘survModelComp’ to explore whether survival is related to size, as illustrated in this figure:
 x11()
@@ -758,3 +761,11 @@ image.plot(Fmatrix_VA_WN@meshpoints,
            main = "Fmatrix: flower and seedlings",
            xlab = "Size at t",
            ylab = "Size at t+1")
+
+##### Clonal objects #####
+
+co <- makeClonalObj(VA.all,fecConstants=data.frame(correctionForOrphans=VA.TT1sTT2.orph),
+                    offspringSizeExplanatoryVariables = "size", Formula = c(cloning~size,clones~size+size2),
+                    Family = c("binomial","poisson"), Transform=c("none","none"),offspringSplitter=data.frame(seedbank=0,continuous=1))
+
+
