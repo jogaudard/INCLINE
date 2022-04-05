@@ -724,7 +724,16 @@ clone_information_SP <- Sib_pro_2018_2021 %>%
 Sib_pro_2018_2021 <- Sib_pro_2018_2021 %>% 
   left_join(clone_information_SP, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_parent")) %>% 
   mutate(clo.if = case_when(clo.no > 0.1 ~ 1,
-                            is.na(clo.no) ~ 0))
+                            is.na(clo.no) ~ 0)) %>% 
+  ungroup() %>%
+  as.data.frame() %>%
+  mutate(stage = case_when(!is.na(size) ~ "continuous",
+                           is.na(size) ~ NA_character_),
+         stageNext = case_when(!is.na(size) & !is.na(sizeNext) ~ "continuous",
+                               is.na(size) & !is.na(sizeNext) ~ "continuous",
+                               !is.na(size) & is.na(sizeNext) ~ "dead",
+                               TRUE ~ NA_character_))
+
 
 
 #Some plots fro visualization/checking
@@ -876,7 +885,16 @@ clone_information_VA <- Ver_alp_2018_2021 %>%
 Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
   left_join(clone_information_VA, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_parent")) %>% 
   mutate(clo.if = case_when(clo.no > 0.1 ~ 1,
-                            is.na(clo.no) ~ 0))
+                            is.na(clo.no) ~ 0)) %>% 
+  ungroup() %>%
+  as.data.frame() %>%
+  mutate(stage = case_when(!is.na(size) ~ "continuous",
+                           is.na(size) ~ NA_character_),
+         stageNext = case_when(!is.na(size) & !is.na(sizeNext) ~ "continuous",
+                               is.na(size) & !is.na(sizeNext) ~ "continuous",
+                               !is.na(size) & is.na(sizeNext) ~ "dead",
+                               TRUE ~ NA_character_))
+
 
 
 #Some plots fro visualization/checking
