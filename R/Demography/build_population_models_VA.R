@@ -764,11 +764,85 @@ image.plot(Fmatrix_VA_WN@meshpoints,
 
 ##### Clonal objects #####
 
+VA_CC_clones <- VA_CC %>% 
+   filter(offspringNext == "clonal") %>% 
+   mutate(number_orphans = case_when(is.na(size) ~ 1,
+                                     !is.na(size) ~0)) %>% 
+   mutate(total_num_orphan = sum(number_orphans),
+          total_num_clones = n()) %>% 
+   fill(total_num_orphan, .direction = "downup") %>% 
+   mutate(prop_orphan = total_num_orphan/total_num_clones)
+
+VA_CR_clones <- VA_CR %>% 
+   filter(offspringNext == "clonal") %>% 
+   mutate(number_orphans = case_when(is.na(size) ~ 1,
+                                     !is.na(size) ~0)) %>% 
+   mutate(total_num_orphan = sum(number_orphans),
+          total_num_clones = n()) %>% 
+   fill(total_num_orphan, .direction = "downup") %>% 
+   mutate(prop_orphan = total_num_orphan/total_num_clones)
+
+VA_CE_clones <- VA_CE %>% 
+   filter(offspringNext == "clonal") %>% 
+   mutate(number_orphans = case_when(is.na(size) ~ 1,
+                                     !is.na(size) ~0)) %>% 
+   mutate(total_num_orphan = sum(number_orphans),
+          total_num_clones = n()) %>% 
+   fill(total_num_orphan, .direction = "downup") %>% 
+   mutate(prop_orphan = total_num_orphan/total_num_clones)
+
+VA_CN_clones <- VA_CN %>% 
+   filter(offspringNext == "clonal") %>% 
+   mutate(number_orphans = case_when(is.na(size) ~ 1,
+                                     !is.na(size) ~0)) %>% 
+   mutate(total_num_orphan = sum(number_orphans),
+          total_num_clones = n()) %>% 
+   fill(total_num_orphan, .direction = "downup") %>% 
+   mutate(prop_orphan = total_num_orphan/total_num_clones)
+
+VA_WC_clones <- VA_WC %>% 
+   filter(offspringNext == "clonal") %>% 
+   mutate(number_orphans = case_when(is.na(size) ~ 1,
+                                     !is.na(size) ~0)) %>% 
+   mutate(total_num_orphan = sum(number_orphans),
+          total_num_clones = n()) %>% 
+   fill(total_num_orphan, .direction = "downup") %>% 
+   mutate(prop_orphan = total_num_orphan/total_num_clones)
+
+VA_WR_clones <- VA_WR %>% 
+   filter(offspringNext == "clonal") %>% 
+   mutate(number_orphans = case_when(is.na(size) ~ 1,
+                                     !is.na(size) ~0)) %>% 
+   mutate(total_num_orphan = sum(number_orphans),
+          total_num_clones = n()) %>% 
+   fill(total_num_orphan, .direction = "downup") %>% 
+   mutate(prop_orphan = total_num_orphan/total_num_clones)
+
+VA_WE_clones <- VA_WE %>% 
+   filter(offspringNext == "clonal") %>% 
+   mutate(number_orphans = case_when(is.na(size) ~ 1,
+                                     !is.na(size) ~0)) %>% 
+   mutate(total_num_orphan = sum(number_orphans),
+          total_num_clones = n()) %>% 
+   fill(total_num_orphan, .direction = "downup") %>% 
+   mutate(prop_orphan = total_num_orphan/total_num_clones)
+
+VA_WN_clones <- VA_WN %>% 
+   filter(offspringNext == "clonal") %>% 
+   mutate(number_orphans = case_when(is.na(size) ~ 1,
+                                     !is.na(size) ~0)) %>% 
+   mutate(total_num_orphan = sum(number_orphans),
+          total_num_clones = n()) %>% 
+   fill(total_num_orphan, .direction = "downup") %>% 
+   mutate(prop_orphan = total_num_orphan/total_num_clones)
+
+#### Ambient temperature control ####
+
 #Is the production of clones size dependent
 AIC(glm(clo.if~1, family = 'binomial', data = VA_CC))
 AIC(glm(clo.if~size, family = 'binomial', data = VA_CC))
 AIC(glm(clo.if~size+I(size^2), family = 'binomial', data = VA_CC))
-CloneChosenModel_VA_CC <- flo.if ~ size + size2 #Chosen based on biology
+CloneChosenModel_VA_CC <- clo.if ~ size + size2 #Chosen based on biology
 
 mod1_VA_CC <- glm(clo.if ~ size + I(size^2), family = 'binomial', data = VA_CC)
 
@@ -783,7 +857,6 @@ points(seq(-10, 45, 0.01),
 AIC(glm(clo.no~1, family = 'poisson', data = VA_CC))
 AIC(glm(clo.no~size, family = 'poisson', data = VA_CC))
 AIC(glm(clo.no~size+I(size^2), family = 'poisson', data = VA_CC))
-AIC(glm(clo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_CC))
 CloneNumberChosenModel_VA_CC <- clo.no ~ size  #Chosen based on AIC
 
 mod2_VA_CC <- glm(clo.no ~ 1, family = 'poisson', data = VA_CC)
@@ -795,18 +868,62 @@ points(seq(-10, 45, 0.01),
        type = "l", col = "red")
 
 # Clonal size depending on mother size
-VA_CC_clones <- VA_CC %>% filter(offspringNext == "clone")
-
 x11()
 par(mfrow=c(1,1))
 growthModelComp(dataf=VA_CC_clones, makePlot=TRUE, legendPos="topright", mainTitle="Growth")
+CloneSizeVariable_VA_CC <- "1"  #Chosen based on AIC
 
-go_CC <- makeGrowthObj(VA_CC_clones, sizeNext ~ size)
+go_clone_VA_CC <- makeGrowthObj(VA_CC_clones, sizeNext ~ 1)
+
+#Make clonal object
+co_VA_CC <- makeClonalObj(VA_CC, fecConstants=data.frame(correctionForOrphans= 1/(1-VA_CC_clones$prop_orphan[1])),
+                    offspringSizeExplanatoryVariables = CloneSizeVariable_VA_CC, Formula = c(CloneChosenModel_VA_CC, CloneNumberChosenModel_VA_CC),
+                    Family = c("binomial","poisson"), Transform=c("none","none"))
+#,offspringSplitter=data.frame(seedbank=0,continuous=1)
 
 
 
-co <- makeClonalObj(VA_CC,fecConstants=data.frame(correctionForOrphans=VA.TT1sTT2.orph),
-                    offspringSizeExplanatoryVariables = "size", Formula = c(cloning~size,clones~size+size2),
-                    Family = c("binomial","poisson"), Transform=c("none","none"),offspringSplitter=data.frame(seedbank=0,continuous=1))
 
+#### Ambient temperature removal ####
 
+#Is the production of clones size dependent
+AIC(glm(clo.if~1, family = 'binomial', data = VA_CR))
+AIC(glm(clo.if~size, family = 'binomial', data = VA_CR))
+AIC(glm(clo.if~size+I(size^2), family = 'binomial', data = VA_CR))
+CloneChosenModel_VA_CR <- flo.if ~ size + size2 #Chosen based on biology
+
+mod1_VA_CR <- glm(clo.if ~ size +I(size^2), family = 'binomial', data = VA_CR)
+
+par(mfrow=c(1,1))
+with(VA_CR, 
+     plot(size, jitter(clo.if)))
+points(seq(-10, 45, 0.01),
+       predict(mod1_VA_CR, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+#If you produce clones, does how many clones you make change with size of the mother 
+AIC(glm(clo.no~1, family = 'poisson', data = VA_CR))
+AIC(glm(clo.no~size, family = 'poisson', data = VA_CR))
+AIC(glm(clo.no~size+I(size^2), family = 'poisson', data = VA_CR))
+CloneNumberChosenModel_VA_CR <- clo.no ~ size  #Chosen based on AIC
+
+mod2_VA_CR <- glm(clo.no ~ 1, family = 'poisson', data = VA_CR)
+
+with(VA_CR, 
+     plot(size, jitter(clo.no)))
+points(seq(-10, 45, 0.01),
+       predict(mod2_VA_CR, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+# Clonal size depending on mother size
+x11()
+par(mfrow=c(1,1))
+growthModelComp(dataf=VA_CR_clones, makePlot=TRUE, legendPos="topright", mainTitle="Growth")
+CloneSizeVariable_VA_CR <- "1"  #Chosen based on AIC
+
+go_clone_VA_CR <- makeGrowthObj(VA_CR_clones, sizeNext ~ 1)
+
+#Make clonal object
+co_VA_CR <- makeClonalObj(VA_CR, fecConstants=data.frame(correctionForOrphans= 1/(1-VA_CR_clones$prop_orphan[1])),
+                          offspringSizeExplanatoryVariables = CloneSizeVariable_VA_CR, Formula = c(CloneChosenModel_VA_CR, CloneNumberChosenModel_VA_CR),
+                          Family = c("binomial","poisson"), Transform=c("none","none"),offspringSplitter=data.frame(seedbank=0,continuous=1))
