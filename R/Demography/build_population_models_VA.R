@@ -354,7 +354,7 @@ AIC(glm(flo.no~1, family = 'poisson', data = VA_CC))
 AIC(glm(flo.no~size, family = 'poisson', data = VA_CC))
 AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_CC))
 AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_CC))
-flowerNumberChosenModel_VA_CC <- flo.if ~ size  #Chosen based on biology by looking at the data
+flowerNumberChosenModel_VA_CC <- flo.no ~ size  #Chosen based on biology by looking at the data
 
 mod2_VA_CC <- glm(flo.no~size, family = 'poisson', data = VA_CC)
 
@@ -408,7 +408,7 @@ AIC(glm(flo.no~1, family = 'poisson', data = VA_CR))
 AIC(glm(flo.no~size, family = 'poisson', data = VA_CR))
 AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_CR))
 AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_CR))
-flowerNumberChosenModel_VA_CR <- flo.if ~ size  #Chosen based on biology by looking at the data
+flowerNumberChosenModel_VA_CR <- flo.no ~ size  #Chosen based on biology by looking at the data
 
 mod2_VA_CR <- glm(flo.no~size, family = 'poisson', data = VA_CR)
 
@@ -462,7 +462,7 @@ AIC(glm(flo.no~1, family = 'poisson', data = VA_CE))
 AIC(glm(flo.no~size, family = 'poisson', data = VA_CE))
 AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_CE))
 AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_CE))
-flowerNumberChosenModel_VA_CE <- flo.if ~ size  #Chosen based on AIC
+flowerNumberChosenModel_VA_CE <- flo.no ~ size  #Chosen based on AIC
 
 mod2_VA_CE <- glm(flo.no~size, family = 'poisson', data = VA_CE)
 
@@ -517,7 +517,7 @@ AIC(glm(flo.no~1, family = 'poisson', data = VA_CN))
 AIC(glm(flo.no~size, family = 'poisson', data = VA_CN))
 AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_CN))
 AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_CN))
-flowerNumberChosenModel_VA_CN <- flo.if ~ size  #Chosen based on AIC
+flowerNumberChosenModel_VA_CN <- flo.no ~ size  #Chosen based on AIC
 
 mod2_VA_CN <- glm(flo.no~size, family = 'poisson', data = VA_CN)
 
@@ -570,7 +570,7 @@ AIC(glm(flo.no~1, family = 'poisson', data = VA_WC))
 AIC(glm(flo.no~size, family = 'poisson', data = VA_WC))
 AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_WC))
 AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_WC))
-flowerNumberChosenModel_VA_WC <- flo.if ~ size  #Chosen based on biology 
+flowerNumberChosenModel_VA_WC <- flo.no ~ size  #Chosen based on biology 
 
 mod2_VA_WC <- glm(flo.no~size, family = 'poisson', data = VA_WC)
 
@@ -624,7 +624,7 @@ AIC(glm(flo.no~1, family = 'poisson', data = VA_WR))
 AIC(glm(flo.no~size, family = 'poisson', data = VA_WR))
 AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_WR))
 AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_WR))
-flowerNumberChosenModel_VA_WR <- flo.if ~ size  #Chosen based on AIC
+flowerNumberChosenModel_VA_WR <- flo.no ~ size  #Chosen based on AIC
 
 mod2_VA_WR <- glm(flo.no~size, family = 'poisson', data = VA_WR)
 
@@ -676,7 +676,7 @@ AIC(glm(flo.no~1, family = 'poisson', data = VA_WE))
 AIC(glm(flo.no~size, family = 'poisson', data = VA_WE))
 AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_WE))
 AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_WE))
-flowerNumberChosenModel_VA_WE <- flo.if ~ size  #Chosen based on AIC
+flowerNumberChosenModel_VA_WE <- flo.no ~ size  #Chosen based on AIC
 
 mod2_VA_WE <- glm(flo.no~size, family = 'poisson', data = VA_WE)
 
@@ -731,7 +731,7 @@ AIC(glm(flo.no~1, family = 'poisson', data = VA_WN))
 AIC(glm(flo.no~size, family = 'poisson', data = VA_WN))
 AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_WN))
 AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_WN))
-flowerNumberChosenModel_VA_WN <- flo.if ~ size  #Chosen based on AIC
+flowerNumberChosenModel_VA_WN <- flo.no ~ size  #Chosen based on AIC
 
 mod2_VA_WN <- glm(flo.no ~ size, family = 'poisson', data = VA_WN)
 
@@ -764,7 +764,48 @@ image.plot(Fmatrix_VA_WN@meshpoints,
 
 ##### Clonal objects #####
 
-co <- makeClonalObj(VA.all,fecConstants=data.frame(correctionForOrphans=VA.TT1sTT2.orph),
+#Is the production of clones size dependent
+AIC(glm(clo.if~1, family = 'binomial', data = VA_CC))
+AIC(glm(clo.if~size, family = 'binomial', data = VA_CC))
+AIC(glm(clo.if~size+I(size^2), family = 'binomial', data = VA_CC))
+CloneChosenModel_VA_CC <- flo.if ~ size + size2 #Chosen based on biology
+
+mod1_VA_CC <- glm(clo.if ~ size + I(size^2), family = 'binomial', data = VA_CC)
+
+par(mfrow=c(1,1))
+with(VA_CC, 
+     plot(size, jitter(clo.if)))
+points(seq(-10, 45, 0.01),
+       predict(mod1_VA_CC, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+#If you produce clones, does how many clones you make change with size of the mother 
+AIC(glm(clo.no~1, family = 'poisson', data = VA_CC))
+AIC(glm(clo.no~size, family = 'poisson', data = VA_CC))
+AIC(glm(clo.no~size+I(size^2), family = 'poisson', data = VA_CC))
+AIC(glm(clo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_CC))
+CloneNumberChosenModel_VA_CC <- clo.no ~ size  #Chosen based on AIC
+
+mod2_VA_CC <- glm(clo.no ~ 1, family = 'poisson', data = VA_CC)
+
+with(VA_CC, 
+     plot(size, jitter(clo.no)))
+points(seq(-10, 45, 0.01),
+       predict(mod2_VA_CC, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+       type = "l", col = "red")
+
+# Clonal size depending on mother size
+VA_CC_clones <- VA_CC %>% filter(offspringNext == "clone")
+
+x11()
+par(mfrow=c(1,1))
+growthModelComp(dataf=VA_CC_clones, makePlot=TRUE, legendPos="topright", mainTitle="Growth")
+
+go_CC <- makeGrowthObj(VA_CC_clones, sizeNext ~ size)
+
+
+
+co <- makeClonalObj(VA_CC,fecConstants=data.frame(correctionForOrphans=VA.TT1sTT2.orph),
                     offspringSizeExplanatoryVariables = "size", Formula = c(cloning~size,clones~size+size2),
                     Family = c("binomial","poisson"), Transform=c("none","none"),offspringSplitter=data.frame(seedbank=0,continuous=1))
 
