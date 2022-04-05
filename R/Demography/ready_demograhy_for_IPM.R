@@ -48,7 +48,7 @@ biomass_Sib_pro <- read_csv2("data/Demography/Biomass_Sib_pro.csv")
 #biomass_Ver_alp_INCLINE <- read_csv2("data/Demography/SG.19_above-below_allocation.csv") #Not using this because some of the biomass rotted while collecting data, so biomass might not be correct
 seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv") 
 biomass_Ver_alp <- read_csv2("data/Demography/VeronicaAlpina_Biomass_Seedclim_edited.csv") #from SeedClim not on INCLINE OSF
-seed_bank <- read_csv("data/Demography/Seed_bank_survival.csv") 
+seed_bank <- read_csv2("data/Demography/Seed_bank_survival.csv") 
 
 
 #### Biomass regressions ####
@@ -486,9 +486,41 @@ VA_max_seedling_size <- Seedling_info_VA_dat %>%
 
 #### Seed bank ####
 
-# seed_bank1 <- seed_bank %>% 
-#   mutate(seeds_dead_in_soil_bank = case_when("missing/dissentegrated" == "Yes", 1,
-#                                              "missing/dissentegrated" == "No", 0))
+ seed_bank1 <- seed_bank %>% 
+  rename(missing = "missing/dissentegrated") %>% 
+   mutate(seeds_dead_in_soil_bank = case_when(missing == "Yes" ~ 1,
+                                              missing == "No" ~ 0),
+          seeds_germinate = case_when(germinated == "Yes" ~ 1,
+                                      TRUE ~ 0),
+          seeds_alive_not_germ = case_when(embryo_in_seed == "Yes" ~ 1,
+                                           TRUE ~ 0)) %>% 
+  group_by(petridish, species) %>% 
+  mutate(seeds_dead_in_soil_bank = sum(seeds_dead_in_soil_bank),
+         seeds_germinate = sum(seeds_germinate),
+         seeds_alive_not_germ = sum(seeds_alive_not_germ),
+         seeds_total = max(seed_number),
+         seeds_dead_later = seeds_total - (seeds_germinate + seeds_alive_not_germ)) %>%
+  select(petridish, plotID, siteID, warming, species, seeds_dead_in_soil_bank, seeds_germinate, seeds_alive_not_germ, seeds_total, seeds_dead_later) %>%
+  unique() %>% 
+  ungroup() %>% 
+  mutate(seeds_alive_total = seeds_germinate + seeds_alive_not_germ,
+         seeds_dead_total = seeds_dead_in_soil_bank + seeds_dead_later,
+         seeds_alive_total_prop = seeds_alive_total/seeds_total,
+         seeds_dead_total_prop = seeds_dead_total/seeds_total) %>% 
+  group_by(siteID, species, warming) %>% 
+ mutate(seeds_alive_total = mean(seeds_alive_total),
+        seeds_alive_total_prop = mean(seeds_alive_total_prop),
+        seeds_dead_total = mean(seeds_dead_total),
+        seeds_dead_total_prop = mean(seeds_dead_total_prop)) %>% 
+  select(siteID, species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop, seeds_total) %>% 
+  unique() %>% 
+  mutate(total = seeds_alive_total + seeds_dead_total)
+  
+
+#go_sb: de som blir en del av frøbanken: 1-seedling_etablishment_rate 
+#stay_sb: av de 20 som du har gravd ned hvor mange har overlevd (spirt til slutt elle rpositive cut test)
+#out_sb:
+
 
 
 #### Making transitions ####
