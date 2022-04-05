@@ -588,7 +588,7 @@ Sib_pro_2018_2019 <- Sib_pro_2018 %>%
   #mutate(flo.no = case_when(is.na(flo.if) ~ NA, !is.na(flo.if) ~ flo.no))
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                               ifelse(juvenile_next == "yes" & is.na(size), "sexual",
-                                     ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
+                                     ifelse(is.na(size) & sizeNext>0, "clonal", NA)))) %>% 
   select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
   mutate(transition = "2018-2019")
 
@@ -608,7 +608,7 @@ Sib_pro_2019_2020 <- Sib_pro_2019 %>%
                             TRUE ~ flo.no)) %>%
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_next == "yes" & is.na(size), "sexual",
-                                       ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>%
+                                       ifelse(is.na(size) & sizeNext>0, "clonal", NA)))) %>%
   select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
   mutate(transition = "2019-2020")
 
@@ -628,7 +628,7 @@ Sib_pro_2020_2021 <- Sib_pro_2020 %>%
                             TRUE ~ flo.no)) %>%
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_next == "yes" & is.na(size), "sexual",
-                                       ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
+                                       ifelse(is.na(size) & sizeNext>0, "clonal", NA)))) %>% 
   select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>% 
   mutate(transition = "2020-2021")
 
@@ -642,7 +642,7 @@ clones_SP <- Sib_pro_2018_2021 %>%
   mutate(clonal_information = map(data, ~ {
     child <- .x %>% 
       filter(is.na(size) & sizeNext > 0) %>% 
-      filter(offspringNext == "clone")
+      filter(offspringNext == "clonal")
     
     parent <- .x %>% 
       filter(seedling == "no", juvenile == "no") %>% 
@@ -665,8 +665,8 @@ Sib_pro_2018_2021 <- Sib_pro_2018_2021 %>%
   left_join(clonal_information_SP, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_child", "X_next", "Y_next", "sizeNext"))
 
 Sib_pro_2018_2021 <- Sib_pro_2018_2021 %>% 
-  mutate(size = case_when((offspringNext == "clone" & distance_parent < 5) ~ size_parent,
-                          (offspringNext == "clone" & distance_parent > 5) ~ size,
+  mutate(size = case_when((offspringNext == "clonal" & distance_parent < 5) ~ size_parent,
+                          (offspringNext == "clonal" & distance_parent > 5) ~ size,
                           offspringNext %in% c(NA, "sexual") ~ size)) %>% 
   mutate(distance_parent = case_when(distance_parent > 5 ~ NA_real_,
                                      distance_parent < 5 ~ distance_parent,
@@ -697,7 +697,7 @@ Sib_pro_2018_2021 <- Sib_pro_2018_2021 %>%
 #Some plots fro visualization/checking
 Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = flo.if)) + geom_point() + geom_abline()
 Sib_pro_2018_2021 %>% filter(seedling == "yes") %>% ggplot(aes(y = sizeNext, x = size)) + geom_point() + geom_abline()
-Sib_pro_2018_2021 %>% filter(offspringNext == "clone") %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
+Sib_pro_2018_2021 %>% filter(offspringNext == "clonal") %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
 Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline()
 Sib_pro_2018_2021 %>% ggplot(aes(x = sizeNext, fill = offspringNext, alpha = 0.5)) + geom_density()
 
@@ -737,7 +737,7 @@ Ver_alp_2018_2019 <- Ver_alp_2018 %>%
          fec = Seeds_per_capsule_VA_null * flo.no) %>%
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_next == "yes" & is.na(size), "sexual",
-                                       ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
+                                       ifelse(is.na(size) & sizeNext>0, "clonal", NA)))) %>% 
   select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
   mutate(transition = "2018-2019")
 
@@ -758,7 +758,7 @@ Ver_alp_2019_2020 <- Ver_alp_2019 %>%
          fec = Seeds_per_capsule_VA_null * flo.no) %>%
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_next == "yes" & is.na(size), "sexual",
-                                       ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
+                                       ifelse(is.na(size) & sizeNext>0, "clonal", NA)))) %>% 
   select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
   mutate(transition = "2019-2020")
 
@@ -779,7 +779,7 @@ Ver_alp_2020_2021 <- Ver_alp_2020 %>%
          fec = Seeds_per_capsule_VA_null * flo.no) %>%
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_next == "yes" & is.na(size), "sexual",
-                                       ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
+                                       ifelse(is.na(size) & sizeNext>0, "clonal", NA)))) %>% 
   select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>% 
   mutate(transition = "2020-2021")
 
@@ -794,7 +794,7 @@ clones_VA <- Ver_alp_2018_2021 %>%
   mutate(clonal_information = map(data, ~ {
     child <- .x %>% 
       filter(is.na(size) & sizeNext > 0) %>% 
-      filter(offspringNext == "clone")
+      filter(offspringNext == "clonal")
     
     parent <- .x %>% 
       filter(seedling == "no", juvenile == "no") %>% 
@@ -817,8 +817,8 @@ Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>%
   left_join(clonal_information_VA, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_child", "X_next", "Y_next", "sizeNext"))
 
 Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
-  mutate(size = case_when((offspringNext == "clone" & distance_parent < 5) ~ size_parent,
-                          (offspringNext == "clone" & distance_parent > 5) ~ size,
+  mutate(size = case_when((offspringNext == "clonal" & distance_parent < 5) ~ size_parent,
+                          (offspringNext == "clonal" & distance_parent > 5) ~ size,
                           offspringNext %in% c(NA, "sexual") ~ size)) %>% 
   mutate(distance_parent = case_when(distance_parent > 5 ~ NA_real_,
                                      distance_parent < 5 ~ distance_parent,
@@ -851,7 +851,7 @@ Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = flo.if)) + geom
 Ver_alp_2018_2021 %>% ggplot(aes(y = flo.no, x = size, color = transition)) + geom_point() + geom_abline()
 Ver_alp_2018_2021 %>% ggplot(aes(y = fec, x = size, color = transition)) + geom_point() + geom_abline()
 Ver_alp_2018_2021 %>% filter(seedling == "yes") %>% ggplot(aes(y = sizeNext, x = size)) + geom_point()
-Ver_alp_2018_2021 %>% filter(offspringNext == "clone") %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
+Ver_alp_2018_2021 %>% filter(offspringNext == "clonal") %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
 Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline()
 Ver_alp_2018_2021 %>% ggplot(aes(x = sizeNext, fill = offspringNext, alpha = 0.5)) + geom_density()
 Ver_alp_2018_2021 %>% ggplot(aes(x = sizeNext, fill = as.factor(clo.if), alpha = 0.5)) + geom_density()
