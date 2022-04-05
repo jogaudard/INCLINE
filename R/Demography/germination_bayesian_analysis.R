@@ -30,7 +30,7 @@ N <- as.numeric(length(GermN))
 treatmat <- model.matrix(~site*WP)
 
 jags.data <- list("site", "WP", "GermN", "N", "NumSeedDish")
-jags.param <- c("alpha", "beta", "alpha.Inc", "beta.Inc", "Presi", "fit", "fit.new") #, "prec1", "sig1", "b", "Presi", "fit", "fit.new"
+jags.param <- c("alpha", "beta",  "Presi", "fit", "fit.new") #, "prec1", "sig1", "b", "Presi", "fit", "fit.new", "alpha.Inc", "beta.Inc",
 
 model_GermN <- function(){
   #group effects
@@ -38,7 +38,7 @@ model_GermN <- function(){
   
   #likelihood
   for (i in 1:N){
-    GermN[i] ~ dbinom(mu[i]*Inc[i], NumSeedDish[i])
+    GermN[i] ~ dbinom(mu[i], NumSeedDish[i])
     
     
     # linear predictor
@@ -46,10 +46,10 @@ model_GermN <- function(){
     #  logit(mu[i]) <- inprod(b, treatmat[i,])
     
     #binomial p.Inc
-    Inc[i] ~ dbern(p.Inc[i])
+    #Inc[i] ~ dbern(p.Inc[i])
     
     #linear predictor of zero inflation
-    logit(p.Inc[i]) <- alpha.Inc + beta.Inc*WP[i] + beta2.Inc*pow(WP[i], 2) + beta3.Inc*pow(WP[i], 3)
+    #logit(p.Inc[i]) <- alpha.Inc + beta.Inc*WP[i] + beta2.Inc*pow(WP[i], 2) + beta3.Inc*pow(WP[i], 3)
     
      # pearson residuals and posterior predictive check
      Presi[i] <- (GermN[i]- NumSeedDish[i]*mu[i]) / sqrt(NumSeedDish[i]*mu[i]*(1-mu[i]))
@@ -71,10 +71,10 @@ model_GermN <- function(){
      beta[i] ~ dnorm(0,0.001) # Slopes
    }
   
-  alpha.Inc ~ dnorm(0, 0.001)
-  beta.Inc ~ dnorm(0, 0.001)
-  beta2.Inc ~ dnorm(0, 0.001)
-  beta3.Inc ~ dnorm(0, 0.001)
+  # alpha.Inc ~ dnorm(0, 0.001)
+  # beta.Inc ~ dnorm(0, 0.001)
+  # beta2.Inc ~ dnorm(0, 0.001)
+  # beta3.Inc ~ dnorm(0, 0.001)
   
    # for(i in 1:8){b[i] ~ dnorm(0,1.0E-6)} #dnorm in JAGS uses mean and precision (0 = mean and 1.0E-6 = precision) different from dnorm in R that has variance and not precision.
    # prec1 ~ dgamma(0.001, 0.001) 
@@ -87,21 +87,22 @@ model_GermN <- function(){
 
 inits.fn <- function() list(
   alpha = rnorm(4,0,2),
-  beta = rnorm (4,-1,1),
-  alpha.Inc = rnorm(1),
-  beta.Inc = rnorm(1),
-  beta.Inc2 = rnorm(1),
-  beta.Inc3 = rnorm(1),
-  Inc = rep(1,N)
+  beta = rnorm (4,-1,1)
+  # alpha.Inc = rnorm(1),
+  # beta.Inc = rnorm(1),
+  # beta.Inc2 = rnorm(1),
+  # beta.Inc3 = rnorm(1),
+  # Inc = rep(1,N)
 )
 
 results_GermN <- jags.parallel(data = jags.data,
                                inits = inits.fn,
                                parameters.to.save = jags.param,
-                               n.iter = 5000,
+                               n.iter = 50000,
                                model.file = model_GermN,
                                n.thin = 5,
-                               n.chains = 3)
+                               n.chains = 3,
+                               n.burnin = 30000)
 results_GermN
 
 # traceplots
@@ -126,7 +127,8 @@ Ver_alp_germination_traits %>%
 
 # Posteriori predictive check
 par(mfrow = c(1,1))
-plot(results_GermN$BUGSoutput$sims.list$fit.new, main = "", xlab = "Discrepancy actual data", ylab = "Discrepancy ideal data")
+plot(results_GermN$BUGSoutput$sims.list$fit.new, results_GermN$BUGSoutput$sims.list$fit,
+     main = "",)
 abline(0,1, lwd = 2, col = "black")
 
 mean(results_GermN$BUGSoutput$sims.list$fit.new > results_GermN$BUGSoutput$sims.list$fit)
