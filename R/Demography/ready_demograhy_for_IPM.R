@@ -35,6 +35,11 @@ conflict_prefer("lmer", "lmerTest")
 #          file = "Biomass_Sib_pro.csv",
 #          path = "data/Demography",
 #          remote_path = "RawData/Demography")
+# 
+# get_file(node = "zhk3m",
+#           file = "Seed_bank_survival.csv",
+#           path = "data/Demography",
+#           remote_path = "RawData/Demography")
 
 #### Load data ####
 
@@ -43,6 +48,7 @@ biomass_Sib_pro <- read_csv2("data/Demography/Biomass_Sib_pro.csv")
 #biomass_Ver_alp_INCLINE <- read_csv2("data/Demography/SG.19_above-below_allocation.csv") #Not using this because some of the biomass rotted while collecting data, so biomass might not be correct
 seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv") 
 biomass_Ver_alp <- read_csv2("data/Demography/VeronicaAlpina_Biomass_Seedclim_edited.csv") #from SeedClim not on INCLINE OSF
+seed_bank <- read_csv("data/Demography/Seed_bank_survival.csv") 
 
 
 #### Biomass regressions ####
@@ -483,15 +489,6 @@ VA_max_seedling_size <- Seedling_info_VA_dat %>%
 #This section calculates the size of individuals, estimates of seed number. And cleaning the data so that we have the correct variables, and variable names for the analysis.
 
 # Clone function to match new individuals with parents and calculate the distance between child and parent
-
-# For testing the function:
-# child <- Sib_pro_2018_2019 %>% 
-#   filter(is.na(size) & sizeNext > 0) %>% 
-#   filter(plotID == "Gud_2_4") 
-# 
-# parent <- Sib_pro_2018_2019 %>% 
-#   filter(plotID == "Gud_2_4") %>% 
-#   filter(seedling == "no", juvenile == "no") 
 
 clone_function <- function(child, parent){
   
