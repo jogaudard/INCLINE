@@ -45,8 +45,14 @@ x0<-data.frame(size=x,size2=x*x)
 # Ver_alp_2018_2021 %>% filter(offspringNext == "clone") %>% ggplot(aes( x = sizeNext)) + geom_histogram() + ylab("Clone size")
 
 Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
-   ungroup() %>% 
-   as.data.frame()
+   ungroup() %>%
+   as.data.frame() %>%
+   mutate(stage = case_when(!is.na(size) ~ "continuous",
+                            is.na(size) ~ NA_character_),
+          stageNext = case_when(!is.na(size) & !is.na(sizeNext) ~ "continuous",
+                                is.na(size) & !is.na(sizeNext) ~ "continuous",
+                                !is.na(size) & is.na(sizeNext) ~ "dead",
+                                TRUE ~ NA_character_))
 
 VA_CC <- Ver_alp_2018_2021 %>% filter(OTC == "C" & treatment == "C")
 VA_CR <- Ver_alp_2018_2021 %>% filter(OTC == "C" & treatment == "R")
@@ -56,6 +62,26 @@ VA_WC <- Ver_alp_2018_2021 %>% filter(OTC == "W" & treatment == "C")
 VA_WR <- Ver_alp_2018_2021 %>% filter(OTC == "W" & treatment == "R")
 VA_WE <- Ver_alp_2018_2021 %>% filter(OTC == "W" & treatment == "E")
 VA_WN <- Ver_alp_2018_2021 %>% filter(OTC == "W" & treatment == "N")
+
+VA_C_seed_bank <- seed_bank1 %>% 
+   filter(species == "Ver_alp",
+          warming == "C") %>% 
+   ungroup() %>% 
+   mutate(seeds_alive_total_prop = mean(seeds_alive_total_prop),
+          seeds_dead_total_prop = mean(seeds_dead_total_prop)) %>% 
+   select(seeds_alive_total_prop) %>% 
+   unique()
+
+VA_OTC_seed_bank <- seed_bank1 %>% 
+   filter(species == "Ver_alp",
+          warming == "OTC") %>% 
+   ungroup() %>% 
+   mutate(seeds_alive_total_prop = mean(seeds_alive_total_prop),
+          seeds_dead_total_prop = mean(seeds_dead_total_prop)) %>% 
+   select(seeds_alive_total_prop) %>% 
+   unique()
+   
+   
 
 ##### P matrix #####
 
@@ -74,6 +100,25 @@ growthModelComp(dataf=VA_CC, makePlot=TRUE, legendPos="bottomright", mainTitle="
 
 # Based on this simple model comparison, we select the following growth model:
 go_CC <- makeGrowthObj(VA_CC, sizeNext ~ size)
+
+# Make discrete transition object
+dto_VA_CC <- makeDiscreteTrans(VA_CC, discreteTrans = matrix(
+                                   c(VA_C_seed_bank$seeds_alive_total_prop,
+                                     (1-seedling_est_VA_C_Veg)*seedling_est_VA_C_Veg,
+                                     (1-seedling_est_VA_C_Veg)*(1-seedling_est_VA_C_Veg), 
+                                     0,
+                                     0.5, #Placeholder number until I know what to put in here, see comment below for what Joachim put in there.
+                                     0.5), #same
+                                     #sum(VA_CC$number[VA_CC$stage=="continuous"&VA_CC$stageNext=="continuous"], na.rm=T),
+                                     #sum(VA.all.TT2$number[VA.all.TT2$stage=="continuous"&VA.all.TT2$stageNext=="dead"], na.rm=T)),
+                                     ncol = 2,
+                                   nrow = 3, 
+                                   dimnames = list(
+                                      c("seedbank", "continuous", "dead"),
+                                      c("seedbank", "continuous"))),
+                                meanToCont = matrix(mean_NoVeg_VA, ncol = 1, nrow = 1, dimnames = list(c("mean"), c("seedbank"))),
+                                sdToCont = matrix(Seedling_info_VA$sd, ncol = 1, nrow = 1,dimnames = list(c(""),c("seedbank"))))
+
 
 # With these survival and growth objects in hand, we build a survival/growth (P) matrix.
 Pmatrix_CC <- makeIPMPmatrix(survObj=so_CC, growObj=go_CC, minSize=minSize, maxSize=maxSize, correction = "constant")
@@ -927,3 +972,7 @@ go_clone_VA_CR <- makeGrowthObj(VA_CR_clones, sizeNext ~ 1)
 co_VA_CR <- makeClonalObj(VA_CR, fecConstants=data.frame(correctionForOrphans= 1/(1-VA_CR_clones$prop_orphan[1])),
                           offspringSizeExplanatoryVariables = CloneSizeVariable_VA_CR, Formula = c(CloneChosenModel_VA_CR, CloneNumberChosenModel_VA_CR),
                           Family = c("binomial","poisson"), Transform=c("none","none"),offspringSplitter=data.frame(seedbank=0,continuous=1))
+
+
+
+
