@@ -480,10 +480,16 @@ Seedling_info_VA_dat %>%
   scale_fill_manual(values = c("lightgreen", "darkgreen")) +
   theme_bw()
 
-
 VA_max_seedling_size <- Seedling_info_VA_dat %>% 
   select(max_seedling_size) %>% 
   unique()
+
+#### Seed bank ####
+
+# seed_bank1 <- seed_bank %>% 
+#   mutate(seeds_dead_in_soil_bank = case_when("missing/dissentegrated" == "Yes", 1,
+#                                              "missing/dissentegrated" == "No", 0))
+
 
 #### Making transitions ####
 #This section calculates the size of individuals, estimates of seed number. And cleaning the data so that we have the correct variables, and variable names for the analysis.
