@@ -422,13 +422,30 @@ WP_names <- c(
   "ULV" = "ULV"
 )
 
+WP_names2 <- c(
+  "1" = "-0.25 MPa",
+  "2" = "-0.33 MPa",
+  "3" = "-0.42 MPa",
+  "4" = "-0.50 MPa",
+  "5" = "-0.57 MPa",
+  "6" = "-0.70 MPa",
+  "7" = "-0.95 MPa",
+  "8" = "-1.20 MPa",
+  "9" = "-1.45 MPa",
+  "10" = "-1.70 MPa",
+  "SKJ" = "SKJ",
+  "LAV" = "LAV",
+  "GUD" = "GUD",
+  "ULV" = "ULV"
+)
+
 Germination_Ver_alp %>% 
-  filter(water_potential %in% c(1:5)) %>% 
+  #filter(water_potential %in% c(1:5)) %>% 
   mutate(siteID = factor(siteID, levels = c("ULV", "LAV", "GUD", "SKJ"))) %>% 
   ggplot(aes(x = sort(as.integer(days_to_germination)), y = cum_germ_percent, group = replicate, color = T50)) +
   geom_line() +
   geom_point(aes(x = T50, y = half_percent)) +
-  facet_grid(water_potential ~ siteID, labeller = as_labeller(WP_names)) +
+  facet_grid(water_potential ~ siteID, labeller = as_labeller(WP_names2), drop = FALSE) +
   xlab("Days to germination") +
   ylab("Germination %") +
   # ggtitle(paste(species, "from", site)) +
@@ -439,7 +456,8 @@ Germination_Ver_alp %>%
                                         linetype = "solid"),
         panel.grid.major = element_line(size = 0.25,
                                         linetype = 'solid',
-                                        colour = "lightgrey")) +
+                                        colour = "lightgrey"),
+        text = element_text(size = 18)) +
   scale_color_viridis_c()
 
 Germination_Ver_alp_1 <- Germination_Ver_alp %>% 
@@ -503,11 +521,12 @@ Germination_Sib_pro <- Sib_pro_germ %>%
 
 #### Make plot of germination ####
 Germination_Sib_pro %>% 
-  filter(siteID == "LAV") %>% 
+  #filter(siteID == "LAV") %>% 
+  mutate(siteID = factor(siteID, levels = c("ULV", "LAV", "GUD", "SKJ"))) %>% 
 ggplot(aes(x = sort(as.integer(days_to_germination)), y = cum_germ_percent, group = replicate, color = T50)) +
     geom_line() +
     geom_point(aes(x = T50, y = half_percent)) +
-    facet_wrap(~ water_potential, labeller = as_labeller(WP_names), ncol = 1) +
+  facet_grid(water_potential ~ siteID, labeller = as_labeller(WP_names2), drop = FALSE) +
     xlab("Days to germination") +
     ylab("Germination %") +
    # ggtitle(paste(species, "from", site)) +
@@ -518,7 +537,8 @@ ggplot(aes(x = sort(as.integer(days_to_germination)), y = cum_germ_percent, grou
                                           linetype = "solid"),
           panel.grid.major = element_line(size = 0.25,
                                           linetype = 'solid',
-                                          colour = "lightgrey")) +
+                                          colour = "lightgrey"),
+          text = element_text(size = 18)) +
   scale_color_viridis_c()
 
 
