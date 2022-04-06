@@ -67,8 +67,6 @@ VA_C_seed_bank <- seed_bank1 %>%
    filter(species == "Ver_alp",
           warming == "C") %>% 
    ungroup() %>% 
-   mutate(seeds_alive_total_prop = mean(seeds_alive_total_prop),
-          seeds_dead_total_prop = mean(seeds_dead_total_prop)) %>% 
    select(seeds_alive_total_prop) %>% 
    unique()
 
@@ -76,8 +74,6 @@ VA_OTC_seed_bank <- seed_bank1 %>%
    filter(species == "Ver_alp",
           warming == "OTC") %>% 
    ungroup() %>% 
-   mutate(seeds_alive_total_prop = mean(seeds_alive_total_prop),
-          seeds_dead_total_prop = mean(seeds_dead_total_prop)) %>% 
    select(seeds_alive_total_prop) %>% 
    unique()
    
