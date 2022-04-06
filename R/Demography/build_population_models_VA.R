@@ -45,14 +45,16 @@ x0<-data.frame(size=x,size2=x*x)
 # Ver_alp_2018_2021 %>% filter(offspringNext == "clone") %>% ggplot(aes( x = sizeNext)) + geom_histogram() + ylab("Clone size")
 
 Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
-   ungroup() %>%
-   as.data.frame() %>%
-   mutate(stage = case_when(!is.na(size) ~ "continuous",
-                            is.na(size) ~ NA_character_),
-          stageNext = case_when(!is.na(size) & !is.na(sizeNext) ~ "continuous",
-                                is.na(size) & !is.na(sizeNext) ~ "continuous",
-                                !is.na(size) & is.na(sizeNext) ~ "dead",
-                                TRUE ~ NA_character_))
+   mutate(stage = as.factor(stage),
+          stageNext = as.factor(stageNext))
+   # ungroup() %>%
+   # as.data.frame() %>%
+   # mutate(stage = case_when(!is.na(size) ~ "continuous",
+   #                          is.na(size) ~ NA_character_),
+   #        stageNext = case_when(!is.na(size) & !is.na(sizeNext) ~ "continuous",
+   #                              is.na(size) & !is.na(sizeNext) ~ "continuous",
+   #                              !is.na(size) & is.na(sizeNext) ~ "dead",
+   #                              TRUE ~ NA_character_))
 
 VA_CC <- Ver_alp_2018_2021 %>% filter(OTC == "C" & treatment == "C")
 VA_CR <- Ver_alp_2018_2021 %>% filter(OTC == "C" & treatment == "R")
@@ -99,21 +101,19 @@ go_CC <- makeGrowthObj(VA_CC, sizeNext ~ size)
 
 # Make discrete transition object
 dto_VA_CC <- makeDiscreteTrans(VA_CC, discreteTrans = matrix(
-                                   c(VA_C_seed_bank$seeds_alive_total_prop,
-                                     (1-seedling_est_VA_C_Veg)*seedling_est_VA_C_Veg,
-                                     (1-seedling_est_VA_C_Veg)*(1-seedling_est_VA_C_Veg), 
-                                     0,
-                                     0.5, #Placeholder number until I know what to put in here, see comment below for what Joachim put in there.
-                                     0.5), #same
-                                     #sum(VA_CC$number[VA_CC$stage=="continuous"&VA_CC$stageNext=="continuous"], na.rm=T),
-                                     #sum(VA.all.TT2$number[VA.all.TT2$stage=="continuous"&VA.all.TT2$stageNext=="dead"], na.rm=T)),
-                                     ncol = 2,
-                                   nrow = 3, 
-                                   dimnames = list(
-                                      c("seedbank", "continuous", "dead"),
-                                      c("seedbank", "continuous"))),
+   c(VA_C_seed_bank$seeds_alive_total_prop,
+     (1-seedling_est_VA_C_Veg)*seedling_est_VA_C_Veg,
+     (1-seedling_est_VA_C_Veg)*(1-seedling_est_VA_C_Veg), 
+     0,
+     0.5, #Placeholder number until I know what to put in here, see comment below for what Joachim put in there
+     0.5),
+   #sum(VA_CC$number[VA_CC$stage=="continuous"&VA_CC$stageNext=="continuous"], na.rm=T),
+   #sum(VA.all.TT2$number[VA.all.TT2$stage=="continuous"&VA.all.TT2$stageNext=="dead"], na.rm=T)),
+   ncol = 2,
+   nrow = 3, 
+   dimnames = list(c("seedbank", "continuous", "dead"), c("seedbank", "continuous"))),
                                 meanToCont = matrix(mean_NoVeg_VA, ncol = 1, nrow = 1, dimnames = list(c("mean"), c("seedbank"))),
-                                sdToCont = matrix(Seedling_info_VA$sd, ncol = 1, nrow = 1,dimnames = list(c(""),c("seedbank"))))
+                                sdToCont = matrix(Seedling_info_VA$sd, ncol = 1, nrow = 1, dimnames = list(c(""),c("seedbank"))))
 
 
 # With these survival and growth objects in hand, we build a survival/growth (P) matrix.
