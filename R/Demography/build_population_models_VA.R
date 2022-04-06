@@ -5,6 +5,7 @@
 #### Source files ####
 source("R/Demography/cleaning_demogprahy.R")
 source("R/Demography/ready_demograhy_for_IPM.R")
+seed_bank <- read_csv2("data/Demography/Seed_bank_survival.csv") 
 
 #### Libraries ####
 library(tidyverse)
@@ -34,6 +35,41 @@ x<-seq(from=round(minSize),to=round(maxSize),length=100)
 x0<-data.frame(size=x,size2=x*x)
 
 
+seed_bank1 <- seed_bank %>% 
+   rename(missing = "missing/dissentegrated") %>% 
+   mutate(seeds_dead_in_soil_bank = case_when(missing == "Yes" ~ 1,
+                                              missing == "No" ~ 0),
+          seeds_germinate = case_when(germinated == "Yes" ~ 1,
+                                      TRUE ~ 0),
+          seeds_alive_not_germ = case_when(embryo_in_seed == "Yes" ~ 1,
+                                           TRUE ~ 0),
+          seeds_dead_later = case_when(dead == "Yes" ~1,
+                                       TRUE ~ 0)) %>% 
+   group_by(petridish, species) %>% 
+   mutate(seeds_dead_in_soil_bank = sum(seeds_dead_in_soil_bank),
+          seeds_germinate = sum(seeds_germinate),
+          seeds_alive_not_germ = sum(seeds_alive_not_germ),
+          seeds_dead_later = sum(seeds_dead_later),
+          seeds_total = max(seed_number)) %>%
+   select(petridish, plotID, siteID, warming, species, seeds_dead_in_soil_bank, seeds_germinate, seeds_alive_not_germ, seeds_total, seeds_dead_later) %>%
+   unique() %>% 
+   mutate(seeds_alive_total = seeds_germinate + seeds_alive_not_germ,
+          seeds_dead_total = seeds_dead_in_soil_bank + seeds_dead_later,
+          seeds_alive_total_prop = seeds_alive_total/seeds_total,
+          seeds_dead_total_prop = seeds_dead_total/seeds_total,
+          seeds_germinate_prop = seeds_germinate/seeds_total,
+          seeds_staySB = seeds_alive_not_germ/seeds_total) %>% 
+   ungroup() %>% 
+   group_by(species, warming) %>% 
+   mutate(seeds_alive_total = round(mean(seeds_alive_total), digits = 0),
+          seeds_alive_total_prop = mean(seeds_alive_total_prop),
+          seeds_dead_total = round(mean(seeds_dead_total), digits = 0),
+          seeds_dead_total_prop = mean(seeds_dead_total_prop),
+          seeds_germinate_prop = mean(seeds_germinate_prop),
+          seeds_staySB = mean(seeds_staySB)) %>% 
+   select(species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop, seeds_germinate_prop, seeds_staySB) %>% 
+   unique() 
+
 # # To understand the data, we plot survival, growth/shrinkage/stasis, number of seeds, and size of recruits:
 # par(mfrow=c(2,2),mar=c(4,4,2,1))
 # plot(Ver_alp_2018_2021$size,jitter(Ver_alp_2018_2021$surv),xlab="Size (t)", ylab="Survival to t+1")
@@ -46,7 +82,8 @@ x0<-data.frame(size=x,size2=x*x)
 
 Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
    mutate(stage = as.factor(stage),
-          stageNext = as.factor(stageNext))
+          stageNext = as.factor(stageNext)) %>% 
+   mutate(number = 1)
    # ungroup() %>%
    # as.data.frame() %>%
    # mutate(stage = case_when(!is.na(size) ~ "continuous",
@@ -68,16 +105,12 @@ VA_WN <- Ver_alp_2018_2021 %>% filter(OTC == "W" & treatment == "N")
 VA_C_seed_bank <- seed_bank1 %>% 
    filter(species == "Ver_alp",
           warming == "C") %>% 
-   ungroup() %>% 
-   select(seeds_alive_total_prop) %>% 
-   unique()
+   ungroup()
 
 VA_OTC_seed_bank <- seed_bank1 %>% 
    filter(species == "Ver_alp",
           warming == "OTC") %>% 
-   ungroup() %>% 
-   select(seeds_alive_total_prop) %>% 
-   unique()
+   ungroup() 
    
    
 
@@ -101,14 +134,12 @@ go_CC <- makeGrowthObj(VA_CC, sizeNext ~ size)
 
 # Make discrete transition object
 dto_VA_CC <- makeDiscreteTrans(VA_CC, discreteTrans = matrix(
-   c(VA_C_seed_bank$seeds_alive_total_prop,
-     (1-seedling_est_VA_C_Veg)*seedling_est_VA_C_Veg,
-     (1-seedling_est_VA_C_Veg)*(1-seedling_est_VA_C_Veg), 
+   c(VA_C_seed_bank$seeds_staySB,
+     (1-VA_C_seed_bank$seeds_staySB)*seedling_est_VA_C_Veg,
+     (1-VA_C_seed_bank$seeds_staySB)*(1-seedling_est_VA_C_Veg), 
      0,
-     0.5, #Placeholder number until I know what to put in here, see comment below for what Joachim put in there
-     0.5),
-   #sum(VA_CC$number[VA_CC$stage=="continuous"&VA_CC$stageNext=="continuous"], na.rm=T),
-   #sum(VA.all.TT2$number[VA.all.TT2$stage=="continuous"&VA.all.TT2$stageNext=="dead"], na.rm=T)),
+     sum(VA_CC$number[VA_CC$stage=="continuous"&VA_CC$stageNext=="continuous"], na.rm=T),
+     sum(VA_CC$number[VA_CC$stage=="continuous"&VA_CC$stageNext=="dead"], na.rm=T)),
    ncol = 2,
    nrow = 3, 
    dimnames = list(c("seedbank", "continuous", "dead"), c("seedbank", "continuous"))),
@@ -117,10 +148,10 @@ dto_VA_CC <- makeDiscreteTrans(VA_CC, discreteTrans = matrix(
 
 
 # With these survival and growth objects in hand, we build a survival/growth (P) matrix.
-Pmatrix_CC <- makeIPMPmatrix(survObj=so_CC, growObj=go_CC, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_CC, correction = "constant")
+Pmatrix_CC <- makeIPMPmatrix(survObj=so_CC, growObj=go_CC, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_CC, correction = "constant", nBigMatrix = 100)
 
 # We plot this P-matrix using the ’image.plot’ function of the fields package:
-
+x11()
 image.plot(Pmatrix_CC@meshpoints,
            Pmatrix_CC@meshpoints,
            t(Pmatrix_CC),
@@ -128,6 +159,8 @@ image.plot(Pmatrix_CC@meshpoints,
            xlab = "Size at t",
            ylab = "Size at t+1")
 abline(0,1,lty=2,lwd=3)
+
+image(t(Pmatrix_CC))
 
 diagnosticsPmatrix(Pmatrix_CC, growObj=go_CC, survObj=so_CC, correction="constant", dff = VA_CC) 
 
@@ -151,14 +184,12 @@ go_CR <- makeGrowthObj(VA_CR, sizeNext ~ size + size2)
 
 # Make discrete transition object
 dto_VA_CR <- makeDiscreteTrans(VA_CR, discreteTrans = matrix(
-   c(VA_C_seed_bank$seeds_alive_total_prop,
-     (1-seedling_est_VA_C_NoVeg)*seedling_est_VA_C_NoVeg,
-     (1-seedling_est_VA_C_NoVeg)*(1-seedling_est_VA_C_NoVeg), 
+   c(VA_C_seed_bank$seeds_staySB,
+     (1-VA_C_seed_bank$seeds_staySB)*seedling_est_VA_C_NoVeg,
+     (1-VA_C_seed_bank$seeds_staySB)*(1-seedling_est_VA_C_NoVeg), 
      0,
-     0.5, #Placeholder number until I know what to put in here, see comment below for what Joachim put in there
-     0.5),
-   #sum(VA_CC$number[VA_CC$stage=="continuous"&VA_CC$stageNext=="continuous"], na.rm=T),
-   #sum(VA.all.TT2$number[VA.all.TT2$stage=="continuous"&VA.all.TT2$stageNext=="dead"], na.rm=T)),
+     sum(VA_CR$number[VA_CR$stage=="continuous"&VA_CR$stageNext=="continuous"], na.rm=T),
+     sum(VA_CR$number[VA_CR$stage=="continuous"&VA_CR$stageNext=="dead"], na.rm=T)),
    ncol = 2,
    nrow = 3, 
    dimnames = list(c("seedbank", "continuous", "dead"), c("seedbank", "continuous"))),
@@ -166,7 +197,7 @@ dto_VA_CR <- makeDiscreteTrans(VA_CR, discreteTrans = matrix(
    sdToCont = matrix(Seedling_info_VA$sd, ncol = 1, nrow = 1, dimnames = list(c(""),c("seedbank"))))
 
 # With these survival and growth objects in hand, we build a survival/growth (P) matrix.
-Pmatrix_CR <- makeIPMPmatrix(survObj=so_CR, growObj=go_CR, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_CR, correction = "constant")
+Pmatrix_CR <- makeIPMPmatrix(survObj=so_CR, growObj=go_CR, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_CR, correction = "constant", nBigMatrix = 100)
 
 # We plot this P-matrix using the ’image.plot’ function of the fields package:
 
@@ -446,7 +477,7 @@ fo_VA_CC <-makeFecObj(VA_CC,
                                           seedlingEstablishmentRate = seedling_est_VA_C_Veg), 
                 meanOffspringSize = Seedling_info_VA$mean_Veg,
                 sdOffspringSize = Seedling_info_VA$sd,
-                offspringSplitter = data.frame(seedbank=VA_C_seed_bank$seeds_alive_total_prop, continuous=(1-VA_C_seed_bank$seeds_alive_total_prop)),
+                offspringSplitter = data.frame(seedbank=VA_C_seed_bank$seeds_alive_total_prop* (1-seedling_est_VA_C_Veg), continuous=(1-(VA_C_seed_bank$seeds_alive_total_prop* (1-seedling_est_VA_C_Veg)))),
                 vitalRatesPerOffspringType = data.frame(seedbank=c(1,1,1,0), continuous=c(1,1,1,1),
                                                         row.names=c("flo.if","flo.no","seedsPerCap","seedlingEstablishmentRate")))
 
@@ -460,6 +491,8 @@ image.plot(Fmatrix_VA_CC@meshpoints,
            main = "Fmatrix: flower and seedlings",
            xlab = "Size at t",
            ylab = "Size at t+1")
+
+image(t(Fmatrix_VA_CC))
 
 #### Ambient temperature removal ####
 
@@ -502,7 +535,8 @@ fo_VA_CR <-makeFecObj(VA_CR,
                       fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_VA_null,
                                                 seedlingEstablishmentRate = seedling_est_VA_C_NoVeg), 
                       meanOffspringSize = Seedling_info_VA$mean_NoVeg,
-                      sdOffspringSize = Seedling_info_VA$sd)
+                      sdOffspringSize = Seedling_info_VA$sd,
+                      offspringSplitter = data.frame(seedbank=VA_C_seed_bank$seeds_alive_total_prop* (1-seedling_est_VA_C_NoVeg), continuous=(1-(VA_C_seed_bank$seeds_alive_total_prop* (1-seedling_est_VA_C_NoVeg)))))
 
 Fmatrix_VA_CR <- makeIPMFmatrix(fecObj=fo_VA_CR, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
 
@@ -954,11 +988,12 @@ go_clone_VA_CC <- makeGrowthObj(VA_CC_clones, sizeNext ~ 1)
 #Make clonal object
 co_VA_CC <- makeClonalObj(VA_CC, fecConstants=data.frame(correctionForOrphans= 1/(1-VA_CC_clones$prop_orphan[1])),
                     offspringSizeExplanatoryVariables = CloneSizeVariable_VA_CC, Formula = c(CloneChosenModel_VA_CC, CloneNumberChosenModel_VA_CC),
-                    Family = c("binomial","poisson"), Transform=c("none","none"))
+                    Family = c("binomial","poisson"), Transform=c("none","none"),offspringSplitter=data.frame(seedbank=0,continuous=1))
 #,offspringSplitter=data.frame(seedbank=0,continuous=1)
 
+Cmatrix_CC <- makeIPMCmatrix(clonalObj = co_VA_CC, minSize=minSize, maxSize=maxSize, nBigMatrix = 100, correction = "constant")
 
-
+image(t(Cmatrix_CC))
 
 #### Ambient temperature removal ####
 
@@ -1004,6 +1039,37 @@ co_VA_CR <- makeClonalObj(VA_CR, fecConstants=data.frame(correctionForOrphans= 1
                           offspringSizeExplanatoryVariables = CloneSizeVariable_VA_CR, Formula = c(CloneChosenModel_VA_CR, CloneNumberChosenModel_VA_CR),
                           Family = c("binomial","poisson"), Transform=c("none","none"),offspringSplitter=data.frame(seedbank=0,continuous=1))
 
+Cmatrix_CR <- makeIPMCmatrix(clonalObj = co_VA_CR, minSize=minSize, maxSize=maxSize, nBigMatrix = 100, correction = "constant")
 
 
 
+first_IPM <- Pmatrix_CC + Fmatrix_VA_CC + Cmatrix_CC
+
+image(t(first_IPM))
+
+persp(first_IPM)
+
+
+first_lambda <- as.numeric(eigen(first_IPM)$value[1])
+
+
+contourPlot2 <- function(M,meshpts,maxSize,upper,lower) {
+   q <- sum(meshpts<=maxSize);
+   filled.contour(meshpts[1:q],meshpts[1:q],M[1:q,1:q], zlim=c(upper,lower),
+                  xlab="size at time t", ylab="size at time t+1", color=heat.colors, nlevels=20, cex.lab=1.5,
+                  plot.axes = { axis(1); axis(2); lines(-10:50, -10:50, lty=2)});
+   return(0);
+}
+
+x11()
+contourPlot2(t(first_IPM), Pmatrix_CC@meshpoints, maxSize, 0.03, 0)
+contourPlot2(t(second_IPM), Pmatrix_CR@meshpoints, maxSize, 0.03, 0)
+
+second_IPM <- Pmatrix_CR + Fmatrix_VA_CR + Cmatrix_CR
+
+image(t(second_IPM))
+x11()
+persp(second_IPM)
+
+
+second_lambda <- as.numeric(eigen(second_IPM)$value[1])
