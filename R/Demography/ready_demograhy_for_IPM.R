@@ -508,13 +508,38 @@ VA_max_seedling_size <- Seedling_info_VA_dat %>%
          seeds_dead_total = seeds_dead_in_soil_bank + seeds_dead_later,
          seeds_alive_total_prop = seeds_alive_total/seeds_total,
          seeds_dead_total_prop = seeds_dead_total/seeds_total) %>% 
-  ungroup() %>% 
-  group_by(siteID, species, warming) %>% 
+  ungroup() %>%   group_by(siteID, species, warming) %>% 
+  mutate(seeds_alive_total = round(mean(seeds_alive_total), digits = 0),
+         seeds_alive_total_prop = mean(seeds_alive_total_prop),
+         seeds_dead_total = round(mean(seeds_dead_total), digits = 0),
+         seeds_dead_total_prop = mean(seeds_dead_total_prop)) %>% 
+  select(siteID, species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop) %>% 
+  unique() 
+
+
+seed_bank_model <- glm(cbind(seeds_alive_total, seeds_dead_total) ~  warming + species, family = binomial, data = seed_bank1)
+summary(seed_bank_model)
+
+seed_bank_predicted <- coef(seed_bank_model) %>% 
+  as.data.frame() %>% 
+  rownames_to_column() %>%
+  rename(value = ".") %>% 
+  mutate(value = expit(value)) %>% 
+  pivot_wider(names_from = "rowname", values_from = "value") %>% 
+  rename(Intercept = "(Intercept)") %>% 
+  mutate(SP_C = Intercept,
+         SP_OTC = Intercept + warmingOTC,
+         VA_C = Intercept + speciesVer_alp,
+         VA_OTC = Intercept + speciesVer_alp + warmingOTC) %>% 
+  select(SP_C, SP_OTC, VA_C, VA_OTC)
+
+seed_bank1 <- seed_bank %>% 
+  group_by(species, warming) %>% 
  mutate(seeds_alive_total = round(mean(seeds_alive_total), digits = 0),
         seeds_alive_total_prop = mean(seeds_alive_total_prop),
         seeds_dead_total = round(mean(seeds_dead_total), digits = 0),
         seeds_dead_total_prop = mean(seeds_dead_total_prop)) %>% 
-  select(siteID, species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop) %>% 
+  select(species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop) %>% 
   unique() 
   
 
@@ -724,7 +749,16 @@ clone_information_SP <- Sib_pro_2018_2021 %>%
 Sib_pro_2018_2021 <- Sib_pro_2018_2021 %>% 
   left_join(clone_information_SP, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_parent")) %>% 
   mutate(clo.if = case_when(clo.no > 0.1 ~ 1,
-                            is.na(clo.no) ~ 0))
+                            is.na(clo.no) ~ 0)) %>% 
+  ungroup() %>%
+  as.data.frame() %>%
+  mutate(stage = case_when(!is.na(size) ~ "continuous",
+                           is.na(size) ~ NA_character_),
+         stageNext = case_when(!is.na(size) & !is.na(sizeNext) ~ "continuous",
+                               is.na(size) & !is.na(sizeNext) ~ "continuous",
+                               !is.na(size) & is.na(sizeNext) ~ "dead",
+                               TRUE ~ NA_character_))
+
 
 
 #Some plots fro visualization/checking
@@ -876,7 +910,16 @@ clone_information_VA <- Ver_alp_2018_2021 %>%
 Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
   left_join(clone_information_VA, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_parent")) %>% 
   mutate(clo.if = case_when(clo.no > 0.1 ~ 1,
-                            is.na(clo.no) ~ 0))
+                            is.na(clo.no) ~ 0)) %>% 
+  ungroup() %>%
+  as.data.frame() %>%
+  mutate(stage = case_when(!is.na(size) ~ "continuous",
+                           is.na(size) ~ NA_character_),
+         stageNext = case_when(!is.na(size) & !is.na(sizeNext) ~ "continuous",
+                               is.na(size) & !is.na(sizeNext) ~ "continuous",
+                               !is.na(size) & is.na(sizeNext) ~ "dead",
+                               TRUE ~ NA_character_))
+
 
 
 #Some plots fro visualization/checking
