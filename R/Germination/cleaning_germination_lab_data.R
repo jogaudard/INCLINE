@@ -473,7 +473,17 @@ Ver_alp_germination_traits <- Ver_alp_germination_traits %>%
   filter(is.na(flag_germination)) %>% 
   dplyr::select(petri_dish, species, siteID, water_potential, replicate, precip,  seeds_in_dish, n_germinated,  days_to_max_germination, germ_percent, T50) %>% 
   unique() %>% 
-  mutate(precip = precip/1000)
+  mutate(precip = precip/1000) %>% 
+  mutate(WP_MPa = case_when(water_potential == 1 ~ -0.25,
+                            water_potential == 2 ~ -0.33,
+                            water_potential == 3 ~ -0.42,
+                            water_potential == 4 ~ -0.50,
+                            water_potential == 5 ~ -0.57,
+                            water_potential == 6 ~ -0.70,
+                            water_potential == 7 ~ -0.95,
+                            water_potential == 8 ~ -1.20,
+                            water_potential == 9 ~ -1.45,
+                            water_potential == 10 ~ -1.70))
 
 #### Make germination metrics Sib pro ####
 
@@ -532,7 +542,17 @@ Sib_pro_germination_traits <- Sib_pro_germination_traits %>%
   filter(is.na(flag_germination)) %>% 
   dplyr::select(petri_dish, species, siteID, water_potential, replicate, precip,  seeds_in_dish, n_germinated,  days_to_max_germination, germ_percent, T50) %>% 
   unique() %>% 
-  mutate(precip = precip/1000)
+  mutate(precip = precip/1000) %>% 
+  mutate(WP_MPa = case_when(water_potential == 1 ~ -0.25,
+                            water_potential == 2 ~ -0.33,
+                            water_potential == 3 ~ -0.42,
+                            water_potential == 4 ~ -0.50,
+                            water_potential == 5 ~ -0.57,
+                            water_potential == 6 ~ -0.70,
+                            water_potential == 7 ~ -0.95,
+                            water_potential == 8 ~ -1.20,
+                            water_potential == 9 ~ -1.45,
+                            water_potential == 10 ~ -1.70))
 
 
 
