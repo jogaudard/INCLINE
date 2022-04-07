@@ -30,15 +30,15 @@ conflict_prefer("filter", "dplyr")
 #          remote_path = "RawData/Demography")
 # 
 # get_file(node = "zhk3m",
-#          file = "INCLINE_metadata_LoggerDates.csv",
+#          file = "INCLINE_metadata.csv",
 #          path = "data",
 #          remote_path = "RawData")
 
 #### Load data ####
 
-Sib_pro <- read_csv2("data/Demography/Sib_pro_2018-2021.csv")
-Ver_alp <- read_csv2("data/Demography/Ver_alp_2018-2021.csv")
-INCLINE_metadata <- read_delim("data/INCLINE_metadata_LoggerDates.csv", delim = ";")
+Sib_pro <- read.csv2("data/Demography/Sib_pro_2018-2021.csv")
+Ver_alp <- read.csv2("data/Demography/Ver_alp_2018-2021.csv")
+INCLINE_metadata <- read_delim("data/INCLINE_metadata.csv", delim = ";")
 
 #### Cleaning variables names in dataset ####
 
