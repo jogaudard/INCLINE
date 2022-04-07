@@ -53,16 +53,16 @@ get_file(node = "zhk3m",
          path = "data/Germination",
          remote_path = "RawData/Germination_lab_experiment")
 
-get_file(node = "zhk3m",
-         file = "INCLINE_metadata_LoggerDates.csv",
-         path = "data",
-         remote_path = "RawData")
+# get_file(node = "zhk3m",
+#          file = "INCLINE_metadata_LoggerDates.csv",
+#          path = "data",
+#          remote_path = "RawData")
 
 #### Load data ####
 
 Sib_pro_germ <- read.delim("data/Germination/INCLINE_Germination_Seedling_Experiment_Data_SP.csv", sep = ";", dec = ".")
 Ver_alp_germ <- read_delim("data/Germination/INCLINE_Germination_Seedling_Experiment_Data_Va.csv")
-INCLINE_metadata <- read_delim("data/INCLINE_metadata_LoggerDates.csv", delim = ";")
+# INCLINE_metadata <- read_delim("data/INCLINE_metadata_LoggerDates.csv", delim = ";")
 comment_dict_VA <- read_delim("data/Germination/comment_dictionary_VA.csv", delim = ";")
 harvest_comment_dict_VA <- read_delim("data/Germination/harvest_comment_dictionary_VA.csv", delim = ";")
 dish_comment_dict_VA <- read_delim("data/Germination/dish_comment_dictionary_VA.csv", delim = ";")
@@ -131,48 +131,48 @@ Ver_alp_germ <- Ver_alp_germ %>%
 
 #Plots for looking at data and looking for mistakes
 
-#Plot to check if total dry mass is larger than the different parts of the plant
-Ver_alp_germ %>% 
-  ggplot(aes(x = dry_mass_g_total, y = dry_mass_g_above_ground))+
-  geom_point() +
-  geom_abline()
-
-Ver_alp_germ %>% 
-  ggplot(aes(x = dry_mass_g_total, y = dry_mass_g_root))+
-  geom_point() +
-  geom_abline()
-
-Ver_alp_germ %>% 
-  ggplot(aes(x = dry_mass_g_above_ground, y = dry_mass_g_root, color = water_potential))+
-  geom_point() +
-  geom_abline() +
-  scale_color_viridis_d()
-
-#Plots looking at distribution of dayes to germination/cotyledons/true leaves with water potential
-Ver_alp_germ %>% 
-  ggplot(aes(y = days_to_germination, x = water_potential)) +
-  geom_boxplot()
-
-Ver_alp_germ %>% 
-  ggplot(aes(y = days_to_cotelydon, x = water_potential)) +
-  geom_boxplot()
-
-Ver_alp_germ %>% 
-  ggplot(aes(y = days_to_leaf, x = water_potential)) +
-  geom_boxplot()
-
-
-#Plots looking at size of plants with water potential
-
-Ver_alp_germ %>% 
-  ggplot(aes(y = dry_mass_g_total, x = water_potential, fill = water_potential)) +
-  geom_violin(draw_quantiles = c(0.75, 0.5, 0.25)) +
-  scale_fill_viridis_d()
-
-Ver_alp_germ %>% 
-  ggplot(aes(y = root_shoot_ratio, x = water_potential, fill = water_potential)) +
-  geom_boxplot() +
-  scale_fill_viridis_d()
+# #Plot to check if total dry mass is larger than the different parts of the plant
+# Ver_alp_germ %>% 
+#   ggplot(aes(x = dry_mass_g_total, y = dry_mass_g_above_ground))+
+#   geom_point() +
+#   geom_abline()
+# 
+# Ver_alp_germ %>% 
+#   ggplot(aes(x = dry_mass_g_total, y = dry_mass_g_root))+
+#   geom_point() +
+#   geom_abline()
+# 
+# Ver_alp_germ %>% 
+#   ggplot(aes(x = dry_mass_g_above_ground, y = dry_mass_g_root, color = water_potential))+
+#   geom_point() +
+#   geom_abline() +
+#   scale_color_viridis_d()
+# 
+# #Plots looking at distribution of dayes to germination/cotyledons/true leaves with water potential
+# Ver_alp_germ %>% 
+#   ggplot(aes(y = days_to_germination, x = water_potential)) +
+#   geom_boxplot()
+# 
+# Ver_alp_germ %>% 
+#   ggplot(aes(y = days_to_cotelydon, x = water_potential)) +
+#   geom_boxplot()
+# 
+# Ver_alp_germ %>% 
+#   ggplot(aes(y = days_to_leaf, x = water_potential)) +
+#   geom_boxplot()
+# 
+# 
+# #Plots looking at size of plants with water potential
+# 
+# Ver_alp_germ %>% 
+#   ggplot(aes(y = dry_mass_g_total, x = water_potential, fill = water_potential)) +
+#   geom_violin(draw_quantiles = c(0.75, 0.5, 0.25)) +
+#   scale_fill_viridis_d()
+# 
+# Ver_alp_germ %>% 
+#   ggplot(aes(y = root_shoot_ratio, x = water_potential, fill = water_potential)) +
+#   geom_boxplot() +
+#   scale_fill_viridis_d()
 
 ##### Sibbaldia procumbens #####
 
@@ -294,68 +294,68 @@ Non_viable_seeds_VA <- Ver_alp_germ %>%
 
 #Plots for looking at data and looking for mistakes
 
-#Plot to check if all dry mass are smaller than wet masses - they are
-Sib_pro_germ %>% 
-  ggplot(aes(x = wet_mass_g_total, y = dry_mass_g_total))+
-  geom_point() +
-  geom_abline()
-
-#Plot to check if total dry mass is larger than the different parts of the plant
-Sib_pro_germ %>% 
-  ggplot(aes(x = dry_mass_g_total, y = dry_mass_g_above_ground))+
-  geom_point() +
-  geom_abline()
-
-Sib_pro_germ %>% 
-  ggplot(aes(x = dry_mass_g_total, y = dry_mass_g_root))+
-  geom_point() +
-  geom_abline()
-
-Sib_pro_germ %>% 
-  ggplot(aes(x = dry_mass_g_above_ground, y = dry_mass_g_root, color = water_potential))+
-  geom_point() +
-  geom_abline() +
-  scale_color_viridis_d()
-
-#Plots looking at distribution of dayes to germination/cotyledons/true leaves with water potential
-Sib_pro_germ %>% 
-  ggplot(aes(y = days_to_germination, x = water_potential)) +
-  geom_boxplot()
-
-Sib_pro_germ %>% 
-  ggplot(aes(x = days_to_germination)) +
-  geom_density(aes(fill = water_potential, alpha = 0.2)) +
-  scale_fill_viridis_d()
-
-Sib_pro_germ %>% 
-  ggplot(aes(y = days_to_cotelydon, x = water_potential)) +
-  geom_boxplot()
-
-Sib_pro_germ %>% 
-  ggplot(aes(x = days_to_cotelydon)) +
-  geom_density(aes(fill = water_potential, alpha = 0.2)) +
-  scale_fill_viridis_d()
-
-Sib_pro_germ %>% 
-  ggplot(aes(y = days_to_leaf, x = water_potential)) +
-  geom_boxplot()
-
-Sib_pro_germ %>% 
-  ggplot(aes(x = days_to_leaf)) +
-  geom_density(aes(fill = water_potential, alpha = 0.2)) +
-  scale_fill_viridis_d()
-
-#Plots looking at size of plants with water potential
-
-Sib_pro_germ %>% 
-  ggplot(aes(y = dry_mass_g_total, x = water_potential, fill = water_potential)) +
-  geom_violin(draw_quantiles = c(0.75, 0.5, 0.25)) +
-  scale_fill_viridis_d()
-
-Sib_pro_germ %>% 
-  ggplot(aes(y = root_shoot_ratio, x = water_potential, fill = water_potential)) +
-  geom_violin(draw_quantiles = c(0.75, 0.5, 0.25)) +
-  scale_fill_viridis_d()
+# #Plot to check if all dry mass are smaller than wet masses - they are
+# Sib_pro_germ %>% 
+#   ggplot(aes(x = wet_mass_g_total, y = dry_mass_g_total))+
+#   geom_point() +
+#   geom_abline()
+# 
+# #Plot to check if total dry mass is larger than the different parts of the plant
+# Sib_pro_germ %>% 
+#   ggplot(aes(x = dry_mass_g_total, y = dry_mass_g_above_ground))+
+#   geom_point() +
+#   geom_abline()
+# 
+# Sib_pro_germ %>% 
+#   ggplot(aes(x = dry_mass_g_total, y = dry_mass_g_root))+
+#   geom_point() +
+#   geom_abline()
+# 
+# Sib_pro_germ %>% 
+#   ggplot(aes(x = dry_mass_g_above_ground, y = dry_mass_g_root, color = water_potential))+
+#   geom_point() +
+#   geom_abline() +
+#   scale_color_viridis_d()
+# 
+# #Plots looking at distribution of dayes to germination/cotyledons/true leaves with water potential
+# Sib_pro_germ %>% 
+#   ggplot(aes(y = days_to_germination, x = water_potential)) +
+#   geom_boxplot()
+# 
+# Sib_pro_germ %>% 
+#   ggplot(aes(x = days_to_germination)) +
+#   geom_density(aes(fill = water_potential, alpha = 0.2)) +
+#   scale_fill_viridis_d()
+# 
+# Sib_pro_germ %>% 
+#   ggplot(aes(y = days_to_cotelydon, x = water_potential)) +
+#   geom_boxplot()
+# 
+# Sib_pro_germ %>% 
+#   ggplot(aes(x = days_to_cotelydon)) +
+#   geom_density(aes(fill = water_potential, alpha = 0.2)) +
+#   scale_fill_viridis_d()
+# 
+# Sib_pro_germ %>% 
+#   ggplot(aes(y = days_to_leaf, x = water_potential)) +
+#   geom_boxplot()
+# 
+# Sib_pro_germ %>% 
+#   ggplot(aes(x = days_to_leaf)) +
+#   geom_density(aes(fill = water_potential, alpha = 0.2)) +
+#   scale_fill_viridis_d()
+# 
+# #Plots looking at size of plants with water potential
+# 
+# Sib_pro_germ %>% 
+#   ggplot(aes(y = dry_mass_g_total, x = water_potential, fill = water_potential)) +
+#   geom_violin(draw_quantiles = c(0.75, 0.5, 0.25)) +
+#   scale_fill_viridis_d()
+# 
+# Sib_pro_germ %>% 
+#   ggplot(aes(y = root_shoot_ratio, x = water_potential, fill = water_potential)) +
+#   geom_violin(draw_quantiles = c(0.75, 0.5, 0.25)) +
+#   scale_fill_viridis_d()
 
 
 #### Make germination metrics Ver alp ####
@@ -490,7 +490,7 @@ Germination_Sib_pro <- Sib_pro_germ %>%
   ungroup() %>% 
   group_by(petri_dish) %>% 
   mutate(germ_prop_timestep = n_germinated_timestep/n_seeds_total) %>%
-  dplyr::select(petri_dish, siteID, water_potential, replicate, days_to_germination, germ_prop_timestep, germ_percent) %>% 
+  dplyr::select(petri_dish, siteID, water_potential, replicate, days_to_germination, germ_prop_timestep, germ_percent, n_germinated, n_seeds_total) %>% 
   unique() %>% 
   filter(!is.na(days_to_germination)) %>% 
   arrange(days_to_germination) %>% 
@@ -517,6 +517,23 @@ Germination_Sib_pro <- Sib_pro_germ %>%
   group_by(petri_dish) %>% 
   fill(T50, .direction = "downup") %>% 
   dplyr::select(-T502, -T50_neg, -T50_pos, -dist, -relative_dist)
+
+
+Germination_Sib_pro_1 <- Germination_Sib_pro %>% 
+  dplyr::select(petri_dish, germ_percent, T50, days_to_max_germination, n_germinated) %>% 
+  unique()
+
+Sib_pro_germination_traits <- Sib_pro_germ %>% 
+  left_join(Germination_Sib_pro_1, by = c("petri_dish")) %>% 
+  mutate(n_germinated = case_when(is.na(n_germinated) ~ 0,
+                                  !is.na(n_germinated) ~ n_germinated))
+
+Sib_pro_germination_traits <- Sib_pro_germination_traits %>% 
+  filter(is.na(flag_germination)) %>% 
+  dplyr::select(petri_dish, species, siteID, water_potential, replicate, precip,  seeds_in_dish, n_germinated,  days_to_max_germination, germ_percent, T50) %>% 
+  unique() %>% 
+  mutate(precip = precip/1000)
+
 
 
 #### Make plot of germination ####
