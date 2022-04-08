@@ -83,7 +83,6 @@ Ver_alp <- Ver_alp %>%
                               juvenile == "yes" ~ "yes",
                               juvenile == "no" ~ "no")) %>% 
   mutate(MS = case_when(MS %in% c(1:100) ~ paste0(plotID, "_", MS))) %>% 
-  select(!...25:...32) %>% 
   mutate(seedling = case_when(seedling == "yes" & SH > 20 ~ "no",
                               seedling == "yes" & NL > 6 ~ "no",
                               seedling == "yes" ~ seedling,
@@ -103,5 +102,73 @@ Ver_alp <- Ver_alp %>%
          OTC = as.factor(OTC),
          treatment = as.factor(treatment))
 
+#### Changing numbers to integers as we only measured in full mm ####
 
-         
+Sib_pro <- Sib_pro %>% 
+  mutate(LSL = case_when(LSL == 0.5 ~ 1, #1 mm is the lowest value we record, changing 0.5 mm to 1 mm
+                         TRUE ~ LSL)) %>% 
+  mutate(LL = round(LL, digits = 0))
+
+Ver_alp1 <- Ver_alp  # Need to fix things that were supposed to be mm but is cm,
+  #mutate(SH = case_when(SH == 0.5 ~ 1, #1 mm is the lowest value we record, changing 0.5 mm to 1 mm
+                         #TRUE ~ SH)) %>% 
+  #mutate(LL = round(LL, digits = 0))
+
+
+#### Imputing missing data for seedlings  ####
+
+#Sibbaldia procumbens
+seedling_constants <- Sib_pro %>% 
+  filter(seedling == "yes") %>% 
+  mutate(mean_LSL =mean(LSL, na.rm = TRUE),
+         sd_LSL = sd(LSL, na.rm = TRUE),
+         mean_NL = mean(NL, na.rm = TRUE),
+         sd_NL = sd(NL, na.rm = TRUE),
+         mean_LL = mean(LL, na.rm = TRUE), 
+         sd_LL = sd(LL, na.rm = TRUE)) %>% 
+  select(mean_LSL, sd_LSL, mean_NL, sd_NL, mean_LL, sd_LL) %>% 
+  unique()
+
+Sib_pro_seedling_fix <- Sib_pro %>% 
+  filter(seedling == "yes") %>% 
+  mutate(LSL = case_when(!is.na(LSL) ~ LSL,
+                         is.na(LSL) ~ round(rnorm(length(LSL), mean = seedling_constants$mean_LSL), digits = 0))) %>% 
+  mutate(NL = case_when(!is.na(NL) ~ NL,
+                        (is.na(NL) & comment_registrator == "only cotyledon") ~ 0L,
+                         (is.na(NL) & comment_registrator != "only cotyledon") ~ abs(as.integer(round(rnorm(length(NL), mean = seedling_constants$mean_NL), digits = 0))))) %>% #using absolute value because we get a few -1 values from the rnorm calculation 
+  mutate(LL = case_when(!is.na(LL) ~ LL,
+                        (is.na(LL) & comment_registrator == "only cotyledon") ~ 0,
+                        (is.na(LL) & comment_registrator != "only cotyledon") ~ round(rnorm(length(LL), mean = seedling_constants$mean_LL), digits = 0))) 
+
+# Veronica alpina
+seedling_constants_VA <- Ver_alp %>% 
+  filter(seedling == "yes") %>% 
+  mutate(mean_SH =mean(SH, na.rm = TRUE),
+         mean_NL = mean(NL, na.rm = TRUE),
+         mean_LL = mean(LL, na.rm = TRUE),
+         mean_WL = mean(WL, na.rm = TRUE)) %>% 
+  select(mean_SH, mean_NL, mean_LL, mean_WL) %>% 
+  unique()
+
+Ver_alp_seedling_fix <- Ver_alp %>% 
+  filter(seedling == "yes") %>% 
+  mutate(SH = case_when(!is.na(SH) ~ SH,
+                         is.na(SH) ~ round(rnorm(length(SH), mean = seedling_constants_VA$mean_SH), digits = 0))) %>% 
+  mutate(NL = case_when(!is.na(NL) ~ NL,
+                        (is.na(NL) & comment %in% c("only cotyledons, 5-7 same TP", "only cotyledons")) ~ 0L,
+                        (is.na(NL) & !comment %in% c("only cotyledons, 5-7 same TP", "only cotyledons")) ~ as.integer(round(rnorm(length(NL), mean = seedling_constants_VA$mean_NL), digits = 0)))) %>% #using absolute value because we get a few -1 values from the rnorm calculation 
+  mutate(LL = case_when(!is.na(LL) ~ LL,
+                        (is.na(LL) & comment %in% c("only cotyledons, 5-7 same TP", "only cotyledons")) ~ 0,
+                        (is.na(LL) & !comment %in% c("only cotyledons, 5-7 same TP", "only cotyledons")) ~ round(rnorm(length(LL), mean = seedling_constants_VA$mean_LL), digits = 0))) %>% 
+  mutate(WL = case_when(!is.na(WL) ~ WL,
+                        (is.na(WL) & comment %in% c("only cotyledons, 5-7 same TP", "only cotyledons")) ~ 0,
+                        (is.na(WL) & !comment %in% c("only cotyledons, 5-7 same TP", "only cotyledons")) ~ round(rnorm(length(WL), mean = seedling_constants_VA$mean_WL), digits = 0)))
+
+#### Replacing the empty rows of seedlings with computed numbers ####
+Sib_pro <- Sib_pro %>%
+  filter(seedling %in% c("no", NA)) %>% 
+  bind_rows(Sib_pro_seedling_fix)
+
+Ver_alp <- Ver_alp %>%
+  filter(seedling %in% c("no", NA)) %>% 
+  bind_rows(Ver_alp_seedling_fix)
