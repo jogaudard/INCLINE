@@ -5,7 +5,7 @@
 #### Source files ####
 source("R/Demography/cleaning_demogprahy.R")
 source("R/Demography/ready_demograhy_for_IPM.R")
-seed_bank <- read_csv2("data/Demography/Seed_bank_survival.csv") 
+seed_bank1 <- read_csv2("data/Demography/Seed_bank_survival.csv") 
 
 #### Libraries ####
 library(tidyverse)
@@ -19,6 +19,17 @@ library(conflicted)
 
 conflict_prefer("select", "dplyr")
 conflict_prefer("lmer", "lmerTest")
+
+#### Functions ####
+
+contourPlot2 <- function(M,meshpts,maxSize,upper,lower, title) {
+   q <- sum(meshpts<=maxSize);
+   filled.contour(meshpts[1:q],meshpts[1:q],M[1:q,1:q], zlim=c(upper,lower),
+                  xlab="size at time t", ylab="size at time t+1", main = title, color=heat.colors, nlevels=20, cex.lab=1.5,
+                  plot.axes = { axis(1); axis(2); lines(-10:50, -10:50, lty=2)});
+   return(0);
+}
+
 
 #### Downloading data from OSF ####
 
@@ -35,7 +46,7 @@ x<-seq(from=round(minSize),to=round(maxSize),length=100)
 x0<-data.frame(size=x,size2=x*x)
 
 
-seed_bank1 <- seed_bank %>% 
+seed_bank1 <- seed_bank1 %>% 
    rename(missing = "missing/dissentegrated") %>% 
    mutate(seeds_dead_in_soil_bank = case_when(missing == "Yes" ~ 1,
                                               missing == "No" ~ 0),
@@ -123,14 +134,12 @@ x11()
 par(mfrow=c(1,1))
 survModelComp(dataf= VA_CC, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
 
-# Based on this simple analysis we select the following survival model since it has the lowest AIC value:
-so_CC <- makeSurvObj(VA_CC, surv ~ size)
+so_VA_CC <- makeSurvObj(VA_CC, surv ~ size) #Choose the size model because that makes sense biologically
 
 # We next model growth, conditional on survival. Here, ’growth’ is the process relating size in year t+1 to size in year t. We use the following code to illustrate it in a figure:
 growthModelComp(dataf=VA_CC, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
 
-# Based on this simple model comparison, we select the following growth model:
-go_CC <- makeGrowthObj(VA_CC, sizeNext ~ size)
+go_VA_CC <- makeGrowthObj(VA_CC, sizeNext ~ size) #Choose this model because of AIC and biology
 
 # Make discrete transition object
 dto_VA_CC <- makeDiscreteTrans(VA_CC, discreteTrans = matrix(
@@ -143,28 +152,19 @@ dto_VA_CC <- makeDiscreteTrans(VA_CC, discreteTrans = matrix(
    ncol = 2,
    nrow = 3, 
    dimnames = list(c("seedbank", "continuous", "dead"), c("seedbank", "continuous"))),
-                                meanToCont = matrix(mean_Veg_VA, ncol = 1, nrow = 1, dimnames = list(c("mean"), c("seedbank"))),
-                                sdToCont = matrix(Seedling_info_VA$sd, ncol = 1, nrow = 1, dimnames = list(c(""),c("seedbank"))))
+                                meanToCont = matrix(Seedling_info_VA_mean, ncol = 1, nrow = 1, dimnames = list(c("mean"), c("seedbank"))),
+                                sdToCont = matrix(sd_VA, ncol = 1, nrow = 1, dimnames = list(c(""),c("seedbank"))))
 
 
 # With these survival and growth objects in hand, we build a survival/growth (P) matrix.
-Pmatrix_CC <- makeIPMPmatrix(survObj=so_CC, growObj=go_CC, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_CC, correction = "constant", nBigMatrix = 100)
+Pmatrix_VA_CC <- makeIPMPmatrix(survObj=so_VA_CC, growObj=go_VA_CC, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_CC, correction = "constant", nBigMatrix = 100)
 
 # We plot this P-matrix using the ’image.plot’ function of the fields package:
 x11()
-image.plot(Pmatrix_CC@meshpoints,
-           Pmatrix_CC@meshpoints,
-           t(Pmatrix_CC),
-           main = "Pmatrix: survival and growth",
-           xlab = "Size at t",
-           ylab = "Size at t+1")
-abline(0,1,lty=2,lwd=3)
+par(mfrow=c(1,1))
+contourPlot2(t(Pmatrix_VA_CC), Pmatrix_VA_CC@meshpoints, maxSize, 0.03, 0, title = "Pmatrix: survival and growth") 
+#diagnosticsPmatrix(Pmatrix_VA_CC, growObj=go_VA_CC, survObj=so_VA_CC, correction="constant", dff = VA_CC) 
 
-image(t(Pmatrix_CC))
-
-diagnosticsPmatrix(Pmatrix_CC, growObj=go_CC, survObj=so_CC, correction="constant", dff = VA_CC) 
-
-#Bindwidth and range size looks ok
 
 #### Ambient temperature removal ####
 
