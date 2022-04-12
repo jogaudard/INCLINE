@@ -33,6 +33,17 @@ conflict_prefer("filter", "dplyr")
 #          file = "INCLINE_metadata.csv",
 #          path = "data",
 #          remote_path = "RawData")
+#
+# get_file(node = "zhk3m",
+#          file = "VA_comments.csv",
+#          path = "data/Demography",
+#          remote_path = "RawData/Demography")
+# 
+# get_file(node = "zhk3m",
+#          file = "SP_comments.csv",
+#          path = "data/Demography",
+#          remote_path = "RawData/Demography")
+
 
 #### Load data ####
 
