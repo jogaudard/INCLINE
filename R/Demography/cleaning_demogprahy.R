@@ -39,6 +39,8 @@ conflict_prefer("filter", "dplyr")
 Sib_pro <- read.csv2("data/Demography/Sib_pro_2018-2021.csv")
 Ver_alp <- read.csv2("data/Demography/Ver_alp_2018-2021.csv")
 INCLINE_metadata <- read_delim("data/INCLINE_metadata.csv", delim = ";")
+VA_comment_dict <- read.csv2("data/Demography/VA_comments.csv")
+SP_comment_dict <- read.csv2("data/Demography/SP_comments.csv")
 
 #### Cleaning variables names in dataset ####
 
@@ -179,8 +181,20 @@ Ver_alp <- Ver_alp %>%
 #### Removing individuals from data set based of comments ####
 #Individuals that might be other species, or that died during transplant or data collection
 
+Ver_alp <- Ver_alp %>% 
+  left_join(VA_comment_dict, by = "comment") %>% 
+  group_by(unique_IDS) %>% 
+  fill(flag, .direction = "downup") %>% 
+  filter(is.na(flag)) %>% 
+  select(-flag)
 
 
+Sib_pro <- Sib_pro %>% 
+  left_join(SP_comment_dict, by = "comment_registrator") %>%
+  group_by(unique_IDS) %>% 
+  fill(flag, .direction = "downup") %>% 
+  filter(is.na(flag)) %>% 
+  select(-flag)
 
 
 #### Remove unneeded datasets ####
@@ -189,3 +203,5 @@ rm(seedling_constants)
 rm(seedling_constants_VA)
 rm(Sib_pro_seedling_fix)
 rm(Ver_alp_seedling_fix)
+rm(SP_comment_dict)
+rm(VA_comment_dict)
