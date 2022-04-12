@@ -209,7 +209,6 @@ Sib_pro <- Sib_pro %>%
 
 
 #### Remove unneeded datasets ####
-rm(INCLINE_metadata)
 rm(seedling_constants)
 rm(seedling_constants_VA)
 rm(Sib_pro_seedling_fix)
