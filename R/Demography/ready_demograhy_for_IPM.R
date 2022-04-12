@@ -427,6 +427,8 @@ Seedling_info_VA_dat %>%
   geom_violin() +
   geom_jitter(alpha = 0.2) +
   geom_hline(yintercept = Seedling_info_VA_mean,  size = 2, color = "black") +
+  geom_hline(yintercept = Seedling_info_VA_mean + 2*sd_VA, size = 0.5, color = "black") +
+  geom_hline(yintercept = Seedling_info_VA_mean - 2*sd_VA, size = 0.5, color = "black") +
   ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") +
   theme_bw() +
   facet_wrap(~OTC)
@@ -484,7 +486,7 @@ seed_bank_predicted <- coef(seed_bank_model) %>%
          VA_OTC = Intercept + speciesVer_alp + warmingOTC) %>% 
   select(SP_C, SP_OTC, VA_C, VA_OTC)
 
-seed_bank1 <- seed_bank %>% 
+seed_bank1 <- seed_bank1 %>% 
   group_by(species, warming) %>% 
  mutate(seeds_alive_total = round(mean(seeds_alive_total), digits = 0),
         seeds_alive_total_prop = mean(seeds_alive_total_prop),
@@ -492,12 +494,6 @@ seed_bank1 <- seed_bank %>%
         seeds_dead_total_prop = mean(seeds_dead_total_prop)) %>% 
   select(species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop) %>% 
   unique() 
-  
-
-#go_sb: de som blir en del av frøbanken: 1-seedling_etablishment_rate 
-#stay_sb: av de 20 som du har gravd ned hvor mange har overlevd (spirt til slutt elle rpositive cut test)
-#out_sb:
-
 
 
 #### Making transitions ####
