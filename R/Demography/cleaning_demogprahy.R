@@ -99,7 +99,8 @@ Ver_alp <- Ver_alp %>%
   mutate(seedling = case_when(seedling == "yes" & SH > 20 ~ "no",
                               seedling == "yes" & NL > 6 ~ "no",
                               seedling == "yes" ~ seedling,
-                              seedling == "no" ~ seedling)) #Changing individuals from the seedling category if they have to large shoot height or to many leaves as we do not think these are actually seedlings.
+                              seedling == "no" ~ seedling)) %>% #Changing individuals from the seedling category if they have to large shoot height or to many leaves as we do not think these are actually seedlings.
+  mutate(siteID = if_else(siteID == "Lav ", "Lav", siteID))
 
 #### Changing variable types ####
 
@@ -198,7 +199,6 @@ Ver_alp <- Ver_alp %>%
   fill(flag, .direction = "downup") %>% 
   filter(is.na(flag)) %>% 
   select(-flag)
-
 
 Sib_pro <- Sib_pro %>% 
   left_join(SP_comment_dict, by = "comment_registrator") %>%
