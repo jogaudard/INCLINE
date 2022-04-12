@@ -55,14 +55,14 @@ Sib_pro <- Sib_pro %>%
   select(!Treat) %>% #removing treatment column from the original dataset
   select(!NC8) %>% 
   select(!NAC5) %>% #removing columns number of capsules 8 (NC8) and number of aborted capsules 5 (NAC5) because there are no entries in them
-  filter(!(is.na(LSL) & is.na(NL) & is.na(LL) & is.na(NFS))) %>%  #remove any individuals that are dead in that year (they might still be in the dataset because we made a comment that the species is gone)
-  mutate(seedling = case_when(is.na(seedling) ~ "no", #replacing NAs in the seedling and juvenile column with NO, assuming we just forgot to enter something there.
-                              seedling == "yes" ~ "yes",
-                              seedling == "no" ~ "no")) %>% 
-  mutate(juvenile = case_when(is.na(juvenile) ~ "no",
-                              juvenile == "yes" ~ "yes",
-                              juvenile == "no" ~ "no")) %>% 
-  mutate(MS = case_when(MS %in% c(1:100) ~ paste0(plotID, "_", MS))) %>% 
+  #Removing this code for now - I don't think we want to replace NAs with NO, because those are individuals that are dead.
+  # mutate(seedling = case_when(is.na(seedling) ~ "no", #replacing NAs in the seedling and juvenile column with NO, assuming we just forgot to enter something there.
+  #                             seedling == "yes" ~ "yes",
+  #                             seedling == "no" ~ "no")) %>% 
+  # mutate(juvenile = case_when(is.na(juvenile) ~ "no",
+  #                             juvenile == "yes" ~ "yes",
+  #                             juvenile == "no" ~ "no")) %>% 
+  mutate(MS = case_when(MS %in% c(1:500) ~ paste0(plotID, "_", MS))) %>% 
   mutate(seedling = case_when(seedling == "yes" & LL > 10 ~ "no",
                               seedling == "yes" & NL > 4 ~ "no",
                               seedling == "yes" ~ seedling,
@@ -75,18 +75,18 @@ Ver_alp <- Ver_alp %>%
   mutate(unique_IDS = paste0(plotID, "_", IDS)) %>% #creating unique individual ID
   left_join(INCLINE_metadata, by = "plotID") %>% #adding treatment info from INCLINE metadata file
   select(!Treat) %>% #removing treatment column from the original dataset
-  filter(!(is.na(SH) & is.na(NL) & is.na(LL) & is.na(WL))) %>% #remove any individuals that are dead in that year (they might still be in the dataset because we made a comment that the species is gone)
-  mutate(seedling = case_when(is.na(seedling) ~ "no", #replacing NAs in the seedling and juvenile column with NO, assuming we just forgot to enter something there.
-                              seedling == "yes" ~ "yes",
-                              seedling == "no" ~ "no")) %>% 
-  mutate(juvenile = case_when(is.na(juvenile) ~ "no",
-                              juvenile == "yes" ~ "yes",
-                              juvenile == "no" ~ "no")) %>% 
+  #Removing this code for now - I don't think we want to replace NAs with NO, because those are individuals that are dead.
+  # mutate(seedling = case_when(is.na(seedling) ~ "no", #replacing NAs in the seedling and juvenile column with NO, assuming we just forgot to enter something there.
+  #                             seedling == "yes" ~ "yes",
+  #                             seedling == "no" ~ "no")) %>% 
+  # mutate(juvenile = case_when(is.na(juvenile) ~ "no",
+  #                             juvenile == "yes" ~ "yes",
+  #                             juvenile == "no" ~ "no")) %>% 
   mutate(MS = case_when(MS %in% c(1:100) ~ paste0(plotID, "_", MS))) %>% 
   mutate(seedling = case_when(seedling == "yes" & SH > 20 ~ "no",
                               seedling == "yes" & NL > 6 ~ "no",
                               seedling == "yes" ~ seedling,
-                              seedling == "no" ~ seedling)) #Removing individuals from the seedling category if they have to large shoot height or to many leaves as we do not think these are actually seedlings.
+                              seedling == "no" ~ seedling)) #Changing individuals from the seedling category if they have to large shoot height or to many leaves as we do not think these are actually seedlings.
 
 #### Changing variable types ####
 
@@ -175,3 +175,17 @@ Sib_pro <- Sib_pro %>%
 Ver_alp <- Ver_alp %>%
   filter(seedling %in% c("no", NA)) %>% 
   bind_rows(Ver_alp_seedling_fix)
+
+#### Removing individuals from data set based of comments ####
+#Individuals that might be other species, or that died during transplant or data collection
+
+
+
+
+
+#### Remove unneeded datasets ####
+rm(INCLINE_metadata)
+rm(seedling_constants)
+rm(seedling_constants_VA)
+rm(Sib_pro_seedling_fix)
+rm(Ver_alp_seedling_fix)
