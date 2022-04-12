@@ -331,17 +331,7 @@ seedling_est_SP_Veg <- expit(seedling_est_VA$Intercept + seedling_est_VA$Veg)
 ###### Sibaldia procumbens ######
 
 Seedling_info_SP_dat <- Sib_pro %>% 
-  filter(seedling == "yes") %>%   #There are some seedlings that lack information in LSL, NL or LL. Do we need to gap fill the data here?
-  group_by(OTC, treatment) %>% 
-  mutate(mean_LSL = round(mean(LSL, na.rm = TRUE)),
-         mean_NL = round(mean(NL, na.rm = TRUE)),
-         mean_LL = round(mean(LL, na.rm = TRUE))) %>%
-  mutate(LSL = case_when(LSL == 0 ~ mean_LSL,   #Filling in gaps with the mean for each treatments - might have to attack this differently later
-                         LSL > 0 ~ LSL)) %>% 
-  mutate(NL = case_when(NL == 0 ~ mean_NL,
-                        NL > 0 ~ NL)) %>% 
-  mutate(LL = case_when(LL == 0 ~ mean_LL,
-                        LL > 0 ~ LL)) %>%
+  filter(seedling == "yes") %>% 
   left_join(Sib_pro_coef, by = "siteID") %>% 
   mutate(size = Intercept + LSL * LSL_coef + NL * NL_coef + LL * LL_coef) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
   ungroup() %>% 
@@ -399,19 +389,6 @@ Seedling_info_SP_dat %>%
 
 Seedling_info_VA_dat <- Ver_alp %>% 
   filter(seedling == "yes") %>% 
-  group_by(OTC, treatment) %>% 
-  mutate(mean_SH = round(mean(SH, na.rm = TRUE)),
-         mean_NL = round(mean(NL, na.rm = TRUE)),
-         mean_LL = round(mean(LL, na.rm = TRUE)),
-         mean_WL = round(mean(WL, na.rm = TRUE))) %>%
-  mutate(SH = case_when(SH == 0 ~ mean_SH,   #Filling in gaps with the mean for each treatments - might have to attack this differently later
-                         SH > 0 ~ SH)) %>% 
-  mutate(NL = case_when(NL == 0 ~ mean_NL,
-                        NL > 0 ~ NL)) %>% 
-  mutate(LL = case_when(LL == 0 ~ mean_LL,
-                        LL > 0 ~ LL)) %>% 
-  mutate(LL = case_when(WL == 0 ~ mean_WL,
-                        WL > 0 ~ WL)) %>% 
   add_column(Ver_alp_coef) %>%
   mutate(size = Intercept + SH * SH_coef + NL * NL_coef + LL * LL_coef + WL * WL_coef) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
   ungroup() %>% 
@@ -419,56 +396,40 @@ Seedling_info_VA_dat <- Ver_alp %>%
   mutate(Vegetation = case_when(treatment %in% c("C", "E", "N") ~ "Veg",
                                 treatment == "R" ~ "NoVeg"))
 
-# model_seedling_VA1 <- lmer(size ~ OTC * treatment + (1|siteID/blockID/plotID), data = Seedling_info_VA_dat)
-# summary(model_seedling_VA1)
+#  model_seedling_VA1 <- lmer(size ~ OTC * treatment + (1|siteID/blockID/plotID), data = Seedling_info_VA_dat)
+#  summary(model_seedling_VA1)
+#  
+#  model_seedling_VA2 <- lmer(size ~ OTC + treatment + (1|siteID/blockID/plotID), data = Seedling_info_VA_dat) #Is singularity, need to remove siteID
+#  summary(model_seedling_VA2)
+#  
+#  model_seedling_VA3 <- lmer(size ~ OTC + treatment + (1|blockID/plotID), data = Seedling_info_VA_dat)
+#  summary(model_seedling_VA3)
+#  
+#  model_seedling_VA4 <- lmer(size ~ treatment + (1|blockID/plotID), data = Seedling_info_VA_dat)
+#  summary(model_seedling_VA4)
 # 
-# model_seedling_VA2 <- lmer(size ~ OTC * treatment + (1|blockID/plotID), data = Seedling_info_VA_dat)
-# summary(model_seedling_VA2)
-# 
-# model_seedling_VA3 <- lmer(size ~ OTC * treatment + (1|plotID), data = Seedling_info_VA_dat)
-# summary(model_seedling_VA3)
-# 
-# model_seedling_VA4 <- lmer(size ~ OTC + treatment + (1|plotID), data = Seedling_info_VA_dat)
-# summary(model_seedling_VA4)
-# 
-# model_seedling_VA5 <- lmer(size ~ treatment + (1|plotID), data = Seedling_info_VA_dat)
+# model_seedling_VA5 <- lmer(size ~ Vegetation + (1|blockID/plotID), data = Seedling_info_VA_dat)
 # summary(model_seedling_VA5)
+# 
+#  model_seedling_VA6 <- lmer(size ~ OTC + (1|blockID/plotID), data = Seedling_info_VA_dat)
+#  summary(model_seedling_VA6)
+ 
+ model_seedling_VA_null <- lmer(size ~ 1 + (1|plotID), data = Seedling_info_VA_dat) 
+ summary(model_seedling_VA_null)
 
-model_seedling_VA6 <- lmer(size ~ Vegetation + (1|plotID), data = Seedling_info_VA_dat)
-summary(model_seedling_VA6)
-
-# model_seedling_VA7 <- lmer(size ~ OTC + (1|plotID), data = Seedling_info_VA_dat)
-# summary(model_seedling_VA7)
-
-Seedling_info_VA_mean <- fixef(model_seedling_VA6)%>% 
-  as.data.frame() %>% 
-  rownames_to_column() %>% 
-  pivot_wider(names_from = "rowname", values_from = ".") %>% 
-  rename(Intercept = "(Intercept)", Veg = VegetationVeg) 
-
-# Need to make this in a format that can be added in the model later
-
-mean_NoVeg_VA <- Seedling_info_VA_mean$Intercept
-
-mean_Veg_VA <- Seedling_info_VA_mean$Intercept + Seedling_info_VA_mean$Veg
-
-sd_VA <- arm::sigma.hat(model_seedling_VA6)$sigma$data #can we get different standard diviations for different groups? google this with lmer.
-
-Seedling_info_VA <- as.data.frame(mean_NoVeg_VA) %>% 
-  add_column(mean_Veg_VA) %>% 
-  add_column(sd_VA) %>% 
-  rename(mean_NoVeg = mean_NoVeg_VA, mean_Veg = mean_Veg_VA, sd = sd_VA)
+ 
+ Seedling_info_VA_mean  <- as.numeric(fixef(model_seedling_VA_null))
+ sd_VA <- arm::sigma.hat(model_seedling_VA_null)$sigma$data
 
 
 Seedling_info_VA_dat %>%  
-  ggplot(aes(x = Vegetation, y = size, fill = Vegetation)) + 
-  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
-  geom_jitter(alpha= 0.2) +
-  geom_hline(yintercept = mean_NoVeg_VA,  size = 2, color = "lightgreen") +
-  geom_hline(yintercept = mean_Veg_VA, size = 2, color = "darkgreen") +
+  ggplot(aes(y = size, x = treatment, fill = treatment)) + 
+  geom_violin() +
+  geom_jitter(alpha = 0.2) +
+  geom_hline(yintercept = Seedling_info_VA_mean,  size = 2, color = "black") +
   ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") +
-  scale_fill_manual(values = c("lightgreen", "darkgreen")) +
-  theme_bw()
+  theme_bw() +
+  facet_wrap(~OTC)
 
 VA_max_seedling_size <- Seedling_info_VA_dat %>% 
   select(max_seedling_size) %>% 
