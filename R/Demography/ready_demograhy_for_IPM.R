@@ -45,7 +45,6 @@ conflict_prefer("lmer", "lmerTest")
 
 Seeds_per_capsule <- read_csv2("data/Demography/Seeds_per_capsule.csv")
 biomass_Sib_pro <- read_csv2("data/Demography/Biomass_Sib_pro.csv")
-#biomass_Ver_alp_INCLINE <- read_csv2("data/Demography/SG.19_above-below_allocation.csv") #Not using this because some of the biomass rotted while collecting data, so biomass might not be correct
 seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv") 
 biomass_Ver_alp <- read_csv2("data/Demography/VeronicaAlpina_Biomass_Seedclim_edited.csv") #from SeedClim not on INCLINE OSF
 seed_bank <- read_csv2("data/Demography/Seed_bank_survival.csv") 
@@ -82,14 +81,6 @@ Sib_pro_coef <- Sib_pro_coef %>%
 
 
 ##### Veronica alpina #####
-
-#Using placeholder data from SeedClim for the biomass regressions there
-# Ver_alp_coef <- biomass_Ver_alp %>% 
-#   filter(species == "valp") %>% 
-#   select(!species) %>% 
-#   rename(Intercept = "(Intercept)", SH_coef = SH, NL_coef = NL, LL_coef = LL, WL_coef = WL)
-
-# biomass Ver_alp
 
 biomass_Ver_alp <- biomass_Ver_alp %>% 
   select(siteID, IDS, SH, NL, LL, WL, ag) %>% 
