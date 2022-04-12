@@ -375,15 +375,15 @@ SP_max_seedling_size <- Seedling_info_SP_dat %>%
   select(max_seedling_size) %>% 
   unique()
 
-Seedling_info_SP_dat %>%  
-  ggplot(aes(x = Vegetation, y = size, fill = Vegetation)) + 
-  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
-  geom_jitter(alpha= 0.2) +
-  geom_hline(yintercept = mean_NoVeg_SP,  size = 2, color = "lightgreen") +
-  geom_hline(yintercept = mean_Veg_SP, size = 2, color = "darkgreen") +
-  ggtitle("Seedling size by treatment for Sibbaldia procumbens") + ylab("size") +
-  scale_fill_manual(values = c("lightgreen", "darkgreen")) +
-  theme_bw()
+# Seedling_info_SP_dat %>%  
+#   ggplot(aes(x = Vegetation, y = size, fill = Vegetation)) + 
+#   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+#   geom_jitter(alpha= 0.2) +
+#   geom_hline(yintercept = mean_NoVeg_SP,  size = 2, color = "lightgreen") +
+#   geom_hline(yintercept = mean_Veg_SP, size = 2, color = "darkgreen") +
+#   ggtitle("Seedling size by treatment for Sibbaldia procumbens") + ylab("size") +
+#   scale_fill_manual(values = c("lightgreen", "darkgreen")) +
+#   theme_bw()
 
 ###### Veronica alpina ######
 
@@ -422,16 +422,16 @@ Seedling_info_VA_dat <- Ver_alp %>%
  sd_VA <- arm::sigma.hat(model_seedling_VA_null)$sigma$data
 
 
-Seedling_info_VA_dat %>%  
-  ggplot(aes(y = size, x = treatment, fill = treatment)) + 
-  geom_violin() +
-  geom_jitter(alpha = 0.2) +
-  geom_hline(yintercept = Seedling_info_VA_mean,  size = 2, color = "black") +
-  geom_hline(yintercept = Seedling_info_VA_mean + 2*sd_VA, size = 0.5, color = "black") +
-  geom_hline(yintercept = Seedling_info_VA_mean - 2*sd_VA, size = 0.5, color = "black") +
-  ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") +
-  theme_bw() +
-  facet_wrap(~OTC)
+# Seedling_info_VA_dat %>%  
+#   ggplot(aes(y = size, x = treatment, fill = treatment)) + 
+#   geom_violin() +
+#   geom_jitter(alpha = 0.2) +
+#   geom_hline(yintercept = Seedling_info_VA_mean,  size = 2, color = "black") +
+#   geom_hline(yintercept = Seedling_info_VA_mean + 2*sd_VA, size = 0.5, color = "black") +
+#   geom_hline(yintercept = Seedling_info_VA_mean - 2*sd_VA, size = 0.5, color = "black") +
+#   ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") +
+#   theme_bw() +
+#   facet_wrap(~OTC)
 
 VA_max_seedling_size <- Seedling_info_VA_dat %>% 
   select(max_seedling_size) %>% 
@@ -724,12 +724,12 @@ Sib_pro_2018_2021 <- Sib_pro_2018_2021 %>%
 
 
 #Some plots fro visualization/checking
-Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = as.factor(flo.if))) + geom_point() + geom_abline()
-Sib_pro_2018_2021 %>% filter(seedling == "yes") %>% ggplot(aes(y = sizeNext, x = size)) + geom_point() + geom_abline()
-Sib_pro_2018_2021 %>% filter(offspringNext == "clonal") %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
-Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline()
-Sib_pro_2018_2021 %>% ggplot(aes(x = sizeNext, fill = offspringNext, alpha = 0.5)) + geom_density()
-Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = offspringNext, fill = offspringNext)) + geom_violin() + geom_jitter(alpha = 0.2)
+# Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = as.factor(flo.if))) + geom_point() + geom_abline()
+# Sib_pro_2018_2021 %>% filter(seedling == "yes") %>% ggplot(aes(y = sizeNext, x = size)) + geom_point() + geom_abline()
+# Sib_pro_2018_2021 %>% filter(offspringNext == "clonal") %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
+# Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline()
+# Sib_pro_2018_2021 %>% ggplot(aes(x = sizeNext, fill = offspringNext, alpha = 0.5)) + geom_density()
+# Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = offspringNext, fill = offspringNext)) + geom_violin() + geom_jitter(alpha = 0.2)
 
 
 
@@ -899,13 +899,13 @@ Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>%
 
 
 #Some plots fro visualization/checking
-Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = flo.if)) + geom_point() + geom_abline()
-Ver_alp_2018_2021 %>% ggplot(aes(y = flo.no, x = size, color = transition)) + geom_point() + geom_abline()
-Ver_alp_2018_2021 %>% ggplot(aes(y = fec, x = size, color = transition)) + geom_point() + geom_abline()
-Ver_alp_2018_2021 %>% filter(seedling == "yes") %>% ggplot(aes(y = sizeNext, x = size)) + geom_point()
-Ver_alp_2018_2021 %>% filter(offspringNext == "clonal") %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
-Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline()
-Ver_alp_2018_2021 %>% ggplot(aes(x = sizeNext, fill = offspringNext, alpha = 0.5)) + geom_density()
-Ver_alp_2018_2021 %>% ggplot(aes(x = sizeNext, fill = as.factor(clo.if), alpha = 0.5)) + geom_density()
-Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = offspringNext, fill = offspringNext)) + geom_violin() + geom_jitter(alpha = 0.2)
+# Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = flo.if)) + geom_point() + geom_abline()
+# Ver_alp_2018_2021 %>% ggplot(aes(y = flo.no, x = size, color = transition)) + geom_point() + geom_abline()
+# Ver_alp_2018_2021 %>% ggplot(aes(y = fec, x = size, color = transition)) + geom_point() + geom_abline()
+# Ver_alp_2018_2021 %>% filter(seedling == "yes") %>% ggplot(aes(y = sizeNext, x = size)) + geom_point()
+# Ver_alp_2018_2021 %>% filter(offspringNext == "clonal") %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
+# Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline()
+# Ver_alp_2018_2021 %>% ggplot(aes(x = sizeNext, fill = offspringNext, alpha = 0.5)) + geom_density()
+# Ver_alp_2018_2021 %>% ggplot(aes(x = sizeNext, fill = as.factor(clo.if), alpha = 0.5)) + geom_density()
+# Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = offspringNext, fill = offspringNext)) + geom_violin() + geom_jitter(alpha = 0.2)
 
