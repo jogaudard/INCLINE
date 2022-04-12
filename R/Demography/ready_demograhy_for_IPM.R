@@ -140,13 +140,13 @@ summary(seed_SP_null)
 Seeds_per_capsule_SP <- as.numeric(exp(fixef(seed_SP_null)))
 
 
-Seeds_per_capsule_SP_dat %>%  
-  ggplot(aes(x = size, y = Number_of_seeds)) + 
-  geom_point(aes(color = Site)) + 
-  geom_hline(aes(yintercept = Seeds_per_capsule_SP)) + 
-  ggtitle("Number of seeds by size for Sibbaldia procumbens") + 
-  xlab("log2(size)") +
-  ylab("Seed per capsule") + scale_color_viridis_d()
+# Seeds_per_capsule_SP_dat %>%  
+#   ggplot(aes(x = size, y = Number_of_seeds)) + 
+#   geom_point(aes(color = Site)) + 
+#   geom_hline(aes(yintercept = Seeds_per_capsule_SP)) + 
+#   ggtitle("Number of seeds by size for Sibbaldia procumbens") + 
+#   xlab("log2(size)") +
+#   ylab("Seed per capsule") + scale_color_viridis_d()
 
 ###### Veronica alpina ######
 
@@ -178,21 +178,21 @@ summary(seed_VA_null)
 
 Seeds_per_capsule_VA_null <- as.numeric(exp(fixef(seed_VA_null)))
 
-Seeds_per_capsule_VA_dat %>%  
-  ggplot(aes(x = size, y = Number_of_seeds)) + 
-  geom_point(aes(color = Site)) + 
-  geom_hline(aes(yintercept = Seeds_per_capsule_VA_null)) + 
-  #geom_abline(intercept = Seeds_per_capsule_VA$Intercept_seeds, slope = Seeds_per_capsule_VA$seed_number_coef) +
-  ggtitle("Number of seeds by size for Veronica_alpina") + 
-  xlab("log2(size)") + 
-  ylab("Seed per capsule") + 
-  scale_color_viridis_d()
+# Seeds_per_capsule_VA_dat %>%  
+#   ggplot(aes(x = size, y = Number_of_seeds)) + 
+#   geom_point(aes(color = Site)) + 
+#   geom_hline(aes(yintercept = Seeds_per_capsule_VA_null)) + 
+#   #geom_abline(intercept = Seeds_per_capsule_VA$Intercept_seeds, slope = Seeds_per_capsule_VA$seed_number_coef) +
+#   ggtitle("Number of seeds by size for Veronica_alpina") + 
+#   xlab("log2(size)") + 
+#   ylab("Seed per capsule") + 
+#   scale_color_viridis_d()
 
   
 #### Seedling establishment coefficients ####
 #This section calculate the seedling establishment rate for each species in the warmed and unwarmed plots (using the data from the vegetated plots further in the analysis)
 
-seedling_est1 <- seedling_est %>% 
+seedling_est <- seedling_est %>% 
   filter(Year == 2020) %>% 
   select(Site, Block, Plot, PlotID, Date, Species, ID, Vegetation, Present) %>% 
   mutate(Date = dmy(Date)) %>% 
@@ -213,7 +213,7 @@ seedling_est1 <- seedling_est %>%
   rename(Vegetation = treatment)
   
 
-seedling_est_background <- seedling_est1 %>% 
+seedling_est_background <- seedling_est %>% 
   filter(!Plot %in% c("C", "OTC")) %>% 
   filter(campaign_number == "second") %>% 
   mutate(Present = case_when(Present == "yes" ~ 1,
@@ -226,11 +226,11 @@ seedling_est_background <- seedling_est1 %>%
   select(Species, Vegetation, background_germination) %>% 
   unique()
 
-seedling_est2 <- seedling_est1 %>% 
+seedling_est <- seedling_est %>% 
   filter(Plot %in% c("C", "OTC")) %>% 
   rename(Warming = Plot) 
 
-binomial_seedlings <- seedling_est2 %>%
+binomial_seedlings <- seedling_est %>%
   select(Site, Block, Warming, PlotID, plotID, Species, Vegetation, campaign_number) %>%
   filter(campaign_number == "second") %>%
   unique() %>%
@@ -239,7 +239,7 @@ binomial_seedlings <- seedling_est2 %>%
   mutate(ID = c(1:20)) %>% 
   mutate(ID = as.character(ID))
 
-binomial_seedling_data <- seedling_est2 %>% 
+binomial_seedling_data <- seedling_est %>% 
   full_join(binomial_seedlings, by = c("Site", "Block", "Warming", "PlotID", "plotID", "Species", "Vegetation", "campaign_number", "ID")) %>% 
   mutate(Present = case_when(is.na(Present) ~ "no",
                              !is.na(Present) ~ Present)) %>% 
@@ -410,6 +410,9 @@ Seedling_info_VA_dat <- Ver_alp %>%
 # 
 # model_seedling_VA5 <- lmer(size ~ Vegetation + (1|blockID/plotID), data = Seedling_info_VA_dat)
 # summary(model_seedling_VA5)
+#
+# model_seedling_VA6 <- lmer(size ~ Vegetation + (1|plotID), data = Seedling_info_VA_dat)
+# summary(model_seedling_VA6)
 # 
 #  model_seedling_VA6 <- lmer(size ~ OTC + (1|blockID/plotID), data = Seedling_info_VA_dat)
 #  summary(model_seedling_VA6)
@@ -909,3 +912,19 @@ Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>%
 # Ver_alp_2018_2021 %>% ggplot(aes(x = sizeNext, fill = as.factor(clo.if), alpha = 0.5)) + geom_density()
 # Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = offspringNext, fill = offspringNext)) + geom_violin() + geom_jitter(alpha = 0.2)
 
+
+#### Remove data and objects ####
+rm(Ver_alp_2018)
+rm(Ver_alp_2019)
+rm(Ver_alp_2020)
+rm(Ver_alp_2021)
+rm(Sib_pro_2018)
+rm(Sib_pro_2019)
+rm(Sib_pro_2020)
+rm(Sib_pro_2021)
+rm(clonal_information_SP)
+rm(clonal_information_VA)
+rm(clone_information_SP)
+rm(clone_information_VA)
+rm(clones_SP)
+rm(clones_VA)
