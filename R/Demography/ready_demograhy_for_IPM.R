@@ -586,14 +586,19 @@ Sib_pro_2018_2019 <- Sib_pro_2018 %>%
          fec = (Seeds_per_capsule_SP * NFL_2018) + (Seeds_per_capsule_SP * NB_2018) + (Seeds_per_capsule_SP * NC_2018),
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
-  mutate(flo.no = rowSums(dplyr::select(., NB_2018, NFL_2018, NC_2018), na.rm=TRUE),
-        flo.if = ifelse(flo.no > 0, 1, 0),
-        flo.no = case_when(flo.no == 0 ~ NA_real_,
-                           TRUE ~ flo.no)) %>%
-  #mutate(flo.no = case_when(is.na(flo.if) ~ NA, !is.na(flo.if) ~ flo.no))
+  mutate(NB_2018 = as.numeric(NB_2018),
+         NFL_2018 = as.numeric(NFL_2018),
+         NC_2018 = as.numeric(NC_2018)) %>% 
+  rowwise() %>% 
+  mutate(flo.no = sum(NB_2018, NFL_2018, NC_2018, na.rm=TRUE),
+         flo.if = ifelse(flo.no > 0, 1, 0),
+         flo.no = case_when(flo.no == 0 ~ NA_real_,
+                            TRUE ~ flo.no),
+         fec = Seeds_per_capsule_SP * flo.no) %>%
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                               ifelse(juvenile_next == "yes" & is.na(size), "sexual",
                                      ifelse(is.na(size) & sizeNext>0, "clonal", NA)))) %>% 
+  ungroup() %>% 
   select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
   mutate(transition = "2018-2019")
 
@@ -607,10 +612,15 @@ Sib_pro_2019_2020 <- Sib_pro_2019 %>%
          fec = (Seeds_per_capsule_SP * NFL_2019) + (Seeds_per_capsule_SP * NB_2019) + (Seeds_per_capsule_SP * NC_2019), 
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
-  mutate(flo.no = rowSums(dplyr::select(., NB_2019, NFL_2019, NC_2019), na.rm=TRUE),
+  mutate(NB_2019 = as.numeric(NB_2019),
+         NFL_2019 = as.numeric(NFL_2019),
+         NC_2019 = as.numeric(NC_2019)) %>%
+  rowwise() %>% 
+  mutate(flo.no = sum(NB_2019, NFL_2019, NC_2019, na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
          flo.no = case_when(flo.no == 0 ~ NA_real_,
-                            TRUE ~ flo.no)) %>%
+                            TRUE ~ flo.no),
+         fec = Seeds_per_capsule_SP * flo.no) %>%
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_next == "yes" & is.na(size), "sexual",
                                        ifelse(is.na(size) & sizeNext>0, "clonal", NA)))) %>%
@@ -627,10 +637,15 @@ Sib_pro_2020_2021 <- Sib_pro_2020 %>%
          fec = (Seeds_per_capsule_SP * NFL_2020) + (Seeds_per_capsule_SP * NB_2020) + (Seeds_per_capsule_SP * NC_2020), 
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
-  mutate(flo.no = rowSums(dplyr::select(., NB_2020, NFL_2020, NC_2020), na.rm=TRUE),
+  mutate(NB_2020 = as.numeric(NB_2020),
+         NFL_2020 = as.numeric(NFL_2020),
+         NC_2020 = as.numeric(NC_2020)) %>% 
+  rowwise() %>% 
+  mutate(flo.no = sum(NB_2020, NFL_2020, NC_2020, na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
          flo.no = case_when(flo.no == 0 ~ NA_real_,
-                            TRUE ~ flo.no)) %>%
+                            TRUE ~ flo.no),
+         fec = Seeds_per_capsule_SP * flo.no) %>%
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_next == "yes" & is.na(size), "sexual",
                                        ifelse(is.na(size) & sizeNext>0, "clonal", NA)))) %>% 
@@ -709,11 +724,13 @@ Sib_pro_2018_2021 <- Sib_pro_2018_2021 %>%
 
 
 #Some plots fro visualization/checking
-Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = flo.if)) + geom_point() + geom_abline()
+Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = as.factor(flo.if))) + geom_point() + geom_abline()
 Sib_pro_2018_2021 %>% filter(seedling == "yes") %>% ggplot(aes(y = sizeNext, x = size)) + geom_point() + geom_abline()
 Sib_pro_2018_2021 %>% filter(offspringNext == "clonal") %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
 Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline()
 Sib_pro_2018_2021 %>% ggplot(aes(x = sizeNext, fill = offspringNext, alpha = 0.5)) + geom_density()
+Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = offspringNext, fill = offspringNext)) + geom_violin() + geom_jitter(alpha = 0.2)
+
 
 
 ##### Veronica alpina #####
@@ -744,7 +761,11 @@ Ver_alp_2018_2019 <- Ver_alp_2018 %>%
          sizeNext = Intercept + (SH_2019 * SH_coef) + (NL_2019 * NL_coef) + (LL_2019 * LL_coef) + (WL_2019 * WL_coef),
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
-  mutate(flo.no = rowSums(dplyr::select(., NB_2018, NFL_2018, NC_2018), na.rm=TRUE),
+  mutate(NB_2018 = as.numeric(NB_2018),
+         NFL_2018 = as.numeric(NFL_2018),
+         NC_2018 = as.numeric(NC_2018)) %>% 
+  rowwise() %>% 
+  mutate(flo.no = sum(NB_2018, NFL_2018, NC_2018, na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
          flo.no = case_when(flo.no == 0 ~ NA_real_,
                             TRUE ~ flo.no),
@@ -765,7 +786,11 @@ Ver_alp_2019_2020 <- Ver_alp_2019 %>%
          sizeNext = Intercept + (SH_2020 * SH_coef) + (NL_2020 * NL_coef) + (LL_2020 * LL_coef) + (WL_2020 * WL_coef), 
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
-  mutate(flo.no = rowSums(dplyr::select(., NB_2019, NFL_2019, NC_2019), na.rm=TRUE),
+  mutate(NB_2019 = as.numeric(NB_2019),
+         NFL_2019 = as.numeric(NFL_2019),
+         NC_2019 = as.numeric(NC_2019)) %>% 
+  rowwise() %>% 
+  mutate(flo.no = sum(NB_2019, NFL_2019, NC_2019, na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
          flo.no = case_when(flo.no == 0 ~ NA_real_,
                             TRUE ~ flo.no),
@@ -786,7 +811,11 @@ Ver_alp_2020_2021 <- Ver_alp_2020 %>%
          sizeNext = Intercept + (SH_2021 * SH_coef) + (NL_2021 * NL_coef) + (LL_2021 * LL_coef) + (WL_2021 * WL_coef), 
          surv = ifelse(size > 0 & is.na(sizeNext), 0,
                        ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
-  mutate(flo.no = rowSums(dplyr::select(., NB_2020, NFL_2020, NC_2020), na.rm=TRUE),
+  mutate(NB_2020 = as.numeric(NB_2020),
+         NFL_2020 = as.numeric(NFL_2020),
+         NC_2020 = as.numeric(NC_2020)) %>% 
+  rowwise() %>% 
+  mutate(flo.no = sum(NB_2020, NFL_2020, NC_2020, na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
          flo.no = case_when(flo.no == 0 ~ NA_real_,
                             TRUE ~ flo.no),
@@ -878,4 +907,5 @@ Ver_alp_2018_2021 %>% filter(offspringNext == "clonal") %>% ggplot(aes(y = sizeN
 Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline()
 Ver_alp_2018_2021 %>% ggplot(aes(x = sizeNext, fill = offspringNext, alpha = 0.5)) + geom_density()
 Ver_alp_2018_2021 %>% ggplot(aes(x = sizeNext, fill = as.factor(clo.if), alpha = 0.5)) + geom_density()
+Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = offspringNext, fill = offspringNext)) + geom_violin() + geom_jitter(alpha = 0.2)
 
