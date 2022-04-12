@@ -83,6 +83,7 @@ Sib_pro <- Sib_pro %>%
 
 Ver_alp <- Ver_alp %>% 
   rename(siteID = Site, block = Block, plot = Plot, year = Year, date = Date, registrator = Registrator, seedling = seedl) %>%  #Rename to lower capital, and correct naming convention for the INCLINE project
+  mutate(siteID = if_else(siteID == "Lav ", "Lav", siteID)) %>% 
   mutate(plotID = paste0(siteID, "_", block, "_", plot)) %>% #creating unique plotID variable
   mutate(blockID = paste0(siteID, "_", block)) %>%  #creating unique blockID variable
   mutate(unique_IDS = paste0(plotID, "_", IDS)) %>% #creating unique individual ID
@@ -99,8 +100,7 @@ Ver_alp <- Ver_alp %>%
   mutate(seedling = case_when(seedling == "yes" & SH > 20 ~ "no",
                               seedling == "yes" & NL > 6 ~ "no",
                               seedling == "yes" ~ seedling,
-                              seedling == "no" ~ seedling)) %>% #Changing individuals from the seedling category if they have to large shoot height or to many leaves as we do not think these are actually seedlings.
-  mutate(siteID = if_else(siteID == "Lav ", "Lav", siteID))
+                              seedling == "no" ~ seedling)) #Changing individuals from the seedling category if they have to large shoot height or to many leaves as we do not think these are actually seedlings.
 
 #### Changing variable types ####
 
