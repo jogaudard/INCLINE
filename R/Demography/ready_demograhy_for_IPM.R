@@ -439,7 +439,7 @@ VA_max_seedling_size <- Seedling_info_VA_dat %>%
 
 #### Seed bank ####
 
- seed_bank1 <- seed_bank %>% 
+ seed_bank <- seed_bank %>% 
   rename(missing = "missing/dissentegrated") %>% 
    mutate(seeds_dead_in_soil_bank = case_when(missing == "Yes" ~ 1,
                                               missing == "No" ~ 0),
@@ -470,23 +470,23 @@ VA_max_seedling_size <- Seedling_info_VA_dat %>%
   unique() 
 
 
-seed_bank_model <- glm(cbind(seeds_alive_total, seeds_dead_total) ~  warming + species, family = binomial, data = seed_bank1)
+seed_bank_model <- glm(cbind(seeds_alive_total, seeds_dead_total) ~  warming + species, family = binomial, data = seed_bank)
 summary(seed_bank_model)
 
-seed_bank_predicted <- coef(seed_bank_model) %>% 
-  as.data.frame() %>% 
-  rownames_to_column() %>%
-  rename(value = ".") %>% 
-  mutate(value = expit(value)) %>% 
-  pivot_wider(names_from = "rowname", values_from = "value") %>% 
-  rename(Intercept = "(Intercept)") %>% 
-  mutate(SP_C = Intercept,
-         SP_OTC = Intercept + warmingOTC,
-         VA_C = Intercept + speciesVer_alp,
-         VA_OTC = Intercept + speciesVer_alp + warmingOTC) %>% 
-  select(SP_C, SP_OTC, VA_C, VA_OTC)
+# seed_bank_predicted <- coef(seed_bank_model) %>% 
+#   as.data.frame() %>% 
+#   rownames_to_column() %>%
+#   rename(value = ".") %>% 
+#   mutate(value = expit(value)) %>% 
+#   pivot_wider(names_from = "rowname", values_from = "value") %>% 
+#   rename(Intercept = "(Intercept)") %>% 
+#   mutate(SP_C = Intercept,
+#          SP_OTC = Intercept + warmingOTC,
+#          VA_C = Intercept + speciesVer_alp,
+#          VA_OTC = Intercept + speciesVer_alp + warmingOTC) %>% 
+#   select(SP_C, SP_OTC, VA_C, VA_OTC)
 
-seed_bank1 <- seed_bank1 %>% 
+seed_bank <- seed_bank %>% 
   group_by(species, warming) %>% 
  mutate(seeds_alive_total = round(mean(seeds_alive_total), digits = 0),
         seeds_alive_total_prop = mean(seeds_alive_total_prop),
