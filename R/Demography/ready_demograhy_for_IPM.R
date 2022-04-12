@@ -16,6 +16,10 @@ library(conflicted)
 conflict_prefer("select", "dplyr")
 conflict_prefer("lmer", "lmerTest")
 
+#### Functions ####
+#Function needed to transform back after binomial model used on data
+expit <- function(L) exp(L) / (1+exp(L)) 
+
 
 #### Downloading data from OSF ####
 
@@ -187,11 +191,6 @@ Seeds_per_capsule_VA_dat %>%
   
 #### Seedling establishment coefficients ####
 #This section calculate the seedling establishment rate for each species in the warmed and unwarmed plots (using the data from the vegetated plots further in the analysis)
-
-#seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv") 
-
-#Function needed to transform back after binomial model used on data
-expit <- function(L) exp(L) / (1+exp(L)) 
 
 seedling_est1 <- seedling_est %>% 
   filter(Year == 2020) %>% 
