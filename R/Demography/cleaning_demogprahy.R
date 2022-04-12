@@ -104,15 +104,15 @@ Ver_alp <- Ver_alp %>%
 
 #### Changing numbers to integers as we only measured in full mm ####
 
-Sib_pro <- Sib_pro %>% 
-  mutate(LSL = case_when(LSL == 0.5 ~ 1, #1 mm is the lowest value we record, changing 0.5 mm to 1 mm
-                         TRUE ~ LSL)) %>% 
-  mutate(LL = round(LL, digits = 0))
+Sib_pro1 <- Sib_pro %>% 
+  mutate(LSL = round(LSL + 0.01, digits = 0),
+         LL = round(LL + 0.01, digits = 0)) %>% 
+  mutate(NFS = if_else(NFS == "?", NA_integer_, as.integer(NFS))) #Need to check if this works as I want it to
 
-Ver_alp1 <- Ver_alp  # Need to fix things that were supposed to be mm but is cm,
-  #mutate(SH = case_when(SH == 0.5 ~ 1, #1 mm is the lowest value we record, changing 0.5 mm to 1 mm
-                         #TRUE ~ SH)) %>% 
-  #mutate(LL = round(LL, digits = 0))
+Ver_alp1 <- Ver_alp %>%  
+  mutate(SH = round(SH + 0.01, digits = 0),
+         LL = round(LL + 0.01, digits = 0),
+         WL = round(WL + 0.01, digits = 0))
 
 
 #### Imputing missing data for seedlings  ####
@@ -133,12 +133,14 @@ Sib_pro_seedling_fix <- Sib_pro %>%
   filter(seedling == "yes") %>% 
   mutate(LSL = case_when(!is.na(LSL) ~ LSL,
                          is.na(LSL) ~ round(rnorm(length(LSL), mean = seedling_constants$mean_LSL), digits = 0))) %>% 
-  mutate(NL = case_when(!is.na(NL) ~ NL,
-                        (is.na(NL) & comment_registrator == "only cotyledon") ~ 0L,
-                         (is.na(NL) & comment_registrator != "only cotyledon") ~ abs(as.integer(round(rnorm(length(NL), mean = seedling_constants$mean_NL), digits = 0))))) %>% #using absolute value because we get a few -1 values from the rnorm calculation 
-  mutate(LL = case_when(!is.na(LL) ~ LL,
-                        (is.na(LL) & comment_registrator == "only cotyledon") ~ 0,
-                        (is.na(LL) & comment_registrator != "only cotyledon") ~ round(rnorm(length(LL), mean = seedling_constants$mean_LL), digits = 0))) 
+  mutate(NL = case_when((comment_registrator == "only cotyledons") ~ 0L, #Every seedling with only cotyledons should not have any leaf measurements (this removes measurements for around 5 individuals)
+                        !is.na(NL) ~ NL,
+                         is.na(NL) ~ abs(as.integer(round(rnorm(length(NL), mean = seedling_constants$mean_NL), digits = 0))))) %>% #using absolute value because we get a few -1 values from the rnorm calculation 
+  mutate(NL = case_when((NL == 0L & comment_registrator != "only cotyledons") ~ 1L, #Changing the seedlings with 0 leaves to 1 leaf because it is not possible except for seedlings with only cotyledons to have 0 leaves.
+                        NL>= 0 ~ NL)) %>% 
+  mutate(LL = case_when((comment_registrator == "only cotyledons") ~ 0,
+                        !is.na(LL) ~ LL,
+                        (is.na(LL) & comment_registrator != "only cotyledons") ~ round(rnorm(length(LL), mean = seedling_constants$mean_LL), digits = 0))) 
 
 # Veronica alpina
 seedling_constants_VA <- Ver_alp %>% 
