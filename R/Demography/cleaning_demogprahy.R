@@ -61,6 +61,7 @@ INCLINE_metadata <- INCLINE_metadata %>%
 
 Sib_pro <- Sib_pro %>% 
   rename(siteID = Site, block = Block, plot = Plot, year = Year, date = Date, regitrator = Registrator, seedling = seedl) %>%  #Rename to lower capital, and correct naming convention for the INCLINE project
+  mutate(siteID = if_else(siteID == "Ulv ", "Ulv", siteID)) %>% 
   mutate(plotID = paste0(siteID, "_", block, "_", plot)) %>% #creating unique plotID variable
   mutate(blockID = paste0(siteID, "_", block)) %>%  #creating unique blockID variable
   mutate(unique_IDS = paste0(plotID, "_", IDS)) %>% #creating unique individual ID
