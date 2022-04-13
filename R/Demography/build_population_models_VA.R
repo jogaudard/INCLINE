@@ -321,7 +321,7 @@ AIC(lmer(sizeNext ~ size+I(size^2) + precip + (1|blockID), data = VA_CC))
 AIC(lmer(sizeNext ~ size+I(size^2) + as.factor(precip) + (1|blockID), data = VA_CC))
 AIC(lmer(sizeNext ~ size+I(size^2) + (1|blockID), data = VA_CC))
 
-mod_growth_VA_CC <- lmer(sizeNext ~ size + as.factor(precip) + (1|blockID), data = VA_CC)
+mod_growth_VA_CC <- lmer(sizeNext ~ size+I(size^2) + precip + (1|blockID), data = VA_CC)
 
 plot_predictions_growth_precip(model = mod_growth_VA_CC, data = VA_CC)
 
