@@ -106,8 +106,6 @@ Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>%
 Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
    left_join(INCLINE_metadata, by = c("plotID"))
 
-Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
-   mutate(precip = precip/1000)
    # ungroup() %>%
    # as.data.frame() %>%
    # mutate(stage = case_when(!is.na(size) ~ "continuous",
@@ -147,6 +145,37 @@ x11()
 par(mfrow=c(1,1))
 survModelComp(dataf= VA_CC, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
 
+AIC(glmer(surv ~ 1 + (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ precip + (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ as.factor(precip) + (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ size + precip + (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ size + as.factor(precip) + (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ size +  (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ size+I(size^2) + precip + (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ size+I(size^2) + as.factor(precip) + (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ size+I(size^2) + (1|blockID), family = 'binomial', data = VA_CC))
+
+mod_surv_VA_CC <- glmer(surv ~ 1 + (1|blockID), family = 'binomial', data = VA_CC)
+
+plot_predictions_surv <-function(model, data) {
+   
+   newdata <- expand.grid(size = seq(-10, 45, 1),
+                          blockID = data$blockID)
+   
+   newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
+   
+   plot <- data %>% 
+      ggplot(aes(x = size, y = surv)) +
+      geom_jitter(height = 0.1) +
+      geom_line(aes(x = size, y = predicted), data=newdata, size = 1, show.legend = TRUE) +
+      ggtitle(paste0("AIC =", AIC(model)))
+   
+   
+   return(plot)
+}
+
+plot_predictions_surv(model = mod_surv_VA_CC, data = VA_CC)
+
 so_VA_CC <- makeSurvObj(VA_CC, surv ~ size) #Choose the size model because that makes sense biologically
 
 # We next model growth, conditional on survival. Here, ’growth’ is the process relating size in year t+1 to size in year t. We use the following code to illustrate it in a figure:
@@ -182,46 +211,64 @@ contourPlot2(t(Pmatrix_VA_CC), Pmatrix_VA_CC@meshpoints, maxSize, 0.03, 0, title
 #### F matrix ####
 # The fecundity component of an IPM requires analysis of each step of the process of reproduction. Here we start with the first step: whether or not individuals flower in year t (a binomial response). We reemphasize that the population was censused during flowering, and thus we construct the population model based on a pre-reproductive census. Since IPMpack does not have a fecundity model comparison function yet, we must perform model comparison manually:
 
-AIC(glmer(flo.if~1 + precip + (1|blockID), family = 'binomial', data = VA_CC))
-AIC(glmer(flo.if~1 +  (1|blockID), family = 'binomial', data = VA_CC))
-AIC(glmer(flo.if~size + precip + (1|blockID), family = 'binomial', data = VA_CC))
-AIC(glmer(flo.if~size +  (1|blockID), family = 'binomial', data = VA_CC))
-AIC(glmer(flo.if~size+I(size^2) + precip + (1|blockID), family = 'binomial', data = VA_CC))
-AIC(glmer(flo.if~size+I(size^2) + (1|blockID), family = 'binomial', data = VA_CC))
-AIC(glmer(flo.if~size+I(size^2)+I(size^3) + precip + (1|blockID), family = 'binomial', data = VA_CC))
-AIC(glmer(flo.if~size+I(size^2)+I(size^3) + (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(flo.if ~ 1 + (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(flo.if ~ precip + (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(flo.if ~ as.factor(precip) + (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(flo.if ~ size + precip + (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(flo.if ~ size + as.factor(precip) + (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(flo.if ~ size +  (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(flo.if ~ size+I(size^2) + precip + (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(flo.if ~ size+I(size^2) + as.factor(precip) + (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(flo.if ~ size+I(size^2) + (1|blockID), family = 'binomial', data = VA_CC))
+
+
+# AIC(glmer(flo.if~size+I(size^2)+I(size^3) + precip + (1|blockID), family = 'binomial', data = VA_CC))
+# AIC(glmer(flo.if~size+I(size^2)+I(size^3) + as.factor(precip) + (1|blockID), family = 'binomial', data = VA_CC))
+# AIC(glmer(flo.if~size+I(size^2)+I(size^3) + (1|blockID), family = 'binomial', data = VA_CC))
 floweringChosenModel_VA_CC <- flo.if ~ size #Chosen based on AIC
 
-mod1_VA_CC <- glmer(flo.if~size+I(size^2) + precip + (1|blockID), family = 'binomial', data = VA_CC) #The model without precip is the better one - but leaving it here now for coding purposes
+mod1_VA_CC <- glmer(flo.if~size+I(size^2) + as.factor(precip) + (1|blockID), family = 'binomial', data = VA_CC) #The model without precip is the better one - but leaving it here now for coding purposes
+modif2_VA_CC <- glmer(flo.if~size+I(size^2) + (1|blockID), family = 'binomial', data = VA_CC)
 
 par(mfrow=c(1,1))
 
-plot_predictions <-function(model, data) {
+plot_predictions_floif_precip <-function(model, data) {
    
    newdata <- expand.grid(size = seq(-10, 45, 1),
                                     precip = c(1.226, 1.561, 2.13, 3.402),
                                     blockID = data$blockID)
    
-   newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE)
+   newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
    
    plot <- data %>% 
       ggplot(aes(x = size, y = flo.if, color = as.factor(precip))) +
       geom_jitter(height = 0.1) +
-      geom_line(aes(x = size, y = predicted, color = factor(precip)), data=newdata, size = 1, show.legend = TRUE) 
+      geom_line(aes(x = size, y = predicted, color = factor(precip)), data=newdata, size = 1, show.legend = TRUE) +
+      ggtitle(paste0("AIC =", AIC(model)))
    
 
    return(plot)
 }
 
-plot_predictions(model = mod1_VA_CC, data = VA_CC)
+plot_predictions_floif <-function(model, data) {
+   
+   newdata <- expand.grid(size = seq(-10, 45, 1),
+                          blockID = data$blockID)
+   
+   newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
+   
+   plot <- data %>% 
+      ggplot(aes(x = size, y = flo.if)) +
+      geom_jitter(height = 0.1) +
+      geom_line(aes(x = size, y = predicted), data=newdata, size = 1, show.legend = TRUE) +
+      ggtitle(paste0("AIC =", AIC(model)))
+   
+   
+   return(plot)
+}
 
-VA_CC %>% 
-   ggplot(aes(x = size, y = flo.if, color = as.factor(precip))) +
-   geom_jitter(height = 0.1) +
-   geom_line(predict(mod1_VA_CC, newdata = expand.grid(size = seq(-10, 45, 0.1),
-                                                      precip = c(1.226, 1.561, 2.13, 3.402),
-                                                      blockID = VA_CC$blockID),
-                     re.form = NULL, allow.new.levels=TRUE))
+plot_predictions_floif_precip(model = mod1_VA_CC, data = VA_CC)
+plot_predictions_floif(model = modif2_VA_CC, data = VA_CC)
 
    
 #    with(VA_CC, 
@@ -231,19 +278,67 @@ VA_CC %>%
 #        type = "l", col = "red")
 
 
-AIC(glm(flo.no~1, family = 'poisson', data = VA_CC))
-AIC(glm(flo.no~size, family = 'poisson', data = VA_CC))
-AIC(glm(flo.no~size+I(size^2), family = 'poisson', data = VA_CC))
-AIC(glm(flo.no~size+I(size^2)+I(size^3), family = 'poisson', data = VA_CC))
+AIC(glmer(flo.no ~ 1 + (1|blockID), family = 'poisson', data = VA_CC))
+AIC(glmer(flo.no ~ precip + (1|blockID), family = 'poisson', data = VA_CC))
+AIC(glmer(flo.no ~ as.factor(precip) + (1|blockID), family = 'poisson', data = VA_CC))
+AIC(glmer(flo.no ~ size + (1|blockID), family = 'poisson', data = VA_CC))
+AIC(glmer(flo.no ~ size + precip + (1|blockID), family = 'poisson', data = VA_CC))
+AIC(glmer(flo.no ~ size + as.factor(precip) + (1|blockID), family = 'poisson', data = VA_CC))
+AIC(glmer(flo.no ~ size + I(size^2) + (1|blockID), family = 'poisson', data = VA_CC))
+AIC(glmer(flo.no ~ size + I(size^2) + precip + (1|blockID), family = 'poisson', data = VA_CC))
+AIC(glmer(flo.no ~ size + I(size^2) + as.factor(precip) + (1|blockID), family = 'poisson', data = VA_CC))
+
+#AIC(glmer(flo.no~size+I(size^2)+I(size^3) + (1|BlockID), family = 'poisson', data = VA_CC))
+
 flowerNumberChosenModel_VA_CC <- flo.no ~ size  #Chosen based on biology by looking at the data
 
-mod2_VA_CC <- glm(flo.no~size, family = 'poisson', data = VA_CC)
+mod2_VA_CC <- glmer(flo.no ~ size + (1|blockID), family = 'poisson', data = VA_CC)
+mod3_VA_CC <- glmer(flo.no ~ size + precip + (1|blockID), family = 'poisson', data = VA_CC)
 
-with(VA_CC, 
-     plot(size, jitter(flo.no)))
-points(seq(-10, 45, 0.01),
-       predict(mod2_VA_CC, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
-       type = "l", col = "red")
+plot_predictions_flono_precip <-function(model, data) {
+   
+   newdata <- expand.grid(size = seq(-10, 45, 1),
+                          precip = c(1.226, 1.561, 2.13, 3.402),
+                          blockID = data$blockID)
+   
+   newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
+   
+   plot <- data %>% 
+      ggplot(aes(x = size, y = flo.no, color = as.factor(precip))) +
+      geom_jitter(height = 0.1) +
+      geom_line(aes(x = size, y = predicted, color = factor(precip)), data=newdata, size = 1, show.legend = TRUE) +
+      ggtitle(paste0("AIC =", AIC(model)))
+   
+   
+   return(plot)
+}
+
+plot_predictions_flono <-function(model, data) {
+   
+   newdata <- expand.grid(size = seq(-10, 45, 1),
+                          blockID = data$blockID)
+   
+   newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
+   
+   plot <- data %>% 
+      ggplot(aes(x = size, y = flo.no)) +
+      geom_jitter(height = 0.1) +
+      geom_line(aes(x = size, y = predicted), data=newdata, size = 1, show.legend = TRUE) +
+      ggtitle(paste0("AIC =", AIC(model)))
+   
+   
+   return(plot)
+}
+
+plot_predictions_flono(model = mod2_VA_CC, data = VA_CC)
+plot_predictions_flono_precip(model = mod3_VA_CC, data = VA_CC)
+
+
+# with(VA_CC, 
+#      plot(size, jitter(flo.no)))
+# points(seq(-10, 45, 0.01),
+#        predict(mod2_VA_CC, newdata = data.frame(size = seq(-10, 45, 0.01)), type = "response"),
+#        type = "l", col = "red")
 
 
 
