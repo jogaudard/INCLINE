@@ -69,7 +69,8 @@ plot_predictions_growth_precip <-function(model, data) {
       ggplot(aes(x = size, y = sizeNext, color = as.factor(precip))) +
       geom_jitter(height = 0.1) +
       geom_line(aes(x = size, y = predicted, color = factor(precip)), data=newdata, size = 1, show.legend = TRUE) +
-      ggtitle(paste0("AIC =", AIC(model)))
+      ggtitle(paste0("AIC =", AIC(model))) +
+      geom_abline()
    
    
    return(plot)
@@ -86,7 +87,8 @@ plot_predictions_growth <-function(model, data) {
       ggplot(aes(x = size, y = sizeNext)) +
       geom_jitter(height = 0.1) +
       geom_line(aes(x = size, y = predicted), data=newdata, size = 1, show.legend = TRUE) +
-      ggtitle(paste0("AIC =", AIC(model)))
+      ggtitle(paste0("AIC =", AIC(model))) +
+      geom_abline()
    
    
    return(plot)
