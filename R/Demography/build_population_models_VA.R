@@ -410,11 +410,11 @@ plot_surv_VA_CC | plot_growth_VA_CC
 
 go_VA_CC <- makeGrowthObj(VA_CC, "sizeNext ~ size")
 
-#Precipitation 1.2, 2.2 and 3.4 m/year
+#Precipitation 1.2, 2.3 and 3.4 m/year
 go_VA_CC_prec1 <- coerceGrowthObj(go_VA_CC, c(as.numeric(fixef(mod_growth_VA_CC)[1]) + 1.2*as.numeric(fixef(mod_growth_VA_CC)[3]) + (1.2)^2* as.numeric(fixef(mod_growth_VA_CC)[4]),
                                               as.numeric(fixef(mod_growth_VA_CC)[2])),
                                   sigma.hat(mod_growth_VA_CC)$sigma$data)
-go_VA_CC_prec2 <- coerceGrowthObj(go_VA_CC, c(as.numeric(fixef(mod_growth_VA_CC)[1]) + 2.2*as.numeric(fixef(mod_growth_VA_CC)[3]) + (2.2)^2* as.numeric(fixef(mod_growth_VA_CC)[4]),
+go_VA_CC_prec2 <- coerceGrowthObj(go_VA_CC, c(as.numeric(fixef(mod_growth_VA_CC)[1]) + 2.3*as.numeric(fixef(mod_growth_VA_CC)[3]) + (2.3)^2* as.numeric(fixef(mod_growth_VA_CC)[4]),
                                               as.numeric(fixef(mod_growth_VA_CC)[2])),
                                   sigma.hat(mod_growth_VA_CC)$sigma$data)
 go_VA_CC_prec3 <- coerceGrowthObj(go_VA_CC, c(as.numeric(fixef(mod_growth_VA_CC)[1]) + 3.4*as.numeric(fixef(mod_growth_VA_CC)[3]) + (3.4)^2* as.numeric(fixef(mod_growth_VA_CC)[4]),
@@ -543,7 +543,7 @@ fo_VA_CC@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_VA_CC)[1]) + 
 fo_VA_CC@fitFec[[2]]$coefficients <- as.numeric(fixef(mod_flo_no_VA_CC))
 fo_VA_CC_prec1 <- fo_VA_CC
 
-fo_VA_CC@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_VA_CC)[1]) + 2.2*as.numeric(fixef(mod_flo_if_VA_CC)[3]) + (2.2)^2* as.numeric(fixef(mod_flo_if_VA_CC)[4]),
+fo_VA_CC@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_VA_CC)[1]) + 2.3*as.numeric(fixef(mod_flo_if_VA_CC)[3]) + (2.3)^2* as.numeric(fixef(mod_flo_if_VA_CC)[4]),
                                        as.numeric(fixef(mod_flo_if_VA_CC)[2]))
 fo_VA_CC@fitFec[[2]]$coefficients <- as.numeric(fixef(mod_flo_no_VA_CC))
 fo_VA_CC_prec2 <- fo_VA_CC
