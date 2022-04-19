@@ -14,6 +14,7 @@ library(lmerTest)
 library(IPMpack)
 library(fields)
 library(conflicted)
+library(patchwork)
 
 #### Select preferences for conflicts ####
 
@@ -61,6 +62,7 @@ plot_predictions_growth_precip <-function(model, data) {
    
    newdata <- expand.grid(size = seq(-10, 45, 1),
                           precip = c(1.226, 1.561, 2.13, 3.402),
+                          transition = c("2018-2019", "2019-2020", "2020-2021"),
                           blockID = data$blockID)
    
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
@@ -290,40 +292,45 @@ x11()
 par(mfrow=c(1,1))
 survModelComp(dataf= VA_CC, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
 
-AIC(glmer(surv ~ 1 + (1|blockID), family = 'binomial', data = VA_CC))
-AIC(glmer(surv ~ precip + (1|blockID), family = 'binomial', data = VA_CC))
-AIC(glmer(surv ~ as.factor(precip) + (1|blockID), family = 'binomial', data = VA_CC))
-AIC(glmer(surv ~ size + precip + (1|blockID), family = 'binomial', data = VA_CC))
-AIC(glmer(surv ~ size + as.factor(precip) + (1|blockID), family = 'binomial', data = VA_CC))
-AIC(glmer(surv ~ size +  (1|blockID), family = 'binomial', data = VA_CC))
-AIC(glmer(surv ~ size+I(size^2) + precip + (1|blockID), family = 'binomial', data = VA_CC))
-AIC(glmer(surv ~ size+I(size^2) + as.factor(precip) + (1|blockID), family = 'binomial', data = VA_CC))
-AIC(glmer(surv ~ size+I(size^2) + (1|blockID), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ 1 + (1|blockID)  + (1|transition), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ precip + (1|blockID)  + (1|transition), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ as.factor(precip) + (1|blockID) + (1|transition), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ size + precip + (1|blockID) + (1|transition), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ size + as.factor(precip) + (1|blockID)  + (1|transition), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ size +  (1|blockID) + (1|transition), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ size+I(size^2) + precip + (1|blockID) + (1|transition), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ size+I(size^2) + as.factor(precip) + (1|blockID) + (1|transition), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ size+I(size^2) + (1|blockID) + (1|transition), family = 'binomial', data = VA_CC))
 
 mod_surv_VA_CC <- glmer(surv ~ size  + (1|blockID), family = 'binomial', data = VA_CC)
-mod2_surv_VA_CC <- glmer(surv ~ size + precip + (1|blockID), family = 'binomial', data = VA_CC)
+mod2_surv_VA_CC <- glmer(surv ~ size+I(size^2) + (1|blockID), family = 'binomial', data = VA_CC)
 
-plot_predictions_surv(model = mod_surv_VA_CC, data = VA_CC)
-plot_predictions_surv_precip(model = mod2_surv_VA_CC, data = VA_CC)
+plot_surv_VA_CC <- plot_predictions_surv(model = mod_surv_VA_CC, data = VA_CC)
+p2 <- plot_predictions_surv(model = mod2_surv_VA_CC, data = VA_CC)
 
-so_VA_CC <- makeSurvObj(VA_CC, surv ~ size) #Choose the size model because that makes sense biologically
+plot_surv_VA_CC | p2
+
+so_VA_CC <- makeSurvObj(VA_CC, "surv ~ size") #Choose the size model because that makes sense biologically
 
 # We next model growth, conditional on survival. Here, ’growth’ is the process relating size in year t+1 to size in year t. We use the following code to illustrate it in a figure:
 growthModelComp(dataf=VA_CC, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
 
-AIC(lmer(sizeNext ~ 1 + (1|blockID), data = VA_CC))
-AIC(lmer(sizeNext ~ precip + (1|blockID), data = VA_CC))
-AIC(lmer(sizeNext ~ as.factor(precip) + (1|blockID), data = VA_CC))
-AIC(lmer(sizeNext ~ size + precip + (1|blockID), data = VA_CC))
-AIC(lmer(sizeNext ~ size + as.factor(precip) + (1|blockID), data = VA_CC))
-AIC(lmer(sizeNext ~ size +  (1|blockID), data = VA_CC))
-AIC(lmer(sizeNext ~ size+I(size^2) + precip + (1|blockID), data = VA_CC))
-AIC(lmer(sizeNext ~ size+I(size^2) + as.factor(precip) + (1|blockID), data = VA_CC))
-AIC(lmer(sizeNext ~ size+I(size^2) + (1|blockID), data = VA_CC))
+AIC(lmer(sizeNext ~ 1 + (1|blockID) + (1|transition), data = VA_CC))
+AIC(lmer(sizeNext ~ precip + (1|blockID) + (1|transition), data = VA_CC))
+AIC(lmer(sizeNext ~ as.factor(precip) + (1|blockID) + (1|transition), data = VA_CC))
+AIC(lmer(sizeNext ~ size + precip + (1|blockID) + (1|transition), data = VA_CC))
+AIC(lmer(sizeNext ~ size + as.factor(precip) + (1|blockID) + (1|transition), data = VA_CC))
+AIC(lmer(sizeNext ~ size +  (1|blockID) + (1|transition), data = VA_CC))
+AIC(lmer(sizeNext ~ size+I(size^2) + precip + (1|blockID) + (1|transition), data = VA_CC))
+AIC(lmer(sizeNext ~ size+I(size^2) + as.factor(precip) + (1|blockID) + (1|transition), data = VA_CC))
+AIC(lmer(sizeNext ~ size+I(size^2) + (1|blockID) + (1|transition), data = VA_CC))
 
-mod_growth_VA_CC <- lmer(sizeNext ~ size+I(size^2) + precip + (1|blockID), data = VA_CC)
+mod_growth_VA_CC <- lmer(sizeNext ~ size + as.factor(precip) + (1|blockID) + (1|transition), data = VA_CC)
+summary(mod_growth_VA_CC)
 
-plot_predictions_growth_precip(model = mod_growth_VA_CC, data = VA_CC)
+plot_growth_VA_CC <- plot_predictions_growth_precip(model = mod_growth_VA_CC, data = VA_CC)
+
+plot_surv_VA_CC | plot_growth_VA_CC
 
 
 go_VA_CC <- makeGrowthObj(VA_CC, sizeNext ~ size) #Choose this model because of AIC and biology
@@ -346,7 +353,7 @@ dto_VA_CC <- makeDiscreteTrans(VA_CC, discreteTrans = matrix(
 # With these survival and growth objects in hand, we build a survival/growth (P) matrix.
 Pmatrix_VA_CC <- makeIPMPmatrix(survObj=so_VA_CC, growObj=go_VA_CC, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_CC, correction = "constant", nBigMatrix = 100)
 
-# We plot this P-matrix using the ’image.plot’ function of the fields package:
+# We plot this P-matrix 
 x11()
 par(mfrow=c(1,1))
 contourPlot2(t(Pmatrix_VA_CC), Pmatrix_VA_CC@meshpoints, maxSize, 0.03, 0, title = "Pmatrix: survival and growth") 
