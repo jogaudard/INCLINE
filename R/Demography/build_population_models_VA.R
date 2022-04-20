@@ -1124,30 +1124,29 @@ mod_flo_if_VA_CE <- glmer(flo.if ~ size+I(size^2) + (1|blockID), family = 'binom
 plot_VA_CE_floif <- plot_predictions_floif(model = mod_flo_if_VA_CE, data = VA_CE)
 plot_VA_CE_floif
 
-#### HERE ####
-
 # Choosing the best model for estimating the number of flowers, if an individual flowers
-#Using a linear model because of singularity fit with all different combinations of random effects. I have tried block_trans, site_trans, blockID + transition, siteID + transition, transition, siteID, blockID.
-summary(glm(flo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = VA_CN))
-AIC(glm(flo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = VA_CN))
-summary(glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CN))
-AIC(glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CN)) #Choosing this model because of AIC
-summary(glm(flo.no ~ size + precip, family = 'poisson', data = VA_CN))
-AIC(glm(flo.no ~ size + precip, family = 'poisson', data = VA_CN))
-summary(glm(flo.no ~ size, family = 'poisson', data = VA_CN))
-AIC(glm(flo.no ~ size , family = 'poisson', data = VA_CN))
-summary(glm(flo.no ~ 1, family = 'poisson', data = VA_CN))
-AIC(glm(flo.no ~ 1, family = 'poisson', data = VA_CN))
+#Using only blockID as random effect because of singularity fit with other higher prioritized random effects. I have tried block_trans, site_trans, blockID + transition, siteID + transition, transition, siteID, blockID. 
+summary(glmer(flo.no ~ size+I(size^2) + precip+I(precip^2) + (1|blockID), family = 'poisson', data = VA_CE))
+AIC(glmer(flo.no ~ size+I(size^2) + precip+I(precip^2) + (1|blockID), family = 'poisson', data = VA_CE))
+summary(glmer(flo.no ~ size + precip+I(precip^2) + (1|blockID), family = 'poisson', data = VA_CE))
+AIC(glmer(flo.no ~ size + precip+I(precip^2) + (1|blockID), family = 'poisson', data = VA_CE))
+summary(glmer(flo.no ~ size + precip + (1|blockID), family = 'poisson', data = VA_CE))
+AIC(glmer(flo.no ~ size + precip + (1|blockID), family = 'poisson', data = VA_CE))
+summary(glmer(flo.no ~ size  + (1|blockID), family = 'poisson', data = VA_CE)) #Choosing this model based of AIC
+AIC(glmer(flo.no ~ size + (1|blockID), family = 'poisson', data = VA_CE))
+summary(glmer(flo.no ~ 1  + (1|blockID), family = 'poisson', data = VA_CE))
+AIC(glmer(flo.no ~ 1 + (1|blockID), family = 'poisson', data = VA_CE))
 
-flowerNumberChosenModel_VA_CN <- flo.no ~ size
-mod_flo_no_VA_CN <- glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CN)
 
-plot_flo_no_VA_CN <-plot_predictions_flono_precip(model = mod_flo_no_VA_CN, data = VA_CN) 
-plot_flo_no_VA_CN
+flowerNumberChosenModel_VA_CE <- flo.no ~ size
+mod_flo_no_VA_CE <- glmer(flo.no ~ size  + (1|blockID), family = 'poisson', data = VA_CE)
+
+plot_flo_no_VA_CE <-plot_predictions_flono(model = mod_flo_no_VA_CE, data = VA_CE) 
+plot_flo_no_VA_CE
 
 # Make fecundity object
-fo_VA_CN <-makeFecObj(VA_CN, 
-                      Formula= c(floweringChosenModel_VA_CN, flowerNumberChosenModel_VA_CN),
+fo_VA_CE <-makeFecObj(VA_CE, 
+                      Formula= c(floweringChosenModel_VA_CE, flowerNumberChosenModel_VA_CE),
                       Family = c("binomial", "poisson"),
                       fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_VA_null,
                                                 seedlingEstablishmentRate = seedling_est_VA_C_Veg), 
@@ -1158,36 +1157,14 @@ fo_VA_CN <-makeFecObj(VA_CN,
                                                               row.names=c("flo.if","flo.no","seedsPerCap","seedlingEstablishmentRate")))
 
 #Replace with coefficients form mixed effects models and make different ones for three precipitation levels
-fo_VA_CN@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_VA_CN)[1]) + 1.2*as.numeric(fixef(mod_flo_if_VA_CN)[4]) + (1.2)^2* as.numeric(fixef(mod_flo_if_VA_CN)[5]),
-                                       as.numeric(fixef(mod_flo_if_VA_CN)[2]),
-                                       as.numeric(fixef(mod_flo_if_VA_CN)[3]))
-fo_VA_CN@fitFec[[2]]$coefficients <- c(as.numeric(coef(mod_flo_no_VA_CN)[1]) + 1.2*as.numeric(coef(mod_flo_no_VA_CN)[3]) + (1.2)^2* as.numeric(coef(mod_flo_no_VA_CN)[4]),
-                                       as.numeric(coef(mod_flo_no_VA_CN)[2]))
-fo_VA_CN_precip1 <- fo_VA_CN
-
-fo_VA_CN@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_VA_CN)[1]) + 2.3*as.numeric(fixef(mod_flo_if_VA_CN)[4]) + (2.3)^2* as.numeric(fixef(mod_flo_if_VA_CN)[5]),
-                                       as.numeric(fixef(mod_flo_if_VA_CN)[2]),
-                                       as.numeric(fixef(mod_flo_if_VA_CN)[3]))
-fo_VA_CN@fitFec[[2]]$coefficients <- c(as.numeric(coef(mod_flo_no_VA_CN)[1]) + 2.3*as.numeric(coef(mod_flo_no_VA_CN)[3]) + (2.3)^2* as.numeric(coef(mod_flo_no_VA_CN)[4]),
-                                       as.numeric(coef(mod_flo_no_VA_CN)[2]))
-fo_VA_CN_precip2 <- fo_VA_CN
-
-fo_VA_CN@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_VA_CN)[1]) + 3.4*as.numeric(fixef(mod_flo_if_VA_CN)[4]) + (3.4)^2* as.numeric(fixef(mod_flo_if_VA_CN)[5]),
-                                       as.numeric(fixef(mod_flo_if_VA_CN)[2]),
-                                       as.numeric(fixef(mod_flo_if_VA_CN)[3]))
-fo_VA_CN@fitFec[[2]]$coefficients <- c(as.numeric(coef(mod_flo_no_VA_CN)[1]) + 3.4*as.numeric(coef(mod_flo_no_VA_CN)[3]) + (3.4)^2* as.numeric(coef(mod_flo_no_VA_CN)[4]),
-                                       as.numeric(coef(mod_flo_no_VA_CN)[2]))
-fo_VA_CN_precip3 <- fo_VA_CN
+fo_VA_CE@fitFec[[1]]$coefficients <- as.numeric(fixef(mod_flo_if_VA_CE))
+fo_VA_CE@fitFec[[2]]$coefficients <- as.numeric(fixef(mod_flo_no_VA_CE))
 
 #Make F matrix
-Fmatrix_VA_CN_precip1 <- makeIPMFmatrix(fecObj=fo_VA_CN_precip1, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
-Fmatrix_VA_CN_precip2 <- makeIPMFmatrix(fecObj=fo_VA_CN_precip2, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
-Fmatrix_VA_CN_precip3 <- makeIPMFmatrix(fecObj=fo_VA_CN_precip3, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
+Fmatrix_VA_CE <- makeIPMFmatrix(fecObj=fo_VA_CE, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
 
 # plotting the F matrix
-contourPlot2(t(Fmatrix_VA_CN_precip1), Fmatrix_VA_CN_precip1@meshpoints, maxSize, 0.03, 0, title = "Fmatrix: flower and seedlings") 
-contourPlot2(t(Fmatrix_VA_CN_precip2), Fmatrix_VA_CN_precip2@meshpoints, maxSize, 0.03, 0, title = "Fmatrix: flower and seedlings") 
-contourPlot2(t(Fmatrix_VA_CN_precip3), Fmatrix_VA_CN_precip3@meshpoints, maxSize, 0.03, 0, title = "Fmatrix: flower and seedlings") 
+contourPlot2(t(Fmatrix_VA_CE), Fmatrix_VA_CE@meshpoints, maxSize, 0.03, 0, title = "Fmatrix: flower and seedlings") 
 
 #### C matrix ####
 
