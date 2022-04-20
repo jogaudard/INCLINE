@@ -1354,38 +1354,6 @@ contourPlot2(t(IPM_VA_CN_precip1), Pmatrix_VA_CN_precip1@meshpoints, maxSize, 0.
 contourPlot2(t(IPM_VA_CN_precip2), Pmatrix_VA_CN_precip2@meshpoints, maxSize, 0.03, 0, title = "Veronica alpina - CN - 2.3 m/year")
 contourPlot2(t(IPM_VA_CN_precip3), Pmatrix_VA_CN_precip3@meshpoints, maxSize, 0.03, 0, title = "Veronica alpina - CN - 3.4 m/year")
 
-# The first step in constructing an IPM with IPMpack is a survival analysis. We use the function ‘survModelComp’ to explore whether survival is related to size, as illustrated in this figure:
-x11()
-par(mfrow=c(1,1))
-survModelComp(dataf= VA_CN, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
-
-# Based on this simple analysis we select the following survival model since it has the lowest AIC value:
-so_CN <- makeSurvObj(VA_CN, surv ~ 1)
-
-# We next model growth, conditional on survival. Here, ’growth’ is the process relating size in year t+1 to size in year t. We use the following code to illustrate it in a figure:
-growthModelComp(dataf=VA_CN, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
-
-# Based on this simple model comparison, we select the following growth model:
-go_CN <- makeGrowthObj(VA_CN, sizeNext ~ size + size2)
-
-# With these survival and growth objects in hand, we build a survival/growth (P) matrix.
-Pmatrix_CN <- makeIPMPmatrix(survObj=so_CN, growObj=go_CN, minSize=minSize, maxSize=maxSize)
-
-# We plot this P-matrix using the ’image.plot’ function of the fields package:
-
-image.plot(Pmatrix_CN@meshpoints,
-           Pmatrix_CN@meshpoints,
-           t(Pmatrix_CN),
-           main = "Pmatrix: survival and growth",
-           xlab = "Size at t",
-           ylab = "Size at t+1")
-abline(0,1,lty=2,lwd=3)
-
-diagnosticsPmatrix(Pmatrix_CN, growObj=go_CN, survObj=so_CN, correction="constant") 
-
-#Bindwidth looks ok, range size could maybe be fixed
-
-
 #### Warming control ####
 
 #### P matrix ####
