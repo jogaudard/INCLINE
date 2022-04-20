@@ -1168,7 +1168,7 @@ contourPlot2(t(Fmatrix_VA_CE), Fmatrix_VA_CE@meshpoints, maxSize, 0.03, 0, title
 
 #### C matrix ####
 
-VA_CN_clones <- VA_CN %>% 
+VA_CE_clones <- VA_CE %>% 
    filter(offspringNext == "clonal") %>% 
    mutate(number_orphans = case_when(is.na(size) ~ 1,
                                      !is.na(size) ~0)) %>% 
@@ -1178,110 +1178,94 @@ VA_CN_clones <- VA_CN %>%
    mutate(prop_orphan = total_num_orphan/total_num_clones)
 
 #Is the production of clones size dependent
-#Using a linear model because of singularity fit with all different combinations of random effects. I have tried block_trans, site_trans, blockID + transition, siteID + transition, transition, siteID, blockID.
-summary(glm(clo.if ~ size+I(size^2) + precip+I(precip^2), family = 'binomial', data = VA_CN))
-AIC(glm(clo.if ~ size+I(size^2) + precip+I(precip^2), family = 'binomial', data = VA_CN))
-summary(glm(clo.if ~ size+I(size^2) + precip, family = 'binomial', data = VA_CN))
-AIC(glm(clo.if ~ size+I(size^2) + precip, family = 'binomial', data = VA_CN))
-summary(glm(clo.if ~ size+I(size^2) , family = 'binomial', data = VA_CN)) #choosing this model based of AIC
-AIC(glm(clo.if ~ size+I(size^2), family = 'binomial', data = VA_CN))
-summary(glm(clo.if ~ size , family = 'binomial', data = VA_CN))
-AIC(glm(clo.if ~ size, family = 'binomial', data = VA_CN))
-summary(glm(clo.if ~ 1 , family = 'binomial', data = VA_CN))
-AIC(glm(clo.if ~ 1, family = 'binomial', data = VA_CN))
+#Using only transition as random effect because of singularity fit with other higher prioritized random effects. I have tried block_trans, site_trans, blockID + transition, siteID + transition, transition, siteID, blockID. Only transition came back without singularity
+summary(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|transition), family = 'binomial', data = VA_CE))
+AIC(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|transition), family = 'binomial', data = VA_CE))
+summary(glmer(clo.if ~ size+I(size^2) + precip + (1|transition), family = 'binomial', data = VA_CE))
+AIC(glmer(clo.if ~ size+I(size^2) + precip + (1|transition), family = 'binomial', data = VA_CE))
+summary(glmer(clo.if ~ size+I(size^2) + (1|transition), family = 'binomial', data = VA_CE)) #Choosing this model based of AIC
+AIC(glmer(clo.if ~ size+I(size^2) + (1|transition), family = 'binomial', data = VA_CE))
+summary(glmer(clo.if ~ size + (1|transition), family = 'binomial', data = VA_CE))
+AIC(glmer(clo.if ~ size + (1|transition), family = 'binomial', data = VA_CE))
+summary(glmer(clo.if ~ 1 + (1|transition), family = 'binomial', data = VA_CE))
+AIC(glmer(clo.if ~ 1 + (1|transition), family = 'binomial', data = VA_CE))
 
 #Chosen model
-mod_clo_VA_CN <- glm(clo.if ~ size+I(size^2) , family = 'binomial', data = VA_CN)
-CloneChosenModel_VA_CN <- clo.if ~ size + size2 
+mod_clo_VA_CE <- glmer(clo.if ~ size+I(size^2) + (1|transition), family = 'binomial', data = VA_CE)
+CloneChosenModel_VA_CE <- clo.if ~ size + size2 
 
 #Plot for visual checking
-plot_clo_if_VA_CN <- plot_predictions_cloif(model = mod_clo_VA_CN, data = VA_CN)
-plot_clo_if_VA_CN
+plot_clo_if_VA_CE <- plot_predictions_cloif(model = mod_clo_VA_CE, data = VA_CE)
+plot_clo_if_VA_CE
 
 #If you produce clones, does how many clones you make change with size of the mother 
 #Using a linear model because of singularity fit with all different combinations of random effects. I have tried block_trans, site_trans, blockID + transition, siteID + transition, transition, siteID, blockID.
-summary(glm(clo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = VA_CN))
-AIC(glm(clo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = VA_CN))
-summary(glm(clo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CN))
-AIC(glm(clo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CN))
-summary(glm(clo.no ~ size + precip, family = 'poisson', data = VA_CN))
-AIC(glm(clo.no ~ size + precip, family = 'poisson', data = VA_CN))
-summary(glm(clo.no ~ size, family = 'poisson', data = VA_CN))
-AIC(glm(clo.no ~ size, family = 'poisson', data = VA_CN))
-summary(glm(clo.no ~ 1, family = 'poisson', data = VA_CN)) #Choosing this model based of AIC
-AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_CN))
+summary(glm(clo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = VA_CE))
+AIC(glm(clo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = VA_CE))
+summary(glm(clo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CE))
+AIC(glm(clo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CE))
+summary(glm(clo.no ~ size + precip, family = 'poisson', data = VA_CE))
+AIC(glm(clo.no ~ size + precip, family = 'poisson', data = VA_CE))
+summary(glm(clo.no ~ size, family = 'poisson', data = VA_CE))
+AIC(glm(clo.no ~ size, family = 'poisson', data = VA_CE))
+summary(glm(clo.no ~ 1, family = 'poisson', data = VA_CE)) #Choosing this model based of AIC
+AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_CE))
 
-mod_clo_no_VA_CN <- glm(clo.no ~ 1, family = 'poisson', data = VA_CN)
-CloneNumberChosenModel_VA_CN <- clo.no ~ 1
+mod_clo_no_VA_CE <- glm(clo.no ~ 1, family = 'poisson', data = VA_CE)
+CloneNumberChosenModel_VA_CE <- clo.no ~ 1
 
-plot_clo_no_VA_CN <- plot_predictions_clono(model = mod_clo_no_VA_CN, data = VA_CN)
-plot_clo_no_VA_CN
+plot_clo_no_VA_CE <- plot_predictions_clono(model = mod_clo_no_VA_CE, data = VA_CE)
+plot_clo_no_VA_CE
 
 #Does size of the clone depend on size of parent.
-#Using a linear model because of singularity fit with all different combinations of random effects. I have tried block_trans, site_trans, blockID + transition, siteID + transition, transition, siteID, blockID.
-summary(lm(sizeNext ~ size+I(size^2) + precip+I(precip^2), data = VA_CN_clones))
-AIC(lm(sizeNext ~ size+I(size^2) + precip+I(precip^2), data = VA_CN_clones))
-summary(lm(sizeNext ~ size + precip+I(precip^2), data = VA_CN_clones))
-AIC(lm(sizeNext ~ size + precip+I(precip^2), data = VA_CN_clones))
-summary(lm(sizeNext ~ size + precip, data = VA_CN_clones)) # choosing this model base of AIC
-AIC(lm(sizeNext ~ size + precip, data = VA_CN_clones))
-summary(lm(sizeNext ~ size, data = VA_CN_clones))
-AIC(lm(sizeNext ~ size, data = VA_CN_clones))
-summary(lm(sizeNext ~ 1, data = VA_CN_clones))
-AIC(lm(sizeNext ~ 1, data = VA_CN_clones))
+summary(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = VA_CE_clones))
+AIC(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = VA_CE_clones))
+summary(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = VA_CE_clones))
+AIC(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = VA_CE_clones))
+summary(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = VA_CE_clones))
+AIC(lmer(sizeNext ~ size+I(size^2)+ (1|block_trans), data = VA_CE_clones))
+summary(lmer(sizeNext ~ size + (1|block_trans), data = VA_CE_clones)) #choosing this model based of AIC
+AIC(lmer(sizeNext ~ size + (1|block_trans), data = VA_CE_clones)) 
+summary(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_CE_clones))
+AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_CE_clones))
 
+mod_clone_growth_VA_CE <- lmer(sizeNext ~ size + (1|block_trans), data = VA_CE_clones)
+CloneSizeVariable_VA_CE <- "size"
 
-mod_clone_growth_VA_CN <- lm(sizeNext ~ size + precip, data = VA_CN_clones)
-CloneSizeVariable_VA_CN <- "size"
-
-plot_clone_growth_VA_CN <- plot_predictions_growth_precip(model = mod_clone_growth_VA_CN, data = VA_CN_clones)
-plot_clone_growth_VA_CN
+plot_clone_growth_VA_CE <- plot_predictions_growth(model = mod_clone_growth_VA_CE, data = VA_CE_clones)
+plot_clone_growth_VA_CE
 
 #Make clonal object
-co_VA_CN <- makeClonalObj(VA_CN, fecConstants=data.frame(correctionForOrphans= 1/(1-VA_CN_clones$prop_orphan[1])),
-                          offspringSizeExplanatoryVariables = CloneSizeVariable_VA_CN, Formula = c(CloneChosenModel_VA_CN, CloneNumberChosenModel_VA_CN),
+co_VA_CE <- makeClonalObj(VA_CE, fecConstants=data.frame(correctionForOrphans= 1/(1-VA_CE_clones$prop_orphan[1])),
+                          offspringSizeExplanatoryVariables = CloneSizeVariable_VA_CE, Formula = c(CloneChosenModel_VA_CE, CloneNumberChosenModel_VA_CE),
                           Family = c("binomial","poisson"), Transform=c("none","none"),offspringSplitter=data.frame(seedbank=0,continuous=1))
 
 
-co_VA_CN@fitFec[[1]]$coefficients <- as.numeric(coef(mod_clo_VA_CN))#not needed as this is a linear model
-co_VA_CN@fitFec[[2]]$coefficients <- as.numeric(coef(mod_clo_no_VA_CN)) #not needed as this is a linear model
-co_VA_CN@sdOffspringSize <- sigma.hat(mod_clone_growth_VA_CN)$sigma$data
-co_VA_CN@offspringRel$coefficients <- c(as.numeric(coef(mod_clone_growth_VA_CN)[1]) + 1.2*as.numeric(coef(mod_clone_growth_VA_CN)[3]),
-                                        as.numeric(coef(mod_clone_growth_VA_CN)[2]))
-co_VA_CN_precip1 <- co_VA_CN
-
-co_VA_CN@offspringRel$coefficients <- c(as.numeric(coef(mod_clone_growth_VA_CN)[1]) + 2.3*as.numeric(coef(mod_clone_growth_VA_CN)[3]),
-                                        as.numeric(coef(mod_clone_growth_VA_CN)[2]))
-co_VA_CN_precip2 <- co_VA_CN
-
-co_VA_CN@offspringRel$coefficients <- c(as.numeric(coef(mod_clone_growth_VA_CN)[1]) + 3.4*as.numeric(coef(mod_clone_growth_VA_CN)[3]),
-                                        as.numeric(coef(mod_clone_growth_VA_CN)[2]))
-co_VA_CN_precip3 <- co_VA_CN
+co_VA_CE@fitFec[[1]]$coefficients <- as.numeric(fixef(mod_clo_VA_CE))
+co_VA_CE@fitFec[[2]]$coefficients <- as.numeric(coef(mod_clo_no_VA_CE)) #not needed as this is a linear model
+co_VA_CE@sdOffspringSize <- sigma.hat(mod_clone_growth_VA_CE)$sigma$data
+co_VA_CE@offspringRel$coefficients <- as.numeric(fixef(mod_clone_growth_VA_CE))
 
 
-Cmatrix_VA_CN_precip1 <- makeIPMCmatrix(clonalObj = co_VA_CN_precip1, minSize=minSize, maxSize=maxSize, nBigMatrix = 100, correction = "constant")
-Cmatrix_VA_CN_precip2 <- makeIPMCmatrix(clonalObj = co_VA_CN_precip2, minSize=minSize, maxSize=maxSize, nBigMatrix = 100, correction = "constant")
-Cmatrix_VA_CN_precip3 <- makeIPMCmatrix(clonalObj = co_VA_CN_precip3, minSize=minSize, maxSize=maxSize, nBigMatrix = 100, correction = "constant")
+Cmatrix_VA_CE <- makeIPMCmatrix(clonalObj = co_VA_CE, minSize=minSize, maxSize=maxSize, nBigMatrix = 100, correction = "constant")
 
-contourPlot2(t(Cmatrix_VA_CN_precip1), Cmatrix_VA_CN_precip1@meshpoints, maxSize, 0.03, 0, title = "Cmatrix: clones") 
-contourPlot2(t(Cmatrix_VA_CN_precip2), Cmatrix_VA_CN_precip2@meshpoints, maxSize, 0.03, 0, title = "Cmatrix: clones") 
-contourPlot2(t(Cmatrix_VA_CN_precip3), Cmatrix_VA_CN_precip3@meshpoints, maxSize, 0.03, 0, title = "Cmatrix: clones") 
+contourPlot2(t(Cmatrix_VA_CE), Cmatrix_VA_CN_precip1@meshpoints, maxSize, 0.03, 0, title = "Cmatrix: clones") 
 
 
 #### Build IPM ####
-IPM_VA_CN_precip1 <- Pmatrix_VA_CN_precip1 + Fmatrix_VA_CN_precip1 + Cmatrix_VA_CN_precip1
-as.numeric(eigen(IPM_VA_CN_precip1)$value[1])
+IPM_VA_CE_precip1 <- Pmatrix_VA_CE_precip1 + Fmatrix_VA_CE + Cmatrix_VA_CE
+as.numeric(eigen(IPM_VA_CE_precip1)$value[1])
 
-IPM_VA_CN_precip2 <- Pmatrix_VA_CN_precip2 + Fmatrix_VA_CN_precip2 + Cmatrix_VA_CN_precip2
-as.numeric(eigen(IPM_VA_CN_precip2)$value[1])
+IPM_VA_CE_precip2 <- Pmatrix_VA_CE_precip2 + Fmatrix_VA_CE + Cmatrix_VA_CE
+as.numeric(eigen(IPM_VA_CE_precip2)$value[1])
 
-IPM_VA_CN_precip3 <- Pmatrix_VA_CN_precip3 + Fmatrix_VA_CN_precip3 + Cmatrix_VA_CN_precip3
-as.numeric(eigen(IPM_VA_CN_precip3)$value[1])
+IPM_VA_CE_precip3 <- Pmatrix_VA_CE_precip3 + Fmatrix_VA_CE + Cmatrix_VA_CE
+as.numeric(eigen(IPM_VA_CE_precip3)$value[1])
 
 x11()
-contourPlot2(t(IPM_VA_CN_precip1), Pmatrix_VA_CN_precip1@meshpoints, maxSize, 0.03, 0, title = "Veronica alpina - CN - 1.2 m/year")
-contourPlot2(t(IPM_VA_CN_precip2), Pmatrix_VA_CN_precip2@meshpoints, maxSize, 0.03, 0, title = "Veronica alpina - CN - 2.3 m/year")
-contourPlot2(t(IPM_VA_CN_precip3), Pmatrix_VA_CN_precip3@meshpoints, maxSize, 0.03, 0, title = "Veronica alpina - CN - 3.4 m/year")
+contourPlot2(t(IPM_VA_CE_precip1), Pmatrix_VA_CE_precip1@meshpoints, maxSize, 0.03, 0, title = "Veronica alpina - CE - 1.2 m/year")
+contourPlot2(t(IPM_VA_CE_precip2), Pmatrix_VA_CE_precip2@meshpoints, maxSize, 0.03, 0, title = "Veronica alpina - CE - 2.3 m/year")
+contourPlot2(t(IPM_VA_CE_precip3), Pmatrix_VA_CE_precip3@meshpoints, maxSize, 0.03, 0, title = "Veronica alpina - CE - 3.4 m/year")
 
 
 ##### Ambient temperature novel #####
@@ -1863,6 +1847,8 @@ x11()
 contourPlot2(t(IPM_VA_WC_precip1), Pmatrix_VA_WC@meshpoints, maxSize, 0.03, 0, title = "Veronica alpina - WC - 1.2 m/year")
 contourPlot2(t(IPM_VA_WC_precip2), Pmatrix_VA_WC@meshpoints, maxSize, 0.03, 0, title = "Veronica alpina - WC - 2.3 m/year")
 contourPlot2(t(IPM_VA_WC_precip3), Pmatrix_VA_WC@meshpoints, maxSize, 0.03, 0, title = "Veronica alpina - WC - 3.4 m/year")
+
+#### HERE ####
 
 #### Warming and removal ####
 
