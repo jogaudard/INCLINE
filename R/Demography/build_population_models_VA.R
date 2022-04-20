@@ -1554,7 +1554,7 @@ AIC(glmer(clo.if ~ 1 + (1|site_trans), family = 'binomial', data = VA_WC))
 
 #Chosen model
 mod_clo_VA_WC <- glmer(clo.if ~ size+I(size^2) + (1|site_trans), family = 'binomial', data = VA_WC)
-CloneChosenModel_VA_WC <- flo.if ~ size + size2 
+CloneChosenModel_VA_WC <- clo.if ~ size + size2 
 
 #Plot for visual checking
 plot_clo_if_VA_WC <- plot_predictions_cloif(model = mod_clo_VA_WC, data = VA_WC)
