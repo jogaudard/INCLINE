@@ -13,6 +13,8 @@ sum(Contributions_fec)
 
 contourPlot2(t(Contributions_fec), c(1:dim(Difference_fec)[1]), maxSize, 0, -0.0005, title = "LTRE fecundity Veronica alpina CC precip 1:precip2")
 
+contourPlot2(t(sens(IPM_VA_CC_precip2)), c(1:dim(sens(IPM_VA_CC_precip2))[1]), maxSize, 0.03, 0, title = "Sensitivity Veronica alpina CC")
+
 #Calculating difference in clonality
 Difference_clone <- Cmatrix_VA_CC_prec2 - Cmatrix_CC_prec1
 Contributions_clone = Difference_clone*SBaseIPM
