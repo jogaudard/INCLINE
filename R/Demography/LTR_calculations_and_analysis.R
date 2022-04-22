@@ -2,283 +2,743 @@
 library(reshape2)
 
 ###Making general function for calculating LTREs
-LTRE_calcultations <-function(IPM1, IPM2, Fmatrix1, Fmatrix2, Pmatrix1, Pmatrix2, Cmatrix1, Cmatrix2) {
+LTRE_calcultations <-function(IPM1, IPM2, Fmatrix1, Fmatrix2, Pmatrix1, Pmatrix2, Cmatrix1, Cmatrix2, survival_object1, survival_object2, growth_object1, growth_object2, minSize, maxSize, discrete_trans1, discrete_trans2) {
 
   #Making a matrix with the different between the two matrixes  
   BaseIPM <- (IPM1 + IPM2) / 2
   SBaseIPM <- sens(BaseIPM)
   
   #Calculating difference in fecundity
-  Difference_fec <- Fmatrix2 - Fmatrix1
+  Difference_fec <- Fmatrix1 - Fmatrix2
   Contributions_fec <- Difference_fec*SBaseIPM
   con_fec <- sum(Contributions_fec)
-  #plotting difference in fecundity
-  long_data <- as.data.frame(Contributions_fec) %>% 
-    set_names(seq(minSize, maxSize, length = 101)) %>% 
-    mutate(size = seq(minSize, maxSize, length = 101)) %>% 
-    pivot_longer(cols = -size, names_to = "sizeNext") %>% 
-    mutate(sizeNext = as.numeric(sizeNext))
-  
-  x11()
-   contourPlot2(t(Contributions_fec), c(1:nrow(Contributions_fec)), maxSize, 0.000005, -0.005, title = "fecundity")
    
-   #Calculating difference in clonality
-   Difference_clone <- Cmatrix2 - Cmatrix1
-   Contributions_clone = Difference_clone*SBaseIPM
-   con_clone <- sum(Contributions_clone)
+  #Calculating difference in clonality
+  Difference_clone <- Cmatrix1 - Cmatrix2
+  Contributions_clone = Difference_clone*SBaseIPM
+  con_clone <- sum(Contributions_clone)
    
-   #Calculating difference in survival and growth
-   Difference_pm <- Pmatrix2 - Pmatrix1
-   Contributions_pm = Difference_pm*SBaseIPM
-   con_pm <- sum(Contributions_pm)
-   
-   #plotting difference in fecundity
-   long_data <- melt(Contributions_fec)
-   ggplot(long_data, aes(x = Var2, y = Var1)) + 
-     geom_raster(aes(fill=value)) + 
-     scale_fill_gradient(low="grey90", high="red") +
-     labs(x="size at  time t", y="size at time t+1", title="fecundity") +
-     theme_bw() + theme(axis.text.x=element_text(size=9, angle=0, vjust=0.3),
-                        axis.text.y=element_text(size=9),
-                        plot.title=element_text(size=11))
+  #Calculating difference in survival and growth
+  Difference_pm <- Pmatrix1 - Pmatrix2
+  Contributions_pm = Difference_pm * SBaseIPM
+  con_pm <- sum(Contributions_pm)
+  
+  #Calculating contribution of growth alone
+  growth_only1 <- coerceSurvObj(survival_object1, c(100,0))
+  Pmatrix_growth_only1 <- makeIPMPmatrix(survObj=growth_only1, growObj=growth_object1, minSize=minSize, maxSize=maxSize, discreteTrans = discrete_trans1, correction = "constant", nBigMatrix = 100)
+  
+  growth_only2 <- coerceSurvObj(survival_object2, c(100,0))
+  Pmatrix_growth_only2 <- makeIPMPmatrix(survObj=growth_only2, growObj=go_VA_CC_prec2, minSize=minSize, maxSize=maxSize, discreteTrans = discrete_trans2, correction = "constant", nBigMatrix = 100)
+  
+  Difference_growth <- Pmatrix_growth_only1 - Pmatrix_growth_only2
+  
+  Contributions_growth = Difference_growth*SBaseIPM
+  con_growth <- sum(Contributions_growth)
+  
+  # Calculating contribution of survival alone
+  Contributions_surv <- Contributions_pm - Contributions_growth
+  con_surv <- sum(Contributions_surv)
+  
+  # Summing up all vital rates
+  total_con <- sum(con_fec, con_clone, con_growth, con_surv)
+  
+  #Difference in lambda
+  lamda_diff <- as.numeric(eigen(IPM1)$value[1])-as.numeric(eigen(IPM2)$value[1])
+  
+  contributions <- c(con_fec, con_clone, con_growth, con_surv)
+  vital_rates <- c("fecundity", "clonality", "growth", "surv")
+  
+  vital_rate_contributions <- as.data.frame(contributions, vital_rates) %>% 
+    rownames_to_column(var = "vital_rates") %>%
+    mutate(total_contribution = total_con,
+           lamda_difference = lamda_diff)
   
   
-  #Making general plots
-  contourPlot2(t(sens(IPM_VA_CC_precip2)), c(1:dim(sens(IPM_VA_CC_precip2))[1]), maxSize, 0.03, 0, title = "Sensitivity Veronica alpina CC")
-
-  
-  
-  return(x)
+  return(vital_rate_contributions)
 }
 
-LTRE_plots <-function(long_data, vital_rate) {
+LTRE_VA_CC_precip_1_2 <- LTRE_calcultations (IPM1 = IPM_VA_CC_precip1, 
+                    IPM2 = IPM_VA_CC_precip2, 
+                    Fmatrix1 = Fmatrix_VA_CC_precip1, 
+                    Fmatrix2 = Fmatrix_VA_CC_precip2, 
+                    Pmatrix1 = Pmatrix_VA_CC_precip1, 
+                    Pmatrix2 = Pmatrix_VA_CC_precip2, 
+                    Cmatrix1 = Cmatrix_VA_CC_prec1, 
+                    Cmatrix2 = Cmatrix_VA_CC_prec1, 
+                    survival_object1 = so_VA_CC, 
+                    survival_object2 = so_VA_CC, 
+                    growth_object1 = go_VA_CC_precip1, 
+                    growth_object2 = go_VA_CC_precip2, 
+                    minSize = minSize, 
+                    maxSize = maxSize, 
+                    discrete_trans1 = dto_VA_CC, 
+                    discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "CC",
+         precipitation = "2-1")
+
+
+
+LTRE_VA_CC_CR_precip_1 <- LTRE_calcultations(IPM1 = IPM_VA_CR_precip1, 
+                                             IPM2 = IPM_VA_CC_precip1, 
+                                             Fmatrix1 = Fmatrix_VA_CR, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip1, 
+                                             Pmatrix1 = Pmatrix_VA_CR_precip1, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip1, 
+                                             Cmatrix1 = Cmatrix_VA_CR, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec1, 
+                                             survival_object1 = so_VA_CR_precip1, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_CR_prec1, 
+                                             growth_object2 = go_VA_CC_precip1, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_CR, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "CR - CC",
+         precipitation = "1")
+
+LTRE_VA_CC_CR_precip_2 <- LTRE_calcultations(IPM1 = IPM_VA_CR_precip2, 
+                                             IPM2 = IPM_VA_CC_precip2, 
+                                             Fmatrix1 = Fmatrix_VA_CR, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip2, 
+                                             Pmatrix1 = Pmatrix_VA_CR_precip2, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip2, 
+                                             Cmatrix1 = Cmatrix_VA_CR, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec2, 
+                                             survival_object1 = so_VA_CR_precip2, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_CR_prec2, 
+                                             growth_object2 = go_VA_CC_precip2, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_CR, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "CR - CC",
+         precipitation = "2")
+
+
+LTRE_VA_CC_CR_precip_3 <- LTRE_calcultations(IPM1 = IPM_VA_CR_precip3, 
+                                             IPM2 = IPM_VA_CC_precip3, 
+                                             Fmatrix1 = Fmatrix_VA_CR, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip3, 
+                                             Pmatrix1 = Pmatrix_VA_CR_precip3, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip3, 
+                                             Cmatrix1 = Cmatrix_VA_CR, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec3, 
+                                             survival_object1 = so_VA_CR_precip3, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_CR_prec3, 
+                                             growth_object2 = go_VA_CC_precip3, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_CR, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "CR - CC",
+         precipitation = "3")
+
+LTRE_VA_CC_CN_precip_1 <- LTRE_calcultations(IPM1 = IPM_VA_CN_precip1, 
+                                             IPM2 = IPM_VA_CC_precip1, 
+                                             Fmatrix1 = Fmatrix_VA_CN_precip1, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip1, 
+                                             Pmatrix1 = Pmatrix_VA_CN_precip1, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip1, 
+                                             Cmatrix1 = Cmatrix_VA_CN_precip1, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec1, 
+                                             survival_object1 = so_VA_CN, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_CN_prec1, 
+                                             growth_object2 = go_VA_CC_precip1, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_CN, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "CN - CC",
+         precipitation = "1")
+
+LTRE_VA_CC_CN_precip_2 <- LTRE_calcultations(IPM1 = IPM_VA_CN_precip2, 
+                                             IPM2 = IPM_VA_CC_precip2, 
+                                             Fmatrix1 = Fmatrix_VA_CN_precip2, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip2, 
+                                             Pmatrix1 = Pmatrix_VA_CN_precip2, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip2, 
+                                             Cmatrix1 = Cmatrix_VA_CN_precip2, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec2, 
+                                             survival_object1 = so_VA_CN, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_CN_prec2, 
+                                             growth_object2 = go_VA_CC_precip2, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_CN, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "CN - CC",
+         precipitation = "2")
+
+LTRE_VA_CC_CN_precip_3 <- LTRE_calcultations(IPM1 = IPM_VA_CN_precip3, 
+                                             IPM2 = IPM_VA_CC_precip3, 
+                                             Fmatrix1 = Fmatrix_VA_CN_precip3, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip3, 
+                                             Pmatrix1 = Pmatrix_VA_CN_precip3, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip3, 
+                                             Cmatrix1 = Cmatrix_VA_CN_precip3, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec3, 
+                                             survival_object1 = so_VA_CN, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_CN_prec3, 
+                                             growth_object2 = go_VA_CC_precip3, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_CN, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "CN - CC",
+         precipitation = "3")
+
+LTRE_VA_CC_CE_precip_1 <- LTRE_calcultations(IPM1 = IPM_VA_CE_precip1, 
+                                             IPM2 = IPM_VA_CC_precip1, 
+                                             Fmatrix1 = Fmatrix_VA_CE, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip1, 
+                                             Pmatrix1 = Pmatrix_VA_CE_precip1, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip1, 
+                                             Cmatrix1 = Cmatrix_VA_CE, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec1, 
+                                             survival_object1 = so_VA_CE_precip1, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_CE_precip1, 
+                                             growth_object2 = go_VA_CC_precip1, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_CE, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "CE - CC",
+         precipitation = "1")
+
+LTRE_VA_CC_CE_precip_2 <- LTRE_calcultations(IPM1 = IPM_VA_CE_precip2, 
+                                             IPM2 = IPM_VA_CC_precip2, 
+                                             Fmatrix1 = Fmatrix_VA_CE, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip2, 
+                                             Pmatrix1 = Pmatrix_VA_CE_precip2, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip2, 
+                                             Cmatrix1 = Cmatrix_VA_CE, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec2, 
+                                             survival_object1 = so_VA_CE_precip2, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_CE_precip2, 
+                                             growth_object2 = go_VA_CC_precip2, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_CE, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "CE - CC",
+         precipitation = "2")
+
+LTRE_VA_CC_CE_precip_3 <- LTRE_calcultations(IPM1 = IPM_VA_CE_precip3, 
+                                             IPM2 = IPM_VA_CC_precip3, 
+                                             Fmatrix1 = Fmatrix_VA_CE, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip3, 
+                                             Pmatrix1 = Pmatrix_VA_CE_precip3, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip3, 
+                                             Cmatrix1 = Cmatrix_VA_CE, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec3, 
+                                             survival_object1 = so_VA_CE_precip3, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_CE_precip3, 
+                                             growth_object2 = go_VA_CC_precip3, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_CE, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "CE - CC",
+         precipitation = "3")
+
+LTRE_VA_CC_WC_precip_1 <- LTRE_calcultations(IPM1 = IPM_VA_WC_precip1, 
+                                             IPM2 = IPM_VA_CC_precip1, 
+                                             Fmatrix1 = Fmatrix_VA_WC, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip1, 
+                                             Pmatrix1 = Pmatrix_VA_WC, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip1, 
+                                             Cmatrix1 = Cmatrix_VA_WC_precip1, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec1, 
+                                             survival_object1 = so_VA_WC, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_WC, 
+                                             growth_object2 = go_VA_CC_precip1, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WC, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WC - CC",
+         precipitation = "1")
+
+LTRE_VA_CC_WC_precip_2 <- LTRE_calcultations(IPM1 = IPM_VA_WC_precip2, 
+                                             IPM2 = IPM_VA_CC_precip2, 
+                                             Fmatrix1 = Fmatrix_VA_WC, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip2, 
+                                             Pmatrix1 = Pmatrix_VA_WC, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip2, 
+                                             Cmatrix1 = Cmatrix_VA_WC_precip2, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec2, 
+                                             survival_object1 = so_VA_WC, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_WC, 
+                                             growth_object2 = go_VA_CC_precip2, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WC, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WC - CC",
+         precipitation = "2")
+
+LTRE_VA_CC_WC_precip_3 <- LTRE_calcultations(IPM1 = IPM_VA_WC_precip3, 
+                                             IPM2 = IPM_VA_CC_precip3, 
+                                             Fmatrix1 = Fmatrix_VA_WC, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip3, 
+                                             Pmatrix1 = Pmatrix_VA_WC, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip3, 
+                                             Cmatrix1 = Cmatrix_VA_WC_precip3, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec3, 
+                                             survival_object1 = so_VA_WC, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_WC, 
+                                             growth_object2 = go_VA_CC_precip3, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WC, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WC - CC",
+         precipitation = "3")
+
+LTRE_VA_CC_WC_precip_3 <- LTRE_calcultations(IPM1 = IPM_VA_WC_precip3, 
+                                             IPM2 = IPM_VA_CC_precip3, 
+                                             Fmatrix1 = Fmatrix_VA_WC, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip3, 
+                                             Pmatrix1 = Pmatrix_VA_WC, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip3, 
+                                             Cmatrix1 = Cmatrix_VA_WC_precip3, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec3, 
+                                             survival_object1 = so_VA_WC, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_WC, 
+                                             growth_object2 = go_VA_CC_precip3, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WC, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WC - CC",
+         precipitation = "3")
+
+LTRE_VA_CC_WE_precip_1 <- LTRE_calcultations(IPM1 = IPM_VA_WE_precip1, 
+                                             IPM2 = IPM_VA_CC_precip1, 
+                                             Fmatrix1 = Fmatrix_VA_WE, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip1, 
+                                             Pmatrix1 = Pmatrix_VA_WE_precip1, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip1, 
+                                             Cmatrix1 = Cmatrix_VA_WE, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec1, 
+                                             survival_object1 = so_VA_WE, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_WE, 
+                                             growth_object2 = go_VA_CC_precip1, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WE, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WE - CC",
+         precipitation = "1")
+
+LTRE_VA_CC_WE_precip_2 <- LTRE_calcultations(IPM1 = IPM_VA_WE_precip2, 
+                                             IPM2 = IPM_VA_CC_precip2, 
+                                             Fmatrix1 = Fmatrix_VA_WE, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip2, 
+                                             Pmatrix1 = Pmatrix_VA_WE_precip2, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip2, 
+                                             Cmatrix1 = Cmatrix_VA_WE, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec2, 
+                                             survival_object1 = so_VA_WE, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_WE, 
+                                             growth_object2 = go_VA_CC_precip2, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WE, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WE - CC",
+         precipitation = "2")
+
+LTRE_VA_CC_WE_precip_3 <- LTRE_calcultations(IPM1 = IPM_VA_WE_precip3, 
+                                             IPM2 = IPM_VA_CC_precip3, 
+                                             Fmatrix1 = Fmatrix_VA_WE, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip3, 
+                                             Pmatrix1 = Pmatrix_VA_WE_precip3, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip3, 
+                                             Cmatrix1 = Cmatrix_VA_WE, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec3, 
+                                             survival_object1 = so_VA_WE, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_WE, 
+                                             growth_object2 = go_VA_CC_precip3, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WE, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WE - CC",
+         precipitation = "3")
+
+LTRE_VA_CC_WN_precip_1 <- LTRE_calcultations(IPM1 = IPM_VA_WN_precip1, 
+                                             IPM2 = IPM_VA_CC_precip1, 
+                                             Fmatrix1 = Fmatrix_VA_WN, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip1, 
+                                             Pmatrix1 = Pmatrix_VA_WN_precip1, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip1, 
+                                             Cmatrix1 = Cmatrix_VA_WN_precip1, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec1, 
+                                             survival_object1 = so_VA_WN, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_WN_precip1, 
+                                             growth_object2 = go_VA_CC_precip1, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WN, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WN - CC",
+         precipitation = "1")
+
+LTRE_VA_CC_WN_precip_2 <- LTRE_calcultations(IPM1 = IPM_VA_WN_precip2, 
+                                             IPM2 = IPM_VA_CC_precip2, 
+                                             Fmatrix1 = Fmatrix_VA_WN, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip2, 
+                                             Pmatrix1 = Pmatrix_VA_WN_precip2, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip2, 
+                                             Cmatrix1 = Cmatrix_VA_WN_precip2, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec2, 
+                                             survival_object1 = so_VA_WN, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_WN_precip2, 
+                                             growth_object2 = go_VA_CC_precip2, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WN, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WN - CC",
+         precipitation = "2")
+
+LTRE_VA_CC_WN_precip_3 <- LTRE_calcultations(IPM1 = IPM_VA_WN_precip3, 
+                                             IPM2 = IPM_VA_CC_precip3, 
+                                             Fmatrix1 = Fmatrix_VA_WN, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip3, 
+                                             Pmatrix1 = Pmatrix_VA_WN_precip3, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip3, 
+                                             Cmatrix1 = Cmatrix_VA_WN_precip3, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec3, 
+                                             survival_object1 = so_VA_WN, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_WN_precip3, 
+                                             growth_object2 = go_VA_CC_precip3, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WN, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WN - CC",
+         precipitation = "3")
+
+LTRE_VA_CC_WR_precip_1 <- LTRE_calcultations(IPM1 = IPM_VA_WR_precip1, 
+                                             IPM2 = IPM_VA_CC_precip1, 
+                                             Fmatrix1 = Fmatrix_VA_WR_precip1, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip1, 
+                                             Pmatrix1 = Pmatrix_VA_WR_precip1, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip1, 
+                                             Cmatrix1 = Cmatrix_VA_WR, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec1, 
+                                             survival_object1 = so_VA_WR, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_WR_precip1, 
+                                             growth_object2 = go_VA_CC_precip1, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WR, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WR - CC",
+         precipitation = "1")
+
+LTRE_VA_CC_WR_precip_2 <- LTRE_calcultations(IPM1 = IPM_VA_WR_precip2, 
+                                             IPM2 = IPM_VA_CC_precip2, 
+                                             Fmatrix1 = Fmatrix_VA_WR_precip2, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip2, 
+                                             Pmatrix1 = Pmatrix_VA_WR_precip2, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip2, 
+                                             Cmatrix1 = Cmatrix_VA_WR, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec2, 
+                                             survival_object1 = so_VA_WR, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_WR_precip2, 
+                                             growth_object2 = go_VA_CC_precip2, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WR, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WR - CC",
+         precipitation = "2")
+
+LTRE_VA_CC_WR_precip_3 <- LTRE_calcultations(IPM1 = IPM_VA_WR_precip3, 
+                                             IPM2 = IPM_VA_CC_precip3, 
+                                             Fmatrix1 = Fmatrix_VA_WR_precip3, 
+                                             Fmatrix2 = Fmatrix_VA_CC_precip3, 
+                                             Pmatrix1 = Pmatrix_VA_WR_precip3, 
+                                             Pmatrix2 = Pmatrix_VA_CC_precip3, 
+                                             Cmatrix1 = Cmatrix_VA_WR, 
+                                             Cmatrix2 = Cmatrix_VA_CC_prec3, 
+                                             survival_object1 = so_VA_WR, 
+                                             survival_object2 = so_VA_CC, 
+                                             growth_object1 = go_VA_WR_precip3, 
+                                             growth_object2 = go_VA_CC_precip3, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WR, 
+                                             discrete_trans2 = dto_VA_CC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WR - CC",
+         precipitation = "3")
+
+LTRE_VA_WC_WR_precip_1 <- LTRE_calcultations(IPM1 = IPM_VA_WR_precip1, 
+                                             IPM2 = IPM_VA_WC_precip1, 
+                                             Fmatrix1 = Fmatrix_VA_WR_precip1, 
+                                             Fmatrix2 = Fmatrix_VA_WC, 
+                                             Pmatrix1 = Pmatrix_VA_WR_precip1, 
+                                             Pmatrix2 = Pmatrix_VA_WC, 
+                                             Cmatrix1 = Cmatrix_VA_WR, 
+                                             Cmatrix2 = Cmatrix_VA_WC_precip1, 
+                                             survival_object1 = so_VA_WR, 
+                                             survival_object2 = so_VA_WC, 
+                                             growth_object1 = go_VA_WR_precip1, 
+                                             growth_object2 = go_VA_WC, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WR, 
+                                             discrete_trans2 = dto_VA_WC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WR - WC",
+         precipitation = "1")
+
+LTRE_VA_WC_WR_precip_2 <- LTRE_calcultations(IPM1 = IPM_VA_WR_precip2, 
+                                             IPM2 = IPM_VA_WC_precip2, 
+                                             Fmatrix1 = Fmatrix_VA_WR_precip2, 
+                                             Fmatrix2 = Fmatrix_VA_WC, 
+                                             Pmatrix1 = Pmatrix_VA_WR_precip2, 
+                                             Pmatrix2 = Pmatrix_VA_WC, 
+                                             Cmatrix1 = Cmatrix_VA_WR, 
+                                             Cmatrix2 = Cmatrix_VA_WC_precip2, 
+                                             survival_object1 = so_VA_WR, 
+                                             survival_object2 = so_VA_WC, 
+                                             growth_object1 = go_VA_WR_precip2, 
+                                             growth_object2 = go_VA_WC, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WR, 
+                                             discrete_trans2 = dto_VA_WC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WR - WC",
+         precipitation = "2")
+
+LTRE_VA_WC_WR_precip_3 <- LTRE_calcultations(IPM1 = IPM_VA_WR_precip3, 
+                                             IPM2 = IPM_VA_WC_precip3, 
+                                             Fmatrix1 = Fmatrix_VA_WR_precip3, 
+                                             Fmatrix2 = Fmatrix_VA_WC, 
+                                             Pmatrix1 = Pmatrix_VA_WR_precip3, 
+                                             Pmatrix2 = Pmatrix_VA_WC, 
+                                             Cmatrix1 = Cmatrix_VA_WR, 
+                                             Cmatrix2 = Cmatrix_VA_WC_precip3, 
+                                             survival_object1 = so_VA_WR, 
+                                             survival_object2 = so_VA_WC, 
+                                             growth_object1 = go_VA_WR_precip3, 
+                                             growth_object2 = go_VA_WC, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WR, 
+                                             discrete_trans2 = dto_VA_WC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WR - WC",
+         precipitation = "3")
+
+LTRE_VA_WC_WE_precip_1 <- LTRE_calcultations(IPM1 = IPM_VA_WE_precip1, 
+                                             IPM2 = IPM_VA_WC_precip1, 
+                                             Fmatrix1 = Fmatrix_VA_WE, 
+                                             Fmatrix2 = Fmatrix_VA_WC, 
+                                             Pmatrix1 = Pmatrix_VA_WE_precip1, 
+                                             Pmatrix2 = Pmatrix_VA_WC, 
+                                             Cmatrix1 = Cmatrix_VA_WE, 
+                                             Cmatrix2 = Cmatrix_VA_WC_precip1, 
+                                             survival_object1 = so_VA_WE, 
+                                             survival_object2 = so_VA_WC, 
+                                             growth_object1 = go_VA_WE_precip1, 
+                                             growth_object2 = go_VA_WC, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WE, 
+                                             discrete_trans2 = dto_VA_WC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WE - WC",
+         precipitation = "1")
+
+LTRE_VA_WC_WE_precip_2 <- LTRE_calcultations(IPM1 = IPM_VA_WE_precip2, 
+                                             IPM2 = IPM_VA_WC_precip2, 
+                                             Fmatrix1 = Fmatrix_VA_WE, 
+                                             Fmatrix2 = Fmatrix_VA_WC, 
+                                             Pmatrix1 = Pmatrix_VA_WE_precip2, 
+                                             Pmatrix2 = Pmatrix_VA_WC, 
+                                             Cmatrix1 = Cmatrix_VA_WE, 
+                                             Cmatrix2 = Cmatrix_VA_WC_precip2, 
+                                             survival_object1 = so_VA_WE, 
+                                             survival_object2 = so_VA_WC, 
+                                             growth_object1 = go_VA_WE_precip2, 
+                                             growth_object2 = go_VA_WC, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WE, 
+                                             discrete_trans2 = dto_VA_WC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WE - WC",
+         precipitation = "2")
+
+LTRE_VA_WC_WE_precip_3 <- LTRE_calcultations(IPM1 = IPM_VA_WE_precip3, 
+                                             IPM2 = IPM_VA_WC_precip3, 
+                                             Fmatrix1 = Fmatrix_VA_WE, 
+                                             Fmatrix2 = Fmatrix_VA_WC, 
+                                             Pmatrix1 = Pmatrix_VA_WE_precip3, 
+                                             Pmatrix2 = Pmatrix_VA_WC, 
+                                             Cmatrix1 = Cmatrix_VA_WE, 
+                                             Cmatrix2 = Cmatrix_VA_WC_precip3, 
+                                             survival_object1 = so_VA_WE, 
+                                             survival_object2 = so_VA_WC, 
+                                             growth_object1 = go_VA_WE_precip3, 
+                                             growth_object2 = go_VA_WC, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WE, 
+                                             discrete_trans2 = dto_VA_WC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WE - WC",
+         precipitation = "3")
+
+LTRE_VA_WC_WN_precip_1 <- LTRE_calcultations(IPM1 = IPM_VA_WN_precip1, 
+                                             IPM2 = IPM_VA_WC_precip1, 
+                                             Fmatrix1 = Fmatrix_VA_WN, 
+                                             Fmatrix2 = Fmatrix_VA_WC, 
+                                             Pmatrix1 = Pmatrix_VA_WN_precip1, 
+                                             Pmatrix2 = Pmatrix_VA_WC, 
+                                             Cmatrix1 = Cmatrix_VA_WN_precip1, 
+                                             Cmatrix2 = Cmatrix_VA_WC_precip1, 
+                                             survival_object1 = so_VA_WN, 
+                                             survival_object2 = so_VA_WC, 
+                                             growth_object1 = go_VA_WN_precip1, 
+                                             growth_object2 = go_VA_WC, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WN, 
+                                             discrete_trans2 = dto_VA_WC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WN - WC",
+         precipitation = "1")
+
+
+LTRE_VA_WC_WN_precip_2 <- LTRE_calcultations(IPM1 = IPM_VA_WN_precip2, 
+                                             IPM2 = IPM_VA_WC_precip2, 
+                                             Fmatrix1 = Fmatrix_VA_WN, 
+                                             Fmatrix2 = Fmatrix_VA_WC, 
+                                             Pmatrix1 = Pmatrix_VA_WN_precip2, 
+                                             Pmatrix2 = Pmatrix_VA_WC, 
+                                             Cmatrix1 = Cmatrix_VA_WN_precip2, 
+                                             Cmatrix2 = Cmatrix_VA_WC_precip2, 
+                                             survival_object1 = so_VA_WN, 
+                                             survival_object2 = so_VA_WC, 
+                                             growth_object1 = go_VA_WN_precip2, 
+                                             growth_object2 = go_VA_WC, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WN, 
+                                             discrete_trans2 = dto_VA_WC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WN - WC",
+         precipitation = "2")
+
+LTRE_VA_WC_WN_precip_3 <- LTRE_calcultations(IPM1 = IPM_VA_WN_precip3, 
+                                             IPM2 = IPM_VA_WC_precip3, 
+                                             Fmatrix1 = Fmatrix_VA_WN, 
+                                             Fmatrix2 = Fmatrix_VA_WC, 
+                                             Pmatrix1 = Pmatrix_VA_WN_precip3, 
+                                             Pmatrix2 = Pmatrix_VA_WC, 
+                                             Cmatrix1 = Cmatrix_VA_WN_precip3, 
+                                             Cmatrix2 = Cmatrix_VA_WC_precip3, 
+                                             survival_object1 = so_VA_WN, 
+                                             survival_object2 = so_VA_WC, 
+                                             growth_object1 = go_VA_WN_precip3, 
+                                             growth_object2 = go_VA_WC, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WN, 
+                                             discrete_trans2 = dto_VA_WC) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WN - WC",
+         precipitation = "3")
+
+
+LTRE_treatments <- LTRE_VA_CC_CR_precip_1 %>% 
+  bind_rows(LTRE_VA_CC_CR_precip_2) %>% 
+  bind_rows(LTRE_VA_CC_CR_precip_3) %>% 
+  bind_rows(LTRE_VA_CC_CN_precip_1) %>% 
+  bind_rows(LTRE_VA_CC_CN_precip_2) %>% 
+  bind_rows(LTRE_VA_CC_CN_precip_3) %>% 
+  bind_rows(LTRE_VA_CC_CE_precip_1) %>% 
+  bind_rows(LTRE_VA_CC_CE_precip_2) %>% 
+  bind_rows(LTRE_VA_CC_CE_precip_3) %>% 
+  bind_rows(LTRE_VA_CC_WC_precip_1) %>% 
+  bind_rows(LTRE_VA_CC_WC_precip_2) %>% 
+  bind_rows(LTRE_VA_CC_WC_precip_3) %>%
+  bind_rows(LTRE_VA_CC_WE_precip_1) %>% 
+  bind_rows(LTRE_VA_CC_WE_precip_2) %>% 
+  bind_rows(LTRE_VA_CC_WE_precip_3) %>%
+  bind_rows(LTRE_VA_CC_WN_precip_1) %>% 
+  bind_rows(LTRE_VA_CC_WN_precip_2) %>%
+  bind_rows(LTRE_VA_CC_WN_precip_3) %>% 
+  bind_rows(LTRE_VA_CC_WR_precip_1) %>%
+  bind_rows(LTRE_VA_CC_WR_precip_2) %>%
+  bind_rows(LTRE_VA_CC_WR_precip_3) %>% 
+  bind_rows(LTRE_VA_WC_WR_precip_1) %>%
+  bind_rows(LTRE_VA_WC_WR_precip_2) %>%
+  bind_rows(LTRE_VA_WC_WR_precip_3) %>% 
+  bind_rows(LTRE_VA_WC_WE_precip_1) %>%
+  bind_rows(LTRE_VA_WC_WE_precip_2) %>%
+  bind_rows(LTRE_VA_WC_WE_precip_3) %>% 
+  bind_rows(LTRE_VA_WC_WN_precip_1) %>%
+  bind_rows(LTRE_VA_WC_WN_precip_2) %>%
+  bind_rows(LTRE_VA_WC_WN_precip_3)
+
+LTRE_treatments %>% 
+  mutate(treatment = factor(treatment, levels = c("CE - CC", "CN - CC", "CR - CC", "WE - CC", "WN - CC", "WR - CC", "WE - WC", "WN - WC", "WR - WC", "WC - CC"))) %>% 
+ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
+  geom_bar(position="stack", stat="identity") +
+  geom_point(aes(y = lamda_difference)) +
+  geom_hline(yintercept = 0) +
+  facet_wrap(~treatment, ncol = 3) +
+  theme_bw()
   
-plot <- ggplot(long_data, aes(x = sizeNext, y = size)) + 
-  geom_raster(aes(fill=value)) + 
-  scale_fill_viridis_c(limits = c(-0.0005, 0.0005)) +
-  labs(x="size at  time t", y="size at time t+1", title=vital_rate) +
-  theme_bw() + theme(axis.text.x=element_text(size=9, angle=0, vjust=0.3),
-                     axis.text.y=element_text(size=9),
-                     plot.title=element_text(size=11)) +
-  scale_x_continuous(expand = c(0,0)) +
-  scale_y_continuous(expand = c(0,0))
-  
-  return(plot)
-}
-LTRE_plots(long_data, "fecundity")
-
-IPM_plot(IPM_treatment = IPM_VA_CC_precip1, IPM_control = IPM_VA_CC_precip2, vital = TRUE, vital_rate_matrix_treatment = Fmatrix_VA_CC_prec1, vital_rate_matrix_control = Fmatrix_VA_CC_prec2, minSize = minSize, maxSize = maxSize, zrange = c( -0.0005, 0)) + ggtitle("Fecundity contribution CC 2.3 - 1.2 m/year")
-
-x11()
-contourPlot2(t(Contributions_fec), c(1:dim(Difference_fec)[1]), maxSize, 0, -0.0005, title = "LTRE fecundity Veronica alpina CC 2.3 - 1.2 m/year")
-
-### CC - difference between precipitation levels ###
-
-
-
-
-#Calculating difference in fecundity
-Difference_fec <- Fmatrix_VA_CC_prec2 - Fmatrix_VA_CC_prec1
-Contributions_fec <- Difference_fec*SBaseIPM
-sum(Contributions_fec)
-
-contourPlot2(t(Contributions_fec), c(1:dim(Difference_fec)[1]), maxSize, 0, -0.0005, title = "LTRE fecundity Veronica alpina CC 2.3 - 1.2 m/year")
-
-contourPlot2(t(sens(IPM_VA_CC_precip2)), c(1:dim(sens(IPM_VA_CC_precip2))[1]), maxSize, 0.03, 0, title = "Sensitivity Veronica alpina CC")
-
-#Calculating difference in clonality
-Difference_clone <- Cmatrix_VA_CC_prec2 - Cmatrix_CC_prec1
-Contributions_clone = Difference_clone*SBaseIPM
-sum(Contributions_clone)
-
-contourPlot2(t(Contributions_clone), c(1:dim(Difference_clone)[1]), maxSize, 0, -0.0001, title = "LTRE clone Veronica alpina CC 2.3 - 1.2 m/year")
-
-#Calculating difference in P matrix
-Difference_pm <- Pmatrix_VA_CC_precip2 - Pmatrix_VA_CC_precip1
-Contributions_pm = Difference_pm*SBaseIPM
-sum(Contributions_pm)
-x11()
-contourPlot2(t(Contributions_pm), c(1:dim(Difference_pm)[1]), maxSize, 0.0002, 0, title = "LTRE growth and survival VA CC 2.3 - 1.2 m/year")
-contourPlot2(t(Contributions_pm), c(1:dim(Difference_pm)[1]), maxSize, 0, -0.0002, title = "LTRE growth and survival VA CC 2.3 - 1.2 m/year")
-image(t(Contributions_pm), c(1:dim(Difference_pm)[1]))
-
-#Adding together all the differences in vital rates to give a general difference between matrixes
-sum(Contributions_fec)+sum(Contributions_clone)+sum(Contributions_pm)
-
-#Find the difference in lamba between populations_
-as.numeric(eigen(IPM_VA_CC_precip2)$value[1])-as.numeric(eigen(IPM_VA_CC_precip1)$value[1])
-
-#Calculating contribution of growth alone
-growth_only_VA_CC_precip1 <- coerceSurvObj(so_VA_CC, c(100,0))
-Pmatrix_growth_only_VA_CC_precip1 <- makeIPMPmatrix(survObj=growth_only_VA_CC_precip1, growObj=go_VA_CC_prec1, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_CC, correction = "constant", nBigMatrix = 100)
-
-
-growth_only_VA_CC_precip2 <- coerceSurvObj(so_VA_CC, c(100,0))
-Pmatrix_growth_VA_only_CC_precip2 <- makeIPMPmatrix(survObj=growth_only_VA_CC_precip2, growObj=go_VA_CC_prec2, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_CC, correction = "constant", nBigMatrix = 100)
-
-Difference_growth_VA_CC_precip_1_2 <- Pmatrix_growth_VA_only_CC_precip2 - Pmatrix_growth_VA_only_CC_precip1
-
-Contributions_growth_VA_CC_precip_1_2 = Difference_growth*SBaseIPM
-sum(Contributions_growth_VA_CC_precip_1_2)
-
-contourPlot2(t(Contributions_growth), c(1:dim(Contributions_growth)[1]), maxSize, 0, -0.0003, "LTRE growth and survival Veronica alpina CC precip 1:precip2")
-
-# Calculating contribution of survival alone
-Contributions_surv <- Contributions_pm - Contributions_growth 
-contourPlot2(t(Contributions_surv), c(1:dim(Contributions_surv)[1]), maxSize, 0, -0.0003, "LTRE growth and survival Veronica alpina CC precip 1:precip2")
-
-
-sum(Contributions_fec)
-sum(Contributions_clone)
-sum(Contributions_growth)
-sum(Contributions_surv)
-
-sum(sum(Contributions_fec),
-    sum(Contributions_clone),
-    sum(Contributions_growth),
-    sum(Contributions_surv))
-
-
-as.numeric(eigen(IPM_VA_CC_precip2)$value[1])-as.numeric(eigen(IPM_VA_CC_precip1)$value[1])
-
-### LTREs
-
-### CC - difference between precipitation levels ###
-
-#Making a matrix with the different between the two matrixes
-BaseIPM <- (IPM_VA_CC_precip1 + IPM_VA_CC_precip2) / 2
-SBaseIPM <- sens(BaseIPM)
-
-#Calculating difference in fecundity
-Difference_fec <- Fmatrix_VA_CC_prec2 - Fmatrix_VA_CC_prec1
-Contributions_fec <- Difference_fec*SBaseIPM
-sum(Contributions_fec)
-
-contourPlot2(t(Contributions_fec), c(1:dim(Difference_fec)[1]), maxSize, 0, -0.0005, title = "LTRE fecundity Veronica alpina CC 2.3 - 1.2 m/year")
-
-contourPlot2(t(sens(IPM_VA_CC_precip2)), c(1:dim(sens(IPM_VA_CC_precip2))[1]), maxSize, 0.03, 0, title = "Sensitivity Veronica alpina CC")
-
-#Calculating difference in clonality
-Difference_clone <- Cmatrix_VA_CC_prec2 - Cmatrix_CC_prec1
-Contributions_clone = Difference_clone*SBaseIPM
-sum(Contributions_clone)
-
-contourPlot2(t(Contributions_clone), c(1:dim(Difference_clone)[1]), maxSize, 0, -0.0001, title = "LTRE clone Veronica alpina CC 2.3 - 1.2 m/year")
-
-#Calculating difference in P matrix
-Difference_pm <- Pmatrix_VA_CC_precip2 - Pmatrix_VA_CC_precip1
-Contributions_pm = Difference_pm*SBaseIPM
-sum(Contributions_pm)
-x11()
-contourPlot2(t(Contributions_pm), c(1:dim(Difference_pm)[1]), maxSize, 0.0002, 0, title = "LTRE growth and survival VA CC 2.3 - 1.2 m/year")
-contourPlot2(t(Contributions_pm), c(1:dim(Difference_pm)[1]), maxSize, 0, -0.0002, title = "LTRE growth and survival VA CC 2.3 - 1.2 m/year")
-image(t(Contributions_pm), c(1:dim(Difference_pm)[1]))
-
-#Adding together all the differences in vital rates to give a general difference between matrixes
-sum(Contributions_fec)+sum(Contributions_clone)+sum(Contributions_pm)
-
-#Find the difference in lamba between populations_
-as.numeric(eigen(IPM_VA_CC_precip2)$value[1])-as.numeric(eigen(IPM_VA_CC_precip1)$value[1])
-
-#Calculating contribution of growth alone
-growth_only_VA_CC_precip1 <- coerceSurvObj(so_VA_CC, c(100,0))
-Pmatrix_growth_only_VA_CC_precip1 <- makeIPMPmatrix(survObj=growth_only_VA_CC_precip1, growObj=go_VA_CC_prec1, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_CC, correction = "constant", nBigMatrix = 100)
-
-
-growth_only_VA_CC_precip2 <- coerceSurvObj(so_VA_CC, c(100,0))
-Pmatrix_growth_VA_only_CC_precip2 <- makeIPMPmatrix(survObj=growth_only_VA_CC_precip2, growObj=go_VA_CC_prec2, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_CC, correction = "constant", nBigMatrix = 100)
-
-Difference_growth_VA_CC_precip_1_2 <- Pmatrix_growth_VA_only_CC_precip2 - Pmatrix_growth_VA_only_CC_precip1
-
-Contributions_growth_VA_CC_precip_1_2 = Difference_growth*SBaseIPM
-sum(Contributions_growth_VA_CC_precip_1_2)
-
-contourPlot2(t(Contributions_growth), c(1:dim(Contributions_growth)[1]), maxSize, 0, -0.0003, "LTRE growth and survival Veronica alpina CC precip 1:precip2")
-
-# Calculating contribution of survival alone
-Contributions_surv <- Contributions_pm - Contributions_growth 
-contourPlot2(t(Contributions_surv), c(1:dim(Contributions_surv)[1]), maxSize, 0, -0.0003, "LTRE growth and survival Veronica alpina CC precip 1:precip2")
-
-
-sum(Contributions_fec)
-sum(Contributions_clone)
-sum(Contributions_growth)
-sum(Contributions_surv)
-
-sum(sum(Contributions_fec),
-    sum(Contributions_clone),
-    sum(Contributions_growth),
-    sum(Contributions_surv))
-
-
-as.numeric(eigen(IPM_VA_CC_precip2)$value[1])-as.numeric(eigen(IPM_VA_CC_precip1)$value[1])
-
-### Comparing precip level 2 and 3 ###
-#Making a matrix with the different between the two matrixes
-BaseIPM_VA_CC_precip_2_3 <- (IPM_VA_CC_precip2 + IPM_VA_CC_precip3) / 2
-SBaseIPM_VA_CC_precip_2_3 <- sens(BaseIPM_VA_CC_precip_2_3)
-
-#Calculating difference in fecundity
-Difference_fec_VA_CC_precip_2_3 <- Fmatrix_VA_CC_prec2 - Fmatrix_VA_CC_prec3
-Contributions_fec_VA_CC_precip_2_3 <- Difference_fec_VA_CC_precip_2_3*SBaseIPM_VA_CC_precip_2_3
-sum(Contributions_fec_VA_CC_precip_2_3)
-
-contourPlot2(t(Contributions_fec_VA_CC_precip_2_3), c(1:dim(Contributions_fec_VA_CC_precip_2_3)[1]), maxSize,  0, -0.0005, title = "LTRE fecundity Veronica alpina CC  2.3 - 3.4 m/year")
-
-#contourPlot2(t(sens(IPM_VA_CC_precip2)), c(1:dim(sens(IPM_VA_CC_precip2))[1]), maxSize, 0.03, 0, title = "Sensitivity Veronica alpina CC")
-
-#Calculating difference in clonality
-Difference_clone_VA_CC_precip_2_3 <- Cmatrix_VA_CC_prec2 - Cmatrix_CC_prec3
-Contributions_clone_VA_CC_precip_2_3 = Difference_clone_VA_CC_precip_2_3*SBaseIPM_VA_CC_precip_2_3
-sum(Contributions_clone_VA_CC_precip_2_3)
-
-contourPlot2(t(Contributions_clone_VA_CC_precip_2_3), c(1:dim(Difference_clone_VA_CC_precip_2_3)[1]), maxSize, 0, -0.0001, title = "LTRE clone Veronica alpina CC 2.3 - 3.4 m/year")
-
-#Calculating difference in P matrix
-Difference_pm_VA_CC_precip_2_3 <- Pmatrix_VA_CC_precip2 - Pmatrix_VA_CC_precip3
-Contributions_pm_VA_CC_precip_2_3 = Difference_pm_VA_CC_precip_2_3*SBaseIPM_VA_CC_precip_2_3
-sum(Contributions_pm_VA_CC_precip_2_3)
-
-contourPlot2(t(Contributions_pm_VA_CC_precip_2_3), c(1:dim(Difference_pm_VA_CC_precip_2_3)[1]), maxSize, 0.02, -0.02, title = "LTRE growth and survival VA CC 2.3 - 3.4 m/year")
-
-#Adding together all the differences in vital rates to give a general difference between matrixes
-sum(Contributions_fec_VA_CC_precip_2_3)+sum(Contributions_clone_VA_CC_precip_2_3)+sum(Contributions_pm_VA_CC_precip_2_3)
-
-#Find the difference in lamba between populations_
-as.numeric(eigen(IPM_VA_CC_precip2)$value[1])-as.numeric(eigen(IPM_VA_CC_precip3)$value[1])
-
-#Calculating contribution of growth alone
-growth_only_VA_CC_precip3 <- coerceSurvObj(so_VA_CC, c(100,0))
-Pmatrix_growth_only_VA_CC_precip3 <- makeIPMPmatrix(survObj=growth_only_VA_CC_precip3, growObj=go_VA_CC_prec3, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_CC, correction = "constant", nBigMatrix = 100)
-
-
-growth_only_VA_CC_precip2 <- coerceSurvObj(so_VA_CC, c(100,0))
-Pmatrix_growth_only_VA_CC_precip2 <- makeIPMPmatrix(survObj=growth_only_VA_CC_precip2, growObj=go_VA_CC_prec2, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_CC, correction = "constant", nBigMatrix = 100)
-
-Difference_growth_VA_CC_precip_2_3 <- Pmatrix_growth_only_VA_CC_precip2 - Pmatrix_growth_only_VA_CC_precip1
-
-Contributions_growth_VA_CC_precip_2_3 = Difference_growth_VA_CC_precip_2_3*SBaseIPM_VA_CC_precip_2_3
-sum(Contributions_growth_VA_CC_precip_2_3)
-
-contourPlot2(t(Contributions_growth_VA_CC_precip_2_3), c(1:dim(Contributions_growth_VA_CC_precip_2_3)[1]), maxSize, 0, -0.0003, "LTRE growth and survival Veronica alpina CC precip 1:precip2")
-
-# Calculating contribution of survival alone
-Contributions_surv_VA_CC_precip_2_3 <- Contributions_pm_VA_CC_precip_2_3 - Contributions_growth_VA_CC_precip_2_3
-contourPlot2(t(Contributions_surv_VA_CC_precip_2_3), c(1:dim(Contributions_surv_VA_CC_precip_2_3)[1]), maxSize, 0, -0.0003, "LTRE growth and survival Veronica alpina CC precip 1:precip2")
-
-
-sum(Contributions_fec_VA_CC_precip_2_3)
-sum(Contributions_clone_VA_CC_precip_2_3)
-sum(Contributions_growth_VA_CC_precip_2_3)
-sum(Contributions_surv_VA_CC_precip_2_3)
-
-sum(sum(Contributions_fec_VA_CC_precip_2_3),
-    sum(Contributions_clone_VA_CC_precip_2_3),
-    sum(Contributions_growth_VA_CC_precip_2_3),
-    sum(Contributions_surv_VA_CC_precip_2_3))
-
-
-as.numeric(eigen(IPM_VA_CC_precip2)$value[1])-as.numeric(eigen(IPM_VA_CC_precip3)$value[1])
-
-
-
