@@ -1,16 +1,9 @@
 ### LTREs
 library(reshape2)
 
-A <- matrix(c(2,5,2,1,0,0,0,0,1,0,0,0,0,1,3,5,6,0,0,1,0,0,0,2,0,0,1,2,7,2,4,6,2,5,1,0,0,1,0,0,0,1,0,0,3,5,4,0,0,1,0,0,1,0,0,2,0,3,5,7,3,1,4,0,1,0,0,0,0,2,0,0,0,1,3,4,6,0,0,1), byrow=T, nrow=8, ncol=10)
-colnames(A) <- letters[1:10]
-rownames(A) <- LETTERS[1:8]
-print(A)
-longData<-melt(A)
-
 ###Making general function for calculating LTREs
 LTRE_calcultations <-function(IPM1, IPM2, Fmatrix1, Fmatrix2, Pmatrix1, Pmatrix2, Cmatrix1, Cmatrix2) {
 
-  x <- list()
   #Making a matrix with the different between the two matrixes  
   BaseIPM <- (IPM1 + IPM2) / 2
   SBaseIPM <- sens(BaseIPM)
@@ -20,25 +13,64 @@ LTRE_calcultations <-function(IPM1, IPM2, Fmatrix1, Fmatrix2, Pmatrix1, Pmatrix2
   Contributions_fec <- Difference_fec*SBaseIPM
   con_fec <- sum(Contributions_fec)
   #plotting difference in fecundity
-  long_data <- melt(Contributions_fec)
-  ggplot(long_data, aes(x = Var2, y = Var1)) + 
-    geom_raster(aes(fill=value)) + 
-    scale_fill_gradient(low="grey90", high="red") +
-    labs(x="size at  time t", y="size at time t+1", title="fecundity") +
-    theme_bw() + theme(axis.text.x=element_text(size=9, angle=0, vjust=0.3),
-                       axis.text.y=element_text(size=9),
-                       plot.title=element_text(size=11))
+  long_data <- as.data.frame(Contributions_fec) %>% 
+    set_names(seq(minSize, maxSize, length = 101)) %>% 
+    mutate(size = seq(minSize, maxSize, length = 101)) %>% 
+    pivot_longer(cols = -size, names_to = "sizeNext") %>% 
+    mutate(sizeNext = as.numeric(sizeNext))
   
-   contourPlot2(t(Contributions_fec), c(1:dim(Difference_fec)[1]), maxSize, 0.0005, -0.0005, title = "fecundity")
+  x11()
+   contourPlot2(t(Contributions_fec), c(1:nrow(Contributions_fec)), maxSize, 0.000005, -0.005, title = "fecundity")
+   
+   #Calculating difference in clonality
+   Difference_clone <- Cmatrix2 - Cmatrix1
+   Contributions_clone = Difference_clone*SBaseIPM
+   con_clone <- sum(Contributions_clone)
+   
+   #Calculating difference in survival and growth
+   Difference_pm <- Pmatrix2 - Pmatrix1
+   Contributions_pm = Difference_pm*SBaseIPM
+   con_pm <- sum(Contributions_pm)
+   
+   #plotting difference in fecundity
+   long_data <- melt(Contributions_fec)
+   ggplot(long_data, aes(x = Var2, y = Var1)) + 
+     geom_raster(aes(fill=value)) + 
+     scale_fill_gradient(low="grey90", high="red") +
+     labs(x="size at  time t", y="size at time t+1", title="fecundity") +
+     theme_bw() + theme(axis.text.x=element_text(size=9, angle=0, vjust=0.3),
+                        axis.text.y=element_text(size=9),
+                        plot.title=element_text(size=11))
   
   
   #Making general plots
   contourPlot2(t(sens(IPM_VA_CC_precip2)), c(1:dim(sens(IPM_VA_CC_precip2))[1]), maxSize, 0.03, 0, title = "Sensitivity Veronica alpina CC")
 
-  x <- list("con_fec" = con_fec, "plot" = plot_fec)
+  
   
   return(x)
 }
+
+LTRE_plots <-function(long_data, vital_rate) {
+  
+plot <- ggplot(long_data, aes(x = sizeNext, y = size)) + 
+  geom_raster(aes(fill=value)) + 
+  scale_fill_viridis_c(limits = c(-0.0005, 0.0005)) +
+  labs(x="size at  time t", y="size at time t+1", title=vital_rate) +
+  theme_bw() + theme(axis.text.x=element_text(size=9, angle=0, vjust=0.3),
+                     axis.text.y=element_text(size=9),
+                     plot.title=element_text(size=11)) +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0))
+  
+  return(plot)
+}
+LTRE_plots(long_data, "fecundity")
+
+IPM_plot(IPM_treatment = IPM_VA_CC_precip1, IPM_control = IPM_VA_CC_precip2, vital = TRUE, vital_rate_matrix_treatment = Fmatrix_VA_CC_prec1, vital_rate_matrix_control = Fmatrix_VA_CC_prec2, minSize = minSize, maxSize = maxSize, zrange = c( -0.0005, 0)) + ggtitle("Fecundity contribution CC 2.3 - 1.2 m/year")
+
+x11()
+contourPlot2(t(Contributions_fec), c(1:dim(Difference_fec)[1]), maxSize, 0, -0.0005, title = "LTRE fecundity Veronica alpina CC 2.3 - 1.2 m/year")
 
 ### CC - difference between precipitation levels ###
 
