@@ -237,18 +237,37 @@ plot_predictions_clono <-function(model, data) {
    return(plot)
 }
 
-
-
-
-
 contourPlot2 <- function(M,meshpts,maxSize,upper,lower, title) {
    q <- sum(meshpts<=maxSize);
-   filled.contour(meshpts[1:q],meshpts[1:q],M[1:q,1:q], zlim=c(upper,lower),
+   plot <- filled.contour(meshpts[1:q],meshpts[1:q],M[1:q,1:q], zlim=c(upper,lower),
                   xlab="size at time t", ylab="size at time t+1", main = title, color=heat.colors, nlevels=20, cex.lab=1.5,
                   plot.axes = { axis(1); axis(2); lines(-10:50, -10:50, lty=2)});
    return(0);
 }
 
+IPM_plot <- function(IPM) {
+   
+long_data <- as.data.frame(IPM) %>% 
+   set_names(seq(minSize, maxSize, length = 101)) %>% 
+   mutate(size = seq(minSize, maxSize, length = 101)) %>% 
+   pivot_longer(cols = -size, names_to = "sizeNext") %>% 
+   mutate(sizeNext = as.numeric(sizeNext))
+
+plot <- ggplot(long_data, aes(x = sizeNext, y = size)) + 
+   geom_raster(aes(fill=value)) + 
+   scale_fill_viridis_c(limits = c(0, 0.03), na.value = "white") +
+   labs(x="size at  time t", y="size at time t+1") +
+   theme_bw() + theme(axis.text.x=element_text(size=9, angle=0, vjust=0.3),
+                      axis.text.y=element_text(size=9),
+                      plot.title=element_text(size=11)) +
+   scale_x_continuous(expand = c(0,0)) +
+   scale_y_continuous(expand = c(0,0)) +
+   geom_abline()
+
+return(plot);
+}
+
+IPM_plot(IPM_VA_CC_precip2) + ggtitle("VA CC precip 2.3 m/year")
 
 #### Downloading data from OSF ####
 
@@ -441,7 +460,7 @@ dto_VA_CC <- makeDiscreteTrans(VA_CC, discreteTrans = matrix(
 # With these survival and growth objects in hand, we build a survival/growth (P) matrix.
 Pmatrix_VA_CC_precip1 <- makeIPMPmatrix(survObj=so_VA_CC, growObj=go_VA_CC_precip1, minSize=minSize, maxSize=maxSize, correction = "constant", nBigMatrix = 100)
 
-diagnosticsPmatrix(Pmatrix_VA_CC_precip1, survObj=so_VA_CC, growObj=go_VA_CC_precip1, dff = VA_CC)
+diagnosticsPmatrix(Pmatrix_VA_CC_precip1, survObj=so_VA_CC, growObj=go_VA_CC_precip1, dff = (VA_CC  %>% filter(siteID == "Ulv")))
 
 Pmatrix_VA_CC_precip1 <- makeIPMPmatrix(survObj=so_VA_CC, growObj=go_VA_CC_precip1, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_CC, correction = "constant", nBigMatrix = 100)
 contourPlot2(t(Pmatrix_VA_CC_precip1), Pmatrix_VA_CC_precip1@meshpoints, maxSize, 0.03, 0, title = "Pmatrix: survival and growth") 
@@ -458,7 +477,7 @@ contourPlot2(t(Pmatrix_VA_CC_precip2), Pmatrix_VA_CC_precip2@meshpoints, maxSize
 # With these survival and growth objects in hand, we build a survival/growth (P) matrix.
 Pmatrix_VA_CC_precip3 <- makeIPMPmatrix(survObj=so_VA_CC, growObj=go_VA_CC_precip3, minSize=minSize, maxSize=maxSize, correction = "constant", nBigMatrix = 100)
 
-diagnosticsPmatrix(Pmatrix_VA_CC_precip3, survObj=so_VA_CC, growObj=go_VA_CC_precip3, dff = VA_CC)
+diagnosticsPmatrix(Pmatrix_VA_CC_precip3, survObj=so_VA_CC, growObj=go_VA_CC_precip3, dff = (VA_CC %>% filter(siteID == "Skj")))
 
 Pmatrix_VA_CC_precip3 <- makeIPMPmatrix(survObj=so_VA_CC, growObj=go_VA_CC_precip3, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_CC, correction = "constant", nBigMatrix = 100)
 contourPlot2(t(Pmatrix_VA_CC_precip3), Pmatrix_VA_CC_precip3@meshpoints, maxSize, 0.03, 0, title = "Pmatrix: survival and growth") 
@@ -681,10 +700,9 @@ persp(IPM_VA_CC_precip3)
 as.numeric(eigen(IPM_VA_CC_precip3)$value[1])
 
 x11()
-contourPlot2(t(IPM_VA_CC_precip1), Pmatrix_VA_CC_precip1@meshpoints, maxSize, 0.03, 0)
-contourPlot2(t(IPM_VA_CC_precip2), Pmatrix_VA_CC_precip1@meshpoints, maxSize, 0.03, 0)
-contourPlot2(t(IPM_VA_CC_precip3), Pmatrix_VA_CC_precip1@meshpoints, maxSize, 0.03, 0)
-
+contourPlot2(t(IPM_VA_CC_precip1), Pmatrix_VA_CC_precip1@meshpoints, maxSize, 0.03, 0, title = "Veronica alpina CC precip 1.2 m/year")
+contourPlot2(t(IPM_VA_CC_precip2), Pmatrix_VA_CC_precip1@meshpoints, maxSize, 0.03, 0, title = "Veronica alpina CC precip 2.3 m/year")
+contourPlot2(t(IPM_VA_CC_precip3), Pmatrix_VA_CC_precip1@meshpoints, maxSize, 0.03, 0, title = "Veronica alpina CC precip 3.4 m/year")
 
 
 ##### Ambient temperature removal #####
@@ -2140,6 +2158,8 @@ summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), fami
 AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WE))
 summary(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_WE))
 AIC(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_WE))
+summary(glmer(surv ~ size + precip + (1|block_trans), family = 'binomial', data = VA_WE))
+AIC(glmer(surv ~ size + precip + (1|block_trans), family = 'binomial', data = VA_WE))
 summary(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_WE)) 
 AIC(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_WE))
 summary(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = VA_WE))
@@ -2211,7 +2231,7 @@ Pmatrix_VA_WE_precip3 <- makeIPMPmatrix(survObj=so_VA_WE, growObj=go_VA_WE_preci
 
 diagnosticsPmatrix(Pmatrix_VA_WE_precip1, survObj=so_VA_WE, growObj=go_VA_WE_precip1, dff = VA_WE)
 diagnosticsPmatrix(Pmatrix_VA_WE_precip2, survObj=so_VA_WE, growObj=go_VA_WE_precip2, dff = VA_WE)
-diagnosticsPmatrix(Pmatrix_VA_WE_precip3, survObj=so_VA_WE, growObj=go_VA_WE_precip3, dff = VA_WE)
+diagnosticsPmatrix(Pmatrix_VA_WE_precip3, survObj=so_VA_WE, growObj=go_VA_WE_precip3, dff = (VA_WE %>% filter(siteID == "Skj")))
 
 Pmatrix_VA_WE_precip1 <- makeIPMPmatrix(survObj=so_VA_WE, growObj=go_VA_WE_precip1, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_WE, correction = "constant", nBigMatrix = 100)
 Pmatrix_VA_WE_precip2 <- makeIPMPmatrix(survObj=so_VA_WE, growObj=go_VA_WE_precip2, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_WE, correction = "constant", nBigMatrix = 100)
