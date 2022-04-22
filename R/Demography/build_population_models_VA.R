@@ -245,21 +245,29 @@ contourPlot2 <- function(M,meshpts,maxSize,upper,lower, title) {
    return(0);
 }
 
-IPM_plot <- function(IPM) {
+IPM_plot <- function(IPM1, IPM2 = NULL, vital = FALSE, minSize, maxSize, zrange) {
    
-long_data <- as.data.frame(IPM) %>% 
-   set_names(seq(minSize, maxSize, length = 101)) %>% 
-   mutate(size = seq(minSize, maxSize, length = 101)) %>% 
+   if(isTRUE(vital)) {
+      BaseIPM <- (IPM1 + IPM2) / 2
+      SBaseIPM <- sens(BaseIPM)
+      matrix <- Fmatrix2 - Fmatrix1
+   } else {
+      matrix <- IPM1
+   }
+   
+long_data <- as.data.frame(matrix) %>% 
+   set_names(seq(minSize, maxSize, length = ncol(matrix))) %>% 
+   mutate(size = seq(minSize, maxSize, length = nrow(matrix))) %>% 
    pivot_longer(cols = -size, names_to = "sizeNext") %>% 
    mutate(sizeNext = as.numeric(sizeNext))
 
 plot <- ggplot(long_data, aes(x = sizeNext, y = size)) + 
    geom_raster(aes(fill=value)) + 
-   scale_fill_viridis_c(limits = c(0, 0.03), na.value = "white") +
-   labs(x="size at  time t", y="size at time t+1") +
-   theme_bw() + theme(axis.text.x=element_text(size=9, angle=0, vjust=0.3),
-                      axis.text.y=element_text(size=9),
-                      plot.title=element_text(size=11)) +
+   scale_fill_viridis_c(limits = zrange, na.value = "white") +
+   labs(x="Size at  time t", y="Size at time t+1") +
+   theme_bw() + 
+   # theme(axis.text.x=element_text(size=9, angle=0, vjust=0.3),
+                      # axis.text.y=element_text(size=9)) +
    scale_x_continuous(expand = c(0,0)) +
    scale_y_continuous(expand = c(0,0)) +
    geom_abline()
@@ -267,7 +275,7 @@ plot <- ggplot(long_data, aes(x = sizeNext, y = size)) +
 return(plot);
 }
 
-IPM_plot(IPM_VA_CC_precip2) + ggtitle("VA CC precip 2.3 m/year")
+IPM_plot(IPM_VA_CC_precip2, minSize = minSize, maxSize = maxSize, zrange = c(0, 0.03)) + ggtitle("VA CC precip 2.3 m/year")
 
 #### Downloading data from OSF ####
 
