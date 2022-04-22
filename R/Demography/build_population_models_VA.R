@@ -245,14 +245,14 @@ contourPlot2 <- function(M,meshpts,maxSize,upper,lower, title) {
    return(0);
 }
 
-IPM_plot <- function(IPM1, IPM2 = NULL, vital = FALSE, minSize, maxSize, zrange) {
+IPM_plot <- function(IPM_control, IPM_treatment = NULL, vital = FALSE, vital_rate_matrix_treatment, vital_rate_matrix_control, minSize, maxSize, zrange) {
    
    if(isTRUE(vital)) {
-      BaseIPM <- (IPM1 + IPM2) / 2
+      BaseIPM <- (IPM_control + IPM_treatment) / 2
       SBaseIPM <- sens(BaseIPM)
-      matrix <- Fmatrix2 - Fmatrix1
+      matrix <- vital_rate_matrix_control - vital_rate_matrix_treatment
    } else {
-      matrix <- IPM1
+      matrix <- IPM_control
    }
    
 long_data <- as.data.frame(matrix) %>% 
