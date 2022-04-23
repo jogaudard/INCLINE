@@ -275,7 +275,7 @@ plot <- ggplot(long_data, aes(x = sizeNext, y = size)) +
 return(plot);
 }
 
-IPM_plot(IPM_VA_CC_precip2, minSize = minSize, maxSize = maxSize, zrange = c(0, 0.03)) + ggtitle("VA CC precip 2.3 m/year")
+IPM_plot(IPM_control = IPM_VA_CC_precip2, minSize = minSize, maxSize = maxSize, zrange = c(0, 0.03)) + ggtitle("VA CC precip 2.3 m/year")
 
 #### Downloading data from OSF ####
 
