@@ -26,7 +26,7 @@ conflict_prefer("lmer", "lmerTest")
 
 plot_predictions_surv <-function(model, data, minSize, maxSize) {
    
-   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, length.out = 100),
                           blockID = data$blockID)
    
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
@@ -43,7 +43,7 @@ plot_predictions_surv <-function(model, data, minSize, maxSize) {
 
 plot_predictions_surv_precip <-function(model, data, minSize, maxSize) {
    
-   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, length.out = 100),
                           precip = c(1.226, 1.561, 2.130, 3.402),
                           blockID = data$blockID)
    
@@ -61,7 +61,7 @@ plot_predictions_surv_precip <-function(model, data, minSize, maxSize) {
 
 plot_predictions_growth_precip <-function(model, data, minSize, maxSize) {
    
-   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, length.out = 100),
                           precip = c(1.226, 1.561, 2.130, 3.402),
                           transition = c("2018-2019", "2019-2020", "2020-2021"),
                           blockID = data$blockID)
@@ -82,7 +82,7 @@ plot_predictions_growth_precip <-function(model, data, minSize, maxSize) {
 
 plot_predictions_growth <-function(model, data, minSize, maxSize) {
    
-   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, length.out = 100),
                           blockID = data$blockID)
    
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
@@ -102,7 +102,7 @@ plot_predictions_growth <-function(model, data, minSize, maxSize) {
 
 plot_predictions_floif_precip <-function(model, data, minSize, maxSize) {
    
-   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, length.out = 100),
                           precip = c(1.226, 1.561, 2.130, 3.402),
                           blockID = data$blockID)
    
@@ -120,7 +120,7 @@ plot_predictions_floif_precip <-function(model, data, minSize, maxSize) {
 
 plot_predictions_floif <-function(model, data, minSize, maxSize) {
    
-   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, length.out = 100),
                           blockID = data$blockID)
    
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
@@ -137,7 +137,7 @@ plot_predictions_floif <-function(model, data, minSize, maxSize) {
 
 plot_predictions_flono_precip <-function(model, data, minSize, maxSize, ylim) {
    
-   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, length.out = 100),
                           precip = c(1.226, 1.561, 2.130, 3.402),
                           blockID = data$blockID)
    
@@ -156,7 +156,7 @@ plot_predictions_flono_precip <-function(model, data, minSize, maxSize, ylim) {
 
 plot_predictions_flono <-function(model, data, minSize, maxSize, ylim) {
    
-   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, length.out = 100),
                           blockID = data$blockID)
    
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
@@ -174,7 +174,7 @@ plot_predictions_flono <-function(model, data, minSize, maxSize, ylim) {
 
 plot_predictions_cloif_precip <-function(model, data, minSize, maxSize) {
    
-   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, length.out = 100),
                           precip = c(1.226, 1.561, 2.130, 3.402),
                           blockID = data$blockID)
    
@@ -192,7 +192,7 @@ plot_predictions_cloif_precip <-function(model, data, minSize, maxSize) {
 
 plot_predictions_cloif <-function(model, data, minSize, maxSize) {
    
-   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, length.out = 100),
                           blockID = data$blockID)
    
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
@@ -209,7 +209,7 @@ plot_predictions_cloif <-function(model, data, minSize, maxSize) {
 
 plot_predictions_clono_precip <-function(model, data, minSize, maxSize, ylim) {
    
-   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, length.out = 100),
                           precip = c(1.226, 1.561, 2.130, 3.402),
                           blockID = data$blockID)
    
@@ -228,7 +228,7 @@ plot_predictions_clono_precip <-function(model, data, minSize, maxSize, ylim) {
 
 plot_predictions_clono <-function(model, data, minSize, maxSize, ylim) {
    
-   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, length.out = 100),
                           blockID = data$blockID)
    
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
