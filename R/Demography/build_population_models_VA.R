@@ -59,7 +59,7 @@ plot_predictions_surv_precip <-function(model, data) {
    return(plot)
 }
 
-plot_predictions_growth_precip <-function(model, data) {
+plot_predictions_growth_precip <-function(model, data, minSize, maxSize) {
    
    newdata <- expand.grid(size = seq(-10, 45, 1),
                           precip = c(1.226, 1.561, 2.130, 3.402),
@@ -73,13 +73,14 @@ plot_predictions_growth_precip <-function(model, data) {
       geom_jitter(height = 0.1) +
       geom_line(aes(x = size, y = predicted, color = factor(precip)), data=newdata, size = 1, show.legend = TRUE) +
       ggtitle(paste0("AIC =", AIC(model))) +
-      geom_abline()
+      geom_abline() +
+      ylim(minSize, maxSize)
    
    
    return(plot)
 }
 
-plot_predictions_growth <-function(model, data) {
+plot_predictions_growth <-function(model, data, minSize, maxSize) {
    
    newdata <- expand.grid(size = seq(-10, 45, 1),
                           blockID = data$blockID)
@@ -91,7 +92,8 @@ plot_predictions_growth <-function(model, data) {
       geom_jitter(height = 0.1) +
       geom_line(aes(x = size, y = predicted), data=newdata, size = 1, show.legend = TRUE) +
       ggtitle(paste0("AIC =", AIC(model))) +
-      geom_abline()
+      geom_abline() +
+      ylim(minSize, maxSize)
    
    
    return(plot)
@@ -133,7 +135,7 @@ plot_predictions_floif <-function(model, data) {
    return(plot)
 }
 
-plot_predictions_flono_precip <-function(model, data) {
+plot_predictions_flono_precip <-function(model, data, ylim) {
    
    newdata <- expand.grid(size = seq(-10, 45, 1),
                           precip = c(1.226, 1.561, 2.130, 3.402),
@@ -145,13 +147,14 @@ plot_predictions_flono_precip <-function(model, data) {
       ggplot(aes(x = size, y = flo.no, color = as.factor(precip))) +
       geom_jitter(height = 0.1) +
       geom_line(aes(x = size, y = predicted, color = factor(precip)), data=newdata, size = 1, show.legend = TRUE) +
-      ggtitle(paste0("AIC =", AIC(model)))
+      ggtitle(paste0("AIC =", AIC(model))) +
+      ylim(0, ylim)
    
    
    return(plot)
 }
 
-plot_predictions_flono <-function(model, data) {
+plot_predictions_flono <-function(model, data, ylim) {
    
    newdata <- expand.grid(size = seq(-10, 45, 1),
                           blockID = data$blockID)
@@ -162,7 +165,8 @@ plot_predictions_flono <-function(model, data) {
       ggplot(aes(x = size, y = flo.no)) +
       geom_jitter(height = 0.1) +
       geom_line(aes(x = size, y = predicted), data=newdata, size = 1, show.legend = TRUE) +
-      ggtitle(paste0("AIC =", AIC(model)))
+      ggtitle(paste0("AIC =", AIC(model))) +
+      ylim(0, ylim)
    
    
    return(plot)
@@ -203,7 +207,7 @@ plot_predictions_cloif <-function(model, data) {
    return(plot)
 }
 
-plot_predictions_clono_precip <-function(model, data) {
+plot_predictions_clono_precip <-function(model, data, ylim) {
    
    newdata <- expand.grid(size = seq(-10, 45, 1),
                           precip = c(1.226, 1.561, 2.130, 3.402),
@@ -215,13 +219,14 @@ plot_predictions_clono_precip <-function(model, data) {
       ggplot(aes(x = size, y = clo.no, color = as.factor(precip))) +
       geom_jitter(height = 0.1) +
       geom_line(aes(x = size, y = predicted, color = factor(precip)), data=newdata, size = 1, show.legend = TRUE) +
-      ggtitle(paste0("AIC =", AIC(model)))
+      ggtitle(paste0("AIC =", AIC(model))) +
+      ylim(0, ylim)
    
    
    return(plot)
 }
 
-plot_predictions_clono <-function(model, data) {
+plot_predictions_clono <-function(model, data, ylim) {
    
    newdata <- expand.grid(size = seq(-10, 45, 1),
                           blockID = data$blockID)
@@ -232,7 +237,8 @@ plot_predictions_clono <-function(model, data) {
       ggplot(aes(x = size, y = clo.no)) +
       geom_jitter(height = 0.1) +
       geom_line(aes(x = size, y = predicted), data=newdata, size = 1, show.legend = TRUE) +
-      ggtitle(paste0("AIC =", AIC(model)))
+      ggtitle(paste0("AIC =", AIC(model))) +
+      ylim(0, ylim)
    
    
    return(plot)
@@ -431,7 +437,7 @@ AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_CC))
 
 mod_growth_VA_CC <- lmer(sizeNext ~ size + precip+I(precip^2) + (1|block_trans), data = VA_CC)
 
-plot_growth_VA_CC <- plot_predictions_growth_precip(model = mod_growth_VA_CC, data = VA_CC)
+plot_growth_VA_CC <- plot_predictions_growth_precip(model = mod_growth_VA_CC, data = VA_CC, minSize, maxSize)
 
 plot_surv_VA_CC | plot_growth_VA_CC
 
@@ -539,7 +545,7 @@ flowerNumberChosenModel_VA_CC <- flo.no ~ size  #Chosen based on biology by look
 
 mod_flo_no_VA_CC <- glmer(flo.no ~ size + (1|block_trans), family = 'poisson', data = VA_CC)
 
-plot_flo_no_VA_CC <-plot_predictions_flono(model = mod_flo_no_VA_CC, data = VA_CC) 
+plot_flo_no_VA_CC <-plot_predictions_flono(model = mod_flo_no_VA_CC, data = VA_CC, ylim = 15) 
 
 plot_flo_no_VA_CC
 
@@ -640,7 +646,7 @@ mod_clo_no_VA_CC <- glm(clo.no ~ 1, family = 'poisson', data = VA_CC)
 CloneNumberChosenModel_VA_CC <- clo.no ~ 1
 
 
-plot_clo_no_VA_CC <- plot_predictions_clono(model = mod_clo_no_VA_CC, data = VA_CC)
+plot_clo_no_VA_CC <- plot_predictions_clono(model = mod_clo_no_VA_CC, data = VA_CC, ylim = 6)
 plot_clo_no_VA_CC
 
 # Clonal size depending on mother size
@@ -769,7 +775,7 @@ AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_CR))
 
 mod_growth_VA_CR <- lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = VA_CR)
 
-plot_growth_VA_CR <- plot_predictions_growth_precip(model = mod_growth_VA_CR, data = VA_CR)
+plot_growth_VA_CR <- plot_predictions_growth_precip(model = mod_growth_VA_CR, data = VA_CR, minSize, maxSize)
 
 plot_surv_VA_CR | plot_growth_VA_CR
 
@@ -876,7 +882,7 @@ flowerNumberChosenModel_VA_CR <- flo.no ~ size
 
 mod_flo_no_VA_CR <- glmer(flo.no ~ size + (1|siteID) + (1|transition), family = 'poisson', data = VA_CR) 
 
-plot_flo_no_VA_CR <-plot_predictions_flono(model = mod_flo_no_VA_CR, data = VA_CR) 
+plot_flo_no_VA_CR <-plot_predictions_flono(model = mod_flo_no_VA_CR, data = VA_CR, ylim = 15) 
 
 plot_flo_no_VA_CR
 
@@ -951,7 +957,7 @@ mod_clo_no_VA_CR <- glm(clo.no ~ 1, family = 'poisson', data = VA_CR)
 CloneNumberChosenModel_VA_CR <- clo.no ~ 1
 
 
-plot_clo_no_VA_CR <- plot_predictions_clono(model = mod_clo_no_VA_CR, data = VA_CR)
+plot_clo_no_VA_CR <- plot_predictions_clono(model = mod_clo_no_VA_CR, data = VA_CR, ylim = 6)
 plot_clo_no_VA_CR
 
 # Clonal size depending on mother size
@@ -1073,7 +1079,7 @@ AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_CE))
 
 mod_growth_VA_CE <- lmer(sizeNext ~ size + precip + (1|block_trans), data = VA_CE)
 
-plot_growth_VA_CE <- plot_predictions_growth_precip(model = mod_growth_VA_CE, data = VA_CE)
+plot_growth_VA_CE <- plot_predictions_growth_precip(model = mod_growth_VA_CE, data = VA_CE, minSize, maxSize)
 
 plot_surv_VA_CE | plot_growth_VA_CE
 
@@ -1165,7 +1171,7 @@ AIC(glmer(flo.no ~ 1 + (1|blockID), family = 'poisson', data = VA_CE))
 flowerNumberChosenModel_VA_CE <- flo.no ~ size
 mod_flo_no_VA_CE <- glmer(flo.no ~ size  + (1|blockID), family = 'poisson', data = VA_CE)
 
-plot_flo_no_VA_CE <-plot_predictions_flono(model = mod_flo_no_VA_CE, data = VA_CE) 
+plot_flo_no_VA_CE <-plot_predictions_flono(model = mod_flo_no_VA_CE, data = VA_CE, ylim = 15) 
 plot_flo_no_VA_CE
 
 # Make fecundity object
@@ -1238,7 +1244,7 @@ AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_CE))
 mod_clo_no_VA_CE <- glm(clo.no ~ 1, family = 'poisson', data = VA_CE)
 CloneNumberChosenModel_VA_CE <- clo.no ~ 1
 
-plot_clo_no_VA_CE <- plot_predictions_clono(model = mod_clo_no_VA_CE, data = VA_CE)
+plot_clo_no_VA_CE <- plot_predictions_clono(model = mod_clo_no_VA_CE, data = VA_CE, ylim = 6)
 plot_clo_no_VA_CE
 
 #Does size of the clone depend on size of parent.
@@ -1337,7 +1343,7 @@ AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_CN))
 
 mod_growth_VA_CN <- lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = VA_CN)
 
-plot_growth_VA_CN <- plot_predictions_growth_precip(model = mod_growth_VA_CN, data = VA_CN)
+plot_growth_VA_CN <- plot_predictions_growth_precip(model = mod_growth_VA_CN, data = VA_CN, minSize, maxSize)
 
 plot_surv_VA_CN | plot_growth_VA_CN
 
@@ -1447,7 +1453,7 @@ AIC(glm(flo.no ~ 1, family = 'poisson', data = VA_CN))
 flowerNumberChosenModel_VA_CN <- flo.no ~ size
 mod_flo_no_VA_CN <- glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CN)
 
-plot_flo_no_VA_CN <-plot_predictions_flono_precip(model = mod_flo_no_VA_CN, data = VA_CN) 
+plot_flo_no_VA_CN <-plot_predictions_flono_precip(model = mod_flo_no_VA_CN, data = VA_CN, ylim = 15) 
 plot_flo_no_VA_CN
 
 # Make fecundity object
@@ -1542,7 +1548,7 @@ AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_CN))
 mod_clo_no_VA_CN <- glm(clo.no ~ 1, family = 'poisson', data = VA_CN)
 CloneNumberChosenModel_VA_CN <- clo.no ~ 1
 
-plot_clo_no_VA_CN <- plot_predictions_clono(model = mod_clo_no_VA_CN, data = VA_CN)
+plot_clo_no_VA_CN <- plot_predictions_clono(model = mod_clo_no_VA_CN, data = VA_CN, ylim = 6)
 plot_clo_no_VA_CN
 
 #Does size of the clone depend on size of parent.
@@ -1656,7 +1662,7 @@ AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_WC))
 
 mod_growth_VA_WC <- lmer(sizeNext ~ size  + (1|block_trans), data = VA_WC)
 
-plot_growth_VA_WC <- plot_predictions_growth(model = mod_growth_VA_WC, data = VA_WC)
+plot_growth_VA_WC <- plot_predictions_growth(model = mod_growth_VA_WC, data = VA_WC, minSize, maxSize)
 
 plot_surv_VA_WC | plot_growth_VA_WC
 
@@ -1727,7 +1733,7 @@ flowerNumberChosenModel_VA_WC <- flo.no ~ size
 
 mod_flo_no_VA_WC <- glm(flo.no ~ size, family = 'poisson', data = VA_WC)
 
-plot_flo_no_VA_WC <-plot_predictions_flono(model = mod_flo_no_VA_WC, data = VA_WC) 
+plot_flo_no_VA_WC <-plot_predictions_flono(model = mod_flo_no_VA_WC, data = VA_WC, ylim = 15) 
 
 plot_flo_no_VA_WC
 
@@ -1804,7 +1810,7 @@ AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_WC))
 mod_clo_no_VA_WC <- glm(clo.no ~ 1, family = 'poisson', data = VA_WC)
 CloneNumberChosenModel_VA_WC <- clo.no ~ 1
 
-plot_clo_no_VA_WC <- plot_predictions_clono(model = mod_clo_no_VA_WC, data = VA_WC)
+plot_clo_no_VA_WC <- plot_predictions_clono(model = mod_clo_no_VA_WC, data = VA_WC, ylim = 6)
 plot_clo_no_VA_WC
 
 #Does size of the clone depend on size of parent.
@@ -1918,7 +1924,7 @@ AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_WR))
 
 mod_growth_VA_WR <- lmer(sizeNext ~ size  + precip + (1|block_trans), data = VA_WR)
 
-plot_growth_VA_WR <- plot_predictions_growth_precip(model = mod_growth_VA_WR, data = VA_WR)
+plot_growth_VA_WR <- plot_predictions_growth_precip(model = mod_growth_VA_WR, data = VA_WR, minSize, maxSize)
 
 plot_surv_VA_WR | plot_growth_VA_WR
 
@@ -2010,7 +2016,7 @@ flowerNumberChosenModel_VA_WR <- flo.no ~ size
 
 mod_flo_no_VA_WR <- glm(flo.no ~ size, family = 'poisson', data = VA_WR)
 
-plot_flo_no_VA_WR <-plot_predictions_flono(model = mod_flo_no_VA_WR, data = VA_WR) 
+plot_flo_no_VA_WR <-plot_predictions_flono(model = mod_flo_no_VA_WR, data = VA_WR, ylim = 15) 
 plot_flo_no_VA_WR
 
 # Make fecundity object
@@ -2098,7 +2104,7 @@ AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_WR))
 mod_clo_no_VA_WR <- glm(clo.no ~ 1, family = 'poisson', data = VA_WR)
 CloneNumberChosenModel_VA_WR <- clo.no ~ 1
 
-plot_clo_no_VA_WR <- plot_predictions_clono(model = mod_clo_no_VA_WR, data = VA_WR)
+plot_clo_no_VA_WR <- plot_predictions_clono(model = mod_clo_no_VA_WR, data = VA_WR, ylim = 6)
 plot_clo_no_VA_WR
 
 #Does size of the clone depend on size of parent.
@@ -2198,7 +2204,7 @@ AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_WE))
 
 mod_growth_VA_WE <- lmer(sizeNext ~ size  + precip + (1|block_trans), data = VA_WE)
 
-plot_growth_VA_WE <- plot_predictions_growth_precip(model = mod_growth_VA_WE, data = VA_WE)
+plot_growth_VA_WE <- plot_predictions_growth_precip(model = mod_growth_VA_WE, data = VA_WE, minSize, maxSize)
 plot_surv_VA_WE | plot_growth_VA_WE
 
 
@@ -2288,7 +2294,7 @@ flowerNumberChosenModel_VA_WE <- flo.no ~ size
 
 mod_flo_no_VA_WE <- glmer(flo.no ~ size + (1|block_trans), family = 'poisson', data = VA_WE)
 
-plot_flo_no_VA_WE <-plot_predictions_flono(model = mod_flo_no_VA_WE, data = VA_WE) 
+plot_flo_no_VA_WE <-plot_predictions_flono(model = mod_flo_no_VA_WE, data = VA_WE, ylim = 15) 
 plot_flo_no_VA_WE
 
 # Make fecundity object
@@ -2360,7 +2366,7 @@ AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_WE))
 mod_clo_no_VA_WE <- glm(clo.no ~ 1, family = 'poisson', data = VA_WE)
 CloneNumberChosenModel_VA_WE <- clo.no ~ 1
 
-plot_clo_no_VA_WE <- plot_predictions_clono(model = mod_clo_no_VA_WE, data = VA_WE)
+plot_clo_no_VA_WE <- plot_predictions_clono(model = mod_clo_no_VA_WE, data = VA_WE, ylim = 6)
 plot_clo_no_VA_WE
 
 #Does size of the clone depend on size of parent.
@@ -2458,7 +2464,7 @@ AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_WN))
 
 mod_growth_VA_WN <- lmer(sizeNext ~ size + precip + (1|block_trans), data = VA_WN)
 
-plot_growth_VA_WN <- plot_predictions_growth_precip(model = mod_growth_VA_WN, data = VA_WN)
+plot_growth_VA_WN <- plot_predictions_growth_precip(model = mod_growth_VA_WN, data = VA_WN, minSize, maxSize)
 plot_surv_VA_WN | plot_growth_VA_WN
 
 
@@ -2551,7 +2557,7 @@ flowerNumberChosenModel_VA_WN <- flo.no ~ size
 
 mod_flo_no_VA_WN <- glm(flo.no ~ size, family = 'poisson', data = VA_WN)
 
-plot_flo_no_VA_WN <-plot_predictions_flono(model = mod_flo_no_VA_WN, data = VA_WN) 
+plot_flo_no_VA_WN <-plot_predictions_flono(model = mod_flo_no_VA_WN, data = VA_WN, ylim = 15) 
 plot_flo_no_VA_WN
 
 # Make fecundity object
@@ -2641,7 +2647,7 @@ AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_WN))
 mod_clo_no_VA_WN <- glm(clo.no ~ 1, family = 'poisson', data = VA_WN)
 CloneNumberChosenModel_VA_WN <- clo.no ~ 1
 
-plot_clo_no_VA_WN <- plot_predictions_clono(model = mod_clo_no_VA_WN, data = VA_WN)
+plot_clo_no_VA_WN <- plot_predictions_clono(model = mod_clo_no_VA_WN, data = VA_WN, ylim = 6)
 plot_clo_no_VA_WN
 
 #Does size of the clone depend on size of parent.
