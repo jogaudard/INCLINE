@@ -24,9 +24,9 @@ conflict_prefer("lmer", "lmerTest")
 
 #### Functions ####
 
-plot_predictions_surv <-function(model, data) {
+plot_predictions_surv <-function(model, data, minSize, maxSize) {
    
-   newdata <- expand.grid(size = seq(-10, 45, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
                           blockID = data$blockID)
    
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
@@ -41,9 +41,9 @@ plot_predictions_surv <-function(model, data) {
    return(plot)
 }
 
-plot_predictions_surv_precip <-function(model, data) {
+plot_predictions_surv_precip <-function(model, data, minSize, maxSize) {
    
-   newdata <- expand.grid(size = seq(-10, 45, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
                           precip = c(1.226, 1.561, 2.130, 3.402),
                           blockID = data$blockID)
    
@@ -61,7 +61,7 @@ plot_predictions_surv_precip <-function(model, data) {
 
 plot_predictions_growth_precip <-function(model, data, minSize, maxSize) {
    
-   newdata <- expand.grid(size = seq(-10, 45, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
                           precip = c(1.226, 1.561, 2.130, 3.402),
                           transition = c("2018-2019", "2019-2020", "2020-2021"),
                           blockID = data$blockID)
@@ -82,7 +82,7 @@ plot_predictions_growth_precip <-function(model, data, minSize, maxSize) {
 
 plot_predictions_growth <-function(model, data, minSize, maxSize) {
    
-   newdata <- expand.grid(size = seq(-10, 45, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
                           blockID = data$blockID)
    
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
@@ -100,9 +100,9 @@ plot_predictions_growth <-function(model, data, minSize, maxSize) {
 }
 
 
-plot_predictions_floif_precip <-function(model, data) {
+plot_predictions_floif_precip <-function(model, data, minSize, maxSize) {
    
-   newdata <- expand.grid(size = seq(-10, 45, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
                           precip = c(1.226, 1.561, 2.130, 3.402),
                           blockID = data$blockID)
    
@@ -118,9 +118,9 @@ plot_predictions_floif_precip <-function(model, data) {
    return(plot)
 }
 
-plot_predictions_floif <-function(model, data) {
+plot_predictions_floif <-function(model, data, minSize, maxSize) {
    
-   newdata <- expand.grid(size = seq(-10, 45, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
                           blockID = data$blockID)
    
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
@@ -135,9 +135,9 @@ plot_predictions_floif <-function(model, data) {
    return(plot)
 }
 
-plot_predictions_flono_precip <-function(model, data, ylim) {
+plot_predictions_flono_precip <-function(model, data, minSize, maxSize, ylim) {
    
-   newdata <- expand.grid(size = seq(-10, 45, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
                           precip = c(1.226, 1.561, 2.130, 3.402),
                           blockID = data$blockID)
    
@@ -154,9 +154,9 @@ plot_predictions_flono_precip <-function(model, data, ylim) {
    return(plot)
 }
 
-plot_predictions_flono <-function(model, data, ylim) {
+plot_predictions_flono <-function(model, data, minSize, maxSize, ylim) {
    
-   newdata <- expand.grid(size = seq(-10, 45, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
                           blockID = data$blockID)
    
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
@@ -172,9 +172,9 @@ plot_predictions_flono <-function(model, data, ylim) {
    return(plot)
 }
 
-plot_predictions_cloif_precip <-function(model, data) {
+plot_predictions_cloif_precip <-function(model, data, minSize, maxSize) {
    
-   newdata <- expand.grid(size = seq(-10, 45, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
                           precip = c(1.226, 1.561, 2.130, 3.402),
                           blockID = data$blockID)
    
@@ -190,9 +190,9 @@ plot_predictions_cloif_precip <-function(model, data) {
    return(plot)
 }
 
-plot_predictions_cloif <-function(model, data) {
+plot_predictions_cloif <-function(model, data, minSize, maxSize) {
    
-   newdata <- expand.grid(size = seq(-10, 45, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
                           blockID = data$blockID)
    
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
@@ -207,9 +207,9 @@ plot_predictions_cloif <-function(model, data) {
    return(plot)
 }
 
-plot_predictions_clono_precip <-function(model, data, ylim) {
+plot_predictions_clono_precip <-function(model, data, minSize, maxSize, ylim) {
    
-   newdata <- expand.grid(size = seq(-10, 45, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
                           precip = c(1.226, 1.561, 2.130, 3.402),
                           blockID = data$blockID)
    
@@ -226,9 +226,9 @@ plot_predictions_clono_precip <-function(model, data, ylim) {
    return(plot)
 }
 
-plot_predictions_clono <-function(model, data, ylim) {
+plot_predictions_clono <-function(model, data, minSize, maxSize, ylim) {
    
-   newdata <- expand.grid(size = seq(-10, 45, 1),
+   newdata <- expand.grid(size = seq(minSize, maxSize, 1),
                           blockID = data$blockID)
    
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
@@ -413,7 +413,7 @@ summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 
 mod_surv_VA_CC <- glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CC)
-plot_surv_VA_CC <- plot_predictions_surv(model = mod_surv_VA_CC, data = VA_CC)
+plot_surv_VA_CC <- plot_predictions_surv(model = mod_surv_VA_CC, data = VA_CC, minSize, maxSize)
 
 plot_surv_VA_CC
 
@@ -517,7 +517,7 @@ mod_flo_if_VA_CC <- glmer(flo.if ~ size + precip+I(precip^2) + (1|block_trans), 
 
 par(mfrow=c(1,1))
 
-plot_VA_CC_floif <- plot_predictions_floif_precip(model = mod_flo_if_VA_CC, data = VA_CC)
+plot_VA_CC_floif <- plot_predictions_floif_precip(model = mod_flo_if_VA_CC, data = VA_CC, minSize, maxSize)
 
 plot_VA_CC_floif 
 
@@ -545,7 +545,7 @@ flowerNumberChosenModel_VA_CC <- flo.no ~ size  #Chosen based on biology by look
 
 mod_flo_no_VA_CC <- glmer(flo.no ~ size + (1|block_trans), family = 'poisson', data = VA_CC)
 
-plot_flo_no_VA_CC <-plot_predictions_flono(model = mod_flo_no_VA_CC, data = VA_CC, ylim = 15) 
+plot_flo_no_VA_CC <-plot_predictions_flono(model = mod_flo_no_VA_CC, data = VA_CC, minSize, maxSize, ylim = 15) 
 
 plot_flo_no_VA_CC
 
@@ -626,7 +626,7 @@ mod_clo_VA_CC <- glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'bino
 CloneChosenModel_VA_CC <- clo.if ~ size + size2 
 
 
-plot_clo_if_VA_CC <- plot_predictions_cloif(model = mod_clo_VA_CC, data = VA_CC)
+plot_clo_if_VA_CC <- plot_predictions_cloif(model = mod_clo_VA_CC, data = VA_CC, minSize, maxSize)
 plot_clo_if_VA_CC
 
 #If you produce clones, does how many clones you make change with size of the mother 
@@ -646,7 +646,7 @@ mod_clo_no_VA_CC <- glm(clo.no ~ 1, family = 'poisson', data = VA_CC)
 CloneNumberChosenModel_VA_CC <- clo.no ~ 1
 
 
-plot_clo_no_VA_CC <- plot_predictions_clono(model = mod_clo_no_VA_CC, data = VA_CC, ylim = 6)
+plot_clo_no_VA_CC <- plot_predictions_clono(model = mod_clo_no_VA_CC, data = VA_CC, minSize, maxSize, ylim = 6)
 plot_clo_no_VA_CC
 
 # Clonal size depending on mother size
@@ -673,7 +673,7 @@ AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_CC_clones))
 mod_clone_growth_VA_CC <- lmer(sizeNext ~ 1 + (1|block_trans), data = VA_CC_clones)
 CloneSizeVariable_VA_CC <- "1"
 
-plot_clone_growth_VA_CC <- plot_predictions_growth(model = mod_clone_growth_VA_CC, data = VA_CC_clones)
+plot_clone_growth_VA_CC <- plot_predictions_growth(model = mod_clone_growth_VA_CC, data = VA_CC_clones, minSize, maxSize)
 plot_clone_growth_VA_CC
 
 #Make clonal object
@@ -747,7 +747,7 @@ AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_CR))
 
 
 mod_surv_VA_CR <- glmer(surv ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR)
-plot_surv_VA_CR <- plot_predictions_surv_precip(model = mod_surv_VA_CR, data = VA_CR)
+plot_surv_VA_CR <- plot_predictions_surv_precip(model = mod_surv_VA_CR, data = VA_CR, minSize, maxSize)
 
 x11()
 plot_surv_VA_CC | plot_surv_VA_CR
@@ -861,7 +861,7 @@ floweringChosenModel_VA_CR <- flo.if ~ size + size2 #Making a mock model, will f
 
 mod_flo_if_VA_CR <- glmer(flo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CR) 
 
-plot_VA_CR_floif <- plot_predictions_floif(model = mod_flo_if_VA_CR, data = VA_CR)
+plot_VA_CR_floif <- plot_predictions_floif(model = mod_flo_if_VA_CR, data = VA_CR, minSize, maxSize)
 
 plot_VA_CR_floif 
 
@@ -885,7 +885,7 @@ flowerNumberChosenModel_VA_CR <- flo.no ~ size
 
 mod_flo_no_VA_CR <- glmer(flo.no ~ size + (1|siteID) + (1|transition), family = 'poisson', data = VA_CR) 
 
-plot_flo_no_VA_CR <-plot_predictions_flono(model = mod_flo_no_VA_CR, data = VA_CR, ylim = 15) 
+plot_flo_no_VA_CR <-plot_predictions_flono(model = mod_flo_no_VA_CR, data = VA_CR, minSize, maxSize, ylim = 15) 
 
 plot_flo_no_VA_CR
 
@@ -940,7 +940,7 @@ mod_clo_VA_CR <- glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'bino
 CloneChosenModel_VA_CR <- clo.if ~ size + size2 
 
 
-plot_clo_if_VA_CR <- plot_predictions_cloif(model = mod_clo_VA_CR, data = VA_CR)
+plot_clo_if_VA_CR <- plot_predictions_cloif(model = mod_clo_VA_CR, data = VA_CR, minSize, maxSize)
 plot_clo_if_VA_CR
 
 #If you produce clones, does how many clones you make change with size of the mother 
@@ -960,7 +960,7 @@ mod_clo_no_VA_CR <- glm(clo.no ~ 1, family = 'poisson', data = VA_CR)
 CloneNumberChosenModel_VA_CR <- clo.no ~ 1
 
 
-plot_clo_no_VA_CR <- plot_predictions_clono(model = mod_clo_no_VA_CR, data = VA_CR, ylim = 6)
+plot_clo_no_VA_CR <- plot_predictions_clono(model = mod_clo_no_VA_CR, data = VA_CR, minSize, maxSize, ylim = 6)
 plot_clo_no_VA_CR
 
 # Clonal size depending on mother size
@@ -988,7 +988,7 @@ AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_CR_clones))
 mod_clone_growth_VA_CR <- lmer(sizeNext ~ size + (1|block_trans), data = VA_CR_clones)
 CloneSizeVariable_VA_CR <- "size"
 
-plot_clone_growth_VA_CR <- plot_predictions_growth(model = mod_clone_growth_VA_CR, data = VA_CR_clones)
+plot_clone_growth_VA_CR <- plot_predictions_growth(model = mod_clone_growth_VA_CR, data = VA_CR_clones, minSize, maxSize)
 plot_clone_growth_VA_CR
 
 
@@ -1054,7 +1054,7 @@ summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_CE))
 AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_CE))
 
 mod_surv_VA_CE <- glmer(surv ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CE)
-plot_surv_VA_CE <- plot_predictions_surv_precip(model = mod_surv_VA_CE, data = VA_CE)
+plot_surv_VA_CE <- plot_predictions_surv_precip(model = mod_surv_VA_CE, data = VA_CE, minSize, maxSize)
 plot_surv_VA_CE
 
 so_VA_CE <- makeSurvObj(VA_CE, "surv ~ size")
@@ -1154,7 +1154,7 @@ glmer(flo.if ~ size+I(size^2) + (1|blockID), family = 'binomial', data = VA_CE, 
 floweringChosenModel_VA_CE <- flo.if ~ size + size2
 mod_flo_if_VA_CE <- glmer(flo.if ~ size+I(size^2) + (1|blockID), family = 'binomial', data = VA_CE)
 
-plot_VA_CE_floif <- plot_predictions_floif(model = mod_flo_if_VA_CE, data = VA_CE)
+plot_VA_CE_floif <- plot_predictions_floif(model = mod_flo_if_VA_CE, data = VA_CE, minSize, maxSize)
 plot_VA_CE_floif
 
 # Choosing the best model for estimating the number of flowers, if an individual flowers
@@ -1174,7 +1174,7 @@ AIC(glmer(flo.no ~ 1 + (1|blockID), family = 'poisson', data = VA_CE))
 flowerNumberChosenModel_VA_CE <- flo.no ~ size
 mod_flo_no_VA_CE <- glmer(flo.no ~ size  + (1|blockID), family = 'poisson', data = VA_CE)
 
-plot_flo_no_VA_CE <-plot_predictions_flono(model = mod_flo_no_VA_CE, data = VA_CE, ylim = 15) 
+plot_flo_no_VA_CE <-plot_predictions_flono(model = mod_flo_no_VA_CE, data = VA_CE, minSize, maxSize, ylim = 15) 
 plot_flo_no_VA_CE
 
 # Make fecundity object
@@ -1228,7 +1228,7 @@ mod_clo_VA_CE <- glmer(clo.if ~ size+I(size^2) + (1|transition), family = 'binom
 CloneChosenModel_VA_CE <- clo.if ~ size + size2 
 
 #Plot for visual checking
-plot_clo_if_VA_CE <- plot_predictions_cloif(model = mod_clo_VA_CE, data = VA_CE)
+plot_clo_if_VA_CE <- plot_predictions_cloif(model = mod_clo_VA_CE, data = VA_CE, minSize, maxSize)
 plot_clo_if_VA_CE
 
 #If you produce clones, does how many clones you make change with size of the mother 
@@ -1247,7 +1247,7 @@ AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_CE))
 mod_clo_no_VA_CE <- glm(clo.no ~ 1, family = 'poisson', data = VA_CE)
 CloneNumberChosenModel_VA_CE <- clo.no ~ 1
 
-plot_clo_no_VA_CE <- plot_predictions_clono(model = mod_clo_no_VA_CE, data = VA_CE, ylim = 6)
+plot_clo_no_VA_CE <- plot_predictions_clono(model = mod_clo_no_VA_CE, data = VA_CE, minSize, maxSize, ylim = 6)
 plot_clo_no_VA_CE
 
 #Does size of the clone depend on size of parent.
@@ -1265,7 +1265,7 @@ AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_CE_clones))
 mod_clone_growth_VA_CE <- lmer(sizeNext ~ size + (1|block_trans), data = VA_CE_clones)
 CloneSizeVariable_VA_CE <- "size"
 
-plot_clone_growth_VA_CE <- plot_predictions_growth(model = mod_clone_growth_VA_CE, data = VA_CE_clones)
+plot_clone_growth_VA_CE <- plot_predictions_growth(model = mod_clone_growth_VA_CE, data = VA_CE_clones, minSize, maxSize)
 plot_clone_growth_VA_CE
 
 #Make clonal object
@@ -1323,7 +1323,7 @@ AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_CN))
 glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN, verbose = TRUE) #Checking for conversion - model seems very stable - conversion OK
 
 mod_surv_VA_CN <- glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN)
-plot_surv_VA_CN <- plot_predictions_surv(model = mod_surv_VA_CN, data = VA_CN)
+plot_surv_VA_CN <- plot_predictions_surv(model = mod_surv_VA_CN, data = VA_CN, minSize, maxSize)
 
 plot_surv_VA_CN
 
@@ -1429,10 +1429,10 @@ AIC(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CN))
  # mod_flo_if_VA_CN2 <- glmer(flo.if ~ size + precip+I(precip^2) + size:precip +  (1|block_trans), family = 'binomial', data = VA_CN)
  # mod_flo_if_VA_CN3 <- glmer(flo.if ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN)
  
- plot_VA_CN_floif <- plot_predictions_floif_precip(model = mod_flo_if_VA_CN, data = VA_CN)
- # plot_VA_CN_floif1 <- plot_predictions_floif_precip(model = mod_flo_if_VA_CN1, data = VA_CN)
- # plot_VA_CN_floif2 <- plot_predictions_floif_precip(model = mod_flo_if_VA_CN2, data = VA_CN)
- # plot_VA_CN_floif3 <- plot_predictions_floif_precip(model = mod_flo_if_VA_CN3, data = VA_CN)
+ plot_VA_CN_floif <- plot_predictions_floif_precip(model = mod_flo_if_VA_CN, data = VA_CN, minSize, maxSize)
+ # plot_VA_CN_floif1 <- plot_predictions_floif_precip(model = mod_flo_if_VA_CN1, data = VA_CN, minSize, maxSize)
+ # plot_VA_CN_floif2 <- plot_predictions_floif_precip(model = mod_flo_if_VA_CN2, data = VA_CN, minSize, maxSize)
+ # plot_VA_CN_floif3 <- plot_predictions_floif_precip(model = mod_flo_if_VA_CN3, data = VA_CN, minSize, maxSize)
  
  plot_VA_CN_floif
  
@@ -1456,7 +1456,7 @@ AIC(glm(flo.no ~ 1, family = 'poisson', data = VA_CN))
 flowerNumberChosenModel_VA_CN <- flo.no ~ size
 mod_flo_no_VA_CN <- glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CN)
 
-plot_flo_no_VA_CN <-plot_predictions_flono_precip(model = mod_flo_no_VA_CN, data = VA_CN, ylim = 15) 
+plot_flo_no_VA_CN <-plot_predictions_flono_precip(model = mod_flo_no_VA_CN, data = VA_CN, minSize, maxSize, ylim = 15) 
 plot_flo_no_VA_CN
 
 # Make fecundity object
@@ -1551,7 +1551,7 @@ AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_CN))
 mod_clo_no_VA_CN <- glm(clo.no ~ 1, family = 'poisson', data = VA_CN)
 CloneNumberChosenModel_VA_CN <- clo.no ~ 1
 
-plot_clo_no_VA_CN <- plot_predictions_clono(model = mod_clo_no_VA_CN, data = VA_CN, ylim = 6)
+plot_clo_no_VA_CN <- plot_predictions_clono(model = mod_clo_no_VA_CN, data = VA_CN, minSize, maxSize, ylim = 6)
 plot_clo_no_VA_CN
 
 #Does size of the clone depend on size of parent.
@@ -1571,7 +1571,7 @@ AIC(lm(sizeNext ~ 1, data = VA_CN_clones))
 mod_clone_growth_VA_CN <- lm(sizeNext ~ size + precip, data = VA_CN_clones)
 CloneSizeVariable_VA_CN <- "size"
 
-plot_clone_growth_VA_CN <- plot_predictions_growth_precip(model = mod_clone_growth_VA_CN, data = VA_CN_clones)
+plot_clone_growth_VA_CN <- plot_predictions_growth_precip(model = mod_clone_growth_VA_CN, data = VA_CN_clones, minSize, maxSize)
 plot_clone_growth_VA_CN
 
 #Make clonal object
@@ -1640,7 +1640,7 @@ summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_WC))
 AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_WC))
 
 mod_surv_VA_WC <- glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_WC)
-plot_surv_VA_WC <- plot_predictions_surv(model = mod_surv_VA_WC, data = VA_WC)
+plot_surv_VA_WC <- plot_predictions_surv(model = mod_surv_VA_WC, data = VA_WC, minSize, maxSize)
 
 plot_surv_VA_WC
 
@@ -1715,7 +1715,7 @@ floweringChosenModel_VA_WC <- flo.if ~ size
 
 mod_flo_if_VA_WC <- glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = VA_WC) 
 
-plot_VA_WC_floif <- plot_predictions_floif(model = mod_flo_if_VA_WC, data = VA_WC)
+plot_VA_WC_floif <- plot_predictions_floif(model = mod_flo_if_VA_WC, data = VA_WC, minSize, maxSize)
 plot_VA_WC_floif 
 
 
@@ -1736,7 +1736,7 @@ flowerNumberChosenModel_VA_WC <- flo.no ~ size
 
 mod_flo_no_VA_WC <- glm(flo.no ~ size, family = 'poisson', data = VA_WC)
 
-plot_flo_no_VA_WC <-plot_predictions_flono(model = mod_flo_no_VA_WC, data = VA_WC, ylim = 15) 
+plot_flo_no_VA_WC <-plot_predictions_flono(model = mod_flo_no_VA_WC, data = VA_WC, minSize, maxSize, ylim = 15) 
 
 plot_flo_no_VA_WC
 
@@ -1794,7 +1794,7 @@ mod_clo_VA_WC <- glmer(clo.if ~ size+I(size^2) + (1|site_trans), family = 'binom
 CloneChosenModel_VA_WC <- clo.if ~ size + size2 
 
 #Plot for visual checking
-plot_clo_if_VA_WC <- plot_predictions_cloif(model = mod_clo_VA_WC, data = VA_WC)
+plot_clo_if_VA_WC <- plot_predictions_cloif(model = mod_clo_VA_WC, data = VA_WC, minSize, maxSize)
 plot_clo_if_VA_WC
 
 #If you produce clones, does how many clones you make change with size of the mother 
@@ -1813,7 +1813,7 @@ AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_WC))
 mod_clo_no_VA_WC <- glm(clo.no ~ 1, family = 'poisson', data = VA_WC)
 CloneNumberChosenModel_VA_WC <- clo.no ~ 1
 
-plot_clo_no_VA_WC <- plot_predictions_clono(model = mod_clo_no_VA_WC, data = VA_WC, ylim = 6)
+plot_clo_no_VA_WC <- plot_predictions_clono(model = mod_clo_no_VA_WC, data = VA_WC, minSize, maxSize, ylim = 6)
 plot_clo_no_VA_WC
 
 #Does size of the clone depend on size of parent.
@@ -1832,7 +1832,7 @@ AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_WC_clones))
 mod_clone_growth_VA_WC <- lmer(sizeNext ~ size + precip+I(precip^2) + (1|block_trans), data = VA_WC_clones)
 CloneSizeVariable_VA_WC <- "size"
 
-plot_clone_growth_VA_WC <- plot_predictions_growth_precip(model = mod_clone_growth_VA_WC, data = VA_WC_clones)
+plot_clone_growth_VA_WC <- plot_predictions_growth_precip(model = mod_clone_growth_VA_WC, data = VA_WC_clones, minSize, maxSize)
 plot_clone_growth_VA_WC
 
 #Make clonal object
@@ -1904,7 +1904,7 @@ summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_WR))
 AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_WR))
 
 mod_surv_VA_WR <- glmer(surv ~ size + (1|block_trans), family = 'binomial', data = VA_WR)
-plot_surv_VA_WR <- plot_predictions_surv(model = mod_surv_VA_WR, data = VA_WR)
+plot_surv_VA_WR <- plot_predictions_surv(model = mod_surv_VA_WR, data = VA_WR, minSize, maxSize)
 
 plot_surv_VA_WR
 
@@ -1998,7 +1998,7 @@ floweringChosenModel_VA_WR <- flo.if ~ size
 
 mod_flo_if_VA_WR <- glmer(flo.if ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WR) 
 
-plot_VA_WR_floif <- plot_predictions_floif_precip(model = mod_flo_if_VA_WR, data = VA_WR)
+plot_VA_WR_floif <- plot_predictions_floif_precip(model = mod_flo_if_VA_WR, data = VA_WR, minSize, maxSize)
 plot_VA_WR_floif 
 
 
@@ -2019,7 +2019,7 @@ flowerNumberChosenModel_VA_WR <- flo.no ~ size
 
 mod_flo_no_VA_WR <- glm(flo.no ~ size, family = 'poisson', data = VA_WR)
 
-plot_flo_no_VA_WR <-plot_predictions_flono(model = mod_flo_no_VA_WR, data = VA_WR, ylim = 15) 
+plot_flo_no_VA_WR <-plot_predictions_flono(model = mod_flo_no_VA_WR, data = VA_WR, minSize, maxSize, ylim = 15) 
 plot_flo_no_VA_WR
 
 # Make fecundity object
@@ -2087,7 +2087,7 @@ mod_clo_VA_WR <- glm(clo.if ~ size+I(size^2), family = 'binomial', data = VA_WR)
 CloneChosenModel_VA_WR <- clo.if ~ size + size2 
 
 #Plot for visual checking
-plot_clo_if_VA_WR <- plot_predictions_cloif(model = mod_clo_VA_WR, data = VA_WR)
+plot_clo_if_VA_WR <- plot_predictions_cloif(model = mod_clo_VA_WR, data = VA_WR, minSize, maxSize)
 plot_clo_if_VA_WR
 
 #If you produce clones, does how many clones you make change with size of the mother 
@@ -2107,7 +2107,7 @@ AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_WR))
 mod_clo_no_VA_WR <- glm(clo.no ~ 1, family = 'poisson', data = VA_WR)
 CloneNumberChosenModel_VA_WR <- clo.no ~ 1
 
-plot_clo_no_VA_WR <- plot_predictions_clono(model = mod_clo_no_VA_WR, data = VA_WR, ylim = 6)
+plot_clo_no_VA_WR <- plot_predictions_clono(model = mod_clo_no_VA_WR, data = VA_WR, minSize, maxSize, ylim = 6)
 plot_clo_no_VA_WR
 
 #Does size of the clone depend on size of parent.
@@ -2126,7 +2126,7 @@ AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_WR_clones))
 mod_clone_growth_VA_WR <- lmer(sizeNext ~ 1 + (1|block_trans), data = VA_WR_clones)
 CloneSizeVariable_VA_WR <- "1"
 
-plot_clone_growth_VA_WR <- plot_predictions_growth(model = mod_clone_growth_VA_WR, data = VA_WR_clones)
+plot_clone_growth_VA_WR <- plot_predictions_growth(model = mod_clone_growth_VA_WR, data = VA_WR_clones, minSize, maxSize)
 plot_clone_growth_VA_WR
 
 #Make clonal object
@@ -2185,7 +2185,7 @@ summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_WE))
 AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_WE))
 
 mod_surv_VA_WE <- glmer(surv ~ size + (1|block_trans), family = 'binomial', data = VA_WE)
-plot_surv_VA_WE <- plot_predictions_surv(model = mod_surv_VA_WE, data = VA_WE)
+plot_surv_VA_WE <- plot_predictions_surv(model = mod_surv_VA_WE, data = VA_WE, minSize, maxSize)
 
 plot_surv_VA_WE
 
@@ -2277,7 +2277,7 @@ floweringChosenModel_VA_WE <- flo.if ~ size
 
 mod_flo_if_VA_WE <- glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = VA_WE) 
 
-plot_VA_WE_floif <- plot_predictions_floif(model = mod_flo_if_VA_WE, data = VA_WE)
+plot_VA_WE_floif <- plot_predictions_floif(model = mod_flo_if_VA_WE, data = VA_WE, minSize, maxSize)
 plot_VA_WE_floif 
 
 
@@ -2297,7 +2297,7 @@ flowerNumberChosenModel_VA_WE <- flo.no ~ size
 
 mod_flo_no_VA_WE <- glmer(flo.no ~ size + (1|block_trans), family = 'poisson', data = VA_WE)
 
-plot_flo_no_VA_WE <-plot_predictions_flono(model = mod_flo_no_VA_WE, data = VA_WE, ylim = 15) 
+plot_flo_no_VA_WE <-plot_predictions_flono(model = mod_flo_no_VA_WE, data = VA_WE, minSize, maxSize, ylim = 15) 
 plot_flo_no_VA_WE
 
 # Make fecundity object
@@ -2350,7 +2350,7 @@ mod_clo_VA_WE <- glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'bino
 CloneChosenModel_VA_WE <- clo.if ~ size + size2 
 
 #Plot for visual checking
-plot_clo_if_VA_WE <- plot_predictions_cloif(model = mod_clo_VA_WE, data = VA_WE)
+plot_clo_if_VA_WE <- plot_predictions_cloif(model = mod_clo_VA_WE, data = VA_WE, minSize, maxSize)
 plot_clo_if_VA_WE
 
 #If you produce clones, does how many clones you make change with size of the mother 
@@ -2369,7 +2369,7 @@ AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_WE))
 mod_clo_no_VA_WE <- glm(clo.no ~ 1, family = 'poisson', data = VA_WE)
 CloneNumberChosenModel_VA_WE <- clo.no ~ 1
 
-plot_clo_no_VA_WE <- plot_predictions_clono(model = mod_clo_no_VA_WE, data = VA_WE, ylim = 6)
+plot_clo_no_VA_WE <- plot_predictions_clono(model = mod_clo_no_VA_WE, data = VA_WE, minSize, maxSize, ylim = 6)
 plot_clo_no_VA_WE
 
 #Does size of the clone depend on size of parent.
@@ -2388,7 +2388,7 @@ AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_WE_clones))
 mod_clone_growth_VA_WE <- lmer(sizeNext ~ 1 + (1|block_trans), data = VA_WE_clones)
 CloneSizeVariable_VA_WE <- "1"
 
-plot_clone_growth_VA_WE <- plot_predictions_growth(model = mod_clone_growth_VA_WE, data = VA_WE_clones)
+plot_clone_growth_VA_WE <- plot_predictions_growth(model = mod_clone_growth_VA_WE, data = VA_WE_clones, minSize, maxSize)
 plot_clone_growth_VA_WE
 
 #Make clonal object
@@ -2446,7 +2446,7 @@ summary(glmer(surv ~ 1 + (1|site_trans), family = 'binomial', data = VA_WN))
 AIC(glmer(surv ~ 1 + (1|site_trans), family = 'binomial', data = VA_WN))
 
 mod_surv_VA_WN <- glmer(surv ~ size + (1|site_trans), family = 'binomial', data = VA_WN)
-plot_surv_VA_WN <- plot_predictions_surv(model = mod_surv_VA_WN, data = VA_WN)
+plot_surv_VA_WN <- plot_predictions_surv(model = mod_surv_VA_WN, data = VA_WN, minSize, maxSize)
 
 plot_surv_VA_WN
 
@@ -2539,7 +2539,7 @@ floweringChosenModel_VA_WN <- flo.if ~ size
 
 mod_flo_if_VA_WN <- glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = VA_WN)
 
-plot_VA_WN_floif <- plot_predictions_floif_precip(model = mod_flo_if_VA_WN, data = VA_WN)
+plot_VA_WN_floif <- plot_predictions_floif_precip(model = mod_flo_if_VA_WN, data = VA_WN, minSize, maxSize)
 plot_VA_WN_floif 
 
 
@@ -2560,7 +2560,7 @@ flowerNumberChosenModel_VA_WN <- flo.no ~ size
 
 mod_flo_no_VA_WN <- glm(flo.no ~ size, family = 'poisson', data = VA_WN)
 
-plot_flo_no_VA_WN <-plot_predictions_flono(model = mod_flo_no_VA_WN, data = VA_WN, ylim = 15) 
+plot_flo_no_VA_WN <-plot_predictions_flono(model = mod_flo_no_VA_WN, data = VA_WN, minSize, maxSize, ylim = 15) 
 plot_flo_no_VA_WN
 
 # Make fecundity object
@@ -2631,7 +2631,7 @@ mod_clo_VA_WN <- glmer(clo.if ~ size+I(size^2) + (1|blockID), family = 'binomial
 CloneChosenModel_VA_WN <- clo.if ~ size + size2 
 
 #Plot for visual checking
-plot_clo_if_VA_WN <- plot_predictions_cloif(model = mod_clo_VA_WN, data = VA_WN)
+plot_clo_if_VA_WN <- plot_predictions_cloif(model = mod_clo_VA_WN, data = VA_WN, minSize, maxSize)
 plot_clo_if_VA_WN
 
 #If you produce clones, does how many clones you make change with size of the mother 
@@ -2650,7 +2650,7 @@ AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_WN))
 mod_clo_no_VA_WN <- glm(clo.no ~ 1, family = 'poisson', data = VA_WN)
 CloneNumberChosenModel_VA_WN <- clo.no ~ 1
 
-plot_clo_no_VA_WN <- plot_predictions_clono(model = mod_clo_no_VA_WN, data = VA_WN, ylim = 6)
+plot_clo_no_VA_WN <- plot_predictions_clono(model = mod_clo_no_VA_WN, data = VA_WN, minSize, maxSize, ylim = 6)
 plot_clo_no_VA_WN
 
 #Does size of the clone depend on size of parent.
@@ -2669,7 +2669,7 @@ AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_WN_clones))
 mod_clone_growth_VA_WN <- lmer(sizeNext ~ size + precip + (1|block_trans), data = VA_WN_clones)
 CloneSizeVariable_VA_WN <- "size"
 
-plot_clone_growth_VA_WN <- plot_predictions_growth_precip(model = mod_clone_growth_VA_WN, data = VA_WN_clones)
+plot_clone_growth_VA_WN <- plot_predictions_growth_precip(model = mod_clone_growth_VA_WN, data = VA_WN_clones, minSize, maxSize)
 plot_clone_growth_VA_WN
 
 #Make clonal object
