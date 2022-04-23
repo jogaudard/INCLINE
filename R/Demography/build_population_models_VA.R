@@ -15,6 +15,7 @@ library(IPMpack)
 library(fields)
 library(conflicted)
 library(patchwork)
+library(arm)
 
 #### Select preferences for conflicts ####
 
@@ -619,28 +620,28 @@ mod_clo_VA_CC <- glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'bino
 CloneChosenModel_VA_CC <- clo.if ~ size + size2 
 
 
-pclo1 <- plot_predictions_cloif(model = mod_clo_VA_CC, data = VA_CC)
-pclo1
+plot_clo_if_VA_CC <- plot_predictions_cloif(model = mod_clo_VA_CC, data = VA_CC)
+plot_clo_if_VA_CC
 
 #If you produce clones, does how many clones you make change with size of the mother 
+# Running linear mixed effects models because all the random effects gave singularity warning. I tried block_trans, site_trans, transition + blockID, transition + siteID, transition, blockID and siteID.
+summary(glm(clo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = VA_CC))
+AIC(glm(clo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = VA_CC))
+summary(glm(clo.no ~ size+I(size^2) + precip, family = 'poisson', data = VA_CC))
+AIC(glm(clo.no ~ size+I(size^2) + precip, family = 'poisson', data = VA_CC))
+summary(glm(clo.no ~ size + precip, family = 'poisson', data = VA_CC))
+AIC(glm(clo.no ~ size + precip, family = 'poisson', data = VA_CC))
+summary(glm(clo.no ~ size, family = 'poisson', data = VA_CC))
+AIC(glm(clo.no ~ size, family = 'poisson', data = VA_CC))
+summary(glm(clo.no ~ 1, family = 'poisson', data = VA_CC))
+AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_CC))
 
-summary(glmer(clo.no ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'poisson', data = VA_CC))
-AIC(glmer(clo.no ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'poisson', data = VA_CC))
-summary(glmer(clo.no ~ size+I(size^2) + precip + (1|block_trans), family = 'poisson', data = VA_CC))
-AIC(glmer(clo.no ~ size+I(size^2) + precip + (1|block_trans), family = 'poisson', data = VA_CC))
-summary(glmer(clo.no ~ size + precip + (1|block_trans), family = 'poisson', data = VA_CC))
-AIC(glmer(clo.no ~ size + precip + (1|block_trans), family = 'poisson', data = VA_CC))
-summary(glmer(clo.no ~ size + (1|block_trans), family = 'poisson', data = VA_CC))
-AIC(glmer(clo.no ~ size + (1|block_trans), family = 'poisson', data = VA_CC))
-summary(glmer(clo.no ~ 1 + (1|block_trans), family = 'poisson', data = VA_CC))
-AIC(glmer(clo.no ~ 1 + (1|block_trans), family = 'poisson', data = VA_CC))
-
-mod_clo_no_VA_CC <- glmer(clo.no ~ 1 + (1|block_trans), family = 'poisson', data = VA_CC)
+mod_clo_no_VA_CC <- glm(clo.no ~ 1, family = 'poisson', data = VA_CC)
 CloneNumberChosenModel_VA_CC <- clo.no ~ 1
 
 
-pclo2 <- plot_predictions_clono(model = mod_clo_no_VA_CC, data = VA_CC)
-pclo2
+plot_clo_no_VA_CC <- plot_predictions_clono(model = mod_clo_no_VA_CC, data = VA_CC)
+plot_clo_no_VA_CC
 
 # Clonal size depending on mother size
 # x11()
@@ -667,18 +668,15 @@ mod_clone_growth_VA_CC <- lmer(sizeNext ~ 1 + (1|block_trans), data = VA_CC_clon
 CloneSizeVariable_VA_CC <- "1"
 
 plot_clone_growth_VA_CC <- plot_predictions_growth(model = mod_clone_growth_VA_CC, data = VA_CC_clones)
-
 plot_clone_growth_VA_CC
 
 #Make clonal object
 co_VA_CC <- makeClonalObj(VA_CC, fecConstants=data.frame(correctionForOrphans= 1/(1-VA_CC_clones$prop_orphan[1])),
                           offspringSizeExplanatoryVariables = CloneSizeVariable_VA_CC, Formula = c(CloneChosenModel_VA_CC, CloneNumberChosenModel_VA_CC),
                           Family = c("binomial","poisson"), Transform=c("none","none"),offspringSplitter=data.frame(seedbank=0,continuous=1))
-#,offspringSplitter=data.frame(seedbank=0,continuous=1)
-
 
 co_VA_CC@fitFec[[1]]$coefficients <- as.numeric(fixef(mod_clo_VA_CC))
-co_VA_CC@fitFec[[2]]$coefficients <- as.numeric(fixef(mod_clo_no_VA_CC))
+co_VA_CC@fitFec[[2]]$coefficients <- as.numeric(coef(mod_clo_no_VA_CC)) #not really needed since this is a linear model
 co_VA_CC@offspringRel$coefficients <- as.numeric(fixef(mod_clone_growth_VA_CC))
 co_VA_CC@sdOffspringSize <- sigma.hat(mod_clone_growth_VA_CC)$sigma$data
 co_VA_CC <- co_VA_CC
