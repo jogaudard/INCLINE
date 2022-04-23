@@ -695,19 +695,22 @@ contourPlot2(t(Cmatrix_VA_CC), Cmatrix_VA_CC@meshpoints, maxSize, 0.03, 0, title
 
 #### Build IPM ####
 IPM_VA_CC_precip1 <- Pmatrix_VA_CC_precip1 + Fmatrix_VA_CC_precip1 + Cmatrix_VA_CC
-contourPlot2(t(IPM_VA_CC_precip1, Pmatrix_VA_CC@meshpoints, maxSize, 0.03, 0))
+#contourPlot2(t( M = IPM_VA_CC_precip1, meshpts = Pmatrix_VA_CC_precip1@meshpoints, maxSize = maxSize, lower = 0.03, upper = 0))
+IPM_plot(IPM_control = IPM_VA_CC_precip1, minSize = minSize, maxSize = maxSize, zrange = c(-0.03, 0.04)) + ggtitle("Veronica alpina CC precip 1.2 m/year")
 persp(IPM_VA_CC_precip1)
 as.numeric(eigen(IPM_VA_CC_precip1)$value[1])
 
 
 IPM_VA_CC_precip2 <- Pmatrix_VA_CC_precip2 + Fmatrix_VA_CC_precip2 + Cmatrix_VA_CC
 image(t(IPM_VA_CC_precip2))
+IPM_plot(IPM_control = IPM_VA_CC_precip2, minSize = minSize, maxSize = maxSize, zrange = c(-0.03, 0.04)) + ggtitle("Veronica alpina CC precip 2.3 m/year")
 persp(IPM_VA_CC_precip2)
 as.numeric(eigen(IPM_VA_CC_precip2)$value[1])
 
 
 IPM_VA_CC_precip3 <- Pmatrix_VA_CC_precip3 + Fmatrix_VA_CC_precip3 + Cmatrix_VA_CC
 image(t(IPM_VA_CC_precip3))
+IPM_plot(IPM_control = IPM_VA_CC_precip3, minSize = minSize, maxSize = maxSize, zrange = c(-0.03, 0.04)) + ggtitle("Veronica alpina CC precip 3.4 m/year")
 persp(IPM_VA_CC_precip3)
 as.numeric(eigen(IPM_VA_CC_precip3)$value[1])
 
