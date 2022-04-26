@@ -719,10 +719,26 @@ LTRE_treatments %>%
   mutate(treatment = factor(treatment, levels = c("CE - CC", "CN - CC", "CR - CC", "WE - CC", "WN - CC", "WR - CC", "WE - WC", "WN - WC", "WR - WC", "WC - CC"))) %>% 
 ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
   geom_bar(position="stack", stat="identity") +
-  geom_point(aes(y = lamda_difference)) +
+  geom_point(aes(y = lamda_difference, color = "lambda difference")) +
   geom_hline(yintercept = 0) +
   facet_wrap(~treatment, ncol = 3) +
-  theme_bw()
+  theme_bw() +
+  scale_fill_manual(values = c("#DEDEDE", "#A1A1A1", "#6E6E6E", "#000000")) +
+  scale_color_manual(values = "#B50E00")
+
+Susanne_plot <- LTRE_treatments %>% 
+  mutate(treatment = factor(treatment, levels = c("CE - CC", "CN - CC", "CR - CC", "WE - CC", "WN - CC", "WR - CC", "WE - WC", "WN - WC", "WR - WC", "WC - CC"))) %>% 
+  filter(treatment %in% c("CN - CC", "WC - CC", "WN - CC", "WN - WC")) %>% 
+  mutate(treatment = factor(treatment, levels = c("CN - CC", "WC - CC", "WN - WC", "WN - CC"))) %>% 
+  ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
+  geom_bar(position="stack", stat="identity") +
+  geom_point(aes(y = lamda_difference)) +
+  geom_hline(yintercept = 0) +
+  facet_wrap(~treatment, ncol = 4) +
+  theme_bw() +
+  scale_fill_manual(values = c("#DEDEDE","#6D64E4", "#A1A1A1", "#6E6E6E"))
+
+ggsave(Susanne_plot, filename = "Ver_alp_fecundity.pdf", width = 24, height = 10, units = "cm")
 
 #### Precipitation ####
 #Making LTRE comparisons between precipitation levels within treatments
