@@ -23,6 +23,8 @@ conflict_prefer("select", "dplyr")
 conflict_prefer("lmer", "lmerTest")
 
 #### Functions ####
+Precip_palette <- c("#BAD8F7", "#89B7E1", "#2E75B6", "#213964")
+Precip_palette_black <- c("#BAD8F7", "#89B7E1", "#2E75B6", "#213964", "#000000")
 
 plot_predictions_surv <-function(model, data, minSize, maxSize) {
    
@@ -32,10 +34,13 @@ plot_predictions_surv <-function(model, data, minSize, maxSize) {
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
    
    plot <- data %>% 
-      ggplot(aes(x = size, y = surv)) +
+      ggplot(aes(x = size, y = surv, color = as.factor(precip))) +
       geom_jitter(height = 0.1) +
-      geom_line(aes(x = size, y = predicted), data=newdata, size = 1, show.legend = TRUE) +
-      ggtitle(paste0("AIC =", AIC(model)))
+      geom_line(aes(x = size, y = predicted, color = "black"), data=newdata, size = 1, show.legend = TRUE) +
+      ggtitle(paste0("AIC =", AIC(model))) +
+      scale_color_manual(values = Precip_palette_black)+
+      theme_minimal()
+      
    
    
    return(plot)
@@ -53,7 +58,9 @@ plot_predictions_surv_precip <-function(model, data, minSize, maxSize) {
       ggplot(aes(x = size, y = surv, color = as.factor(precip))) +
       geom_jitter(height = 0.1) +
       geom_line(aes(x = size, y = predicted, color = factor(precip)), data=newdata, size = 1, show.legend = TRUE) +
-      ggtitle(paste0("AIC =", AIC(model)))
+      ggtitle(paste0("AIC =", AIC(model))) +
+      scale_color_manual(values = Precip_palette) +
+      theme_minimal()
    
    
    return(plot)
@@ -74,7 +81,9 @@ plot_predictions_growth_precip <-function(model, data, minSize, maxSize) {
       geom_line(aes(x = size, y = predicted, color = factor(precip)), data=newdata, size = 1, show.legend = TRUE) +
       ggtitle(paste0("AIC =", AIC(model))) +
       geom_abline() +
-      ylim(minSize, maxSize)
+      ylim(minSize, maxSize) +
+      scale_color_manual(values = Precip_palette) +
+      theme_minimal()
    
    
    return(plot)
@@ -88,12 +97,14 @@ plot_predictions_growth <-function(model, data, minSize, maxSize) {
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
    
    plot <- data %>% 
-      ggplot(aes(x = size, y = sizeNext)) +
+      ggplot(aes(x = size, y = sizeNext, color = as.factor(precip))) +
       geom_jitter(height = 0.1) +
-      geom_line(aes(x = size, y = predicted), data=newdata, size = 1, show.legend = TRUE) +
+      geom_line(aes(x = size, y = predicted, color = "black"), data=newdata, size = 1, show.legend = TRUE) +
       ggtitle(paste0("AIC =", AIC(model))) +
       geom_abline() +
-      ylim(minSize, maxSize)
+      ylim(minSize, maxSize) +
+      scale_color_manual(values = Precip_palette_black) +
+      theme_minimal()
    
    
    return(plot)
@@ -112,7 +123,9 @@ plot_predictions_floif_precip <-function(model, data, minSize, maxSize) {
       ggplot(aes(x = size, y = flo.if, color = as.factor(precip))) +
       geom_jitter(height = 0.1) +
       geom_line(aes(x = size, y = predicted, color = factor(precip)), data=newdata, size = 1, show.legend = TRUE) +
-      ggtitle(paste0("AIC =", AIC(model)))
+      ggtitle(paste0("AIC =", AIC(model))) +
+      scale_color_manual(values = Precip_palette)+
+      theme_minimal()
    
    
    return(plot)
@@ -126,10 +139,12 @@ plot_predictions_floif <-function(model, data, minSize, maxSize) {
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
    
    plot <- data %>% 
-      ggplot(aes(x = size, y = flo.if)) +
+      ggplot(aes(x = size, y = flo.if, color = as.factor(precip))) +
       geom_jitter(height = 0.1) +
-      geom_line(aes(x = size, y = predicted), data=newdata, size = 1, show.legend = TRUE) +
-      ggtitle(paste0("AIC =", AIC(model)))
+      geom_line(aes(x = size, y = predicted, color = "black"), data=newdata, size = 1, show.legend = TRUE) +
+      ggtitle(paste0("AIC =", AIC(model))) +
+      scale_color_manual(values = Precip_palette_black)+
+      theme_minimal()
    
    
    return(plot)
@@ -148,7 +163,9 @@ plot_predictions_flono_precip <-function(model, data, minSize, maxSize, ylim) {
       geom_jitter(height = 0.1) +
       geom_line(aes(x = size, y = predicted, color = factor(precip)), data=newdata, size = 1, show.legend = TRUE) +
       ggtitle(paste0("AIC =", AIC(model))) +
-      ylim(0, ylim)
+      ylim(0, ylim) +
+      scale_color_manual(values = Precip_palette)+
+      theme_minimal()
    
    
    return(plot)
@@ -162,11 +179,13 @@ plot_predictions_flono <-function(model, data, minSize, maxSize, ylim) {
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
    
    plot <- data %>% 
-      ggplot(aes(x = size, y = flo.no)) +
+      ggplot(aes(x = size, y = flo.no, color = as.factor(precip))) +
       geom_jitter(height = 0.1) +
-      geom_line(aes(x = size, y = predicted), data=newdata, size = 1, show.legend = TRUE) +
+      geom_line(aes(x = size, y = predicted, color = "black"), data=newdata, size = 1, show.legend = TRUE) +
       ggtitle(paste0("AIC =", AIC(model))) +
-      ylim(0, ylim)
+      ylim(0, ylim) +
+      scale_color_manual(values = Precip_palette_black) +
+      theme_minimal()
    
    
    return(plot)
@@ -184,7 +203,9 @@ plot_predictions_cloif_precip <-function(model, data, minSize, maxSize) {
       ggplot(aes(x = size, y = clo.if, color = as.factor(precip))) +
       geom_jitter(height = 0.1) +
       geom_line(aes(x = size, y = predicted, color = factor(precip)), data=newdata, size = 1, show.legend = TRUE) +
-      ggtitle(paste0("AIC =", AIC(model)))
+      ggtitle(paste0("AIC =", AIC(model))) +
+      scale_color_manual(values = Precip_palette) +
+      theme_minimal()
    
    
    return(plot)
@@ -198,10 +219,12 @@ plot_predictions_cloif <-function(model, data, minSize, maxSize) {
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
    
    plot <- data %>% 
-      ggplot(aes(x = size, y = clo.if)) +
+      ggplot(aes(x = size, y = clo.if, color = as.factor(precip))) +
       geom_jitter(height = 0.1) +
-      geom_line(aes(x = size, y = predicted), data=newdata, size = 1, show.legend = TRUE) +
-      ggtitle(paste0("AIC =", AIC(model)))
+      geom_line(aes(x = size, y = predicted, color = "black"), data=newdata, size = 1, show.legend = TRUE) +
+      ggtitle(paste0("AIC =", AIC(model))) +
+      scale_color_manual(values = Precip_palette_black) +
+      theme_minimal()
    
    
    return(plot)
@@ -220,7 +243,9 @@ plot_predictions_clono_precip <-function(model, data, minSize, maxSize, ylim) {
       geom_jitter(height = 0.1) +
       geom_line(aes(x = size, y = predicted, color = factor(precip)), data=newdata, size = 1, show.legend = TRUE) +
       ggtitle(paste0("AIC =", AIC(model))) +
-      ylim(0, ylim)
+      ylim(0, ylim) +
+      scale_color_manual(values = Precip_palette) +
+      theme_minimal()
    
    
    return(plot)
@@ -234,11 +259,13 @@ plot_predictions_clono <-function(model, data, minSize, maxSize, ylim) {
    newdata$predicted <- predict(object = model, newdata = newdata, re.form = NA, allow.new.levels=TRUE, type = "response")
    
    plot <- data %>% 
-      ggplot(aes(x = size, y = clo.no)) +
+      ggplot(aes(x = size, y = clo.no, color = as.factor(precip))) +
       geom_jitter(height = 0.1) +
-      geom_line(aes(x = size, y = predicted), data=newdata, size = 1, show.legend = TRUE) +
+      geom_line(aes(x = size, y = predicted, color = "black"), data=newdata, size = 1, show.legend = TRUE) +
       ggtitle(paste0("AIC =", AIC(model))) +
-      ylim(0, ylim)
+      ylim(0, ylim) +
+      scale_color_manual(values = Precip_palette_black) +
+      theme_minimal()
    
    
    return(plot)
@@ -282,7 +309,7 @@ plot <- ggplot(long_data, aes(x = sizeNext, y = size)) +
 return(plot);
 }
 
-IPM_plot(IPM_control = IPM_VA_CC_precip2, minSize = minSize, maxSize = maxSize, zrange = c(0, 0.03)) + ggtitle("VA CC precip 2.3 m/year")
+# IPM_plot(IPM_control = IPM_VA_CC_precip2, minSize = minSize, maxSize = maxSize, zrange = c(0, 0.03)) + ggtitle("VA CC precip 2.3 m/year")
 
 #### Downloading data from OSF ####
 
@@ -1532,7 +1559,7 @@ mod_clo_VA_CN <- glm(clo.if ~ size+I(size^2) , family = 'binomial', data = VA_CN
 CloneChosenModel_VA_CN <- clo.if ~ size + size2 
 
 #Plot for visual checking
-plot_clo_if_VA_CN <- plot_predictions_cloif(model = mod_clo_VA_CN, data = VA_CN)
+plot_clo_if_VA_CN <- plot_predictions_cloif(model = mod_clo_VA_CN, data = VA_CN, minSize, maxSize)
 plot_clo_if_VA_CN
 
 #If you produce clones, does how many clones you make change with size of the mother 
@@ -1551,7 +1578,7 @@ AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_CN))
 mod_clo_no_VA_CN <- glm(clo.no ~ 1, family = 'poisson', data = VA_CN)
 CloneNumberChosenModel_VA_CN <- clo.no ~ 1
 
-plot_clo_no_VA_CN <- plot_predictions_clono(model = mod_clo_no_VA_CN, data = VA_CN, minSize, maxSize, ylim = 6)
+plot_clo_no_VA_CN <- plot_predictions_clono(model = mod_clo_no_VA_CN, data = VA_CN, minSize = minSize, maxSize = maxSize, ylim = 6)
 plot_clo_no_VA_CN
 
 #Does size of the clone depend on size of parent.
