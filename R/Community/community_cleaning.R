@@ -53,6 +53,16 @@ community$subPlotID = paste(substr(community$Site,1,3),
                             community$plot,
                             community$subPlot,
                             sep = '_')
+
+# check for duplicates and remove them 
+community18 <- subset(community,year==2018) # subset because years cause replicates
+rows <- which(duplicated(community18$subPlotID)==TRUE) # row numbers that contain duplicates
+# In Lav block 4, plot 6 is repeated!
+community18 <- community18[-rows,] # remove the duplicates
+community <- community[!community$year==2018,] # remove 2018 data from whole data set
+community <- rbind(community18,community) # and bind it back together (NB in a different order than before, might need some sorting)
+
+
 # reorder and select columns to keep
 community <- community %>%
   select(subPlotID,Site,Block,plot,subPlot,
