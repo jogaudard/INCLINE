@@ -458,7 +458,7 @@ AIC(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_WC))
 
 floweringChosenModel_SP_WC <- flo.if ~ size
 
-mod_flo_if_SP_WC <- glmer(flo.if ~ size + precip+ (1|block_trans), family = 'binomial', data = SP_WC) 
+mod_flo_if_SP_WC <- glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = SP_WC) 
 
 par(mfrow=c(1,1))
 
@@ -502,13 +502,28 @@ fo_SP_WC <-makeFecObj(SP_WC,
                       vitalRatesPerOffspringType = data.frame(seedbank=c(1,1,1,0), continuous=c(1,1,1,1),
                                                               row.names=c("flo.if","flo.no","seedsPerCap","seedlingEstablishmentRate")))
 
-fo_SP_WC@fitFec[[1]]$coefficients <- as.numeric(fixef(mod_flo_if_SP_WC))
 fo_SP_WC@fitFec[[2]]$coefficients <- as.numeric(coef(mod_flo_no_SP_WC))
+fo_SP_WC@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_SP_WC)[1]) + 1.2*as.numeric(fixef(mod_flo_if_SP_WC)[3]),
+                                       as.numeric(fixef(mod_flo_if_SP_WC)[2]))
 
-Fmatrix_SP_WC <- makeIPMFmatrix(fecObj=fo_SP_WC, minSize=minSize_SP, maxSize=maxSize_SP, correction = "continuous", nBigMatrix = 100)
+fo_SP_WC_precip1 <- fo_SP_WC
+
+fo_SP_WC@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_SP_WC)[1]) + 2.3*as.numeric(fixef(mod_flo_if_SP_WC)[3]),
+                                       as.numeric(fixef(mod_flo_if_SP_WC)[2]))
+
+fo_SP_WC_precip2 <- fo_SP_WC
+
+fo_SP_WC@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_SP_WC)[1]) + 3.4*as.numeric(fixef(mod_flo_if_SP_WC)[3]),
+                                       as.numeric(fixef(mod_flo_if_SP_WC)[2]))
+
+fo_SP_WC_precip3 <- fo_SP_WC
+
+Fmatrix_SP_WC_precip1 <- makeIPMFmatrix(fecObj=fo_SP_WC_precip1, minSize=minSize_SP, maxSize=maxSize_SP, correction = "continuous", nBigMatrix = 100)
+Fmatrix_SP_WC_precip2 <- makeIPMFmatrix(fecObj=fo_SP_WC_precip2, minSize=minSize_SP, maxSize=maxSize_SP, correction = "continuous", nBigMatrix = 100)
+Fmatrix_SP_WC_precip3 <- makeIPMFmatrix(fecObj=fo_SP_WC_precip3, minSize=minSize_SP, maxSize=maxSize_SP, correction = "continuous", nBigMatrix = 100)
 
 #Plotting the matrix
-contourPlot2(t(Fmatrix_SP_WC), Fmatrix_SP_WC@meshpoints, maxSize, 0.003, 0, title = "Fmatrix: flower and seedlings")
+contourPlot2(t(Fmatrix_SP_WC_precip1), Fmatrix_SP_WC@meshpoints, maxSize, 0.003, 0, title = "Fmatrix: flower and seedlings")
 
 # image.plot(Fmatrix_VA_WC@meshpoints,
 #            Fmatrix_VA_WC@meshpoints,
@@ -532,11 +547,11 @@ SP_WC_clones <- SP_WC %>%
 
 #Is the production of clones size dependent
 #Running linear mixed effects models because all the random effects gave singularity warning. I tried block_trans, site_trans, transition + blockID, transition + siteID, transition, blockID and siteID.
-summary(glm(clo.if ~ size+I(size^2) + precip+I(precip^2), family = 'binomial', data = SP_WC)) #Choosing this model based of AIC
+summary(glm(clo.if ~ size+I(size^2) + precip+I(precip^2), family = 'binomial', data = SP_WC)) 
 AIC(glm(clo.if ~ size+I(size^2) + precip+I(precip^2) , family = 'binomial', data = SP_WC))
 summary(glm(clo.if ~ size+I(size^2) + precip , family = 'binomial', data = SP_WC))
 AIC(glm(clo.if ~ size+I(size^2) + precip , family = 'binomial', data = SP_WC))
-summary(glm(clo.if ~ size+I(size^2) , family = 'binomial', data = SP_WC)) 
+summary(glm(clo.if ~ size+I(size^2) , family = 'binomial', data = SP_WC)) #Choosing this model based of AIC
 AIC(glm(clo.if ~ size+I(size^2), family = 'binomial', data = SP_WC))
 summary(glm(clo.if ~ size, family = 'binomial', data = SP_WC))
 AIC(glm(clo.if ~ size, family = 'binomial', data = SP_WC))
@@ -544,11 +559,11 @@ summary(glm(clo.if ~ 1, family = 'binomial', data = SP_WC))
 AIC(glm(clo.if ~ 1 , family = 'binomial', data = SP_WC))
 
 
-mod_clo_SP_WC <- glm(clo.if ~ size+I(size^2) + precip+I(precip^2), family = 'binomial', data = SP_WC)
+mod_clo_SP_WC <- glm(clo.if ~ size+I(size^2), family = 'binomial', data = SP_WC)
 CloneChosenModel_SP_WC <- clo.if ~ size + size2 
 
 
-plot_clo_if_SP_WC <- plot_predictions_cloif_precip(model = mod_clo_SP_WC, data = SP_WC, minSize_SP, maxSize_SP)
+plot_clo_if_SP_WC <- plot_predictions_cloif(model = mod_clo_SP_WC, data = SP_WC, minSize_SP, maxSize_SP)
 plot_clo_if_SP_WC
 
 #If you produce clones, does how many clones you make change with size of the mother 
@@ -584,8 +599,8 @@ summary(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|blockID), data 
 AIC(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|blockID), data = SP_WC_clones))
 summary(lmer(sizeNext ~ size+I(size^2) + precip + (1|blockID), data = SP_WC_clones)) 
 AIC(lmer(sizeNext ~ size+I(size^2) + precip + (1|blockID), data = SP_WC_clones))
-summary(lmer(sizeNext ~ size+I(size^2) + (1|blockID), data = SP_WC_clones))
-AIC(lmer(sizeNext ~ size+I(size^2) + (1|blockID), data = SP_WC_clones))
+summary(lmer(sizeNext ~ size + precip + (1|blockID), data = SP_WC_clones)) 
+AIC(lmer(sizeNext ~ size + precip + (1|blockID), data = SP_WC_clones))
 summary(lmer(sizeNext ~ size + (1|blockID), data = SP_WC_clones)) 
 AIC(lmer(sizeNext ~ size + (1|blockID), data = SP_WC_clones)) #Using this model based of AIC
 summary(lmer(sizeNext ~ 1 + (1|blockID), data = SP_WC_clones)) 
@@ -603,48 +618,32 @@ co_SP_WC <- makeClonalObj(SP_WC, fecConstants=data.frame(correctionForOrphans= 1
                           offspringSizeExplanatoryVariables = CloneSizeVariable_SP_WC, Formula = c(CloneChosenModel_SP_WC, CloneNumberChosenModel_SP_WC),
                           Family = c("binomial","poisson"), Transform=c("none","none"),offspringSplitter=data.frame(seedbank=0,continuous=1))
 
+co_SP_WC@fitFec[[1]]$coefficients <- as.numeric(coef(mod_clo_SP_WC))
 co_SP_WC@fitFec[[2]]$coefficients <- as.numeric(coef(mod_clo_no_SP_WC)) #not really needed since this is a linear model
 co_SP_WC@offspringRel$coefficients <- as.numeric(fixef(mod_clone_growth_SP_WC))
 co_SP_WC@sdOffspringSize <- sigma.hat(mod_clone_growth_SP_WC)$sigma$data
-co_SP_WC@fitFec[[1]]$coefficients <- c(as.numeric(coef(mod_clo_SP_WC)[1]) + 1.2*as.numeric(coef(mod_clo_SP_WC)[4]) + 1.2^2*as.numeric(coef(mod_clo_SP_WC)[5]),
-                                       as.numeric(coef(mod_clo_SP_WC)[2]),
-                                       as.numeric(coef(mod_clo_SP_WC)[3]))
-co_SP_WC_precip1 <- co_SP_WC
-
-co_SP_WC@fitFec[[1]]$coefficients <- c(as.numeric(coef(mod_clo_SP_WC)[1]) + 2.3*as.numeric(coef(mod_clo_SP_WC)[4]) + 2.3^2*as.numeric(coef(mod_clo_SP_WC)[5]),
-                                       as.numeric(coef(mod_clo_SP_WC)[2]),
-                                       as.numeric(coef(mod_clo_SP_WC)[3]))
-co_SP_WC_precip2 <- co_SP_WC
-
-co_SP_WC@fitFec[[1]]$coefficients <- c(as.numeric(coef(mod_clo_SP_WC)[1]) + 3.4*as.numeric(coef(mod_clo_SP_WC)[4]) + 3.4^2*as.numeric(coef(mod_clo_SP_WC)[5]),
-                                       as.numeric(coef(mod_clo_SP_WC)[2]),
-                                       as.numeric(coef(mod_clo_SP_WC)[3]))
-co_SP_WC_precip3 <- co_SP_WC
 
 
-Cmatrix_SP_WC_precip1 <- makeIPMCmatrix(clonalObj = co_SP_WC_precip1, minSize=minSize_SP, maxSize=maxSize_SP, nBigMatrix = 100, correction = "constant")
-Cmatrix_SP_WC_precip2 <- makeIPMCmatrix(clonalObj = co_SP_WC_precip2, minSize=minSize_SP, maxSize=maxSize_SP, nBigMatrix = 100, correction = "constant")
-Cmatrix_SP_WC_precip3 <- makeIPMCmatrix(clonalObj = co_SP_WC_precip3, minSize=minSize_SP, maxSize=maxSize_SP, nBigMatrix = 100, correction = "constant")
 
-contourPlot2(t(Cmatrix_SP_WC_precip1), Cmatrix_SP_WC_precip1@meshpoints, maxSize_SP, 0.03, 0, title = "Cmatrix: clones") 
-contourPlot2(t(Cmatrix_SP_WC_precip2), Cmatrix_SP_WC_precip2@meshpoints, maxSize_SP, 0.03, 0, title = "Cmatrix: clones") 
-contourPlot2(t(Cmatrix_SP_WC_precip3), Cmatrix_SP_WC_precip3@meshpoints, maxSize_SP, 0.03, 0, title = "Cmatrix: clones") 
+Cmatrix_SP_WC <- makeIPMCmatrix(clonalObj = co_SP_WC, minSize=minSize_SP, maxSize=maxSize_SP, nBigMatrix = 100, correction = "constant")
+
+contourPlot2(t(Cmatrix_SP_WC), Cmatrix_SP_WC@meshpoints, maxSize_SP, 0.03, 0, title = "Cmatrix: clones") 
 
 
 #### Build IPM ####
-IPM_SP_WC_precip1 <- Pmatrix_SP_WC + Fmatrix_SP_WC + Cmatrix_SP_WC_precip1
+IPM_SP_WC_precip1 <- Pmatrix_SP_WC + Fmatrix_SP_WC_precip1 + Cmatrix_SP_WC
 #contourPlot2(t( M = IPM_SP_CC_precip1, meshpts = Pmatrix_SP_CC_precip1@meshpoints, maxSize = maxSize, lower = 0.03, upper = 0))
 IPM_plot(IPM_control = IPM_SP_WC_precip1, minSize = minSize_SP, maxSize = maxSize_SP, zrange = c(-0.03, 0.06)) + ggtitle("Sibbaldia procumbens WC precip 1.2 m/year")
 #persp(IPM_SP_CC)
 as.numeric(eigen(IPM_SP_WC_precip1)$value[1])
 
-IPM_SP_WC_precip2 <- Pmatrix_SP_WC + Fmatrix_SP_WC + Cmatrix_SP_WC_precip2
+IPM_SP_WC_precip2 <- Pmatrix_SP_WC + Fmatrix_SP_WC_precip2 + Cmatrix_SP_WC
 #contourPlot2(t( M = IPM_SP_CC_precip1, meshpts = Pmatrix_SP_CC_precip1@meshpoints, maxSize = maxSize, lower = 0.03, upper = 0))
 IPM_plot(IPM_control = IPM_SP_WC_precip2, minSize = minSize_SP, maxSize = maxSize_SP, zrange = c(-0.03, 0.06)) + ggtitle("Sibbaldia procumbens WC precip 2.3 m/year")
 #persp(IPM_SP_CC)
 as.numeric(eigen(IPM_SP_WC_precip2)$value[1])
 
-IPM_SP_WC_precip3 <- Pmatrix_SP_WC + Fmatrix_SP_WC + Cmatrix_SP_WC_precip3
+IPM_SP_WC_precip3 <- Pmatrix_SP_WC + Fmatrix_SP_WC_precip3 + Cmatrix_SP_WC
 #contourPlot2(t( M = IPM_SP_CC_precip1, meshpts = Pmatrix_SP_CC_precip1@meshpoints, maxSize = maxSize, lower = 0.03, upper = 0))
 IPM_plot(IPM_control = IPM_SP_WC_precip3, minSize = minSize_SP, maxSize = maxSize_SP, zrange = c(-0.03, 0.06)) + ggtitle("Sibbaldia procumbens WC precip 3.4 m/year")
 #persp(IPM_SP_CC)
