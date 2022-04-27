@@ -371,9 +371,11 @@ Seedling_info_SP <- as.data.frame(mean_NoVeg_SP) %>%
   add_column(sd_SP) %>% 
   rename(mean_NoVeg = mean_NoVeg_SP, mean_Veg = mean_Veg_SP, sd = sd_SP)
 
-SP_max_seedling_size <- Seedling_info_SP_dat %>% 
+SP_max_seedling_size1 <- Seedling_info_SP_dat %>% 
   select(max_seedling_size) %>% 
   unique()
+
+SP_max_seedling_size <- mean_Veg_SP + 2*sd_SP
 
 # Seedling_info_SP_dat %>%  
 #   ggplot(aes(x = Vegetation, y = size, fill = Vegetation)) + 
@@ -439,6 +441,8 @@ Seedling_info_VA_dat <- Ver_alp %>%
 VA_max_seedling_size <- Seedling_info_VA_dat %>% 
   select(max_seedling_size) %>% 
   unique()
+
+VA_max_seedling_size <-  Seedling_info_VA_mean + 2*sd_VA
 
 #### Seed bank ####
 
@@ -587,8 +591,9 @@ Sib_pro_2018_2019 <- Sib_pro_2018 %>%
   mutate(size = Intercept + (NL_2018 * NL_coef) + (LL_2018 * LL_coef),
          sizeNext = Intercept + (NL_2019 * NL_coef) + (LL_2019 * LL_coef),
          fec = (Seeds_per_capsule_SP * NFL_2018) + (Seeds_per_capsule_SP * NB_2018) + (Seeds_per_capsule_SP * NC_2018),
-         surv = ifelse(size > 0 & is.na(sizeNext), 0,
-                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
+         surv = case_when(is.numeric(size) & is.na(sizeNext) ~ 0,
+                          is.numeric(size) & is.numeric(size) ~ 1, 
+                          TRUE ~ NA_real_)) %>% 
   mutate(NB_2018 = as.numeric(NB_2018),
          NFL_2018 = as.numeric(NFL_2018),
          NC_2018 = as.numeric(NC_2018)) %>% 
@@ -613,8 +618,9 @@ Sib_pro_2019_2020 <- Sib_pro_2019 %>%
   mutate(size = Intercept + NL_2019 * NL_coef + LL_2019 * LL_coef,
          sizeNext = Intercept + NL_2020 * NL_coef + LL_2020 * LL_coef,
          fec = (Seeds_per_capsule_SP * NFL_2019) + (Seeds_per_capsule_SP * NB_2019) + (Seeds_per_capsule_SP * NC_2019), 
-         surv = ifelse(size > 0 & is.na(sizeNext), 0,
-                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
+         surv = case_when(is.numeric(size) & is.na(sizeNext) ~ 0,
+                          is.numeric(size) & is.numeric(size) ~ 1, 
+                          TRUE ~ NA_real_)) %>% 
   mutate(NB_2019 = as.numeric(NB_2019),
          NFL_2019 = as.numeric(NFL_2019),
          NC_2019 = as.numeric(NC_2019)) %>%
@@ -638,8 +644,9 @@ Sib_pro_2020_2021 <- Sib_pro_2020 %>%
   mutate(size = Intercept + NL_2020 * NL_coef + LL_2020 * LL_coef,
          sizeNext = Intercept + NL_2021 * NL_coef + LL_2021 * LL_coef,
          fec = (Seeds_per_capsule_SP * NFL_2020) + (Seeds_per_capsule_SP * NB_2020) + (Seeds_per_capsule_SP * NC_2020), 
-         surv = ifelse(size > 0 & is.na(sizeNext), 0,
-                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
+         surv = case_when(is.numeric(size) & is.na(sizeNext) ~ 0,
+                          is.numeric(size) & is.numeric(size) ~ 1, 
+                          TRUE ~ NA_real_)) %>% 
   mutate(NB_2020 = as.numeric(NB_2020),
          NFL_2020 = as.numeric(NFL_2020),
          NC_2020 = as.numeric(NC_2020)) %>% 
@@ -670,7 +677,7 @@ clones_SP <- Sib_pro_2018_2021 %>%
     parent <- .x %>% 
       filter(seedling == "no", juvenile == "no") %>% 
       select(unique_IDS, X, Y, size) %>% 
-      filter(size > (SP_max_seedling_size$max_seedling_size))
+      filter(size > SP_max_seedling_size)
     
     
     clone_function(child, parent)
@@ -762,8 +769,9 @@ Ver_alp_2018_2019 <- Ver_alp_2018 %>%
   add_column(Seeds_per_capsule_VA_null) %>% 
   mutate(size = Intercept + (SH_2018 * SH_coef) + (NL_2018 * NL_coef) + (LL_2018 * LL_coef) + (WL_2018 * WL_coef), 
          sizeNext = Intercept + (SH_2019 * SH_coef) + (NL_2019 * NL_coef) + (LL_2019 * LL_coef) + (WL_2019 * WL_coef),
-         surv = ifelse(size > 0 & is.na(sizeNext), 0,
-                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
+         surv = case_when(is.numeric(size) & is.na(sizeNext) ~ 0,
+                          is.numeric(size) & is.numeric(size) ~ 1, 
+                          TRUE ~ NA_real_)) %>% 
   mutate(NB_2018 = as.numeric(NB_2018),
          NFL_2018 = as.numeric(NFL_2018),
          NC_2018 = as.numeric(NC_2018)) %>% 
@@ -787,8 +795,9 @@ Ver_alp_2019_2020 <- Ver_alp_2019 %>%
   add_column(Seeds_per_capsule_VA_null) %>% 
   mutate(size = Intercept + (SH_2019 * SH_coef) + (NL_2019 * NL_coef) + (LL_2019 * LL_coef) + (WL_2019 * WL_coef), 
          sizeNext = Intercept + (SH_2020 * SH_coef) + (NL_2020 * NL_coef) + (LL_2020 * LL_coef) + (WL_2020 * WL_coef), 
-         surv = ifelse(size > 0 & is.na(sizeNext), 0,
-                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
+         surv = case_when(is.numeric(size) & is.na(sizeNext) ~ 0,
+                          is.numeric(size) & is.numeric(size) ~ 1, 
+                          TRUE ~ NA_real_)) %>% 
   mutate(NB_2019 = as.numeric(NB_2019),
          NFL_2019 = as.numeric(NFL_2019),
          NC_2019 = as.numeric(NC_2019)) %>% 
@@ -812,8 +821,9 @@ Ver_alp_2020_2021 <- Ver_alp_2020 %>%
   add_column(Seeds_per_capsule_VA_null) %>% 
   mutate(size = Intercept + (SH_2020 * SH_coef) + (NL_2020 * NL_coef) + (LL_2020 * LL_coef) + (WL_2020 * WL_coef), 
          sizeNext = Intercept + (SH_2021 * SH_coef) + (NL_2021 * NL_coef) + (LL_2021 * LL_coef) + (WL_2021 * WL_coef), 
-         surv = ifelse(size > 0 & is.na(sizeNext), 0,
-                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
+         surv = case_when(is.numeric(size) & is.na(sizeNext) ~ 0,
+                          is.numeric(size) & is.numeric(size) ~ 1, 
+                          TRUE ~ NA_real_)) %>% 
   mutate(NB_2020 = as.numeric(NB_2020),
          NFL_2020 = as.numeric(NFL_2020),
          NC_2020 = as.numeric(NC_2020)) %>% 
@@ -845,7 +855,7 @@ clones_VA <- Ver_alp_2018_2021 %>%
     parent <- .x %>% 
       filter(seedling == "no", juvenile == "no") %>% 
       select(unique_IDS, X, Y, size) %>% 
-      filter(size > (VA_max_seedling_size$max_seedling_size))
+      filter(size > (VA_max_seedling_size))
     
     
     clone_function(child, parent)
