@@ -371,9 +371,11 @@ Seedling_info_SP <- as.data.frame(mean_NoVeg_SP) %>%
   add_column(sd_SP) %>% 
   rename(mean_NoVeg = mean_NoVeg_SP, mean_Veg = mean_Veg_SP, sd = sd_SP)
 
-SP_max_seedling_size <- Seedling_info_SP_dat %>% 
+SP_max_seedling_size1 <- Seedling_info_SP_dat %>% 
   select(max_seedling_size) %>% 
   unique()
+
+SP_max_seedling_size <- mean_Veg_SP + 2*sd_SP
 
 # Seedling_info_SP_dat %>%  
 #   ggplot(aes(x = Vegetation, y = size, fill = Vegetation)) + 
@@ -439,6 +441,8 @@ Seedling_info_VA_dat <- Ver_alp %>%
 VA_max_seedling_size <- Seedling_info_VA_dat %>% 
   select(max_seedling_size) %>% 
   unique()
+
+VA_max_seedling_size <-  Seedling_info_VA_mean + 2*sd_VA
 
 #### Seed bank ####
 
@@ -673,7 +677,7 @@ clones_SP <- Sib_pro_2018_2021 %>%
     parent <- .x %>% 
       filter(seedling == "no", juvenile == "no") %>% 
       select(unique_IDS, X, Y, size) %>% 
-      filter(size > (SP_max_seedling_size$max_seedling_size))
+      filter(size > SP_max_seedling_size)
     
     
     clone_function(child, parent)
@@ -851,7 +855,7 @@ clones_VA <- Ver_alp_2018_2021 %>%
     parent <- .x %>% 
       filter(seedling == "no", juvenile == "no") %>% 
       select(unique_IDS, X, Y, size) %>% 
-      filter(size > (VA_max_seedling_size$max_seedling_size))
+      filter(size > (VA_max_seedling_size))
     
     
     clone_function(child, parent)
