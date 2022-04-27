@@ -39,7 +39,7 @@ INCLINE_metadata <- INCLINE_metadata %>%
 
 # We define a new size axis for the midpoint evaluation of the IPMs:
 minSize_SP <- min(Sib_pro_2018_2021$size, na.rm=T)-0.2
-maxSize_SP <- max(Sib_pro_2018_2021$sizeNext, na.rm=T)+0.2
+maxSize_SP <- max(Sib_pro_2018_2021$sizeNext[Sib_pro_2018_2021$sizeNext != max(Sib_pro_2018_2021$sizeNext, na.rm = T)], na.rm=T) #taking out the largest number because this is so much higher than any other individuals
 x_SP <- seq(from=round(minSize_SP),to=round(maxSize_SP),length=100)
 x0_SP <- data.frame(size=x_SP,size2=x_SP*x_SP)
 
@@ -175,20 +175,21 @@ contourPlot2(t(Pmatrix_SP_CC), Pmatrix_SP_CC@meshpoints, maxSize_SP, 0.03, 0, ti
 
 #### F matrix ####
 # Choosing the best model for estimating if an individual flowers
-summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CC))
-AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CC))
-summary(glmer(flo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CC)) 
-AIC(glmer(flo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CC))
-summary(glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = SP_CC))
-AIC(glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = SP_CC))
-summary(glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = SP_CC))
-AIC(glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = SP_CC)) #Choosing this model
-summary(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_CC))
-AIC(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_CC))
+# Using site_transition as the random effect because block_transition came back with singularity warning.
+summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|site_trans), family = 'binomial', data = SP_CC))
+AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|site_trans), family = 'binomial', data = SP_CC))
+summary(glmer(flo.if ~ size+I(size^2) + precip + (1|site_trans), family = 'binomial', data = SP_CC)) 
+AIC(glmer(flo.if ~ size+I(size^2) + precip + (1|site_trans), family = 'binomial', data = SP_CC))
+summary(glmer(flo.if ~ size + precip + (1|site_trans), family = 'binomial', data = SP_CC))
+AIC(glmer(flo.if ~ size + precip + (1|site_trans), family = 'binomial', data = SP_CC))
+summary(glmer(flo.if ~ size + (1|site_trans), family = 'binomial', data = SP_CC))
+AIC(glmer(flo.if ~ size + (1|site_trans), family = 'binomial', data = SP_CC)) #Choosing this model
+summary(glmer(flo.if ~ 1 + (1|site_trans), family = 'binomial', data = SP_CC))
+AIC(glmer(flo.if ~ 1 + (1|site_trans), family = 'binomial', data = SP_CC))
 
 floweringChosenModel_SP_CC <- flo.if ~ size
 
-mod_flo_if_SP_CC <- glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = SP_CC) 
+mod_flo_if_SP_CC <- glmer(flo.if ~ size + (1|site_trans), family = 'binomial', data = SP_CC) 
 
 par(mfrow=c(1,1))
 
@@ -199,16 +200,16 @@ plot_SP_CC_floif
 
 
 # Choosing the best model for estimating the number of flowers, if an individual flowers
-
-summary(glmer(flo.no ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'poisson', data = SP_CC))
-AIC(glmer(flo.no ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'poisson', data = SP_CC))
-summary(glmer(flo.no ~ size+I(size^2) + precip + (1|block_trans), family = 'poisson', data = SP_CC)) 
-AIC(glmer(flo.no ~ size+I(size^2) + precip + (1|block_trans), family = 'poisson', data = SP_CC))
-summary(glmer(flo.no ~ size +I(size^2)  + (1|block_trans), family = 'poisson', data = SP_CC)) 
-AIC(glmer(flo.no ~ size +I(size^2) + (1|block_trans), family = 'poisson', data = SP_CC))
-summary(glmer(flo.no ~ size + (1|block_trans), family = 'poisson', data = SP_CC)) 
-AIC(glmer(flo.no ~ size + (1|block_trans), family = 'poisson', data = SP_CC)) 
-summary(glmer(flo.no ~ 1 + (1|block_trans), family = 'poisson', data = SP_CC))#Choosing this model because the other ones are highly affected by one outlier
+# Using transition as the random effect because the other options came back with singularity warning. I tried block_trans, site_trans, transition + blockID, transition + siteID, blockId, and siteID.
+summary(glmer(flo.no ~ size+I(size^2) + precip+I(precip^2) + (1|transition), family = 'poisson', data = SP_CC))
+AIC(glmer(flo.no ~ size+I(size^2) + precip+I(precip^2) + (1|transition), family = 'poisson', data = SP_CC))
+summary(glmer(flo.no ~ size+I(size^2) + precip + (1|transition), family = 'poisson', data = SP_CC)) 
+AIC(glmer(flo.no ~ size+I(size^2) + precip + (1|transition), family = 'poisson', data = SP_CC))
+summary(glmer(flo.no ~ size +I(size^2)  + (1|transition), family = 'poisson', data = SP_CC)) 
+AIC(glmer(flo.no ~ size +I(size^2) + (1|transition), family = 'poisson', data = SP_CC))
+summary(glmer(flo.no ~ size + (1|transition), family = 'poisson', data = SP_CC)) 
+AIC(glmer(flo.no ~ size + (1|transition), family = 'poisson', data = SP_CC)) 
+summary(glmer(flo.no ~ 1 + (1|transition), family = 'poisson', data = SP_CC))#Choosing this model because the other ones are highly affected by one outlier
 AIC(glmer(flo.no ~ 1 + (1|block_trans), family = 'poisson', data = SP_CC))
 
 
@@ -261,20 +262,19 @@ SP_CC_clones <- SP_CC %>%
   mutate(prop_orphan = total_num_orphan/total_num_clones)
 
 #Is the production of clones size dependent
-# Chose site_trans as random effect because block_trans complained about singularity
-summary(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|site_trans), family = 'binomial', data = SP_CC))
-AIC(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|site_trans), family = 'binomial', data = SP_CC))
-summary(glmer(clo.if ~ size+I(size^2) + precip + (1|site_trans), family = 'binomial', data = SP_CC))
-AIC(glmer(clo.if ~ size+I(size^2) + precip + (1|site_trans), family = 'binomial', data = SP_CC))
-summary(glmer(clo.if ~ size+I(size^2) + (1|site_trans), family = 'binomial', data = SP_CC)) #Choosing thins model based of AIC
-AIC(glmer(clo.if ~ size+I(size^2) + (1|site_trans), family = 'binomial', data = SP_CC))
-summary(glmer(clo.if ~ size + (1|site_trans), family = 'binomial', data = SP_CC))
-AIC(glmer(clo.if ~ size + (1|site_trans), family = 'binomial', data = SP_CC))
-summary(glmer(clo.if ~ 1 + (1|site_trans), family = 'binomial', data = SP_CC))
-AIC(glmer(clo.if ~ 1 + (1|site_trans), family = 'binomial', data = SP_CC))
+summary(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CC))
+AIC(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CC))
+summary(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CC))
+AIC(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CC))
+summary(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CC)) #Choosing thins model based of AIC
+AIC(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CC))
+summary(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = SP_CC))
+AIC(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = SP_CC))
+summary(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_CC))
+AIC(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_CC))
 
 #Checking for convergiance in the model since it is giving a warning. Looks ok
-glmer(clo.if ~ size+I(size^2) + (1|site_trans), family = 'binomial', data = SP_CC, verbose = TRUE) 
+glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CC, verbose = TRUE) 
 
 mod_clo_SP_CC <- glmer(clo.if ~ size+I(size^2) + (1|site_trans), family = 'binomial', data = SP_CC)
 CloneChosenModel_SP_CC <- clo.if ~ size + size2 
@@ -289,8 +289,8 @@ summary(glm(clo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', da
 AIC(glm(clo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = SP_CC))
 summary(glm(clo.no ~ size+I(size^2) + precip, family = 'poisson', data = SP_CC))
 AIC(glm(clo.no ~ size+I(size^2) + precip, family = 'poisson', data = SP_CC))
-summary(glm(clo.no ~ size+I(size^2), family = 'poisson', data = SP_CC))
-AIC(glm(clo.no ~ size+I(size^2), family = 'poisson', data = SP_CC))
+summary(glm(clo.no ~ size + precip, family = 'poisson', data = SP_CC))
+AIC(glm(clo.no ~ size + precip, family = 'poisson', data = SP_CC))
 summary(glm(clo.no ~ size, family = 'poisson', data = SP_CC))
 AIC(glm(clo.no ~ size, family = 'poisson', data = SP_CC))
 summary(glm(clo.no ~ 1, family = 'poisson', data = SP_CC)) #Chosing this model based of AIC
