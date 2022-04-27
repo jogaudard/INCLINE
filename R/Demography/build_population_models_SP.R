@@ -273,6 +273,8 @@ AIC(glmer(clo.if ~ size + (1|site_trans), family = 'binomial', data = SP_CC))
 summary(glmer(clo.if ~ 1 + (1|site_trans), family = 'binomial', data = SP_CC))
 AIC(glmer(clo.if ~ 1 + (1|site_trans), family = 'binomial', data = SP_CC))
 
+#Checking for convergiance in the model since it is giving a warning. Looks ok
+glmer(clo.if ~ size+I(size^2) + (1|site_trans), family = 'binomial', data = SP_CC, verbose = TRUE) 
 
 mod_clo_SP_CC <- glmer(clo.if ~ size+I(size^2) + (1|site_trans), family = 'binomial', data = SP_CC)
 CloneChosenModel_SP_CC <- clo.if ~ size + size2 
@@ -377,6 +379,9 @@ summary(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = SP_WC))
 AIC(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = SP_WC))
 summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = SP_WC))
 AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = SP_WC))
+
+#Checking the convergence, because of a warning. Looks ok.
+glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_WC, verbose = TRUE) 
 
 mod_surv_SP_WC <- glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_WC)
 plot_surv_SP_WC <- plot_predictions_surv(model = mod_surv_SP_WC, data = SP_WC, minSize_SP, maxSize_SP)
