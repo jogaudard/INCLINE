@@ -5,15 +5,15 @@
 source("R/Demography/cleaning_demogprahy.R")
 
 #### Libraries ####
-library(tidyverse)
+#library(tidyverse)
 library(lme4)
 library(lmerTest)
-library(lubridate)
-library(conflicted)
+#library(lubridate)
+#library(conflicted)
 
 #### Select preferences for conflicts ####
 
-conflict_prefer("select", "dplyr")
+#conflict_prefer("select", "dplyr")
 conflict_prefer("lmer", "lmerTest")
 
 #### Functions ####
@@ -938,3 +938,12 @@ rm(clone_information_SP)
 rm(clone_information_VA)
 rm(clones_SP)
 rm(clones_VA)
+# rm(Sib_pro_2018_2019)
+# rm(Sib_pro_2019_2020)
+# rm(Sib_pro_2020_2021)
+# rm(Ver_alp_2018_2019)
+# rm(Ver_alp_2019_2020)
+# rm(Ver_alp_2020_2021)
+rm(Seeds_per_capsule)
+rm(Seeds_per_capsule_SP)
+rm(Seeds_per_capsule_VA)
