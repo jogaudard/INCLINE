@@ -588,6 +588,589 @@ as.numeric(eigen(IPM_SP_CR)$value[1])
 x11()
 contourPlot2(t(IPM_SP_CR), Pmatrix_SP_CR@meshpoints, maxSize_SP, 0.06, 0, title = "Sibbaldia procumbensCR ")
 
+##### Ambient temperature extant #####
+
+#### P matrix ####
+
+# choosing the best survival model
+summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CE))#We chose this model based on AIC
+AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CE)) 
+AIC(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(surv ~ size + precip + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(surv ~ size + precip + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = SP_CE))
+
+#Checking for conergence. Looks ok.
+glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CE, verbose = TRUE)
+
+mod_surv_SP_CE <- glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CE)
+plot_surv_SP_CE <- plot_predictions_surv_precip(model = mod_surv_SP_CE, data = SP_CE, minSize_SP, maxSize_SP)
+
+plot_surv_SP_CE
+
+so_SP_CE <- makeSurvObj(SP_CE, "surv ~ size + size2")
+so_SP_CE_precip1 <- coerceSurvObj(so_SP_CE, c(as.numeric(fixef(mod_surv_SP_CE)[1]) + 1.2*as.numeric(fixef(mod_surv_SP_CE)[4]) + (1.2)^2*as.numeric(fixef(mod_surv_SP_CE)[5]), as.numeric(fixef(mod_surv_SP_CE)[2]), as.numeric(fixef(mod_surv_SP_CE)[3]))) 
+so_SP_CE_precip2 <- coerceSurvObj(so_SP_CE, c(as.numeric(fixef(mod_surv_SP_CE)[1]) + 2.3*as.numeric(fixef(mod_surv_SP_CE)[4]) + (2.3)^2*as.numeric(fixef(mod_surv_SP_CE)[5]), as.numeric(fixef(mod_surv_SP_CE)[2]), as.numeric(fixef(mod_surv_SP_CE)[3]))) 
+so_SP_CE_precip3 <- coerceSurvObj(so_SP_CE, c(as.numeric(fixef(mod_surv_SP_CE)[1]) + 3.4*as.numeric(fixef(mod_surv_SP_CE)[4]) + (3.4)^2*as.numeric(fixef(mod_surv_SP_CE)[5]), as.numeric(fixef(mod_surv_SP_CE)[2]), as.numeric(fixef(mod_surv_SP_CE)[3]))) 
+
+
+# choosing the bext growth model
+summary(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = SP_CE))
+AIC(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = SP_CE))
+summary(lmer(sizeNext ~ size + precip+I(precip^2) + (1|block_trans), data = SP_CE))
+AIC(lmer(sizeNext ~ size + precip+I(precip^2) + (1|block_trans), data = SP_CE))
+summary(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = SP_CE)) 
+AIC(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = SP_CE))
+summary(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = SP_CE))
+AIC(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = SP_CE)) 
+summary(lmer(sizeNext ~ size + precip + (1|block_trans), data = SP_CE))
+AIC(lmer(sizeNext ~ size + precip + (1|block_trans), data = SP_CE))
+summary(lmer(sizeNext ~ size + (1|block_trans), data = SP_CE)) #We chose this model based on AIC
+AIC(lmer(sizeNext ~ size + (1|block_trans), data = SP_CE))
+summary(lmer(sizeNext ~ 1 + (1|block_trans), data = SP_CE))
+AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = SP_CE))
+
+
+mod_growth_SP_CE <- lmer(sizeNext ~ size + (1|block_trans), data = SP_CE)
+
+plot_growth_SP_CE <- plot_predictions_growth(model = mod_growth_SP_CE, data = SP_CE, minSize_SP, maxSize_SP)
+
+plot_growth_SP_CE
+
+
+go_SP_CE <- makeGrowthObj(SP_CE, "sizeNext ~ size")
+go_SP_CE <- coerceGrowthObj(go_SP_CE, fixef(mod_growth_SP_CE),
+                            sigma.hat(mod_growth_SP_CE)$sigma$data)
+
+
+# Make discrete transition object
+dto_SP_CE <- makeDiscreteTrans(SP_CE, discreteTrans = matrix(
+  c(SP_C_seed_bank$seeds_staySB,
+    (1-SP_C_seed_bank$seeds_staySB)*seedling_est_SP_Veg,
+    (1-SP_C_seed_bank$seeds_staySB)*(1-seedling_est_SP_Veg), 
+    0,
+    sum(SP_CE$number[SP_CE$stage=="continuous"&SP_CE$stageNext=="continuous"], na.rm=T),
+    sum(SP_CE$number[SP_CE$stage=="continuous"&SP_CE$stageNext=="dead"], na.rm=T)),
+  ncol = 2,
+  nrow = 3, 
+  dimnames = list(c("seedbank", "continuous", "dead"), c("seedbank", "continuous"))),
+  meanToCont = matrix(Seedling_info_SP$mean_Veg, ncol = 1, nrow = 1, dimnames = list(c("mean"), c("seedbank"))),
+  sdToCont = matrix(Seedling_info_SP$sd, ncol = 1, nrow = 1, dimnames = list(c(""),c("seedbank"))))
+
+
+# With these survival and growth objects in hand, we build a survival/growth (P) matrix.
+Pmatrix_SP_CE_precip1 <- makeIPMPmatrix(survObj=so_SP_CE_precip1, growObj=go_SP_CE, minSize=minSize_SP, maxSize=maxSize_SP, correction = "constant", nBigMatrix = 100)
+Pmatrix_SP_CE_precip2 <- makeIPMPmatrix(survObj=so_SP_CE_precip2, growObj=go_SP_CE, minSize=minSize_SP, maxSize=maxSize_SP, correction = "constant", nBigMatrix = 100)
+Pmatrix_SP_CE_precip3 <- makeIPMPmatrix(survObj=so_SP_CE_precip3, growObj=go_SP_CE, minSize=minSize_SP, maxSize=maxSize_SP, correction = "constant", nBigMatrix = 100)
+
+diagnosticsPmatrix(Pmatrix_SP_CE_precip1, survObj=so_SP_CE_precip1, growObj=go_SP_CE, dff = SP_CE)
+diagnosticsPmatrix(Pmatrix_SP_CE_precip2, survObj=so_SP_CE_precip2, growObj=go_SP_CE, dff = SP_CE)
+diagnosticsPmatrix(Pmatrix_SP_CE_precip3, survObj=so_SP_CE_precip3, growObj=go_SP_CE, dff = SP_CE)
+
+Pmatrix_SP_CE_precip1 <- makeIPMPmatrix(survObj=so_SP_CE_precip1, growObj=go_SP_CE, minSize=minSize_SP, maxSize=maxSize_SP, discreteTrans = dto_SP_CE, correction = "constant", nBigMatrix = 100)
+Pmatrix_SP_CE_precip2 <- makeIPMPmatrix(survObj=so_SP_CE_precip2, growObj=go_SP_CE, minSize=minSize_SP, maxSize=maxSize_SP, discreteTrans = dto_SP_CE, correction = "constant", nBigMatrix = 100)
+Pmatrix_SP_CE_precip3 <- makeIPMPmatrix(survObj=so_SP_CE_precip3, growObj=go_SP_CE, minSize=minSize_SP, maxSize=maxSize_SP, discreteTrans = dto_SP_CE, correction = "constant", nBigMatrix = 100)
+x11()
+contourPlot2(t(Pmatrix_SP_CE), Pmatrix_SP_CE@meshpoints, maxSize_SP, 0.03, 0, title = "Pmatrix: survival and growth") 
+
+
+#### F matrix ####
+# Choosing the best model for estimating if an individual flowers.
+summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(flo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CE)) 
+AIC(glmer(flo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = SP_CE)) #Choosing this model
+AIC(glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(flo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CE)) 
+AIC(glmer(flo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = SP_CE)) 
+summary(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_CE))
+
+floweringChosenModel_SP_CE <- flo.if ~ size
+mod_flo_if_SP_CE <- glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = SP_CE) 
+
+plot_SP_CE_floif <- plot_predictions_floif_precip(model = mod_flo_if_SP_CE, data = SP_CE, minSize_SP, maxSize_SP)
+plot_SP_CE_floif 
+
+
+
+# Choosing the best model for estimating the number of flowers, if an individual flowers
+# Using linear model as the random effects came back with singularity warning. I tried block_trans, site_trans, transition + blockID, transition + siteID, blockId, transition and siteID.
+summary(glm(flo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = SP_CE))
+AIC(glm(flo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = SP_CE))
+summary(glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = SP_CE))
+AIC(glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = SP_CE))
+summary(glm(flo.no ~ precip+I(precip^2), family = 'poisson', data = SP_CE))
+AIC(glm(flo.no ~ precip+I(precip^2), family = 'poisson', data = SP_CE))
+summary(glm(flo.no ~ size + precip, family = 'poisson', data = SP_CE)) 
+AIC(glm(flo.no ~ size + precip, family = 'poisson', data = SP_CE))
+summary(glm(flo.no ~ size, family = 'poisson', data = SP_CE)) 
+AIC(glm(flo.no ~ size, family = 'poisson', data = SP_CE)) 
+summary(glm(flo.no ~ precip, family = 'poisson', data = SP_CE)) 
+AIC(glm(flo.no ~ precip, family = 'poisson', data = SP_CE))
+summary(glm(flo.no ~ 1, family = 'poisson', data = SP_CE))#Choosing this model because the other ones are highly affected by one outlier
+AIC(glm(flo.no ~ 1, family = 'poisson', data = SP_CE))
+
+
+flowerNumberChosenModel_SP_CE <- flo.no ~ 1   #Chosen based on biology by looking at the data
+
+mod_flo_no_SP_CE <- glm(flo.no ~ precip+I(precip^2), family = 'poisson', data = SP_CE)
+
+plot_flo_no_SP_CE <-plot_predictions_flono_precip(model = mod_flo_no_SP_CE, data = SP_CE, minSize_SP, maxSize_SP, ylim = 15) 
+
+plot_flo_no_SP_CE
+
+# Make fecundity object
+fo_SP_CE <-makeFecObj(SP_CE, 
+                      Formula= c(floweringChosenModel_SP_CE, flowerNumberChosenModel_SP_CE),
+                      Family = c("binomial", "poisson"),
+                      fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_SP,
+                                                seedlingEstablishmentRate = seedling_est_SP_Veg), 
+                      meanOffspringSize = Seedling_info_SP$mean_Veg,
+                      sdOffspringSize = Seedling_info_SP$sd,
+                      offspringSplitter = data.frame(seedbank=SP_C_seed_bank$seeds_alive_total_prop* (1-seedling_est_SP_Veg), continuous=(1-(SP_C_seed_bank$seeds_alive_total_prop* (1-seedling_est_SP_Veg)))),
+                      vitalRatesPerOffspringType = data.frame(seedbank=c(1,1,1,0), continuous=c(1,1,1,1),
+                                                              row.names=c("flo.if","flo.no","seedsPerCap","seedlingEstablishmentRate")))
+
+fo_SP_CE@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_SP_CE)[1]) + 1.2*as.numeric(fixef(mod_flo_if_SP_CE)[3]),
+                                       as.numeric(fixef(mod_flo_if_SP_CE)[2]))
+fo_SP_CE@fitFec[[2]]$coefficients <- as.numeric(coef(mod_flo_no_SP_CE)[1] + 1.2*as.numeric(coef(mod_flo_no_SP_CE)[2]) + (1.2)^2*as.numeric(coef(mod_flo_no_SP_CE)[3]))
+fo_SP_CE_precip1 <- fo_SP_CE
+
+fo_SP_CE@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_SP_CE)[1]) + 2.3*as.numeric(fixef(mod_flo_if_SP_CE)[3]),
+                                       as.numeric(fixef(mod_flo_if_SP_CE)[2]))
+fo_SP_CE@fitFec[[2]]$coefficients <- as.numeric(coef(mod_flo_no_SP_CE)[1] + 2.3*as.numeric(coef(mod_flo_no_SP_CE)[2]) + (2.3)^2*as.numeric(coef(mod_flo_no_SP_CE)[3]))
+fo_SP_CE_precip2 <- fo_SP_CE
+
+fo_SP_CE@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_SP_CE)[1]) + 3.4*as.numeric(fixef(mod_flo_if_SP_CE)[3]),
+                                       as.numeric(fixef(mod_flo_if_SP_CE)[2]))
+fo_SP_CE@fitFec[[2]]$coefficients <- as.numeric(coef(mod_flo_no_SP_CE)[1] + 3.4*as.numeric(coef(mod_flo_no_SP_CE)[2]) + (3.4)^2*as.numeric(coef(mod_flo_no_SP_CE)[3]))
+fo_SP_CE_precip3 <- fo_SP_CE
+
+
+Fmatrix_SP_CE_precip1 <- makeIPMFmatrix(fecObj=fo_SP_CE_precip1, minSize=minSize_SP, maxSize=maxSize_SP, correction = "continuous", nBigMatrix = 100)
+Fmatrix_SP_CE_precip2 <- makeIPMFmatrix(fecObj=fo_SP_CE_precip2, minSize=minSize_SP, maxSize=maxSize_SP, correction = "continuous", nBigMatrix = 100)
+Fmatrix_SP_CE_precip3 <- makeIPMFmatrix(fecObj=fo_SP_CE_precip3, minSize=minSize_SP, maxSize=maxSize_SP, correction = "continuous", nBigMatrix = 100)
+
+#Plotting the matrix
+contourPlot2(t(Fmatrix_SP_CE_precip1), Fmatrix_SP_CE_precip1@meshpoints, maxSize, 0.003, 0, title = "Fmatrix: flower and seedlings")
+contourPlot2(t(Fmatrix_SP_CE_precip2), Fmatrix_SP_CE_precip2@meshpoints, maxSize, 0.003, 0, title = "Fmatrix: flower and seedlings")
+contourPlot2(t(Fmatrix_SP_CE_precip3), Fmatrix_SP_CE_precip3@meshpoints, maxSize, 0.003, 0, title = "Fmatrix: flower and seedlings")
+
+# image.plot(Fmatrix_VA_CC@meshpoints,
+#            Fmatrix_VA_CC@meshpoints,
+#            t(Fmatrix_VA_CC),
+#            main = "Fmatrix: flower and seedlings",
+#            xlab = "Size at t",
+#            ylab = "Size at t+1")
+# 
+# image(t(Fmatrix_VA_CC))
+
+#### C matrix ####
+
+SP_CE_clones <- SP_CE %>% 
+  filter(offspringNext == "clonal") %>% 
+  mutate(number_orphans = case_when(is.na(size) ~ 1,
+                                    !is.na(size) ~0)) %>% 
+  mutate(total_num_orphan = sum(number_orphans),
+         total_num_clones = n()) %>% 
+  fill(total_num_orphan, .direction = "downup") %>% 
+  mutate(prop_orphan = total_num_orphan/total_num_clones)
+
+#Is the production of clones size dependent
+summary(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CE)) #Choosing thins model based of AIC
+AIC(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_CE))
+
+
+mod_clo_SP_CE <- glmer(clo.if ~ size+I(size^2) + (1|site_trans), family = 'binomial', data = SP_CE)
+CloneChosenModel_SP_CE <- clo.if ~ size + size2 
+
+
+plot_clo_if_SP_CE <- plot_predictions_cloif(model = mod_clo_SP_CE, data = SP_CE, minSize_SP, maxSize_SP)
+plot_clo_if_SP_CE
+
+#If you produce clones, does how many clones you make change with size of the mother 
+# Running linear mixed effects models because all the random effects gave singularity warning. I tried block_trans, site_trans, transition + blockID, transition + siteID, transition, blockID and siteID.
+summary(glm(clo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = SP_CE))
+AIC(glm(clo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = SP_CE))
+summary(glm(clo.no ~ size+I(size^2) + precip, family = 'poisson', data = SP_CE))
+AIC(glm(clo.no ~ size+I(size^2) + precip, family = 'poisson', data = SP_CE))
+summary(glm(clo.no ~ size + precip, family = 'poisson', data = SP_CE))
+AIC(glm(clo.no ~ size + precip, family = 'poisson', data = SP_CE))
+summary(glm(clo.no ~ size, family = 'poisson', data = SP_CE))
+AIC(glm(clo.no ~ size, family = 'poisson', data = SP_CE))
+summary(glm(clo.no ~ 1, family = 'poisson', data = SP_CE)) #Chosing this model based of AIC
+AIC(glm(clo.no ~ 1, family = 'poisson', data = SP_CE))
+
+mod_clo_no_SP_CE <- glm(clo.no ~ 1, family = 'poisson', data = SP_CE)
+CloneNumberChosenModel_SP_CE <- clo.no ~ 1
+
+
+plot_clo_no_SP_CE <- plot_predictions_clono(model = mod_clo_no_SP_CE, data = SP_CE, minSize_SP, maxSize_SP, ylim = 6)
+plot_clo_no_SP_CE
+
+# Clonal size depending on mother size
+summary(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = SP_CE_clones))
+AIC(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = SP_CE_clones))
+summary(lmer(sizeNext ~ size + precip+I(precip^2) + (1|block_trans), data = SP_CE_clones))
+AIC(lmer(sizeNext ~ size + precip+I(precip^2) + (1|block_trans), data = SP_CE_clones))
+summary(lmer(sizeNext ~ size + precip + (1|block_trans), data = SP_CE_clones)) 
+AIC(lmer(sizeNext ~ size + precip + (1|block_trans), data = SP_CE_clones))
+summary(lmer(sizeNext ~ precip+I(precip^2) + (1|block_trans), data = SP_CE_clones))
+AIC(lmer(sizeNext ~ precip+I(precip^2) + (1|block_trans), data = SP_CE_clones))
+summary(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = SP_CE_clones)) 
+AIC(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = SP_CE_clones))
+summary(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = SP_CE_clones))
+AIC(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = SP_CE_clones))
+summary(lmer(sizeNext ~ size + (1|block_trans), data = SP_CE_clones)) #Using this model based of AIC
+AIC(lmer(sizeNext ~ size + (1|block_trans), data = SP_CE_clones))
+summary(lmer(sizeNext ~ 1 + (1|block_trans), data = SP_CE_clones)) 
+AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = SP_CE_clones))
+
+
+mod_clone_growth_SP_CE <- lmer(sizeNext ~ size + (1|block_trans), data = SP_CE_clones)
+CloneSizeVariable_SP_CE <- "size"
+
+plot_clone_growth_SP_CE <- plot_predictions_growth(model = mod_clone_growth_SP_CE, data = SP_CE_clones, minSize_SP, maxSize_SP)
+plot_clone_growth_SP_CE
+
+#Make clonal object
+co_SP_CE <- makeClonalObj(SP_CE, fecConstants=data.frame(correctionForOrphans= 1/(1-SP_CE_clones$prop_orphan[1])),
+                          offspringSizeExplanatoryVariables = CloneSizeVariable_SP_CE, Formula = c(CloneChosenModel_SP_CE, CloneNumberChosenModel_SP_CE),
+                          Family = c("binomial","poisson"), Transform=c("none","none"),offspringSplitter=data.frame(seedbank=0,continuous=1))
+
+co_SP_CE@fitFec[[1]]$coefficients <- as.numeric(fixef(mod_clo_SP_CE))
+co_SP_CE@fitFec[[2]]$coefficients <- as.numeric(coef(mod_clo_no_SP_CE)) #not really needed since this is a linear model
+co_SP_CE@offspringRel$coefficients <- as.numeric(fixef(mod_clone_growth_SP_CE))
+co_SP_CE@sdOffspringSize <- sigma.hat(mod_clone_growth_SP_CE)$sigma$data
+co_SP_CE <- co_SP_CE
+
+
+Cmatrix_SP_CE <- makeIPMCmatrix(clonalObj = co_SP_CE, minSize=minSize_SP, maxSize=maxSize_SP, nBigMatrix = 100, correction = "constant")
+
+contourPlot2(t(Cmatrix_SP_CE), Cmatrix_SP_CE@meshpoints, maxSize_SP, 0.03, 0, title = "Cmatrix: clones") 
+
+
+#### Build IPM ####
+IPM_SP_CE_precip1 <- Pmatrix_SP_CE_precip1 + Fmatrix_SP_CE_precip1 + Cmatrix_SP_CE
+IPM_SP_CE_precip2 <- Pmatrix_SP_CE_precip2 + Fmatrix_SP_CE_precip2 + Cmatrix_SP_CE
+IPM_SP_CE_precip3 <- Pmatrix_SP_CE_precip3 + Fmatrix_SP_CE_precip3 + Cmatrix_SP_CE
+#contourPlot2(t( M = IPM_SP_CE_precip1, meshpts = Pmatrix_SP_CE_precip1@meshpoints, maxSize = maxSize, lower = 0.03, upper = 0))
+IPM_plot(IPM_control = IPM_SP_CE_precip1, minSize = minSize_SP, maxSize = maxSize_SP, zrange = c(-0.03, 0.06)) + ggtitle("Sibbaldia procumbens CE 1.2 m/year")
+IPM_plot(IPM_control = IPM_SP_CE_precip2, minSize = minSize_SP, maxSize = maxSize_SP, zrange = c(-0.03, 0.06)) + ggtitle("Sibbaldia procumbens CE 2.3 m/year")
+IPM_plot(IPM_control = IPM_SP_CE_precip3, minSize = minSize_SP, maxSize = maxSize_SP, zrange = c(-0.03, 0.06)) + ggtitle("Sibbaldia procumbens CE 3.4 m/year")
+#persp(IPM_SP_CE)
+as.numeric(eigen(IPM_SP_CE_precip1)$value[1])
+as.numeric(eigen(IPM_SP_CE_precip2)$value[1])
+as.numeric(eigen(IPM_SP_CE_precip3)$value[1])
+
+##### Ambient temperature novel #####
+
+#### P matrix ####
+
+# choosing the best survival model
+summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CN))
+AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CN))
+summary(glmer(surv ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CN))#We chose this model based on AIC
+AIC(glmer(surv ~ size+ precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CN))
+summary(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CN))
+AIC(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CN))
+summary(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CN)) 
+AIC(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CN))
+summary(glmer(surv ~ size + precip + (1|block_trans), family = 'binomial', data = SP_CN))
+AIC(glmer(surv ~ size + precip + (1|block_trans), family = 'binomial', data = SP_CN))
+summary(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = SP_CN))
+AIC(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = SP_CN))
+summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = SP_CN))
+AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = SP_CN))
+
+mod_surv_SP_CN <- glmer(surv ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CN)
+plot_surv_SP_CN <- plot_predictions_surv_precip(model = mod_surv_SP_CN, data = SP_CN, minSize_SP, maxSize_SP)
+
+plot_surv_SP_CN
+
+so_SP_CN <- makeSurvObj(SP_CN, "surv ~ size")
+so_SP_CN_precip1 <- coerceSurvObj(so_SP_CN, c(as.numeric(fixef(mod_surv_SP_CN)[1]) + 1.2*as.numeric(fixef(mod_surv_SP_CN)[3]) + (1.2)^2*as.numeric(fixef(mod_surv_SP_CN)[4]), 
+                                              as.numeric(fixef(mod_surv_SP_CN)[2])))
+so_SP_CN_precip2 <- coerceSurvObj(so_SP_CN, c(as.numeric(fixef(mod_surv_SP_CN)[1]) + 2.3*as.numeric(fixef(mod_surv_SP_CN)[3]) + (2.3)^2*as.numeric(fixef(mod_surv_SP_CN)[4]), 
+                                              as.numeric(fixef(mod_surv_SP_CN)[2])))
+so_SP_CN_precip3 <- coerceSurvObj(so_SP_CN, c(as.numeric(fixef(mod_surv_SP_CN)[1]) + 3.4*as.numeric(fixef(mod_surv_SP_CN)[3]) + (3.4)^2*as.numeric(fixef(mod_surv_SP_CN)[4]), 
+                                              as.numeric(fixef(mod_surv_SP_CN)[2])))
+
+# choosing the best growth model
+summary(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = SP_CN))
+AIC(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = SP_CN))
+summary(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = SP_CN)) 
+AIC(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = SP_CN))
+summary(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = SP_CN))#We chose this model based on AIC
+AIC(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = SP_CN)) 
+summary(lmer(sizeNext ~ size + (1|block_trans), data = SP_CN)) 
+AIC(lmer(sizeNext ~ size + (1|block_trans), data = SP_CN))
+summary(lmer(sizeNext ~ 1 + (1|block_trans), data = SP_CN))
+AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = SP_CN))
+
+
+mod_growth_SP_CN <- lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = SP_CN)
+
+plot_growth_SP_CN <- plot_predictions_growth(model = mod_growth_SP_CN, data = SP_CN, minSize_SP, maxSize_SP)
+
+plot_growth_SP_CN
+
+
+go_SP_CN <- makeGrowthObj(SP_CN, "sizeNext ~ size + size2")
+go_SP_CN <- coerceGrowthObj(go_SP_CN, fixef(mod_growth_SP_CN),
+                            sigma.hat(mod_growth_SP_CN)$sigma$data)
+
+
+# Make discrete transition object
+dto_SP_CN <- makeDiscreteTrans(SP_CN, discreteTrans = matrix(
+  c(SP_C_seed_bank$seeds_staySB,
+    (1-SP_C_seed_bank$seeds_staySB)*seedling_est_SP_Veg,
+    (1-SP_C_seed_bank$seeds_staySB)*(1-seedling_est_SP_Veg), 
+    0,
+    sum(SP_CN$number[SP_CN$stage=="continuous"&SP_CN$stageNext=="continuous"], na.rm=T),
+    sum(SP_CN$number[SP_CN$stage=="continuous"&SP_CN$stageNext=="dead"], na.rm=T)),
+  ncol = 2,
+  nrow = 3, 
+  dimnames = list(c("seedbank", "continuous", "dead"), c("seedbank", "continuous"))),
+  meanToCont = matrix(Seedling_info_SP$mean_Veg, ncol = 1, nrow = 1, dimnames = list(c("mean"), c("seedbank"))),
+  sdToCont = matrix(Seedling_info_SP$sd, ncol = 1, nrow = 1, dimnames = list(c(""),c("seedbank"))))
+
+
+# With these survival and growth objects in hand, we build a survival/growth (P) matrix.
+Pmatrix_SP_CN_precip1 <- makeIPMPmatrix(survObj=so_SP_CN_precip1, growObj=go_SP_CN, minSize=minSize_SP, maxSize=maxSize_SP, correction = "constant", nBigMatrix = 100)
+Pmatrix_SP_CN_precip2 <- makeIPMPmatrix(survObj=so_SP_CN_precip2, growObj=go_SP_CN, minSize=minSize_SP, maxSize=maxSize_SP, correction = "constant", nBigMatrix = 100)
+Pmatrix_SP_CN_precip3 <- makeIPMPmatrix(survObj=so_SP_CN_precip3, growObj=go_SP_CN, minSize=minSize_SP, maxSize=maxSize_SP, correction = "constant", nBigMatrix = 100)
+
+diagnosticsPmatrix(Pmatrix_SP_CN_precip1, survObj=so_SP_CN_precip1, growObj=go_SP_CN, dff = SP_CN)
+diagnosticsPmatrix(Pmatrix_SP_CN_precip2, survObj=so_SP_CN_precip2, growObj=go_SP_CN, dff = SP_CN)
+diagnosticsPmatrix(Pmatrix_SP_CN_precip3, survObj=so_SP_CN_precip3, growObj=go_SP_CN, dff = SP_CN)
+
+Pmatrix_SP_CN_precip1 <- makeIPMPmatrix(survObj=so_SP_CN_precip1, growObj=go_SP_CN, minSize=minSize_SP, maxSize=maxSize_SP, discreteTrans = dto_SP_CN, correction = "constant", nBigMatrix = 100)
+Pmatrix_SP_CN_precip2 <- makeIPMPmatrix(survObj=so_SP_CN_precip2, growObj=go_SP_CN, minSize=minSize_SP, maxSize=maxSize_SP, discreteTrans = dto_SP_CN, correction = "constant", nBigMatrix = 100)
+Pmatrix_SP_CN_precip3 <- makeIPMPmatrix(survObj=so_SP_CN_precip3, growObj=go_SP_CN, minSize=minSize_SP, maxSize=maxSize_SP, discreteTrans = dto_SP_CN, correction = "constant", nBigMatrix = 100)
+x11()
+contourPlot2(t(Pmatrix_SP_CN), Pmatrix_SP_CN@meshpoints, maxSize_SP, 0.03, 0, title = "Pmatrix: survival and growth") 
+
+
+#### F matrix ####
+# Choosing the best model for estimating if an individual flowers.
+summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(flo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CE)) 
+AIC(glmer(flo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = SP_CE)) #Choosing this model
+AIC(glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(flo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CE)) 
+AIC(glmer(flo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = SP_CE)) 
+summary(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_CE))
+
+floweringChosenModel_SP_CE <- flo.if ~ size
+mod_flo_if_SP_CE <- glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = SP_CE) 
+
+plot_SP_CE_floif <- plot_predictions_floif_precip(model = mod_flo_if_SP_CE, data = SP_CE, minSize_SP, maxSize_SP)
+plot_SP_CE_floif 
+
+
+
+# Choosing the best model for estimating the number of flowers, if an individual flowers
+# Using linear model as the random effects came back with singularity warning. I tried block_trans, site_trans, transition + blockID, transition + siteID, blockId, transition and siteID.
+summary(glm(flo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = SP_CE))
+AIC(glm(flo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = SP_CE))
+summary(glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = SP_CE))
+AIC(glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = SP_CE))
+summary(glm(flo.no ~ precip+I(precip^2), family = 'poisson', data = SP_CE))
+AIC(glm(flo.no ~ precip+I(precip^2), family = 'poisson', data = SP_CE))
+summary(glm(flo.no ~ size + precip, family = 'poisson', data = SP_CE)) 
+AIC(glm(flo.no ~ size + precip, family = 'poisson', data = SP_CE))
+summary(glm(flo.no ~ size, family = 'poisson', data = SP_CE)) 
+AIC(glm(flo.no ~ size, family = 'poisson', data = SP_CE)) 
+summary(glm(flo.no ~ precip, family = 'poisson', data = SP_CE)) 
+AIC(glm(flo.no ~ precip, family = 'poisson', data = SP_CE))
+summary(glm(flo.no ~ 1, family = 'poisson', data = SP_CE))#Choosing this model because the other ones are highly affected by one outlier
+AIC(glm(flo.no ~ 1, family = 'poisson', data = SP_CE))
+
+
+flowerNumberChosenModel_SP_CE <- flo.no ~ 1   #Chosen based on biology by looking at the data
+
+mod_flo_no_SP_CE <- glm(flo.no ~ precip+I(precip^2), family = 'poisson', data = SP_CE)
+
+plot_flo_no_SP_CE <-plot_predictions_flono_precip(model = mod_flo_no_SP_CE, data = SP_CE, minSize_SP, maxSize_SP, ylim = 15) 
+
+plot_flo_no_SP_CE
+
+# Make fecundity object
+fo_SP_CE <-makeFecObj(SP_CE, 
+                      Formula= c(floweringChosenModel_SP_CE, flowerNumberChosenModel_SP_CE),
+                      Family = c("binomial", "poisson"),
+                      fecConstants = data.frame(seedsPerCap = Seeds_per_capsule_SP,
+                                                seedlingEstablishmentRate = seedling_est_SP_Veg), 
+                      meanOffspringSize = Seedling_info_SP$mean_Veg,
+                      sdOffspringSize = Seedling_info_SP$sd,
+                      offspringSplitter = data.frame(seedbank=SP_C_seed_bank$seeds_alive_total_prop* (1-seedling_est_SP_Veg), continuous=(1-(SP_C_seed_bank$seeds_alive_total_prop* (1-seedling_est_SP_Veg)))),
+                      vitalRatesPerOffspringType = data.frame(seedbank=c(1,1,1,0), continuous=c(1,1,1,1),
+                                                              row.names=c("flo.if","flo.no","seedsPerCap","seedlingEstablishmentRate")))
+
+fo_SP_CE@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_SP_CE)[1]) + 1.2*as.numeric(fixef(mod_flo_if_SP_CE)[3]),
+                                       as.numeric(fixef(mod_flo_if_SP_CE)[2]))
+fo_SP_CE@fitFec[[2]]$coefficients <- as.numeric(coef(mod_flo_no_SP_CE)[1] + 1.2*as.numeric(coef(mod_flo_no_SP_CE)[2]) + (1.2)^2*as.numeric(coef(mod_flo_no_SP_CE)[3]))
+fo_SP_CE_precip1 <- fo_SP_CE
+
+fo_SP_CE@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_SP_CE)[1]) + 2.3*as.numeric(fixef(mod_flo_if_SP_CE)[3]),
+                                       as.numeric(fixef(mod_flo_if_SP_CE)[2]))
+fo_SP_CE@fitFec[[2]]$coefficients <- as.numeric(coef(mod_flo_no_SP_CE)[1] + 2.3*as.numeric(coef(mod_flo_no_SP_CE)[2]) + (2.3)^2*as.numeric(coef(mod_flo_no_SP_CE)[3]))
+fo_SP_CE_precip2 <- fo_SP_CE
+
+fo_SP_CE@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_SP_CE)[1]) + 3.4*as.numeric(fixef(mod_flo_if_SP_CE)[3]),
+                                       as.numeric(fixef(mod_flo_if_SP_CE)[2]))
+fo_SP_CE@fitFec[[2]]$coefficients <- as.numeric(coef(mod_flo_no_SP_CE)[1] + 3.4*as.numeric(coef(mod_flo_no_SP_CE)[2]) + (3.4)^2*as.numeric(coef(mod_flo_no_SP_CE)[3]))
+fo_SP_CE_precip3 <- fo_SP_CE
+
+
+Fmatrix_SP_CE_precip1 <- makeIPMFmatrix(fecObj=fo_SP_CE_precip1, minSize=minSize_SP, maxSize=maxSize_SP, correction = "continuous", nBigMatrix = 100)
+Fmatrix_SP_CE_precip2 <- makeIPMFmatrix(fecObj=fo_SP_CE_precip2, minSize=minSize_SP, maxSize=maxSize_SP, correction = "continuous", nBigMatrix = 100)
+Fmatrix_SP_CE_precip3 <- makeIPMFmatrix(fecObj=fo_SP_CE_precip3, minSize=minSize_SP, maxSize=maxSize_SP, correction = "continuous", nBigMatrix = 100)
+
+#Plotting the matrix
+contourPlot2(t(Fmatrix_SP_CE_precip1), Fmatrix_SP_CE_precip1@meshpoints, maxSize, 0.003, 0, title = "Fmatrix: flower and seedlings")
+contourPlot2(t(Fmatrix_SP_CE_precip2), Fmatrix_SP_CE_precip2@meshpoints, maxSize, 0.003, 0, title = "Fmatrix: flower and seedlings")
+contourPlot2(t(Fmatrix_SP_CE_precip3), Fmatrix_SP_CE_precip3@meshpoints, maxSize, 0.003, 0, title = "Fmatrix: flower and seedlings")
+
+# image.plot(Fmatrix_VA_CC@meshpoints,
+#            Fmatrix_VA_CC@meshpoints,
+#            t(Fmatrix_VA_CC),
+#            main = "Fmatrix: flower and seedlings",
+#            xlab = "Size at t",
+#            ylab = "Size at t+1")
+# 
+# image(t(Fmatrix_VA_CC))
+
+#### C matrix ####
+
+SP_CE_clones <- SP_CE %>% 
+  filter(offspringNext == "clonal") %>% 
+  mutate(number_orphans = case_when(is.na(size) ~ 1,
+                                    !is.na(size) ~0)) %>% 
+  mutate(total_num_orphan = sum(number_orphans),
+         total_num_clones = n()) %>% 
+  fill(total_num_orphan, .direction = "downup") %>% 
+  mutate(prop_orphan = total_num_orphan/total_num_clones)
+
+#Is the production of clones size dependent
+summary(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CE)) #Choosing thins model based of AIC
+AIC(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = SP_CE))
+summary(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_CE))
+AIC(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_CE))
+
+
+mod_clo_SP_CE <- glmer(clo.if ~ size+I(size^2) + (1|site_trans), family = 'binomial', data = SP_CE)
+CloneChosenModel_SP_CE <- clo.if ~ size + size2 
+
+
+plot_clo_if_SP_CE <- plot_predictions_cloif(model = mod_clo_SP_CE, data = SP_CE, minSize_SP, maxSize_SP)
+plot_clo_if_SP_CE
+
+#If you produce clones, does how many clones you make change with size of the mother 
+# Running linear mixed effects models because all the random effects gave singularity warning. I tried block_trans, site_trans, transition + blockID, transition + siteID, transition, blockID and siteID.
+summary(glm(clo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = SP_CE))
+AIC(glm(clo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = SP_CE))
+summary(glm(clo.no ~ size+I(size^2) + precip, family = 'poisson', data = SP_CE))
+AIC(glm(clo.no ~ size+I(size^2) + precip, family = 'poisson', data = SP_CE))
+summary(glm(clo.no ~ size + precip, family = 'poisson', data = SP_CE))
+AIC(glm(clo.no ~ size + precip, family = 'poisson', data = SP_CE))
+summary(glm(clo.no ~ size, family = 'poisson', data = SP_CE))
+AIC(glm(clo.no ~ size, family = 'poisson', data = SP_CE))
+summary(glm(clo.no ~ 1, family = 'poisson', data = SP_CE)) #Chosing this model based of AIC
+AIC(glm(clo.no ~ 1, family = 'poisson', data = SP_CE))
+
+mod_clo_no_SP_CE <- glm(clo.no ~ 1, family = 'poisson', data = SP_CE)
+CloneNumberChosenModel_SP_CE <- clo.no ~ 1
+
+
+plot_clo_no_SP_CE <- plot_predictions_clono(model = mod_clo_no_SP_CE, data = SP_CE, minSize_SP, maxSize_SP, ylim = 6)
+plot_clo_no_SP_CE
+
+# Clonal size depending on mother size
+summary(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = SP_CE_clones))
+AIC(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = SP_CE_clones))
+summary(lmer(sizeNext ~ size + precip+I(precip^2) + (1|block_trans), data = SP_CE_clones))
+AIC(lmer(sizeNext ~ size + precip+I(precip^2) + (1|block_trans), data = SP_CE_clones))
+summary(lmer(sizeNext ~ size + precip + (1|block_trans), data = SP_CE_clones)) 
+AIC(lmer(sizeNext ~ size + precip + (1|block_trans), data = SP_CE_clones))
+summary(lmer(sizeNext ~ precip+I(precip^2) + (1|block_trans), data = SP_CE_clones))
+AIC(lmer(sizeNext ~ precip+I(precip^2) + (1|block_trans), data = SP_CE_clones))
+summary(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = SP_CE_clones)) 
+AIC(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = SP_CE_clones))
+summary(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = SP_CE_clones))
+AIC(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = SP_CE_clones))
+summary(lmer(sizeNext ~ size + (1|block_trans), data = SP_CE_clones)) #Using this model based of AIC
+AIC(lmer(sizeNext ~ size + (1|block_trans), data = SP_CE_clones))
+summary(lmer(sizeNext ~ 1 + (1|block_trans), data = SP_CE_clones)) 
+AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = SP_CE_clones))
+
+
+mod_clone_growth_SP_CE <- lmer(sizeNext ~ size + (1|block_trans), data = SP_CE_clones)
+CloneSizeVariable_SP_CE <- "size"
+
+plot_clone_growth_SP_CE <- plot_predictions_growth(model = mod_clone_growth_SP_CE, data = SP_CE_clones, minSize_SP, maxSize_SP)
+plot_clone_growth_SP_CE
+
+#Make clonal object
+co_SP_CE <- makeClonalObj(SP_CE, fecConstants=data.frame(correctionForOrphans= 1/(1-SP_CE_clones$prop_orphan[1])),
+                          offspringSizeExplanatoryVariables = CloneSizeVariable_SP_CE, Formula = c(CloneChosenModel_SP_CE, CloneNumberChosenModel_SP_CE),
+                          Family = c("binomial","poisson"), Transform=c("none","none"),offspringSplitter=data.frame(seedbank=0,continuous=1))
+
+co_SP_CE@fitFec[[1]]$coefficients <- as.numeric(fixef(mod_clo_SP_CE))
+co_SP_CE@fitFec[[2]]$coefficients <- as.numeric(coef(mod_clo_no_SP_CE)) #not really needed since this is a linear model
+co_SP_CE@offspringRel$coefficients <- as.numeric(fixef(mod_clone_growth_SP_CE))
+co_SP_CE@sdOffspringSize <- sigma.hat(mod_clone_growth_SP_CE)$sigma$data
+co_SP_CE <- co_SP_CE
+
+
+Cmatrix_SP_CE <- makeIPMCmatrix(clonalObj = co_SP_CE, minSize=minSize_SP, maxSize=maxSize_SP, nBigMatrix = 100, correction = "constant")
+
+contourPlot2(t(Cmatrix_SP_CE), Cmatrix_SP_CE@meshpoints, maxSize_SP, 0.03, 0, title = "Cmatrix: clones") 
+
+
+#### Build IPM ####
+IPM_SP_CE_precip1 <- Pmatrix_SP_CE_precip1 + Fmatrix_SP_CE_precip1 + Cmatrix_SP_CE
+IPM_SP_CE_precip2 <- Pmatrix_SP_CE_precip2 + Fmatrix_SP_CE_precip2 + Cmatrix_SP_CE
+IPM_SP_CE_precip3 <- Pmatrix_SP_CE_precip3 + Fmatrix_SP_CE_precip3 + Cmatrix_SP_CE
+#contourPlot2(t( M = IPM_SP_CE_precip1, meshpts = Pmatrix_SP_CE_precip1@meshpoints, maxSize = maxSize, lower = 0.03, upper = 0))
+IPM_plot(IPM_control = IPM_SP_CE_precip1, minSize = minSize_SP, maxSize = maxSize_SP, zrange = c(-0.03, 0.06)) + ggtitle("Sibbaldia procumbens CE 1.2 m/year")
+IPM_plot(IPM_control = IPM_SP_CE_precip2, minSize = minSize_SP, maxSize = maxSize_SP, zrange = c(-0.03, 0.06)) + ggtitle("Sibbaldia procumbens CE 2.3 m/year")
+IPM_plot(IPM_control = IPM_SP_CE_precip3, minSize = minSize_SP, maxSize = maxSize_SP, zrange = c(-0.03, 0.06)) + ggtitle("Sibbaldia procumbens CE 3.4 m/year")
+#persp(IPM_SP_CE)
+as.numeric(eigen(IPM_SP_CE_precip1)$value[1])
+as.numeric(eigen(IPM_SP_CE_precip2)$value[1])
+as.numeric(eigen(IPM_SP_CE_precip3)$value[1])
+
 
 
 ##### Warming control #####
