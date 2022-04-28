@@ -63,12 +63,12 @@ VA_WR <- Ver_alp_2018_2021 %>% filter(OTC == "W" & treatment == "R")
 VA_WE <- Ver_alp_2018_2021 %>% filter(OTC == "W" & treatment == "E")
 VA_WN <- Ver_alp_2018_2021 %>% filter(OTC == "W" & treatment == "N")
 
-VA_C_seed_bank <- seed_bank1 %>% 
+VA_C_seed_bank <- seed_bank %>% 
    filter(species == "Ver_alp",
           warming == "C") %>% 
    ungroup()
 
-VA_OTC_seed_bank <- seed_bank1 %>% 
+VA_OTC_seed_bank <- seed_bank %>% 
    filter(species == "Ver_alp",
           warming == "OTC") %>% 
    ungroup() 
@@ -80,9 +80,6 @@ VA_OTC_seed_bank <- seed_bank1 %>%
 #### P matrix ####
 
 # choosing the best survival model
-x11()
-par(mfrow=c(1,1))
-# survModelComp(dataf= VA_CC, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
 
 summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
 AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
@@ -104,7 +101,6 @@ so_VA_CC <- makeSurvObj(VA_CC, "surv ~ size + size2")
 so_VA_CC <- coerceSurvObj(so_VA_CC, as.numeric(fixef(mod_surv_VA_CC))) #Adding coefficients from mixed effect model and not from the linear model as is default in makeSurvObj
 
 # choosing the bext growth model
-#growthModelComp(dataf=VA_CC, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
 
 summary(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = VA_CC))
 AIC(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = VA_CC))
@@ -183,9 +179,11 @@ contourPlot2(t(Pmatrix_VA_CC_precip3), Pmatrix_VA_CC_precip3@meshpoints, maxSize
 
 #### F matrix ####
 # Choosing the best model for estimating if an individual flowers
-summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
+summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC)) #Choosing this model based of AIC
 AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
-summary(glmer(flo.if ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC)) #Choosing this model based of AIC
+summary(glmer(flo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
+AIC(glmer(flo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
+summary(glmer(flo.if ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC)) 
 AIC(glmer(flo.if ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
 summary(glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = VA_CC))
 AIC(glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = VA_CC))
@@ -194,9 +192,9 @@ AIC(glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CC))
 summary(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 AIC(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 
-floweringChosenModel_VA_CC <- flo.if ~ size #Making a mock model, will fill in from actual model later
+floweringChosenModel_VA_CC <- flo.if ~ size + size2 #Making a mock model, will fill in from actual model later
 
-mod_flo_if_VA_CC <- glmer(flo.if ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC) 
+mod_flo_if_VA_CC <- glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC) 
 
 plot_VA_CC_floif <- plot_predictions_floif_precip(model = mod_flo_if_VA_CC, data = VA_CC, minSize, maxSize)
 
@@ -205,11 +203,10 @@ plot_VA_CC_floif
 
 # Choosing the best model for estimating the number of flowers, if an individual flowers
 
-VA_CC <- VA_CC %>% 
-   filter(!unique_IDS == "Ulv_6_2_4")
-
 summary(glmer(flo.no ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'poisson', data = VA_CC))
 AIC(glmer(flo.no ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'poisson', data = VA_CC))
+summary(glmer(flo.no ~ size+I(size^2) + precip + (1|block_trans), family = 'poisson', data = VA_CC))
+AIC(glmer(flo.no ~ size+I(size^2) + precip + (1|block_trans), family = 'poisson', data = VA_CC))
 summary(glmer(flo.no ~ size + precip +I(precip^2) + (1|block_trans), family = 'poisson', data = VA_CC)) 
 AIC(glmer(flo.no ~ size + precip+I(size^2) + (1|block_trans), family = 'poisson', data = VA_CC))
 summary(glmer(flo.no ~ size + precip + (1|block_trans), family = 'poisson', data = VA_CC))
@@ -218,8 +215,6 @@ summary(glmer(flo.no ~ size + (1|block_trans), family = 'poisson', data = VA_CC)
 AIC(glmer(flo.no ~ size + (1|block_trans), family = 'poisson', data = VA_CC)) 
 summary(glmer(flo.no ~ 1 + (1|block_trans), family = 'poisson', data = VA_CC))
 AIC(glmer(flo.no ~ 1 + (1|block_trans), family = 'poisson', data = VA_CC))
-
-#AIC(glmer(flo.no~size+I(size^2)+I(size^3) + (1|BlockID), family = 'poisson', data = VA_CC))
 
 flowerNumberChosenModel_VA_CC <- flo.no ~ size  #Chosen based on biology by looking at the data
 
@@ -241,18 +236,21 @@ fo_VA_CC <-makeFecObj(VA_CC,
                       vitalRatesPerOffspringType = data.frame(seedbank=c(1,1,1,0), continuous=c(1,1,1,1),
                                                               row.names=c("flo.if","flo.no","seedsPerCap","seedlingEstablishmentRate")))
 
-fo_VA_CC@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_VA_CC)[1]) + 1.2*as.numeric(fixef(mod_flo_if_VA_CC)[3]) + (1.2)^2* as.numeric(fixef(mod_flo_if_VA_CC)[4]),
-                                       as.numeric(fixef(mod_flo_if_VA_CC)[2]))
+fo_VA_CC@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_VA_CC)[1]) + 1.2*as.numeric(fixef(mod_flo_if_VA_CC)[4]) + (1.2)^2* as.numeric(fixef(mod_flo_if_VA_CC)[5]),
+                                       as.numeric(fixef(mod_flo_if_VA_CC)[2]),
+                                       as.numeric(fixef(mod_flo_if_VA_CC)[3]))
 fo_VA_CC@fitFec[[2]]$coefficients <- as.numeric(fixef(mod_flo_no_VA_CC))
 fo_VA_CC_precip1 <- fo_VA_CC
 
-fo_VA_CC@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_VA_CC)[1]) + 2.3*as.numeric(fixef(mod_flo_if_VA_CC)[3]) + (2.3)^2* as.numeric(fixef(mod_flo_if_VA_CC)[4]),
-                                       as.numeric(fixef(mod_flo_if_VA_CC)[2]))
+fo_VA_CC@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_VA_CC)[1]) + 2.3*as.numeric(fixef(mod_flo_if_VA_CC)[4]) + (2.3)^2* as.numeric(fixef(mod_flo_if_VA_CC)[5]),
+                                       as.numeric(fixef(mod_flo_if_VA_CC)[2]),
+                                       as.numeric(fixef(mod_flo_if_VA_CC)[3]))
 fo_VA_CC@fitFec[[2]]$coefficients <- as.numeric(fixef(mod_flo_no_VA_CC))
 fo_VA_CC_precip2 <- fo_VA_CC
 
-fo_VA_CC@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_VA_CC)[1]) + 3.4*as.numeric(fixef(mod_flo_if_VA_CC)[3]) + (3.4)^2* as.numeric(fixef(mod_flo_if_VA_CC)[4]),
-                                       as.numeric(fixef(mod_flo_if_VA_CC)[2]))
+fo_VA_CC@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_VA_CC)[1]) + 3.4*as.numeric(fixef(mod_flo_if_VA_CC)[4]) + (3.4)^2* as.numeric(fixef(mod_flo_if_VA_CC)[5]),
+                                       as.numeric(fixef(mod_flo_if_VA_CC)[2]),
+                                       as.numeric(fixef(mod_flo_if_VA_CC)[3]))
 fo_VA_CC@fitFec[[2]]$coefficients <- as.numeric(fixef(mod_flo_no_VA_CC))
 fo_VA_CC_precip3 <- fo_VA_CC
 
@@ -294,16 +292,16 @@ summary(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), fa
 AIC(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
 summary(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
 AIC(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
-summary(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CC)) #Choosing thins model based of AIC
+summary(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CC)) 
 AIC(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CC))
-summary(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CC))
+summary(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CC)) #Choosing this model based of AIC
 AIC(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CC))
 summary(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 AIC(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 
 
-mod_clo_VA_CC <- glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CC)
-CloneChosenModel_VA_CC <- clo.if ~ size + size2 
+mod_clo_VA_CC <- glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CC)
+CloneChosenModel_VA_CC <- clo.if ~ size 
 
 
 plot_clo_if_VA_CC <- plot_predictions_cloif(model = mod_clo_VA_CC, data = VA_CC, minSize, maxSize)
@@ -319,7 +317,7 @@ summary(glm(clo.no ~ size + precip, family = 'poisson', data = VA_CC))
 AIC(glm(clo.no ~ size + precip, family = 'poisson', data = VA_CC))
 summary(glm(clo.no ~ size, family = 'poisson', data = VA_CC))
 AIC(glm(clo.no ~ size, family = 'poisson', data = VA_CC))
-summary(glm(clo.no ~ 1, family = 'poisson', data = VA_CC))
+summary(glm(clo.no ~ 1, family = 'poisson', data = VA_CC)) #Choosing this model based of AIC
 AIC(glm(clo.no ~ 1, family = 'poisson', data = VA_CC))
 
 mod_clo_no_VA_CC <- glm(clo.no ~ 1, family = 'poisson', data = VA_CC)
@@ -405,13 +403,10 @@ contourPlot2(t(IPM_VA_CC_precip3), Pmatrix_VA_CC_precip1@meshpoints, maxSize, 0.
 #### P matrix ####
 
 # choosing the best survival model
-x11()
-par(mfrow=c(1,1))
-# survModelComp(dataf= VA_CC, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
 
-summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR))
+summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR)) #We chose this model 
 AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR))
-summary(glmer(surv ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR)) #We chose this model 
+summary(glmer(surv ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR)) 
 AIC(glmer(surv ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR))
 summary(glmer(surv ~ size + precip + (1|block_trans), family = 'binomial', data = VA_CR))
 AIC(glmer(surv ~ size + precip + (1|block_trans), family = 'binomial', data = VA_CR))
@@ -420,29 +415,25 @@ AIC(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = VA_CR))
 summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_CR))
 AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_CR))
 
-# summary(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CR))
-# AIC(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CR))
-# summary(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CR))
-# AIC(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CR))
 
-
-mod_surv_VA_CR <- glmer(surv ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR)
+mod_surv_VA_CR <- glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR)
 plot_surv_VA_CR <- plot_predictions_surv_precip(model = mod_surv_VA_CR, data = VA_CR, minSize, maxSize)
 
-x11()
-plot_surv_VA_CC | plot_surv_VA_CR
+plot_surv_VA_CR
 
-so_VA_CR <- makeSurvObj(VA_CR, "surv ~ size")
-so_VA_CR_precip1 <- coerceSurvObj(so_VA_CR, c(as.numeric(fixef(mod_surv_VA_CR)[1]) + 1.2*as.numeric(fixef(mod_surv_VA_CR)[3]) + (1.2)^2* as.numeric(fixef(mod_surv_VA_CR)[4]),
-                                              as.numeric(fixef(mod_surv_VA_CR)[2]))) #Adding coefficients from mixed effect model and not from the linear model as is default in makeSurvObj
-so_VA_CR_precip2 <- coerceSurvObj(so_VA_CR, c(as.numeric(fixef(mod_surv_VA_CR)[1]) + 2.3*as.numeric(fixef(mod_surv_VA_CR)[3]) + (2.3)^2* as.numeric(fixef(mod_surv_VA_CR)[4]),
-                                              as.numeric(fixef(mod_surv_VA_CR)[2])))
-so_VA_CR_precip3 <- coerceSurvObj(so_VA_CR, c(as.numeric(fixef(mod_surv_VA_CR)[1]) + 3.4*as.numeric(fixef(mod_surv_VA_CR)[3]) + (3.4)^2* as.numeric(fixef(mod_surv_VA_CR)[4]),
-                                              as.numeric(fixef(mod_surv_VA_CR)[2])))
+so_VA_CR <- makeSurvObj(VA_CR, "surv ~ size + size2")
+so_VA_CR_precip1 <- coerceSurvObj(so_VA_CR, c(as.numeric(fixef(mod_surv_VA_CR)[1]) + 1.2*as.numeric(fixef(mod_surv_VA_CR)[4]) + (1.2)^2* as.numeric(fixef(mod_surv_VA_CR)[5]),
+                                              as.numeric(fixef(mod_surv_VA_CR)[2]),
+                                              as.numeric(fixef(mod_surv_VA_CR)[3]))) #Adding coefficients from mixed effect model and not from the linear model as is default in makeSurvObj
+so_VA_CR_precip2 <- coerceSurvObj(so_VA_CR, c(as.numeric(fixef(mod_surv_VA_CR)[1]) + 2.3*as.numeric(fixef(mod_surv_VA_CR)[4]) + (2.3)^2* as.numeric(fixef(mod_surv_VA_CR)[5]),
+                                              as.numeric(fixef(mod_surv_VA_CR)[2]),
+                                              as.numeric(fixef(mod_surv_VA_CR)[3])))
+so_VA_CR_precip3 <- coerceSurvObj(so_VA_CR, c(as.numeric(fixef(mod_surv_VA_CR)[1]) + 3.4*as.numeric(fixef(mod_surv_VA_CR)[4]) + (3.4)^2* as.numeric(fixef(mod_surv_VA_CR)[5]),
+                                              as.numeric(fixef(mod_surv_VA_CR)[2]),
+                                              as.numeric(fixef(mod_surv_VA_CR)[3])))
 
 
 # choosing the best growth model
-#growthModelComp(dataf=VA_CC, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
 
 summary(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = VA_CR)) #We chose this model based on AIC
 AIC(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = VA_CR))
@@ -460,7 +451,7 @@ mod_growth_VA_CR <- lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|blo
 
 plot_growth_VA_CR <- plot_predictions_growth_precip(model = mod_growth_VA_CR, data = VA_CR, minSize, maxSize)
 
-plot_surv_VA_CR | plot_growth_VA_CR
+plot_growth_VA_CR
 
 
 go_VA_CR <- makeGrowthObj(VA_CR, "sizeNext ~ size + size2")
@@ -616,6 +607,7 @@ summary(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CR))
 AIC(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CR))
 
 
+
 mod_clo_VA_CR <- glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CR)
 CloneChosenModel_VA_CR <- clo.if ~ size + size2 
 
@@ -644,21 +636,12 @@ plot_clo_no_VA_CR <- plot_predictions_clono(model = mod_clo_no_VA_CR, data = VA_
 plot_clo_no_VA_CR
 
 # Clonal size depending on mother size
-# x11()
-# par(mfrow=c(1,1))
-# growthModelComp(dataf=VA_CC_clones, makePlot=TRUE, legendPos="topright", mainTitle="Growth")
-# CloneSizeVariable_VA_CC <- "1"  #Chosen based on AIC
-# 
-# go_clone_VA_CC <- makeGrowthObj(VA_CC_clones, sizeNext ~ 1)
-
-
 summary(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = VA_CR_clones))
 AIC(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = VA_CR_clones))
-
 summary(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = VA_CR_clones)) 
 AIC(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = VA_CR_clones))
-summary(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = VA_CR_clones))
-AIC(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = VA_CR_clones))
+summary(lmer(sizeNext ~ size + precip + (1|block_trans), data = VA_CR_clones)) 
+AIC(lmer(sizeNext ~ size + precip + (1|block_trans), data = VA_CR_clones))
 summary(lmer(sizeNext ~ size + (1|block_trans), data = VA_CR_clones)) #choosing this model based on AIC
 AIC(lmer(sizeNext ~ size + (1|block_trans), data = VA_CR_clones))
 summary(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_CR_clones)) 
@@ -764,7 +747,7 @@ mod_growth_VA_CE <- lmer(sizeNext ~ size + precip + (1|block_trans), data = VA_C
 
 plot_growth_VA_CE <- plot_predictions_growth_precip(model = mod_growth_VA_CE, data = VA_CE, minSize, maxSize)
 
-plot_surv_VA_CE | plot_growth_VA_CE
+plot_growth_VA_CE
 
 go_VA_CE <- makeGrowthObj(VA_CE, "sizeNext ~ size")
 
@@ -839,16 +822,18 @@ plot_VA_CE_floif
 
 # Choosing the best model for estimating the number of flowers, if an individual flowers
 #Using only blockID as random effect because of singularity fit with other higher prioritized random effects. I have tried block_trans, site_trans, blockID + transition, siteID + transition, transition, siteID, blockID. 
-summary(glmer(flo.no ~ size+I(size^2) + precip+I(precip^2) + (1|blockID), family = 'poisson', data = VA_CE))
-AIC(glmer(flo.no ~ size+I(size^2) + precip+I(precip^2) + (1|blockID), family = 'poisson', data = VA_CE))
-summary(glmer(flo.no ~ size + precip+I(precip^2) + (1|blockID), family = 'poisson', data = VA_CE))
-AIC(glmer(flo.no ~ size + precip+I(precip^2) + (1|blockID), family = 'poisson', data = VA_CE))
-summary(glmer(flo.no ~ size + precip + (1|blockID), family = 'poisson', data = VA_CE))
-AIC(glmer(flo.no ~ size + precip + (1|blockID), family = 'poisson', data = VA_CE))
-summary(glmer(flo.no ~ size  + (1|blockID), family = 'poisson', data = VA_CE)) #Choosing this model based of AIC
-AIC(glmer(flo.no ~ size + (1|blockID), family = 'poisson', data = VA_CE))
-summary(glmer(flo.no ~ 1  + (1|blockID), family = 'poisson', data = VA_CE))
-AIC(glmer(flo.no ~ 1 + (1|blockID), family = 'poisson', data = VA_CE))
+summary(glm(flo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = VA_CE))
+AIC(glm(flo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = VA_CE))
+summary(glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CE))
+AIC(glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CE))
+summary(glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CE))
+AIC(glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CE))
+summary(glm(flo.no ~ size + precip, family = 'poisson', data = VA_CE))
+AIC(glm(flo.no ~ size + precip, family = 'poisson', data = VA_CE))
+summary(glm(flo.no ~ size , family = 'poisson', data = VA_CE)) #Choosing this model based of AIC
+AIC(glm(flo.no ~ size, family = 'poisson', data = VA_CE))
+summary(glm(flo.no ~ 1, family = 'poisson', data = VA_CE))
+AIC(glm(flo.no ~ 1, family = 'poisson', data = VA_CE))
 
 
 flowerNumberChosenModel_VA_CE <- flo.no ~ size
@@ -915,6 +900,8 @@ plot_clo_if_VA_CE
 #Using a linear model because of singularity fit with all different combinations of random effects. I have tried block_trans, site_trans, blockID + transition, siteID + transition, transition, siteID, blockID.
 summary(glm(clo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = VA_CE))
 AIC(glm(clo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = VA_CE))
+summary(glm(clo.no ~ size+I(size^2) + precip, family = 'poisson', data = VA_CE))
+AIC(glm(clo.no ~ size+I(size^2) + precip, family = 'poisson', data = VA_CE))
 summary(glm(clo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CE))
 AIC(glm(clo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CE))
 summary(glm(clo.no ~ size + precip, family = 'poisson', data = VA_CE))
@@ -1012,11 +999,13 @@ so_VA_CN <- coerceSurvObj(so_VA_CN, as.numeric(fixef(mod_surv_VA_CN))) #Adding c
 
 
 # Choosing the best growth model
-summary(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = VA_CN)) #We chose this model based on AIC
+summary(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = VA_CN)) 
 AIC(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = VA_CN))
 summary(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = VA_CN)) 
 AIC(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = VA_CN))
-summary(lmer(sizeNext ~ size + precip + (1|block_trans), data = VA_CN)) 
+summary(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = VA_CN)) 
+AIC(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = VA_CN))
+summary(lmer(sizeNext ~ size + precip + (1|block_trans), data = VA_CN)) #We chose this model based on AIC
 AIC(lmer(sizeNext ~ size + precip + (1|block_trans), data = VA_CN))
 summary(lmer(sizeNext ~ size + (1|block_trans), data = VA_CN))
 AIC(lmer(sizeNext ~ size + (1|block_trans), data = VA_CN)) 
@@ -1024,28 +1013,25 @@ summary(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_CN))
 AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = VA_CN))
 
 
-mod_growth_VA_CN <- lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = VA_CN)
+mod_growth_VA_CN <- lmer(sizeNext ~ size + precip + (1|block_trans), data = VA_CN)
 
 plot_growth_VA_CN <- plot_predictions_growth_precip(model = mod_growth_VA_CN, data = VA_CN, minSize, maxSize)
 
-plot_surv_VA_CN | plot_growth_VA_CN
+plot_growth_VA_CN
 
 
-go_VA_CN <- makeGrowthObj(VA_CN, "sizeNext ~ size + size2")
+go_VA_CN <- makeGrowthObj(VA_CN, "sizeNext ~ size")
 
 #Adding coefficients and standard deviations from mixed effect model and not from the linear model as is default in makeSurvObj
 #Precipitation 1.2, 2.3 and 3.4 m/year
-go_VA_CN_precip1 <- coerceGrowthObj(go_VA_CN, c(as.numeric(fixef(mod_growth_VA_CN)[1]) + 1.2*as.numeric(fixef(mod_growth_VA_CN)[4]) + (1.2)^2* as.numeric(fixef(mod_growth_VA_CN)[5]),
-                                              as.numeric(fixef(mod_growth_VA_CN)[2]),
-                                              as.numeric(fixef(mod_growth_VA_CN)[3])),
+go_VA_CN_precip1 <- coerceGrowthObj(go_VA_CN, c(as.numeric(fixef(mod_growth_VA_CN)[1]) + 1.2*as.numeric(fixef(mod_growth_VA_CN)[3]), 
+                                              as.numeric(fixef(mod_growth_VA_CN)[2])),
                                   sigma.hat(mod_growth_VA_CN)$sigma$data)
-go_VA_CN_precip2 <- coerceGrowthObj(go_VA_CN, c(as.numeric(fixef(mod_growth_VA_CN)[1]) + 2.3*as.numeric(fixef(mod_growth_VA_CN)[4]) + (2.3)^2* as.numeric(fixef(mod_growth_VA_CN)[5]),
-                                              as.numeric(fixef(mod_growth_VA_CN)[2]),
-                                              as.numeric(fixef(mod_growth_VA_CN)[3])),
+go_VA_CN_precip2 <- coerceGrowthObj(go_VA_CN, c(as.numeric(fixef(mod_growth_VA_CN)[1]) + 2.3*as.numeric(fixef(mod_growth_VA_CN)[3]),
+                                              as.numeric(fixef(mod_growth_VA_CN)[2])),
                                   sigma.hat(mod_growth_VA_CN)$sigma$data)
-go_VA_CN_precip3 <- coerceGrowthObj(go_VA_CN, c(as.numeric(fixef(mod_growth_VA_CN)[1]) + 3.4*as.numeric(fixef(mod_growth_VA_CN)[4]) + (3.4)^2* as.numeric(fixef(mod_growth_VA_CN)[5]),
-                                              as.numeric(fixef(mod_growth_VA_CN)[2]),
-                                              as.numeric(fixef(mod_growth_VA_CN)[3])),
+go_VA_CN_precip3 <- coerceGrowthObj(go_VA_CN, c(as.numeric(fixef(mod_growth_VA_CN)[1]) + 3.4*as.numeric(fixef(mod_growth_VA_CN)[3]),
+                                              as.numeric(fixef(mod_growth_VA_CN)[2])),
                                   sigma.hat(mod_growth_VA_CN)$sigma$data)
 
 # Make discrete transition object
@@ -1124,8 +1110,8 @@ AIC(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CN))
 #Using a linear model because of singularity fit with all different combinations of random effects. I have tried block_trans, site_trans, blockID + transition, siteID + transition, transition, siteID, blockID.
 summary(glm(flo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = VA_CN))
 AIC(glm(flo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = VA_CN))
-summary(glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CN))
-AIC(glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CN)) #Choosing this model because of AIC
+summary(glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CN))#Choosing this model because of AIC
+AIC(glm(flo.no ~ size + precip+I(precip^2), family = 'poisson', data = VA_CN)) 
 summary(glm(flo.no ~ size + precip, family = 'poisson', data = VA_CN))
 AIC(glm(flo.no ~ size + precip, family = 'poisson', data = VA_CN))
 summary(glm(flo.no ~ size, family = 'poisson', data = VA_CN))
@@ -1195,20 +1181,22 @@ VA_CN_clones <- VA_CN %>%
    mutate(prop_orphan = total_num_orphan/total_num_clones)
 
 #Is the production of clones size dependent
-#Using a linear model because of singularity fit with all different combinations of random effects. I have tried block_trans, site_trans, blockID + transition, siteID + transition, transition, siteID, blockID.
-summary(glm(clo.if ~ size+I(size^2) + precip+I(precip^2), family = 'binomial', data = VA_CN))
-AIC(glm(clo.if ~ size+I(size^2) + precip+I(precip^2), family = 'binomial', data = VA_CN))
-summary(glm(clo.if ~ size+I(size^2) + precip, family = 'binomial', data = VA_CN))
-AIC(glm(clo.if ~ size+I(size^2) + precip, family = 'binomial', data = VA_CN))
-summary(glm(clo.if ~ size+I(size^2) , family = 'binomial', data = VA_CN)) #choosing this model based of AIC
-AIC(glm(clo.if ~ size+I(size^2), family = 'binomial', data = VA_CN))
-summary(glm(clo.if ~ size , family = 'binomial', data = VA_CN))
-AIC(glm(clo.if ~ size, family = 'binomial', data = VA_CN))
-summary(glm(clo.if ~ 1 , family = 'binomial', data = VA_CN))
-AIC(glm(clo.if ~ 1, family = 'binomial', data = VA_CN))
+summary(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN))
+AIC(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN))
+summary(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CN))
+AIC(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CN))
+summary(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN)) #choosing this model based of AIC
+AIC(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN))
+summary(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CN))
+AIC(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CN))
+summary(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CN))
+AIC(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CN))
+
+#Checking convergence on the model. Looks ok.
+glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN, verbose = TRUE)
 
 #Chosen model
-mod_clo_VA_CN <- glm(clo.if ~ size+I(size^2) , family = 'binomial', data = VA_CN)
+mod_clo_VA_CN <- glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN)
 CloneChosenModel_VA_CN <- clo.if ~ size + size2 
 
 #Plot for visual checking
@@ -1240,18 +1228,18 @@ summary(lm(sizeNext ~ size+I(size^2) + precip+I(precip^2), data = VA_CN_clones))
 AIC(lm(sizeNext ~ size+I(size^2) + precip+I(precip^2), data = VA_CN_clones))
 summary(lm(sizeNext ~ size + precip+I(precip^2), data = VA_CN_clones))
 AIC(lm(sizeNext ~ size + precip+I(precip^2), data = VA_CN_clones))
-summary(lm(sizeNext ~ size + precip, data = VA_CN_clones)) # choosing this model base of AIC
+summary(lm(sizeNext ~ size + precip, data = VA_CN_clones)) 
 AIC(lm(sizeNext ~ size + precip, data = VA_CN_clones))
-summary(lm(sizeNext ~ size, data = VA_CN_clones))
+summary(lm(sizeNext ~ size, data = VA_CN_clones)) # choosing this model base of AIC
 AIC(lm(sizeNext ~ size, data = VA_CN_clones))
 summary(lm(sizeNext ~ 1, data = VA_CN_clones))
 AIC(lm(sizeNext ~ 1, data = VA_CN_clones))
 
 
-mod_clone_growth_VA_CN <- lm(sizeNext ~ size + precip, data = VA_CN_clones)
+mod_clone_growth_VA_CN <- lm(sizeNext ~ size, data = VA_CN_clones)
 CloneSizeVariable_VA_CN <- "size"
 
-plot_clone_growth_VA_CN <- plot_predictions_growth_precip(model = mod_clone_growth_VA_CN, data = VA_CN_clones, minSize, maxSize)
+plot_clone_growth_VA_CN <- plot_predictions_growth(model = mod_clone_growth_VA_CN, data = VA_CN_clones, minSize, maxSize)
 plot_clone_growth_VA_CN
 
 #Make clonal object
@@ -1260,25 +1248,12 @@ co_VA_CN <- makeClonalObj(VA_CN, fecConstants=data.frame(correctionForOrphans= 1
                           Family = c("binomial","poisson"), Transform=c("none","none"),offspringSplitter=data.frame(seedbank=0,continuous=1))
 
 
-co_VA_CN@fitFec[[1]]$coefficients <- as.numeric(coef(mod_clo_VA_CN))#not needed as this is a linear model
+co_VA_CN@fitFec[[1]]$coefficients <- as.numeric(fixef(mod_clo_VA_CN)) 
 co_VA_CN@fitFec[[2]]$coefficients <- as.numeric(coef(mod_clo_no_VA_CN)) #not needed as this is a linear model
 co_VA_CN@sdOffspringSize <- sigma.hat(mod_clone_growth_VA_CN)$sigma$data
-co_VA_CN@offspringRel$coefficients <- c(as.numeric(coef(mod_clone_growth_VA_CN)[1]) + 1.2*as.numeric(coef(mod_clone_growth_VA_CN)[3]),
-                                        as.numeric(coef(mod_clone_growth_VA_CN)[2]))
-co_VA_CN_precip1 <- co_VA_CN
+co_VA_CN@offspringRel$coefficients <- as.numeric(coef(mod_clone_growth_VA_CN))#not needed as this is a linear model
 
-co_VA_CN@offspringRel$coefficients <- c(as.numeric(coef(mod_clone_growth_VA_CN)[1]) + 2.3*as.numeric(coef(mod_clone_growth_VA_CN)[3]),
-                                        as.numeric(coef(mod_clone_growth_VA_CN)[2]))
-co_VA_CN_precip2 <- co_VA_CN
-
-co_VA_CN@offspringRel$coefficients <- c(as.numeric(coef(mod_clone_growth_VA_CN)[1]) + 3.4*as.numeric(coef(mod_clone_growth_VA_CN)[3]),
-                                        as.numeric(coef(mod_clone_growth_VA_CN)[2]))
-co_VA_CN_precip3 <- co_VA_CN
-
-
-Cmatrix_VA_CN_precip1 <- makeIPMCmatrix(clonalObj = co_VA_CN_precip1, minSize=minSize, maxSize=maxSize, nBigMatrix = 100, correction = "constant")
-Cmatrix_VA_CN_precip2 <- makeIPMCmatrix(clonalObj = co_VA_CN_precip2, minSize=minSize, maxSize=maxSize, nBigMatrix = 100, correction = "constant")
-Cmatrix_VA_CN_precip3 <- makeIPMCmatrix(clonalObj = co_VA_CN_precip3, minSize=minSize, maxSize=maxSize, nBigMatrix = 100, correction = "constant")
+Cmatrix_VA_CN <- makeIPMCmatrix(clonalObj = co_VA_CN, minSize=minSize, maxSize=maxSize, nBigMatrix = 100, correction = "constant")
 
 contourPlot2(t(Cmatrix_VA_CN_precip1), Cmatrix_VA_CN_precip1@meshpoints, maxSize, 0.03, 0, title = "Cmatrix: clones") 
 contourPlot2(t(Cmatrix_VA_CN_precip2), Cmatrix_VA_CN_precip2@meshpoints, maxSize, 0.03, 0, title = "Cmatrix: clones") 
@@ -1286,13 +1261,13 @@ contourPlot2(t(Cmatrix_VA_CN_precip3), Cmatrix_VA_CN_precip3@meshpoints, maxSize
 
 
 #### Build IPM ####
-IPM_VA_CN_precip1 <- Pmatrix_VA_CN_precip1 + Fmatrix_VA_CN_precip1 + Cmatrix_VA_CN_precip1
+IPM_VA_CN_precip1 <- Pmatrix_VA_CN_precip1 + Fmatrix_VA_CN_precip1 + Cmatrix_VA_CN
 as.numeric(eigen(IPM_VA_CN_precip1)$value[1])
 
-IPM_VA_CN_precip2 <- Pmatrix_VA_CN_precip2 + Fmatrix_VA_CN_precip2 + Cmatrix_VA_CN_precip2
+IPM_VA_CN_precip2 <- Pmatrix_VA_CN_precip2 + Fmatrix_VA_CN_precip2 + Cmatrix_VA_CN
 as.numeric(eigen(IPM_VA_CN_precip2)$value[1])
 
-IPM_VA_CN_precip3 <- Pmatrix_VA_CN_precip3 + Fmatrix_VA_CN_precip3 + Cmatrix_VA_CN_precip3
+IPM_VA_CN_precip3 <- Pmatrix_VA_CN_precip3 + Fmatrix_VA_CN_precip3 + Cmatrix_VA_CN
 as.numeric(eigen(IPM_VA_CN_precip3)$value[1])
 
 x11()
