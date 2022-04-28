@@ -371,9 +371,9 @@ Seedling_info_SP <- as.data.frame(mean_NoVeg_SP) %>%
   add_column(sd_SP) %>% 
   rename(mean_NoVeg = mean_NoVeg_SP, mean_Veg = mean_Veg_SP, sd = sd_SP)
 
-SP_max_seedling_size1 <- Seedling_info_SP_dat %>% 
-  select(max_seedling_size) %>% 
-  unique()
+# SP_max_seedling_size1 <- Seedling_info_SP_dat %>% 
+#   select(max_seedling_size) %>% 
+#   unique()
 
 SP_max_seedling_size <- mean_Veg_SP + 2*sd_SP
 
@@ -448,14 +448,14 @@ VA_max_seedling_size <-  Seedling_info_VA_mean + 2*sd_VA
 
  seed_bank <- seed_bank %>% 
   rename(missing = "missing/dissentegrated") %>% 
-   mutate(seeds_dead_in_soil_bank = case_when(missing == "Yes" ~ 1,
-                                              missing == "No" ~ 0),
-          seeds_germinate = case_when(germinated == "Yes" ~ 1,
-                                      TRUE ~ 0),
-          seeds_alive_not_germ = case_when(embryo_in_seed == "Yes" ~ 1,
-                                           TRUE ~ 0),
-          seeds_dead_later = case_when(dead == "Yes" ~1,
-                                       TRUE ~ 0)) %>% 
+  mutate(seeds_dead_in_soil_bank = case_when(missing == "Yes" ~ 1,
+                                             missing == "No" ~ 0),
+         seeds_germinate = case_when(germinated == "Yes" ~ 1,
+                                     TRUE ~ 0),
+         seeds_alive_not_germ = case_when(embryo_in_seed == "Yes" ~ 1,
+                                          TRUE ~ 0),
+         seeds_dead_later = case_when(dead == "Yes" ~1,
+                                      TRUE ~ 0)) %>% 
   group_by(petridish, species) %>% 
   mutate(seeds_dead_in_soil_bank = sum(seeds_dead_in_soil_bank),
          seeds_germinate = sum(seeds_germinate),
@@ -467,40 +467,35 @@ VA_max_seedling_size <-  Seedling_info_VA_mean + 2*sd_VA
   mutate(seeds_alive_total = seeds_germinate + seeds_alive_not_germ,
          seeds_dead_total = seeds_dead_in_soil_bank + seeds_dead_later,
          seeds_alive_total_prop = seeds_alive_total/seeds_total,
-         seeds_dead_total_prop = seeds_dead_total/seeds_total) %>% 
-  ungroup() %>%   group_by(siteID, species, warming) %>% 
+         seeds_dead_total_prop = seeds_dead_total/seeds_total,
+         seeds_germinate_prop = seeds_germinate/seeds_total,
+         seeds_staySB = seeds_alive_not_germ/seeds_total) %>% 
+  ungroup()
+
+seed_bank_model_dataset <- seed_bank %>% 
+  group_by(siteID, species, warming) %>% 
   mutate(seeds_alive_total = round(mean(seeds_alive_total), digits = 0),
          seeds_alive_total_prop = mean(seeds_alive_total_prop),
          seeds_dead_total = round(mean(seeds_dead_total), digits = 0),
-         seeds_dead_total_prop = mean(seeds_dead_total_prop)) %>% 
-  select(siteID, species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop) %>% 
+         seeds_dead_total_prop = mean(seeds_dead_total_prop),
+         seeds_germinate_prop = seeds_germinate/seeds_total,
+         seeds_staySB = seeds_alive_not_germ/seeds_total) %>% 
+  select(siteID, species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop, seeds_germinate_prop, seeds_staySB) %>% 
   unique() 
 
-
-seed_bank_model <- glm(cbind(seeds_alive_total, seeds_dead_total) ~  warming + species, family = binomial, data = seed_bank)
-summary(seed_bank_model)
-
-# seed_bank_predicted <- coef(seed_bank_model) %>% 
-#   as.data.frame() %>% 
-#   rownames_to_column() %>%
-#   rename(value = ".") %>% 
-#   mutate(value = expit(value)) %>% 
-#   pivot_wider(names_from = "rowname", values_from = "value") %>% 
-#   rename(Intercept = "(Intercept)") %>% 
-#   mutate(SP_C = Intercept,
-#          SP_OTC = Intercept + warmingOTC,
-#          VA_C = Intercept + speciesVer_alp,
-#          VA_OTC = Intercept + speciesVer_alp + warmingOTC) %>% 
-#   select(SP_C, SP_OTC, VA_C, VA_OTC)
+seed_bank_model <- glm(cbind(seeds_alive_total, seeds_dead_total) ~  warming + species + siteID, family = binomial, data = seed_bank_model_dataset)
+summary(seed_bank_model) #Should maybe use the model and predict for different sites and species and treatment
 
 seed_bank <- seed_bank %>% 
   group_by(species, warming) %>% 
- mutate(seeds_alive_total = round(mean(seeds_alive_total), digits = 0),
-        seeds_alive_total_prop = mean(seeds_alive_total_prop),
-        seeds_dead_total = round(mean(seeds_dead_total), digits = 0),
-        seeds_dead_total_prop = mean(seeds_dead_total_prop)) %>% 
-  select(species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop) %>% 
-  unique() 
+  mutate(seeds_alive_total = round(mean(seeds_alive_total), digits = 0),
+         seeds_alive_total_prop = mean(seeds_alive_total_prop),
+         seeds_dead_total = round(mean(seeds_dead_total), digits = 0),
+         seeds_dead_total_prop = mean(seeds_dead_total_prop),
+         seeds_germinate_prop = mean(seeds_germinate_prop),
+         seeds_staySB = mean(seeds_staySB)) %>% 
+  select(species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop, seeds_germinate_prop, seeds_staySB) %>% 
+  unique()
 
 
 #### Making transitions ####
