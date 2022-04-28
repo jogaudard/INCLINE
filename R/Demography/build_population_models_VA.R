@@ -368,16 +368,6 @@ seed_bank1 <- seed_bank1 %>%
    select(species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop, seeds_germinate_prop, seeds_staySB) %>% 
    unique() 
 
-# # To understand the data, we plot survival, growth/shrinkage/stasis, number of seeds, and size of recruits:
-# par(mfrow=c(2,2),mar=c(4,4,2,1))
-# plot(Ver_alp_2018_2021$size,jitter(Ver_alp_2018_2021$surv),xlab="Size (t)", ylab="Survival to t+1")
-# plot(Ver_alp_2018_2021$size, Ver_alp_2018_2021$sizeNext,xlab="Size (t)",ylab="Size (t+1)") 
-# plot(Ver_alp_2018_2021$size,jitter(Ver_alp_2018_2021$flo.if),xlab="Size (t)", ylab="Flowering probability") 
-# plot(Ver_alp_2018_2021$size, Ver_alp_2018_2021$fec,xlab="Size (t)",ylab="Number of seeds") 
-# 
-# Ver_alp_2018_2021 %>% filter(offspringNext == "sexual") %>% ggplot(aes( x = sizeNext)) + geom_histogram() + ylab("Seedling size")
-# Ver_alp_2018_2021 %>% filter(offspringNext == "clone") %>% ggplot(aes( x = sizeNext)) + geom_histogram() + ylab("Clone size")
-
 Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
    mutate(stage = as.factor(stage),
           stageNext = as.factor(stageNext)) %>% 
@@ -388,15 +378,6 @@ Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>%
    mutate(treat = paste0(OTC, treatment),
           site_trans = paste0(siteID, transition),
           block_trans = paste0(blockID, transition))
-
-   # ungroup() %>%
-   # as.data.frame() %>%
-   # mutate(stage = case_when(!is.na(size) ~ "continuous",
-   #                          is.na(size) ~ NA_character_),
-   #        stageNext = case_when(!is.na(size) & !is.na(sizeNext) ~ "continuous",
-   #                              is.na(size) & !is.na(sizeNext) ~ "continuous",
-   #                              !is.na(size) & is.na(sizeNext) ~ "dead",
-   #                              TRUE ~ NA_character_))
 
 VA_CC <- Ver_alp_2018_2021 %>% filter(OTC == "C" & treatment == "C")
 VA_CR <- Ver_alp_2018_2021 %>% filter(OTC == "C" & treatment == "R")
