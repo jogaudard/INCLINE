@@ -447,7 +447,7 @@ mod_growth_VA_CC <- lmer(sizeNext ~ size + precip+I(precip^2) + (1|block_trans),
 
 plot_growth_VA_CC <- plot_predictions_growth_precip(model = mod_growth_VA_CC, data = VA_CC, minSize, maxSize)
 
-plot_surv_VA_CC | plot_growth_VA_CC
+plot_growth_VA_CC
 
 
 go_VA_CC <- makeGrowthObj(VA_CC, "sizeNext ~ size")
@@ -510,7 +510,7 @@ contourPlot2(t(Pmatrix_VA_CC_precip3), Pmatrix_VA_CC_precip3@meshpoints, maxSize
 # Choosing the best model for estimating if an individual flowers
 summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
 AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
-summary(glmer(flo.if ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC)) #Choosing this model
+summary(glmer(flo.if ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC)) #Choosing this model based of AIC
 AIC(glmer(flo.if ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
 summary(glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = VA_CC))
 AIC(glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = VA_CC))
@@ -523,12 +523,9 @@ floweringChosenModel_VA_CC <- flo.if ~ size #Making a mock model, will fill in f
 
 mod_flo_if_VA_CC <- glmer(flo.if ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC) 
 
-par(mfrow=c(1,1))
-
 plot_VA_CC_floif <- plot_predictions_floif_precip(model = mod_flo_if_VA_CC, data = VA_CC, minSize, maxSize)
 
 plot_VA_CC_floif 
-
 
 
 # Choosing the best model for estimating the number of flowers, if an individual flowers
