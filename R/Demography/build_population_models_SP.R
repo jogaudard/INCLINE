@@ -44,16 +44,6 @@ x_SP <- seq(from=round(minSize_SP),to=round(maxSize_SP),length=100)
 x0_SP <- data.frame(size=x_SP,size2=x_SP*x_SP)
 
 
-# # To understand the data, we plot survival, growth/shrinkage/stasis, number of seeds, and size of recruits:
-# par(mfrow=c(2,2),mar=c(4,4,2,1))
-# plot(Ver_alp_2018_2021$size,jitter(Ver_alp_2018_2021$surv),xlab="Size (t)", ylab="Survival to t+1")
-# plot(Ver_alp_2018_2021$size, Ver_alp_2018_2021$sizeNext,xlab="Size (t)",ylab="Size (t+1)") 
-# plot(Ver_alp_2018_2021$size,jitter(Ver_alp_2018_2021$flo.if),xlab="Size (t)", ylab="Flowering probability") 
-# plot(Ver_alp_2018_2021$size, Ver_alp_2018_2021$fec,xlab="Size (t)",ylab="Number of seeds") 
-# 
-# Ver_alp_2018_2021 %>% filter(offspringNext == "sexual") %>% ggplot(aes( x = sizeNext)) + geom_histogram() + ylab("Seedling size")
-# Ver_alp_2018_2021 %>% filter(offspringNext == "clone") %>% ggplot(aes( x = sizeNext)) + geom_histogram() + ylab("Clone size")
-
 Sib_pro_2018_2021 <- Sib_pro_2018_2021 %>% 
   mutate(stage = as.factor(stage),
          stageNext = as.factor(stageNext)) %>% 
@@ -65,14 +55,6 @@ Sib_pro_2018_2021 <- Sib_pro_2018_2021 %>%
          site_trans = paste0(siteID, transition),
          block_trans = paste0(blockID, transition))
 
-# ungroup() %>%
-# as.data.frame() %>%
-# mutate(stage = case_when(!is.na(size) ~ "continuous",
-#                          is.na(size) ~ NA_character_),
-#        stageNext = case_when(!is.na(size) & !is.na(sizeNext) ~ "continuous",
-#                              is.na(size) & !is.na(sizeNext) ~ "continuous",
-#                              !is.na(size) & is.na(sizeNext) ~ "dead",
-#                              TRUE ~ NA_character_))
 
 SP_CC <- Sib_pro_2018_2021 %>% filter(OTC == "C" & treatment == "C")
 SP_CR <- Sib_pro_2018_2021 %>% filter(OTC == "C" & treatment == "R")
