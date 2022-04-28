@@ -65,12 +65,12 @@ SP_WR <- Sib_pro_2018_2021 %>% filter(OTC == "W" & treatment == "R")
 SP_WE <- Sib_pro_2018_2021 %>% filter(OTC == "W" & treatment == "E")
 SP_WN <- Sib_pro_2018_2021 %>% filter(OTC == "W" & treatment == "N")
 
-SP_C_seed_bank <- seed_bank1 %>% 
+SP_C_seed_bank <- seed_bank %>% 
   filter(species == "Sib_pro",
          warming == "C") %>% 
   ungroup()
 
-SP_OTC_seed_bank <- seed_bank1 %>% 
+SP_OTC_seed_bank <- seed_bank %>% 
   filter(species == "Sib_pro",
          warming == "OTC") %>% 
   ungroup() 
@@ -286,16 +286,12 @@ plot_clo_no_SP_CC <- plot_predictions_clono(model = mod_clo_no_SP_CC, data = SP_
 plot_clo_no_SP_CC
 
 # Clonal size depending on mother size
-# x11()
-# par(mfrow=c(1,1))
-# growthModelComp(dataf=SP_CC_clones, makePlot=TRUE, legendPos="topright", mainTitle="Growth")
-# CloneSizeSPriable_SP_CC <- "1"  #Chosen based on AIC
-# 
-# go_clone_SP_CC <- makeGrowthObj(SP_CC_clones, sizeNext ~ 1)
-
-
 summary(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = SP_CC_clones))
 AIC(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = SP_CC_clones))
+summary(lmer(sizeNext ~ size + precip+I(precip^2) + (1|block_trans), data = SP_CC_clones))
+AIC(lmer(sizeNext ~ size + precip+I(precip^2) + (1|block_trans), data = SP_CC_clones))
+summary(lmer(sizeNext ~ size + precip + (1|block_trans), data = SP_CC_clones)) 
+AIC(lmer(sizeNext ~ size + precip + (1|block_trans), data = SP_CC_clones))
 summary(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = SP_CC_clones)) 
 AIC(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = SP_CC_clones))
 summary(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = SP_CC_clones))
@@ -347,16 +343,17 @@ contourPlot2(t(IPM_SP_CC), Pmatrix_SP_CC@meshpoints, maxSize_SP, 0.06, 0, title 
 #### P matrix ####
 
 # choosing the best survival model
-x11()
-par(mfrow=c(1,1))
-# survModelComp(dataf= VA_WC, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
-
 summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_WC))
 AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_WC))
+summary(glmer(surv ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_WC))
+AIC(glmer(surv ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_WC))
 summary(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_WC))
 AIC(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_WC))
 summary(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_WC)) #We chose this model based on AIC
 AIC(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_WC))
+
+summary(glmer(surv ~ size + precip + (1|block_trans), family = 'binomial', data = SP_WC))
+AIC(glmer(surv ~ size + precip + (1|block_trans), family = 'binomial', data = SP_WC))
 summary(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = SP_WC))
 AIC(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = SP_WC))
 summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = SP_WC))
@@ -374,35 +371,33 @@ so_SP_WC <- makeSurvObj(SP_WC, "surv ~ size + size2")
 so_SP_WC <- coerceSurvObj(so_SP_WC, as.numeric(fixef(mod_surv_SP_WC))) #Adding coefficients from mixed effect model and not from the linear model as is default in makeSurvObj
 
 # choosing the bext growth model
-#growthModelComp(dataf=SP_WC, makePlot=TRUE, legendPos="bottomright", mainTitle="Growth")
-
 summary(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = SP_WC))
 AIC(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = SP_WC))
 summary(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = SP_WC)) 
 AIC(lmer(sizeNext ~ size+I(size^2) + precip + (1|block_trans), data = SP_WC))
 summary(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = SP_WC))
-AIC(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = SP_WC)) #We chose this model based on AIC
-summary(lmer(sizeNext ~ size + (1|block_trans), data = SP_WC))
+AIC(lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = SP_WC)) 
+summary(lmer(sizeNext ~ size + (1|block_trans), data = SP_WC))#We chose this model based on AIC
 AIC(lmer(sizeNext ~ size + (1|block_trans), data = SP_WC))
 summary(lmer(sizeNext ~ 1 + (1|block_trans), data = SP_WC))
 AIC(lmer(sizeNext ~ 1 + (1|block_trans), data = SP_WC))
 
 
-mod_growth_SP_WC <- lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = SP_WC)
+mod_growth_SP_WC <- lmer(sizeNext ~ size + (1|block_trans), data = SP_WC)
 
 plot_growth_SP_WC <- plot_predictions_growth(model = mod_growth_SP_WC, data = SP_WC, minSize_SP, maxSize_SP)
 
-plot_surv_SP_WC | plot_growth_SP_WC
+plot_growth_SP_WC
 
 
-go_SP_WC <- makeGrowthObj(SP_WC, "sizeNext ~ size + size2")
+go_SP_WC <- makeGrowthObj(SP_WC, "sizeNext ~ size")
 go_SP_WC <- coerceGrowthObj(go_SP_WC, fixef(mod_growth_SP_WC),
                             sigma.hat(mod_growth_SP_WC)$sigma$data)
 
 
 # Make discrete transition object
 dto_SP_WC <- makeDiscreteTrans(SP_WC, discreteTrans = matrix(
-  c(SP_C_seed_bank$seeds_staySB,
+  c(SP_OTC_seed_bank$seeds_staySB,
     (1-SP_OTC_seed_bank$seeds_staySB)*seedling_est_SP_Veg,
     (1-SP_OTC_seed_bank$seeds_staySB)*(1-seedling_est_SP_Veg), 
     0,
@@ -431,6 +426,8 @@ summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), fa
 AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_WC))
 summary(glmer(flo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_WC)) 
 AIC(glmer(flo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_WC))
+summary(glmer(flo.if ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_WC))
+AIC(glmer(flo.if ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_WC))
 summary(glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = SP_WC)) #Choosing this model based of AIC
 AIC(glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = SP_WC))
 summary(glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = SP_WC))
@@ -439,15 +436,9 @@ summary(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_WC))
 AIC(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_WC))
 
 floweringChosenModel_SP_WC <- flo.if ~ size
-
 mod_flo_if_SP_WC <- glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = SP_WC) 
-
-par(mfrow=c(1,1))
-
 plot_SP_WC_floif <- plot_predictions_floif_precip(model = mod_flo_if_SP_WC, data = SP_WC, minSize_SP, maxSize_SP)
-
 plot_SP_WC_floif 
-
 
 
 # Choosing the best model for estimating the number of flowers, if an individual flowers
@@ -533,6 +524,8 @@ summary(glm(clo.if ~ size+I(size^2) + precip+I(precip^2), family = 'binomial', d
 AIC(glm(clo.if ~ size+I(size^2) + precip+I(precip^2) , family = 'binomial', data = SP_WC))
 summary(glm(clo.if ~ size+I(size^2) + precip , family = 'binomial', data = SP_WC))
 AIC(glm(clo.if ~ size+I(size^2) + precip , family = 'binomial', data = SP_WC))
+summary(glm(clo.if ~ size + precip , family = 'binomial', data = SP_WC))
+AIC(glm(clo.if ~ size + precip , family = 'binomial', data = SP_WC))
 summary(glm(clo.if ~ size+I(size^2) , family = 'binomial', data = SP_WC)) #Choosing this model based of AIC
 AIC(glm(clo.if ~ size+I(size^2), family = 'binomial', data = SP_WC))
 summary(glm(clo.if ~ size, family = 'binomial', data = SP_WC))
@@ -554,6 +547,8 @@ summary(glm(clo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', da
 AIC(glm(clo.no ~ size+I(size^2) + precip+I(precip^2), family = 'poisson', data = SP_WC))
 summary(glm(clo.no ~ size+I(size^2) + precip, family = 'poisson', data = SP_WC))
 AIC(glm(clo.no ~ size+I(size^2) + precip, family = 'poisson', data = SP_WC))
+summary(glm(clo.no ~ size+I(size^2) + precip, family = 'poisson', data = SP_WC))
+AIC(glm(clo.no ~ size+I(size^2) + precip, family = 'poisson', data = SP_WC))
 summary(glm(clo.no ~ size+I(size^2), family = 'poisson', data = SP_WC))
 AIC(glm(clo.no ~ size+I(size^2), family = 'poisson', data = SP_WC))
 summary(glm(clo.no ~ size, family = 'poisson', data = SP_WC))
@@ -569,13 +564,6 @@ plot_clo_no_SP_WC <- plot_predictions_clono(model = mod_clo_no_SP_WC, data = SP_
 plot_clo_no_SP_WC
 
 # Clonal size depending on mother size
-# x11()
-# par(mfrow=c(1,1))
-# growthModelComp(dataf=SP_CC_clones, makePlot=TRUE, legendPos="topright", mainTitle="Growth")
-# CloneSizeSPriable_SP_CC <- "1"  #Chosen based on AIC
-# 
-# go_clone_SP_CC <- makeGrowthObj(SP_CC_clones, sizeNext ~ 1)
-
 # Using blockID as random effect. I tried block_trans, site_trans, transition + blockID, transition + siteID, transition as well.
 summary(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|blockID), data = SP_WC_clones))
 AIC(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|blockID), data = SP_WC_clones))
