@@ -5,7 +5,7 @@
 #### Source files ####
 source("R/Demography/cleaning_demogprahy.R")
 source("R/Demography/ready_demograhy_for_IPM.R")
-#Need functions and seed_bank info from build_population_models_VA - might move that to a seperate script and load it here in both of the build_IPM scripts
+source("R/Demography/functions_for_IPM_building.R")
 
 #### Libraries ####
 library(tidyverse)
@@ -80,16 +80,14 @@ SP_OTC_seed_bank <- seed_bank1 %>%
 #### P matrix ####
 
 # choosing the best survival model
-x11()
-par(mfrow=c(1,1))
-# survModelComp(dataf= VA_CC, makePlot=TRUE, legendPos="topleft", mainTitle="Survival", ncuts = 30)
-
 summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CC))
 AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CC))
 summary(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CC))
 AIC(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CC))
 summary(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CC)) #We chose this model based on AIC
 AIC(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CC))
+summary(glmer(surv ~ size + precip + (1|block_trans), family = 'binomial', data = SP_CC))
+AIC(glmer(surv ~ size + precip + (1|block_trans), family = 'binomial', data = SP_CC))
 summary(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = SP_CC))
 AIC(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = SP_CC))
 summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = SP_CC))
@@ -122,7 +120,7 @@ mod_growth_SP_CC <- lmer(sizeNext ~ size+I(size^2) + (1|block_trans), data = SP_
 
 plot_growth_SP_CC <- plot_predictions_growth(model = mod_growth_SP_CC, data = SP_CC, minSize_SP, maxSize_SP)
 
-plot_surv_SP_CC | plot_growth_SP_CC
+plot_growth_SP_CC
 
 
 go_SP_CC <- makeGrowthObj(SP_CC, "sizeNext ~ size + size2")
@@ -158,20 +156,22 @@ contourPlot2(t(Pmatrix_SP_CC), Pmatrix_SP_CC@meshpoints, maxSize_SP, 0.03, 0, ti
 #### F matrix ####
 # Choosing the best model for estimating if an individual flowers
 # Using site_transition as the random effect because block_transition came back with singularity warning.
-summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|site_trans), family = 'binomial', data = SP_CC))
-AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|site_trans), family = 'binomial', data = SP_CC))
-summary(glmer(flo.if ~ size+I(size^2) + precip + (1|site_trans), family = 'binomial', data = SP_CC)) 
-AIC(glmer(flo.if ~ size+I(size^2) + precip + (1|site_trans), family = 'binomial', data = SP_CC))
-summary(glmer(flo.if ~ size + precip + (1|site_trans), family = 'binomial', data = SP_CC))
-AIC(glmer(flo.if ~ size + precip + (1|site_trans), family = 'binomial', data = SP_CC))
-summary(glmer(flo.if ~ size + (1|site_trans), family = 'binomial', data = SP_CC))
-AIC(glmer(flo.if ~ size + (1|site_trans), family = 'binomial', data = SP_CC)) #Choosing this model
-summary(glmer(flo.if ~ 1 + (1|site_trans), family = 'binomial', data = SP_CC))
-AIC(glmer(flo.if ~ 1 + (1|site_trans), family = 'binomial', data = SP_CC))
+summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CC))
+AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = SP_CC))
+summary(glmer(flo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CC)) 
+AIC(glmer(flo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_CC))
+summary(glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = SP_CC))
+AIC(glmer(flo.if ~ size + precip + (1|block_trans), family = 'binomial', data = SP_CC))
+summary(glmer(flo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CC)) 
+AIC(glmer(flo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_CC))
+summary(glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = SP_CC))
+AIC(glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = SP_CC)) #Choosing this model
+summary(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_CC))
+AIC(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = SP_CC))
 
 floweringChosenModel_SP_CC <- flo.if ~ size
 
-mod_flo_if_SP_CC <- glmer(flo.if ~ size + (1|site_trans), family = 'binomial', data = SP_CC) 
+mod_flo_if_SP_CC <- glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = SP_CC) 
 
 par(mfrow=c(1,1))
 
