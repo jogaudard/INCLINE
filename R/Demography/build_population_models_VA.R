@@ -5,7 +5,6 @@
 #### Source files ####
 source("R/Demography/cleaning_demogprahy.R")
 source("R/Demography/ready_demograhy_for_IPM.R")
-seed_bank1 <- read_csv2("data/Demography/Seed_bank_survival.csv") 
 source("R/Demography/functions_for_IPM_building.R")
 
 #### Libraries ####
@@ -43,42 +42,6 @@ minSize<-min(Ver_alp_2018_2021$size, na.rm=T)-1
 maxSize<-max(Ver_alp_2018_2021$sizeNext, na.rm=T)+2
 x<-seq(from=round(minSize),to=round(maxSize),length=100)
 x0<-data.frame(size=x,size2=x*x)
-
-
-seed_bank1 <- seed_bank1 %>% 
-   rename(missing = "missing/dissentegrated") %>% 
-   mutate(seeds_dead_in_soil_bank = case_when(missing == "Yes" ~ 1,
-                                              missing == "No" ~ 0),
-          seeds_germinate = case_when(germinated == "Yes" ~ 1,
-                                      TRUE ~ 0),
-          seeds_alive_not_germ = case_when(embryo_in_seed == "Yes" ~ 1,
-                                           TRUE ~ 0),
-          seeds_dead_later = case_when(dead == "Yes" ~1,
-                                       TRUE ~ 0)) %>% 
-   group_by(petridish, species) %>% 
-   mutate(seeds_dead_in_soil_bank = sum(seeds_dead_in_soil_bank),
-          seeds_germinate = sum(seeds_germinate),
-          seeds_alive_not_germ = sum(seeds_alive_not_germ),
-          seeds_dead_later = sum(seeds_dead_later),
-          seeds_total = max(seed_number)) %>%
-   select(petridish, plotID, siteID, warming, species, seeds_dead_in_soil_bank, seeds_germinate, seeds_alive_not_germ, seeds_total, seeds_dead_later) %>%
-   unique() %>% 
-   mutate(seeds_alive_total = seeds_germinate + seeds_alive_not_germ,
-          seeds_dead_total = seeds_dead_in_soil_bank + seeds_dead_later,
-          seeds_alive_total_prop = seeds_alive_total/seeds_total,
-          seeds_dead_total_prop = seeds_dead_total/seeds_total,
-          seeds_germinate_prop = seeds_germinate/seeds_total,
-          seeds_staySB = seeds_alive_not_germ/seeds_total) %>% 
-   ungroup() %>% 
-   group_by(species, warming) %>% 
-   mutate(seeds_alive_total = round(mean(seeds_alive_total), digits = 0),
-          seeds_alive_total_prop = mean(seeds_alive_total_prop),
-          seeds_dead_total = round(mean(seeds_dead_total), digits = 0),
-          seeds_dead_total_prop = mean(seeds_dead_total_prop),
-          seeds_germinate_prop = mean(seeds_germinate_prop),
-          seeds_staySB = mean(seeds_staySB)) %>% 
-   select(species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop, seeds_germinate_prop, seeds_staySB) %>% 
-   unique() 
 
 Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
    mutate(stage = as.factor(stage),
