@@ -304,6 +304,13 @@ VA_CC_clones <- VA_CC %>%
    mutate(prop_orphan = total_num_orphan/total_num_clones)
 
 #Is the production of clones size dependent
+summary(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
+AIC(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
+summary(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
+AIC(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
+summary(glmer(clo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CC))
+AIC(glmer(clo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CC))
+
 summary(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
 AIC(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
 summary(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
@@ -316,7 +323,7 @@ summary(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 AIC(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 
 
-mod_clo_VA_CC <- glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CC)
+mod_clo_VA_CC <- glmer(clo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CC)
 CloneChosenModel_VA_CC <- clo.if ~ size 
 
 
@@ -628,6 +635,14 @@ VA_CR_clones <- VA_CR %>%
    mutate(prop_orphan = total_num_orphan/total_num_clones)
 
 #Is the production of clones size dependent
+summary(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR))
+AIC(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR))
+summary(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_CR))
+AIC(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_CR))
+summary(glmer(clo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CR))
+AIC(glmer(clo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CR))
+
+
 summary(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR))
 AIC(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR))
 summary(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CR))
@@ -641,7 +656,7 @@ AIC(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CR))
 
 
 
-mod_clo_VA_CR <- glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CR)
+mod_clo_VA_CR <- glmer(clo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CR)
 CloneChosenModel_VA_CR <- clo.if ~ size + size2 
 
 
@@ -919,6 +934,13 @@ VA_CE_clones <- VA_CE %>%
 
 #Is the production of clones size dependent
 #Using only transition as random effect because of singularity fit with other higher prioritized random effects. I have tried block_trans, site_trans, blockID + transition, siteID + transition, transition, siteID, blockID. Only transition came back without singularity
+summary(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|transition), family = 'binomial', data = VA_CE))
+AIC(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|transition), family = 'binomial', data = VA_CE))
+summary(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip + (1|transition), family = 'binomial', data = VA_CE))
+AIC(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip + (1|transition), family = 'binomial', data = VA_CE))
+summary(glmer(clo.if ~ size+I(size^2)+I(size^3) + (1|transition), family = 'binomial', data = VA_CE))
+AIC(glmer(clo.if ~ size+I(size^2)+I(size^3) + (1|transition), family = 'binomial', data = VA_CE))
+
 summary(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|transition), family = 'binomial', data = VA_CE))
 AIC(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|transition), family = 'binomial', data = VA_CE))
 summary(glmer(clo.if ~ size+I(size^2) + precip + (1|transition), family = 'binomial', data = VA_CE))
@@ -1237,23 +1259,31 @@ VA_CN_clones <- VA_CN %>%
    mutate(prop_orphan = total_num_orphan/total_num_clones)
 
 #Is the production of clones size dependent
+#Need to change back to mixed effect model if we chose not to use the size^3
+summary(glm(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2), family = 'binomial', data = VA_CN))
+AIC(glm(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2), family = 'binomial', data = VA_CN))
+summary(glm(clo.if ~ size+I(size^2)+I(size^3) + precip , family = 'binomial', data = VA_CN))
+AIC(glm(clo.if ~ size+I(size^2)+I(size^3) + precip, family = 'binomial', data = VA_CN))
+summary(glm(clo.if ~ size+I(size^2)+I(size^3), family = 'binomial', data = VA_CN))
+AIC(glm(clo.if ~ size+I(size^2)+I(size^3), family = 'binomial', data = VA_CN))
+
 summary(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN))
-AIC(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN))
+AIC(glm(clo.if ~ size+I(size^2) + precip+I(precip^2), family = 'binomial', data = VA_CN))
 summary(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CN))
-AIC(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CN))
+AIC(glm(clo.if ~ size+I(size^2) + precip, family = 'binomial', data = VA_CN))
 summary(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN)) #choosing this model based of AIC
-AIC(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN))
+AIC(glm(clo.if ~ size+I(size^2), family = 'binomial', data = VA_CN))
 summary(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CN))
-AIC(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CN))
+AIC(glm(clo.if ~ size, family = 'binomial', data = VA_CN))
 summary(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CN))
-AIC(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CN))
+AIC(glm(clo.if ~ 1, family = 'binomial', data = VA_CN))
 
 #Checking convergence on the model. Looks ok.
-glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN, verbose = TRUE)
+glmer(clo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CN, verbose = TRUE)
 
 #Chosen model
-mod_clo_VA_CN <- glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN)
-CloneChosenModel_VA_CN <- clo.if ~ size + size2 
+mod_clo_VA_CN <- glm(clo.if ~ size+I(size^2)+I(size^3), family = 'binomial', data = VA_CN)
+CloneChosenModel_VA_CN <- clo.if ~ size + size2 +size3
 
 #Plot for visual checking
 plot_clo_if_VA_CN <- plot_predictions_cloif(model = mod_clo_VA_CN, data = VA_CN, minSize, maxSize)
@@ -1499,6 +1529,12 @@ VA_WC_clones <- VA_WC %>%
 
 #Is the production of clones size dependent
 # Using site_trans as random effect because block_trans did not work (singularity)
+summary(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|site_trans), family = 'binomial', data = VA_WC))
+AIC(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|site_trans), family = 'binomial', data = VA_WC))
+summary(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip + (1|site_trans), family = 'binomial', data = VA_WC))
+AIC(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip + (1|site_trans), family = 'binomial', data = VA_WC))
+summary(glmer(clo.if ~ size+I(size^2)+I(size^3) + (1|site_trans), family = 'binomial', data = VA_WC))
+AIC(glmer(clo.if ~ size+I(size^2)+I(size^3) + (1|site_trans), family = 'binomial', data = VA_WC))
 summary(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|site_trans), family = 'binomial', data = VA_WC))
 AIC(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|site_trans), family = 'binomial', data = VA_WC))
 summary(glmer(clo.if ~ size+I(size^2) + precip + (1|site_trans), family = 'binomial', data = VA_WC))
@@ -1802,6 +1838,13 @@ VA_WR_clones <- VA_WR %>%
 
 #Is the production of clones size dependent
 #Using a linear model because of singularity fit with all different combinations of random effects. I have tried block_trans, site_trans, blockID + transition, siteID + transition, transition, siteID, blockID.
+summary(glm(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2), family = 'binomial', data = VA_WR))
+AIC(glm(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2), family = 'binomial', data = VA_WR))
+summary(glm(clo.if ~ size+I(size^2)+I(size^3) + precip, family = 'binomial', data = VA_WR))
+AIC(glm(clo.if ~ size+I(size^2)+I(size^3) + precip, family = 'binomial', data = VA_WR))
+summary(glm(clo.if ~ size+I(size^2)+I(size^3), family = 'binomial', data = VA_WR))
+AIC(glm(clo.if ~ size+I(size^2)+I(size^3), family = 'binomial', data = VA_WR))
+
 summary(glm(clo.if ~ size+I(size^2) + precip+I(precip^2), family = 'binomial', data = VA_WR))
 AIC(glm(clo.if ~ size+I(size^2) + precip+I(precip^2), family = 'binomial', data = VA_WR))
 summary(glm(clo.if ~ size+I(size^2) + precip, family = 'binomial', data = VA_WR))
@@ -2097,6 +2140,12 @@ VA_WE_clones <- VA_WE %>%
    mutate(prop_orphan = total_num_orphan/total_num_clones)
 
 #Is the production of clones size dependent
+summary(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WE))
+AIC(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WE))
+summary(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_WE))
+AIC(glmer(clo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_WE))
+summary(glmer(clo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_WE))
+AIC(glmer(clo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_WE))
 summary(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WE))
 AIC(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WE))
 summary(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_WE))
@@ -2415,23 +2464,26 @@ VA_WN_clones <- VA_WN %>%
    mutate(prop_orphan = total_num_orphan/total_num_clones)
 
 #Is the production of clones size dependent
-#Using blockID as a random effect because of singularity fit with other more desirable options.  I have tried block_trans, site_trans, blockID + transition (which worked with the first model, but not the rest), siteID + transition, and transitio before landing on doing it with blockID as random effect.
-summary(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|blockID), family = 'binomial', data = VA_WN))
-AIC(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|blockID), family = 'binomial', data = VA_WN))
-summary(glmer(clo.if ~ size+I(size^2) + precip + (1|blockID), family = 'binomial', data = VA_WN))
-AIC(glmer(clo.if ~ size+I(size^2) + precip + (1|blockID), family = 'binomial', data = VA_WN))
-summary(glmer(clo.if ~ size+I(size^2) + (1|blockID), family = 'binomial', data = VA_WN)) #Choosing this model based of AIC
-AIC(glmer(clo.if ~ size+I(size^2) + (1|blockID), family = 'binomial', data = VA_WN))
-summary(glmer(clo.if ~ size + (1|blockID), family = 'binomial', data = VA_WN))
-AIC(glmer(clo.if ~ size + (1|blockID), family = 'binomial', data = VA_WN))
-summary(glmer(clo.if ~ 1 + (1|blockID), family = 'binomial', data = VA_WN))
-AIC(glmer(clo.if ~ 1 + (1|blockID), family = 'binomial', data = VA_WN))
-
-#Checking convergence - looks OK even if the model complains.
-glmer(clo.if ~ size+I(size^2) + (1|blockID), family = 'binomial', data = VA_WN, verbose = TRUE)
+#Using linear model because all random effects complained about singularity.  I have tried block_trans, site_trans, blockID + transition (which worked with the first model, but not the rest), siteID + transition, and transitio before landing on doing it with blockID as random effect.
+summary(glm(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2), family = 'binomial', data = VA_WN))
+AIC(glm(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2), family = 'binomial', data = VA_WN))
+summary(glm(clo.if ~ size+I(size^2)+I(size^3) + precip, family = 'binomial', data = VA_WN))
+AIC(glm(clo.if ~ size+I(size^2)+I(size^3) + precip, family = 'binomial', data = VA_WN))
+summary(glm(clo.if ~ size+I(size^2)+I(size^3), family = 'binomial', data = VA_WN))#Choosing this model based of AIC
+AIC(glm(clo.if ~ size+I(size^2)+I(size^3), family = 'binomial', data = VA_WN)) 
+summary(glm(clo.if ~ size+I(size^2) + precip+I(precip^2), family = 'binomial', data = VA_WN))
+AIC(glm(clo.if ~ size+I(size^2) + precip+I(precip^2), family = 'binomial', data = VA_WN))
+summary(glm(clo.if ~ size+I(size^2) + precip, family = 'binomial', data = VA_WN))
+AIC(glm(clo.if ~ size+I(size^2) + precip, family = 'binomial', data = VA_WN))
+summary(glm(clo.if ~ size+I(size^2), family = 'binomial', data = VA_WN)) 
+AIC(glm(clo.if ~ size+I(size^2), family = 'binomial', data = VA_WN))
+summary(glm(clo.if ~ size, family = 'binomial', data = VA_WN))
+AIC(glm(clo.if ~ size, family = 'binomial', data = VA_WN))
+summary(glm(clo.if ~ 1, family = 'binomial', data = VA_WN))
+AIC(glm(clo.if ~ 1, family = 'binomial', data = VA_WN))
 
 #Chosen model
-mod_clo_VA_WN <- glmer(clo.if ~ size+I(size^2) + (1|blockID), family = 'binomial', data = VA_WN)
+mod_clo_VA_WN <- glm(clo.if ~ size+I(size^2)+I(size^3), family = 'binomial', data = VA_WN)
 CloneChosenModel_VA_WN <- clo.if ~ size + size2 
 
 #Plot for visual checking
