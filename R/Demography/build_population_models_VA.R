@@ -80,27 +80,34 @@ VA_OTC_seed_bank <- seed_bank %>%
 #### P matrix ####
 
 # choosing the best survival model
-
-summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
-AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
-summary(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
-AIC(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
-summary(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CC)) #We chose this model based on AIC
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
+AIC(glmer(surv ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CC))#We chose this model based on AIC
+AIC(glmer(surv ~ size+I(size^2)+I(size^3)+ (1|block_trans), family = 'binomial', data = VA_CC))
+summary(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CC)) 
 AIC(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CC))
 summary(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = VA_CC))
 AIC(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = VA_CC))
 summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 
-mod_surv_VA_CC <- glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CC)
+# summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
+# AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
+# summary(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
+# AIC(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
+
+
+mod_surv_VA_CC <- glmer(surv ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CC)
 plot_surv_VA_CC <- plot_predictions_surv(model = mod_surv_VA_CC, data = VA_CC, minSize, maxSize)
 
 plot_surv_VA_CC
 
-so_VA_CC <- makeSurvObj(VA_CC, "surv ~ size + size2")
+so_VA_CC <- makeSurvObj(VA_CC, "surv ~ size + size2 + size3")
 so_VA_CC <- coerceSurvObj(so_VA_CC, as.numeric(fixef(mod_surv_VA_CC))) #Adding coefficients from mixed effect model and not from the linear model as is default in makeSurvObj
 
-# choosing the bext growth model
+# choosing the best growth model
 
 summary(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = VA_CC))
 AIC(lmer(sizeNext ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), data = VA_CC))
@@ -404,7 +411,14 @@ contourPlot2(t(IPM_VA_CC_precip3), Pmatrix_VA_CC_precip1@meshpoints, maxSize, 0.
 
 # choosing the best survival model
 
-summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR)) #We chose this model 
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR))
+AIC(glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_CR))
+AIC(glmer(surv ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_CR))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CR))#We chose this model based on AIC
+AIC(glmer(surv ~ size+I(size^2)+I(size^3)+ (1|block_trans), family = 'binomial', data = VA_CR))
+
+summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR)) 
 AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR))
 summary(glmer(surv ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR)) 
 AIC(glmer(surv ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR))
@@ -416,21 +430,24 @@ summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_CR))
 AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_CR))
 
 
-mod_surv_VA_CR <- glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR)
+mod_surv_VA_CR <- glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR)
 plot_surv_VA_CR <- plot_predictions_surv_precip(model = mod_surv_VA_CR, data = VA_CR, minSize, maxSize)
 
 plot_surv_VA_CR
 
-so_VA_CR <- makeSurvObj(VA_CR, "surv ~ size + size2")
-so_VA_CR_precip1 <- coerceSurvObj(so_VA_CR, c(as.numeric(fixef(mod_surv_VA_CR)[1]) + 1.2*as.numeric(fixef(mod_surv_VA_CR)[4]) + (1.2)^2* as.numeric(fixef(mod_surv_VA_CR)[5]),
+so_VA_CR <- makeSurvObj(VA_CR, "surv ~ size + size2 + size3")
+so_VA_CR_precip1 <- coerceSurvObj(so_VA_CR, c(as.numeric(fixef(mod_surv_VA_CR)[1]) + 1.2*as.numeric(fixef(mod_surv_VA_CR)[5]) + (1.2)^2* as.numeric(fixef(mod_surv_VA_CR)[6]),
                                               as.numeric(fixef(mod_surv_VA_CR)[2]),
-                                              as.numeric(fixef(mod_surv_VA_CR)[3]))) #Adding coefficients from mixed effect model and not from the linear model as is default in makeSurvObj
-so_VA_CR_precip2 <- coerceSurvObj(so_VA_CR, c(as.numeric(fixef(mod_surv_VA_CR)[1]) + 2.3*as.numeric(fixef(mod_surv_VA_CR)[4]) + (2.3)^2* as.numeric(fixef(mod_surv_VA_CR)[5]),
+                                              as.numeric(fixef(mod_surv_VA_CR)[3]),
+                                              as.numeric(fixef(mod_surv_VA_CR)[4]))) #Adding coefficients from mixed effect model and not from the linear model as is default in makeSurvObj
+so_VA_CR_precip2 <- coerceSurvObj(so_VA_CR, c(as.numeric(fixef(mod_surv_VA_CR)[1]) + 2.3*as.numeric(fixef(mod_surv_VA_CR)[5]) + (2.3)^2* as.numeric(fixef(mod_surv_VA_CR)[6]),
                                               as.numeric(fixef(mod_surv_VA_CR)[2]),
-                                              as.numeric(fixef(mod_surv_VA_CR)[3])))
-so_VA_CR_precip3 <- coerceSurvObj(so_VA_CR, c(as.numeric(fixef(mod_surv_VA_CR)[1]) + 3.4*as.numeric(fixef(mod_surv_VA_CR)[4]) + (3.4)^2* as.numeric(fixef(mod_surv_VA_CR)[5]),
+                                              as.numeric(fixef(mod_surv_VA_CR)[3]),
+                                              as.numeric(fixef(mod_surv_VA_CR)[4])))
+so_VA_CR_precip3 <- coerceSurvObj(so_VA_CR, c(as.numeric(fixef(mod_surv_VA_CR)[1]) + 3.4*as.numeric(fixef(mod_surv_VA_CR)[5]) + (3.4)^2* as.numeric(fixef(mod_surv_VA_CR)[6]),
                                               as.numeric(fixef(mod_surv_VA_CR)[2]),
-                                              as.numeric(fixef(mod_surv_VA_CR)[3])))
+                                              as.numeric(fixef(mod_surv_VA_CR)[3]),
+                                              as.numeric(fixef(mod_surv_VA_CR)[4])))
 
 
 # choosing the best growth model
@@ -705,6 +722,8 @@ contourPlot2(t(IPM_VA_CR_precip3), Pmatrix_VA_CR_precip3@meshpoints, maxSize, 0.
 x11()
 par(mfrow=c(1,1))
 
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CE))
+AIC(glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CE))
 summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CE))
 AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CE))
 summary(glmer(surv ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CE)) #choosing this model for AIC
@@ -976,25 +995,32 @@ contourPlot2(t(IPM_VA_CE_precip3), Pmatrix_VA_CE_precip3@meshpoints, maxSize, 0.
 x11()
 par(mfrow=c(1,1))
 
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN))
+AIC(glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_CN))
+AIC(glmer(surv ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_CN))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CN))#We chose this model based on AIC
+AIC(glmer(surv ~ size+I(size^2)+I(size^3)+ (1|block_trans), family = 'binomial', data = VA_CN))
+
 summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN))
 AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN))
 summary(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CN))
 AIC(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CN))
-summary(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN)) #We chose this model based on AIC
+summary(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN))
 AIC(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN))
 summary(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = VA_CN)) 
 AIC(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = VA_CN))
 summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_CN))
 AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_CN))
 
-glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN, verbose = TRUE) #Checking for conversion - model seems very stable - conversion OK
+glmer(surv ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CN, verbose = TRUE) #Checking for conversion - model seems very stable - conversion OK
 
-mod_surv_VA_CN <- glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN)
+mod_surv_VA_CN <- glmer(surv ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CN)
 plot_surv_VA_CN <- plot_predictions_surv(model = mod_surv_VA_CN, data = VA_CN, minSize, maxSize)
 
 plot_surv_VA_CN
 
-so_VA_CN <- makeSurvObj(VA_CN, "surv ~ size + size2")
+so_VA_CN <- makeSurvObj(VA_CN, "surv ~ size + size2 + size3")
 so_VA_CN <- coerceSurvObj(so_VA_CN, as.numeric(fixef(mod_surv_VA_CN))) #Adding coefficients from mixed effect model and not from the linear model as is default in makeSurvObj
 
 
@@ -1282,6 +1308,12 @@ contourPlot2(t(IPM_VA_CN_precip3), Pmatrix_VA_CN_precip3@meshpoints, maxSize, 0.
 # choosing the best survival model
 x11()
 par(mfrow=c(1,1))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WC))
+AIC(glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WC))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_WC))
+AIC(glmer(surv ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_WC))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_WC)) #We force this model because it doesn't make sense that survival should go down with the largest individuals.
+AIC(glmer(surv ~ size+I(size^2)+I(size^3)+ (1|block_trans), family = 'binomial', data = VA_WC))
 
 summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WC))
 AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WC))
@@ -1294,12 +1326,12 @@ AIC(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = VA_WC))
 summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_WC))
 AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_WC))
 
-mod_surv_VA_WC <- glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_WC)
+mod_surv_VA_WC <- glmer(surv ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_WC)
 plot_surv_VA_WC <- plot_predictions_surv(model = mod_surv_VA_WC, data = VA_WC, minSize, maxSize)
 
 plot_surv_VA_WC
 
-so_VA_WC <- makeSurvObj(VA_WC, "surv ~ size + size2")
+so_VA_WC <- makeSurvObj(VA_WC, "surv ~ size + size2 + size3")
 so_VA_WC <- coerceSurvObj(so_VA_WC, as.numeric(fixef(mod_surv_VA_WC))) #Adding coefficients from mixed effect model and not from the linear model as is default in makeSurvObj
 
 # Choosing the best growth model
@@ -1541,6 +1573,12 @@ contourPlot2(t(IPM_VA_WC_precip3), Pmatrix_VA_WC@meshpoints, maxSize, 0.03, 0, t
 #### P matrix ####
 
 # choosing the best survival model
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WR))
+AIC(glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WR))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_WR))
+AIC(glmer(surv ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_WR))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_WR))
+AIC(glmer(surv ~ size+I(size^2)+I(size^3)+ (1|block_trans), family = 'binomial', data = VA_WR))
 summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WR))
 AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WR))
 summary(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_WR))
@@ -1832,6 +1870,12 @@ contourPlot2(t(IPM_VA_WR_precip3), Pmatrix_VA_WR_precip3@meshpoints, maxSize, 0.
 # choosing the best survival model
 x11()
 par(mfrow=c(1,1))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WE))
+AIC(glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WE))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_WE))
+AIC(glmer(surv ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_WE))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_WE))#We chose this model based on biology and the diagnostic plots (it is one of the lowest AIC, but the trend with size alone, or size squared does not make biological sense)
+AIC(glmer(surv ~ size+I(size^2)+I(size^3)+ (1|block_trans), family = 'binomial', data = VA_WE))
 
 summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WE))
 AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WE))
@@ -1840,18 +1884,18 @@ AIC(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial',
 summary(glmer(surv ~ size + precip + (1|block_trans), family = 'binomial', data = VA_WE))
 AIC(glmer(surv ~ size + precip + (1|block_trans), family = 'binomial', data = VA_WE))
 summary(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_WE)) 
-AIC(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_WE)) #We chose this model based on biology (it is the second lowest AIC, but the trend with size alone does not make biological sense)
+AIC(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_WE)) 
 summary(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = VA_WE))
-AIC(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = VA_WE)) #highest AIC, but not chosing this model
+AIC(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = VA_WE)) #highest AIC, but not choosing this model
 summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_WE))
 AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_WE))
 
-mod_surv_VA_WE <- glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_WE)
+mod_surv_VA_WE <- glmer(surv ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_WE)
 plot_surv_VA_WE <- plot_predictions_surv(model = mod_surv_VA_WE, data = VA_WE, minSize, maxSize)
 
 plot_surv_VA_WE
 
-so_VA_WE <- makeSurvObj(VA_WE, "surv ~ size + size2")
+so_VA_WE <- makeSurvObj(VA_WE, "surv ~ size + size2 + size3")
 so_VA_WE <- coerceSurvObj(so_VA_WE, as.numeric(fixef(mod_surv_VA_WE))) #Adding coefficients from mixed effect model and not from the linear model as is default in makeSurvObj
 
 # Choosing the best growth model
@@ -1910,7 +1954,7 @@ Pmatrix_VA_WE_precip3 <- makeIPMPmatrix(survObj=so_VA_WE, growObj=go_VA_WE_preci
 
 diagnosticsPmatrix(Pmatrix_VA_WE_precip1, survObj=so_VA_WE, growObj=go_VA_WE_precip1, dff = VA_WE)
 diagnosticsPmatrix(Pmatrix_VA_WE_precip2, survObj=so_VA_WE, growObj=go_VA_WE_precip2, dff = VA_WE)
-diagnosticsPmatrix(Pmatrix_VA_WE_precip3, survObj=so_VA_WE, growObj=go_VA_WE_precip3, dff = (VA_WE %>% filter(siteID == "Skj")))
+diagnosticsPmatrix(Pmatrix_VA_WE_precip3, survObj=so_VA_WE, growObj=go_VA_WE_precip3, dff = VA_WE)
 
 Pmatrix_VA_WE_precip1 <- makeIPMPmatrix(survObj=so_VA_WE, growObj=go_VA_WE_precip1, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_WE, correction = "constant", nBigMatrix = 100)
 Pmatrix_VA_WE_precip2 <- makeIPMPmatrix(survObj=so_VA_WE, growObj=go_VA_WE_precip2, minSize=minSize, maxSize=maxSize, discreteTrans = dto_VA_WE, correction = "constant", nBigMatrix = 100)
@@ -2120,23 +2164,32 @@ contourPlot2(t(IPM_VA_WE_precip3), Pmatrix_VA_WE_precip3@meshpoints, maxSize, 0.
 # choosing the best survival model
 
 #Using site_trans as random effect because we get a singularity warning with block_trans.
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|site_trans), family = 'binomial', data = VA_WN))
+AIC(glmer(surv ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|site_trans), family = 'binomial', data = VA_WN))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + precip + (1|site_trans), family = 'binomial', data = VA_WN))
+AIC(glmer(surv ~ size+I(size^2)+I(size^3) + precip + (1|site_trans), family = 'binomial', data = VA_WN))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + (1|site_trans), family = 'binomial', data = VA_WN))#We chose this model based on AIC
+AIC(glmer(surv ~ size+I(size^2)+I(size^3)+ (1|site_trans), family = 'binomial', data = VA_WN))
+summary(glmer(surv ~ size+I(size^2) + (1|site_trans), family = 'binomial', data = VA_WN))
+AIC(glmer(surv ~ size+I(size^2)+ (1|site_trans), family = 'binomial', data = VA_WN))
+
 summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|site_trans), family = 'binomial', data = VA_WN))
 AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|site_trans), family = 'binomial', data = VA_WN))
 summary(glmer(surv ~ size+I(size^2) + precip + (1|site_trans), family = 'binomial', data = VA_WN))
 AIC(glmer(surv ~ size+I(size^2) + precip + (1|site_trans), family = 'binomial', data = VA_WN))
 summary(glmer(surv ~ size + precip + (1|site_trans), family = 'binomial', data = VA_WN))
 AIC(glmer(surv ~ size + precip + (1|site_trans), family = 'binomial', data = VA_WN))
-summary(glmer(surv ~ size + (1|site_trans), family = 'binomial', data = VA_WN)) #We chose this model based on AIC
+summary(glmer(surv ~ size + (1|site_trans), family = 'binomial', data = VA_WN)) 
 AIC(glmer(surv ~ size + (1|site_trans), family = 'binomial', data = VA_WN))
 summary(glmer(surv ~ 1 + (1|site_trans), family = 'binomial', data = VA_WN))
 AIC(glmer(surv ~ 1 + (1|site_trans), family = 'binomial', data = VA_WN))
 
-mod_surv_VA_WN <- glmer(surv ~ size + (1|site_trans), family = 'binomial', data = VA_WN)
+mod_surv_VA_WN <- glmer(surv ~ size+I(size^2)+I(size^3) + (1|site_trans), family = 'binomial', data = VA_WN)
 plot_surv_VA_WN <- plot_predictions_surv(model = mod_surv_VA_WN, data = VA_WN, minSize, maxSize)
 
 plot_surv_VA_WN
 
-so_VA_WN <- makeSurvObj(VA_WN, "surv ~ size")
+so_VA_WN <- makeSurvObj(VA_WN, "surv ~ size + size3")
 so_VA_WN <- coerceSurvObj(so_VA_WN, as.numeric(fixef(mod_surv_VA_WN))) #Adding coefficients from mixed effect model and not from the linear model as is default in makeSurvObj
 
 # Choosing the best growth model
