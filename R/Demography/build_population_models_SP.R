@@ -1465,12 +1465,14 @@ summary(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomi
 AIC(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = SP_WR))
 summary(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_WR)) #Using this model based of AIC
 AIC(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_WR))
+summary(glmer(surv ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = SP_WR)) #Using this model based of AIC
+AIC(glmer(surv ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = SP_WR))
 summary(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = SP_WR))
 AIC(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = SP_WR))
 summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = SP_WR))
 AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = SP_WR))
 
-mod_surv_SP_WR <- glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = SP_WR)
+mod_surv_SP_WR <- glmer(surv ~ size + (1|block_trans), family = 'binomial', data = SP_WR)
 plot_surv_SP_WR <- plot_predictions_surv(model = mod_surv_SP_WR, data = SP_WR, minSize_SP, maxSize_SP)
 
 plot_surv_SP_WR
