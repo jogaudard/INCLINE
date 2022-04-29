@@ -186,6 +186,15 @@ contourPlot2(t(Pmatrix_VA_CC_precip3), Pmatrix_VA_CC_precip3@meshpoints, maxSize
 
 #### F matrix ####
 # Choosing the best model for estimating if an individual flowers
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CC))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CC))
+summary(glmer(flo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CC))
+AIC(glmer(flo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CC))
+
 summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC)) #Choosing this model based of AIC
 AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
 summary(glmer(flo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
@@ -199,9 +208,9 @@ AIC(glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CC))
 summary(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 AIC(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 
-floweringChosenModel_VA_CC <- flo.if ~ size + size2 #Making a mock model, will fill in from actual model later
+floweringChosenModel_VA_CC <- flo.if ~ size + size2 + size3 #Making a mock model, will fill in from actual model later
 
-mod_flo_if_VA_CC <- glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC) 
+mod_flo_if_VA_CC <- glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC) 
 
 plot_VA_CC_floif <- plot_predictions_floif_precip(model = mod_flo_if_VA_CC, data = VA_CC, minSize, maxSize)
 
@@ -534,6 +543,13 @@ contourPlot2(t(Pmatrix_VA_CR_precip3), Pmatrix_VA_CR_precip3@meshpoints, maxSize
 
 #### F matrix ####
 # Choosing the best model for estimating if an individual flowers
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR))
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_CR))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_CR))
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CR))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CR))
+
 summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR))
 AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR))
 summary(glmer(flo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CR))
@@ -545,9 +561,9 @@ AIC(glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CR))
 summary(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CR))
 AIC(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CR))
 
-floweringChosenModel_VA_CR <- flo.if ~ size + size2 #Making a mock model, will fill in from actual model later
+floweringChosenModel_VA_CR <- flo.if ~ size + size2 + size3 #Making a mock model, will fill in from actual model later
 
-mod_flo_if_VA_CR <- glmer(flo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CR) 
+mod_flo_if_VA_CR <- glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CR) 
 
 plot_VA_CR_floif <- plot_predictions_floif(model = mod_flo_if_VA_CR, data = VA_CR, minSize, maxSize)
 
@@ -819,6 +835,13 @@ contourPlot2(t(Pmatrix_VA_CE_precip3), Pmatrix_VA_CE_precip1@meshpoints, maxSize
 #### F matrix ####
 # Choosing the best model for estimating if an individual flowers
 #Using only blockID as random effect because of singularity fit with other higher prioritized random effects. I have tried block_trans, site_trans, blockID + transition, siteID + transition, transition, siteID, blockID. siteID does also work, but we encapsule more of the spatial autocorrelation when we also use blockID, so going for that.
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|blockID), family = 'binomial', data = VA_CE))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|blockID), family = 'binomial', data = VA_CE))
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip + (1|blockID), family = 'binomial', data = VA_CE))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip + (1|blockID), family = 'binomial', data = VA_CE))
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|blockID), family = 'binomial', data = VA_CE))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|blockID), family = 'binomial', data = VA_CE))
+
 summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|blockID), family = 'binomial', data = VA_CE)) 
 AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|blockID), family = 'binomial', data = VA_CE)) 
 summary(glmer(flo.if ~ size+I(size^2) + precip + (1|blockID), family = 'binomial', data = VA_CE))
@@ -1097,6 +1120,13 @@ contourPlot2(t(Pmatrix_VA_CN_precip3), Pmatrix_VA_CN_precip1@meshpoints, maxSize
 
 #### F matrix ####
 # Choosing the best model for estimating if an individual flowers
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN))
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_CN))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_CN))
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CN))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CN))
+
 summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN)) #choosing this model based of AIC
 AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN))
 summary(glmer(flo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CN))
@@ -1109,11 +1139,11 @@ summary(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CN))
 AIC(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CN))
 
 #Have not decided on a model yet because the size2 does not make a lot of sense to me.
-  glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN, verbose = TRUE) #Checking for conversion - model seems very stable - conversion OK
+  glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN, verbose = TRUE) #Checking for conversion - model seems very stable - conversion OK
   
   floweringChosenModel_VA_CN <- flo.if ~ size + size2
   
- mod_flo_if_VA_CN <- glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN)
+ mod_flo_if_VA_CN <- glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN)
  
  #Also testing other models to see if we agree with AIC. It doesn't make to much sense that is should go so much down again as we get the largest individuals as it does for the model above. But none of the other models are a better fit in our opinion. Going for the size+size2+precip+precip2 model for now.
  
@@ -1387,6 +1417,13 @@ contourPlot2(t(Pmatrix_VA_WC), Pmatrix_VA_WC@meshpoints, maxSize, 0.03, 0, title
 
 #### F matrix ####
 # Choosing the best model for estimating if an individual flowers
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WC))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WC))
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_WC))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_WC))
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_WC))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_WC))
+
 summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WC))
 AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WC))
 summary(glmer(flo.if ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WC))
@@ -1670,6 +1707,13 @@ contourPlot2(t(Pmatrix_VA_WR_precip3), Pmatrix_VA_WR_precip3@meshpoints, maxSize
 
 #### F matrix ####
 # Choosing the best model for estimating if an individual flowers
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WR))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WR))
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_WR))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_WR))
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_WR))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_WR))
+
 summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WR))
 AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WR))
 summary(glmer(flo.if ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WR)) #Choosing this model based on AIC
@@ -1968,6 +2012,13 @@ contourPlot2(t(Pmatrix_VA_WE_precip3), Pmatrix_VA_WE_precip3@meshpoints, maxSize
 
 #### F matrix ####
 # Choosing the best model for estimating if an individual flowers
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WE))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WE))
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_WE))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_WE))
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_WE))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_WE))
+
 summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WE))
 AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WE))
 summary(glmer(flo.if ~ size + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WE))
@@ -2262,6 +2313,13 @@ contourPlot2(t(Pmatrix_VA_WN_precip3), Pmatrix_VA_WN_precip3@meshpoints, maxSize
 
 #### F matrix ####
 # Choosing the best model for estimating if an individual flowers
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WN))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WN))
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_WN))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + precip + (1|block_trans), family = 'binomial', data = VA_WN))
+summary(glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_WN))
+AIC(glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_WN))
+
 summary(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WN))
 AIC(glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WN))
 summary(glmer(flo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_WN)) #Choosing this model based on AIC
