@@ -93,10 +93,8 @@ AIC(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = VA_CC))
 summary(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 AIC(glmer(surv ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 
-# summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
-# AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC))
-# summary(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
-# AIC(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
+#Checking for convergence. Looks ok.
+#glmer(surv ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CC, verbose = TRUE)
 
 
 mod_surv_VA_CC <- glmer(surv ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CC)
@@ -208,9 +206,9 @@ AIC(glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CC))
 summary(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 AIC(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 
-floweringChosenModel_VA_CC <- flo.if ~ size + size2 + size3 #Making a mock model, will fill in from actual model later
+floweringChosenModel_VA_CC <- flo.if ~ size + size2 #Making a mock model, will fill in from actual model later
 
-mod_flo_if_VA_CC <- glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC) 
+mod_flo_if_VA_CC <- glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CC) 
 
 plot_VA_CC_floif <- plot_predictions_floif_precip(model = mod_flo_if_VA_CC, data = VA_CC, minSize, maxSize)
 
@@ -274,7 +272,7 @@ Fmatrix_VA_CC_precip1 <- makeIPMFmatrix(fecObj=fo_VA_CC_precip1, minSize=minSize
 Fmatrix_VA_CC_precip2 <- makeIPMFmatrix(fecObj=fo_VA_CC_precip2, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
 Fmatrix_VA_CC_precip3 <- makeIPMFmatrix(fecObj=fo_VA_CC_precip3, minSize=minSize, maxSize=maxSize, correction = "continuous", nBigMatrix = 100)
 
-# We plot this P-matrix using the ’image.plot’ function of the fields package:
+# We plot this F-matrix using the ’image.plot’ function of the fields package:
 
 
 contourPlot2(t(Fmatrix_VA_CC_precip1), Fmatrix_VA_CC_precip1@meshpoints, maxSize, 0.03, 0, title = "Fmatrix: flower and seedlings") 
@@ -317,13 +315,13 @@ summary(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'bino
 AIC(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CC))
 summary(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CC)) 
 AIC(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CC))
-summary(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CC)) #Choosing this model based of AIC
+summary(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CC)) #Choosing this model because the cubic model does not make biological sense. The chance of producing clones does not go all the way up to 0.8 in the largest individuals.
 AIC(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CC))
 summary(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 AIC(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CC))
 
 
-mod_clo_VA_CC <- glmer(clo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CC)
+mod_clo_VA_CC <- glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CC)
 CloneChosenModel_VA_CC <- clo.if ~ size 
 
 
@@ -568,9 +566,9 @@ AIC(glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CR))
 summary(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CR))
 AIC(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CR))
 
-floweringChosenModel_VA_CR <- flo.if ~ size + size2 + size3 #Making a mock model, will fill in from actual model later
+floweringChosenModel_VA_CR <- flo.if ~ size + size2 #Making a mock model, will fill in from actual model later
 
-mod_flo_if_VA_CR <- glmer(flo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CR) 
+mod_flo_if_VA_CR <- glmer(flo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CR) 
 
 plot_VA_CR_floif <- plot_predictions_floif(model = mod_flo_if_VA_CR, data = VA_CR, minSize, maxSize)
 
@@ -647,7 +645,7 @@ summary(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), fa
 AIC(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CR))
 summary(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CR))
 AIC(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CR))
-summary(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CR)) #Choosing this model based of AIC
+summary(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CR)) #Choosing this model based on the fact that the cubic model that had the lowest AIC does not make biological sense. The chance of producing clones does not increase to 0.8 for the largest individuals. This is the model with the lowest AIC of the other models.
 AIC(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CR))
 summary(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CR))
 AIC(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CR))
@@ -656,7 +654,7 @@ AIC(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CR))
 
 
 
-mod_clo_VA_CR <- glmer(clo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CR)
+mod_clo_VA_CR <- glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CR)
 CloneChosenModel_VA_CR <- clo.if ~ size + size2 
 
 
@@ -1160,12 +1158,11 @@ AIC(glmer(flo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CN))
 summary(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CN))
 AIC(glmer(flo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CN))
 
-#Have not decided on a model yet because the size2 does not make a lot of sense to me.
-  glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN, verbose = TRUE) #Checking for conversion - model seems very stable - conversion OK
+glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN, verbose = TRUE) #Checking for conversion - model seems very stable - conversion OK
   
-  floweringChosenModel_VA_CN <- flo.if ~ size + size2
+floweringChosenModel_VA_CN <- flo.if ~ size + size2
   
- mod_flo_if_VA_CN <- glmer(flo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN)
+ mod_flo_if_VA_CN <- glmer(flo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN)
  
  #Also testing other models to see if we agree with AIC. It doesn't make to much sense that is should go so much down again as we get the largest individuals as it does for the model above. But none of the other models are a better fit in our opinion. Going for the size+size2+precip+precip2 model for now.
  
@@ -1259,7 +1256,7 @@ VA_CN_clones <- VA_CN %>%
    mutate(prop_orphan = total_num_orphan/total_num_clones)
 
 #Is the production of clones size dependent
-#Need to change back to mixed effect model if we chose not to use the size^3
+#When testing with the cubic model we ran all models as linear models, because the cubic ones with random effect complained about singularity. Because we excluded the cubic shape, we went back to inculding the random effect in the other ones when comparing AIC.
 summary(glm(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2), family = 'binomial', data = VA_CN))
 AIC(glm(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2), family = 'binomial', data = VA_CN))
 summary(glm(clo.if ~ size+I(size^2)+I(size^3) + precip , family = 'binomial', data = VA_CN))
@@ -1268,22 +1265,22 @@ summary(glm(clo.if ~ size+I(size^2)+I(size^3), family = 'binomial', data = VA_CN
 AIC(glm(clo.if ~ size+I(size^2)+I(size^3), family = 'binomial', data = VA_CN))
 
 summary(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN))
-AIC(glm(clo.if ~ size+I(size^2) + precip+I(precip^2), family = 'binomial', data = VA_CN))
+AIC(glmer(clo.if ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_CN))
 summary(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CN))
-AIC(glm(clo.if ~ size+I(size^2) + precip, family = 'binomial', data = VA_CN))
-summary(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN)) #choosing this model based of AIC
-AIC(glm(clo.if ~ size+I(size^2), family = 'binomial', data = VA_CN))
+AIC(glmer(clo.if ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_CN))
+summary(glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN)) #choosing this model because the cubic model does not make biological sense. The chance of producing clones does not increase to 1 at a large size. Using the non cubic model with the lowest AIC.
+AIC(glmer(clo.if ~ size+I(size^2)+ (1|block_trans), family = 'binomial', data = VA_CN))
 summary(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CN))
-AIC(glm(clo.if ~ size, family = 'binomial', data = VA_CN))
+AIC(glmer(clo.if ~ size + (1|block_trans), family = 'binomial', data = VA_CN))
 summary(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CN))
-AIC(glm(clo.if ~ 1, family = 'binomial', data = VA_CN))
+AIC(glmer(clo.if ~ 1 + (1|block_trans), family = 'binomial', data = VA_CN))
 
 #Checking convergence on the model. Looks ok.
-glmer(clo.if ~ size+I(size^2)+I(size^3) + (1|block_trans), family = 'binomial', data = VA_CN, verbose = TRUE)
+glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN, verbose = TRUE)
 
 #Chosen model
-mod_clo_VA_CN <- glm(clo.if ~ size+I(size^2)+I(size^3), family = 'binomial', data = VA_CN)
-CloneChosenModel_VA_CN <- clo.if ~ size + size2 +size3
+mod_clo_VA_CN <- glmer(clo.if ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_CN)
+CloneChosenModel_VA_CN <- clo.if ~ size + size2 
 
 #Plot for visual checking
 plot_clo_if_VA_CN <- plot_predictions_cloif(model = mod_clo_VA_CN, data = VA_CN, minSize, maxSize)
@@ -1336,7 +1333,7 @@ co_VA_CN <- makeClonalObj(VA_CN, fecConstants=data.frame(correctionForOrphans= 1
 
 co_VA_CN@fitFec[[1]]$coefficients <- as.numeric(fixef(mod_clo_VA_CN)) 
 co_VA_CN@fitFec[[2]]$coefficients <- as.numeric(coef(mod_clo_no_VA_CN)) #not needed as this is a linear model
-co_VA_CN@sdOffspringSize <- sigma.hat(mod_clone_growth_VA_CN)$sigma$data
+co_VA_CN@sdOffspringSize <- summary(mod_clone_growth_VA_CN)$sigma
 co_VA_CN@offspringRel$coefficients <- as.numeric(coef(mod_clone_growth_VA_CN))#not needed as this is a linear model
 
 Cmatrix_VA_CN <- makeIPMCmatrix(clonalObj = co_VA_CN, minSize=minSize, maxSize=maxSize, nBigMatrix = 100, correction = "constant")
@@ -1379,7 +1376,7 @@ summary(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), fami
 AIC(glmer(surv ~ size+I(size^2) + precip+I(precip^2) + (1|block_trans), family = 'binomial', data = VA_WC))
 summary(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_WC))
 AIC(glmer(surv ~ size+I(size^2) + precip + (1|block_trans), family = 'binomial', data = VA_WC))
-summary(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_WC)) #We chose this model based on AIC
+summary(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_WC)) #Best AIC
 AIC(glmer(surv ~ size+I(size^2) + (1|block_trans), family = 'binomial', data = VA_WC))
 summary(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = VA_WC))
 AIC(glmer(surv ~ size + (1|block_trans), family = 'binomial', data = VA_WC))
@@ -2289,7 +2286,7 @@ plot_surv_VA_WN <- plot_predictions_surv(model = mod_surv_VA_WN, data = VA_WN, m
 
 plot_surv_VA_WN
 
-so_VA_WN <- makeSurvObj(VA_WN, "surv ~ size + size3")
+so_VA_WN <- makeSurvObj(VA_WN, "surv ~ size + size2 + size3")
 so_VA_WN <- coerceSurvObj(so_VA_WN, as.numeric(fixef(mod_surv_VA_WN))) #Adding coefficients from mixed effect model and not from the linear model as is default in makeSurvObj
 
 # Choosing the best growth model
@@ -2469,13 +2466,13 @@ summary(glm(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2), family = 'bi
 AIC(glm(clo.if ~ size+I(size^2)+I(size^3) + precip+I(precip^2), family = 'binomial', data = VA_WN))
 summary(glm(clo.if ~ size+I(size^2)+I(size^3) + precip, family = 'binomial', data = VA_WN))
 AIC(glm(clo.if ~ size+I(size^2)+I(size^3) + precip, family = 'binomial', data = VA_WN))
-summary(glm(clo.if ~ size+I(size^2)+I(size^3), family = 'binomial', data = VA_WN))#Choosing this model based of AIC
+summary(glm(clo.if ~ size+I(size^2)+I(size^3), family = 'binomial', data = VA_WN))
 AIC(glm(clo.if ~ size+I(size^2)+I(size^3), family = 'binomial', data = VA_WN)) 
 summary(glm(clo.if ~ size+I(size^2) + precip+I(precip^2), family = 'binomial', data = VA_WN))
 AIC(glm(clo.if ~ size+I(size^2) + precip+I(precip^2), family = 'binomial', data = VA_WN))
 summary(glm(clo.if ~ size+I(size^2) + precip, family = 'binomial', data = VA_WN))
 AIC(glm(clo.if ~ size+I(size^2) + precip, family = 'binomial', data = VA_WN))
-summary(glm(clo.if ~ size+I(size^2), family = 'binomial', data = VA_WN)) 
+summary(glm(clo.if ~ size+I(size^2), family = 'binomial', data = VA_WN)) #Choosing this model based on that the cubic models did not make biological sense by going all the way up to 100% chance of producing clones at the largest individuals.
 AIC(glm(clo.if ~ size+I(size^2), family = 'binomial', data = VA_WN))
 summary(glm(clo.if ~ size, family = 'binomial', data = VA_WN))
 AIC(glm(clo.if ~ size, family = 'binomial', data = VA_WN))
@@ -2483,7 +2480,7 @@ summary(glm(clo.if ~ 1, family = 'binomial', data = VA_WN))
 AIC(glm(clo.if ~ 1, family = 'binomial', data = VA_WN))
 
 #Chosen model
-mod_clo_VA_WN <- glm(clo.if ~ size+I(size^2)+I(size^3), family = 'binomial', data = VA_WN)
+mod_clo_VA_WN <- glm(clo.if ~ size+I(size^2), family = 'binomial', data = VA_WN)
 CloneChosenModel_VA_WN <- clo.if ~ size + size2 
 
 #Plot for visual checking
