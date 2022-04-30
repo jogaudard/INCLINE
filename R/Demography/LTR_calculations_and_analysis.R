@@ -6,6 +6,21 @@ cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
 palette_with_white <- c("#a6611a", "#dfc27d", "#f5f5f5", "#80cdc1", "#018571")
 palette <- c("#a6611a", "#dfc27d", "#80cdc1", "#018571")
 
+# palette with values = c(
+#   "-5" = "#543005",
+#   "-4" = "#8C510A",
+#   "-3" = "#BF812D",
+#   "-2" = "#DFC27D",
+#   "-1" = "#F6E8C3",
+#   "0" = "#F5F5F5",
+#   "1" = "#C7EAE5",
+#   "2" = "#80CDC1",
+#   "3" = "#35978F",
+#   "4" = "#01665E",
+#   "5" = "#003C30",
+#   "Not Sure" = "gainsboro",
+#   "Data deficient" = "light grey")) +
+
 #### Making functions ####
 
 ### Making function to make growth matrix
@@ -41,10 +56,10 @@ LTRE_calcultations <-function(IPM1, IPM2, Fmatrix1, Fmatrix2, Pmatrix1, Pmatrix2
   con_pm <- sum(Contributions_pm)
   
   #Calculating contribution of growth alone
-  growth_only1 <- coerceSurvObj(survival_object1, c(100,0))
+  growth_only1 <- coerceSurvObj(survival_object1, c(100,0,0,0))
   Pmatrix_growth_only1 <- makeIPMPmatrix(survObj=growth_only1, growObj=growth_object1, minSize=minSize, maxSize=maxSize, discreteTrans = discrete_trans1, correction = "constant", nBigMatrix = 100)
   
-  growth_only2 <- coerceSurvObj(survival_object2, c(100,0))
+  growth_only2 <- coerceSurvObj(survival_object2, c(100,0,0,0))
   Pmatrix_growth_only2 <- makeIPMPmatrix(survObj=growth_only2, growObj=growth_object2, minSize=minSize, maxSize=maxSize, discreteTrans = discrete_trans2, correction = "constant", nBigMatrix = 100)
   
   Difference_growth <- Pmatrix_growth_only1 - Pmatrix_growth_only2
@@ -1354,8 +1369,6 @@ ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) +
   #scale_color_manual(values = "#B50E00") +
   ggtitle("Vital rate contribution to lambda difference in Veronica alpina")
 
-"My~bold(Partly~Bold)~and~italic(Partly~Italic)~Text"
-
 LTRE_treatments %>% 
   filter(species == "Sib_pro") %>% 
   mutate(treatment = factor(treatment, levels = c("CE - CC", "CN - CC", "CR - CC", "WE - CC", "WN - CC", "WR - CC", "WE - WC", "WN - WC", "WR - WC", "WC - CC"))) %>% 
@@ -1376,8 +1389,8 @@ LTRE_treatments %>%
 Susanne_plot_ver_alp <- LTRE_treatments %>% 
   filter(species == "Ver_alp") %>% 
   mutate(treatment = factor(treatment, levels = c("CE - CC", "CN - CC", "CR - CC", "WE - CC", "WN - CC", "WR - CC", "WE - WC", "WN - WC", "WR - WC", "WC - CC"))) %>% 
-  filter(treatment %in% c("CN - CC", "WC - CC", "WN - CC", "WN - WC")) %>% 
-  mutate(treatment = factor(treatment, levels = c("CN - CC", "WC - CC", "WN - WC", "WN - CC"))) %>% 
+  filter(treatment %in% c("WC - CC", "CN - CC", "WN - CC", "WN - WC")) %>% 
+  mutate(treatment = factor(treatment, levels = c("WC - CC", "CN - CC", "WN - WC", "WN - CC"))) %>% 
   ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
   geom_bar(position="stack", stat="identity") +
   geom_point(aes(y = lamda_difference)) +
@@ -1392,7 +1405,7 @@ Susanne_plot_sib_pro <- LTRE_treatments %>%
   filter(species == "Sib_pro") %>% 
   mutate(treatment = factor(treatment, levels = c("CE - CC", "CN - CC", "CR - CC", "WE - CC", "WN - CC", "WR - CC", "WE - WC", "WN - WC", "WR - WC", "WC - CC"))) %>% 
   filter(treatment %in% c("CN - CC", "WC - CC", "WN - CC", "WN - WC")) %>% 
-  mutate(treatment = factor(treatment, levels = c("CN - CC", "WC - CC", "WN - WC", "WN - CC"))) %>% 
+  mutate(treatment = factor(treatment, levels = c("WC - CC", "CN - CC", "WN - WC", "WN - CC"))) %>% 
   ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
   geom_bar(position="stack", stat="identity") +
   geom_point(aes(y = lamda_difference)) +
@@ -1401,7 +1414,7 @@ Susanne_plot_sib_pro <- LTRE_treatments %>%
   theme_bw() +
   scale_fill_manual(values = c("#DEDEDE","#FFC300", "#A1A1A1", "#6E6E6E"))
 
-ggsave(Susanne_plot_sib_pro, filename = "Ver_alp_fecundity.pdf", width = 24, height = 10, units = "cm")
+ggsave(Susanne_plot_sib_pro, filename = "Sib_pro_fecundity.pdf", width = 24, height = 10, units = "cm")
 
 #### Precipitation ####
 #Making LTRE comparisons between precipitation levels within treatments
