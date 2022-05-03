@@ -8,6 +8,7 @@ library(R2jags)
 library(ggmcmc)
 library(broom.mixed)
 library(car) # use car package for logit function- adjusts to avoid infinity
+library("patchwork")
 
 
 # load data 
@@ -22,11 +23,13 @@ return(a)
 # function to standardize dpe var
 standard <- function(x) (x - mean(x, na.rm=T)) / ((sd(x, na.rm=T)))
 
+# Palette for plotting
+Precip_palette <- c("#BAD8F7", "#89B7E1", "#2E75B6", "#213964")
+
 #Jags hates NA in independent variables
 #Take out NAs in the data that you don't want to model
 
-##############################
-# Ver.alp
+#### Germination percentage Veronica alpina ####
 # take out the too many zer0s
 Ver_alp_germination_traits <- Ver_alp_germination_traits %>% 
   mutate(water_potential = as.numeric(water_potential))
@@ -85,7 +88,7 @@ model_GermN <- function(){
    rss_new <- sum(res_new[])
 }
 
-results_GermN <- jags.parallel(data = jags.data,
+results_Germ_percent_Ver_alp <- jags.parallel(data = jags.data,
                                #inits = inits.fn,
                                parameters.to.save = jags.param,
                                n.iter = 200000,
@@ -93,24 +96,24 @@ results_GermN <- jags.parallel(data = jags.data,
                                n.thin = 5,
                                n.chains = 3,
                                n.burnin = 35000)
-results_GermN
+results_Germ_percent_Ver_alp
 
 # traceplots
-s <- ggs(as.mcmc(results_GermN))
+s <- ggs(as.mcmc(results_Germ_percent_Ver_alp))
 ggs_traceplot(s, family="b") 
 
 # check Gelman Rubin Statistics
-gelman.diag(as.mcmc(results_GermN))
+gelman.diag(as.mcmc(results_Germ_percent_Ver_alp))
 
 # Posterior predictive check
-plot(results_GermN$BUGSoutput$sims.list$rss_new, results_GermN$BUGSoutput$sims.list$rss,
+plot(results_Germ_percent_Ver_alp$BUGSoutput$sims.list$rss_new, results_Germ_percent_Ver_alp$BUGSoutput$sims.list$rss,
      main = "",)
 abline(0,1, lwd = 2, col = "black")
 
-mean(results_GermN$BUGSoutput$sims.list$rss_new > results_GermN$BUGSoutput$sims.list$rss)
+mean(results_Germ_percent_Ver_alp$BUGSoutput$sims.list$rss_new > results_Germ_percent_Ver_alp$BUGSoutput$sims.list$rss)
 
 ## put together for figure  and r^2
-mcmc <- results_GermN$BUGSoutput$sims.matrix
+mcmc <- results_Germ_percent_Ver_alp$BUGSoutput$sims.matrix
 coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
 fit = coefs %*% t(treatmat)
 resid = sweep(fit, 2, logit(GermN/NumSeedDish, adjust = 0.01), "-")
@@ -146,30 +149,39 @@ graphdat <- dat %>% mutate(estimate = (n_germinated/seeds_in_dish)) %>%
 graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
 graphdat$Precip <- as.numeric(standard(dat$precip))
 
-ggplot()+ 
+Germ_percent_Ver_alp_main_plot <- ggplot()+ 
   geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.15)+
   geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
                                fill = factor(Precip)), alpha=0.35)+
   geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
-  #facet_wrap(~Precip)+
-  #scale_colour_manual("Treatment", values=c("gray", "red")) + 
-  #scale_fill_manual("Treatment", values=c("dark gray", "red")) + 
+  #facet_wrap(~Precip, nrow = 1)+
   scale_x_continuous("Standardized WP") + 
   scale_y_continuous("Germination %")+ 
-  # theme(axis.text.y = element_text(size=7,colour= "black"),
-  #       axis.text.x= element_text(size=7, colour="black"), 
-  #       axis.title=element_text(size=7),strip.text=element_text(size=5),
-  #       plot.title=element_text(size=7),
-  #       legend.title=element_text(size=5), legend.text=element_text(size=4),
-  #       legend.margin=margin(0,0,0,0),legend.position = c(0.2,0.3),
-  #       legend.box.margin=margin(-10,-2,-10,-5),legend.justification="left",
-  #       legend.key.size = unit(0.15, "cm"))+ #labs(title="Colonization probability")+
   theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+  scale_colour_manual(values = Precip_palette)+
+  scale_fill_manual(values = Precip_palette)
+
+Germ_percent_Ver_alp_four_panels_plot <- ggplot()+ 
+  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.15)+
+  geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
+                               fill = factor(Precip)), alpha=0.35)+
+  geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
+  facet_wrap(~Precip, nrow = 1)+
+  scale_x_continuous("Standardized WP") + 
+  scale_y_continuous("Germination %")+ 
+  theme(panel.background = element_rect(fill='white', colour='black'))+
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+  scale_colour_manual(values = Precip_palette)+
+  scale_fill_manual(values = Precip_palette)
+
+Germ_percent_Ver_alp_main_plot /
+  Germ_percent_Ver_alp_four_panels_plot + 
+  plot_layout(heights = c(4, 1), guides = "collect") & 
+  theme(legend.position='bottom')
 
 
-#########################################################################################
-# Sib.pro
+#### Germination percentage Sibbaldia procumbens ####
 
 # take out the too many zer0s
 Sib_pro_germination_traits <- Sib_pro_germination_traits %>% 
@@ -192,7 +204,7 @@ Precip <- as.numeric(standard(dat$precip))
 
 # dependent variables
 GermN <- as.numeric(dat$n_germinated)
-NumSeedDish <- as.numeric(dat$seeds_in_dish)  #Viability test information needs to be inculded here
+NumSeedDish <- as.numeric(dat$seeds_in_dish)  #Viability test information needs to be included here
 N <- as.numeric(length(GermN))
 
 treatmat <- model.matrix(~Precip*WP_MPa)
@@ -207,7 +219,7 @@ jags.data <- list("treatmat", "GermN", "N", "NumSeedDish", "site", "n_parm")
 jags.param <- c("b",  "Presi", "rss", "rss_new", "sig1") 
 
 #Run the model 
-results_GermN <- jags.parallel(data = jags.data,
+results_Germ_percent_Sib_pro <- jags.parallel(data = jags.data,
                                #inits = inits.fn,
                                parameters.to.save = jags.param,
                                n.iter = 200000,
@@ -215,24 +227,24 @@ results_GermN <- jags.parallel(data = jags.data,
                                n.thin = 5,
                                n.chains = 3,
                                n.burnin = 35000)
-results_GermN
+results_Germ_percent_Sib_pro
 
 # traceplots
-s <- ggs(as.mcmc(results_GermN))
+s <- ggs(as.mcmc(results_Germ_percent_Sib_pro))
 ggs_traceplot(s, family="b") 
 
 # check Gelman Rubin Statistics
-gelman.diag(as.mcmc(results_GermN))
+gelman.diag(as.mcmc(results_Germ_percent_Sib_pro))
 
 # Posterior predictive check
-plot(results_GermN$BUGSoutput$sims.list$rss_new, results_GermN$BUGSoutput$sims.list$rss,
+plot(results_Germ_percent_Sib_pro$BUGSoutput$sims.list$rss_new, results_Germ_percent_Sib_pro$BUGSoutput$sims.list$rss,
      main = "",)
 abline(0,1, lwd = 2, col = "black")
 
-mean(results_GermN$BUGSoutput$sims.list$rss_new > results_GermN$BUGSoutput$sims.list$rss)
+mean(results_Germ_percent_Sib_pro$BUGSoutput$sims.list$rss_new > results_Germ_percent_Sib_pro$BUGSoutput$sims.list$rss)
 
 ## put together for figure  and r^2
-mcmc <- results_GermN$BUGSoutput$sims.matrix 
+mcmc <- results_Germ_percent_Sib_pro$BUGSoutput$sims.matrix 
 coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
 fit = coefs %*% t(treatmat)
 resid = sweep(fit, 2, logit(GermN/NumSeedDish, adjust = 0.01), "-")
@@ -268,29 +280,59 @@ graphdat <- dat %>% mutate(estimate = (n_germinated/seeds_in_dish)) %>%
 graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
 graphdat$Precip <- as.numeric(standard(dat$precip))
 
-ggplot()+ 
-  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.15)+
+# ggplot()+ 
+#   geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.15)+
+#   geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
+#                                fill = factor(Precip)), alpha=0.35)+
+#   geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
+#   #facet_wrap(~Precip)+
+#   #scale_colour_manual("Treatment", values=c("gray", "red")) + 
+#   #scale_fill_manual("Treatment", values=c("dark gray", "red")) + 
+#   scale_x_continuous("Standardized WP") + 
+#   scale_y_continuous("Germination %")+ 
+#   # theme(axis.text.y = element_text(size=7,colour= "black"),
+#   #       axis.text.x= element_text(size=7, colour="black"), 
+#   #       axis.title=element_text(size=7),strip.text=element_text(size=5),
+#   #       plot.title=element_text(size=7),
+#   #       legend.title=element_text(size=5), legend.text=element_text(size=4),
+#   #       legend.margin=margin(0,0,0,0),legend.position = c(0.2,0.3),
+#   #       legend.box.margin=margin(-10,-2,-10,-5),legend.justification="left",
+#   #       legend.key.size = unit(0.15, "cm"))+ #labs(title="Colonization probability")+
+#   theme(panel.background = element_rect(fill='white', colour='black'))+
+#   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+
+Germ_percent_Sib_pro_main_plot <- ggplot()+ 
+  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.25)+
   geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
                                fill = factor(Precip)), alpha=0.35)+
   geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
-  #facet_wrap(~Precip)+
-  #scale_colour_manual("Treatment", values=c("gray", "red")) + 
-  #scale_fill_manual("Treatment", values=c("dark gray", "red")) + 
+  #facet_wrap(~Precip, nrow = 1)+
   scale_x_continuous("Standardized WP") + 
   scale_y_continuous("Germination %")+ 
-  # theme(axis.text.y = element_text(size=7,colour= "black"),
-  #       axis.text.x= element_text(size=7, colour="black"), 
-  #       axis.title=element_text(size=7),strip.text=element_text(size=5),
-  #       plot.title=element_text(size=7),
-  #       legend.title=element_text(size=5), legend.text=element_text(size=4),
-  #       legend.margin=margin(0,0,0,0),legend.position = c(0.2,0.3),
-  #       legend.box.margin=margin(-10,-2,-10,-5),legend.justification="left",
-  #       legend.key.size = unit(0.15, "cm"))+ #labs(title="Colonization probability")+
   theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+  scale_colour_manual(values = Precip_palette)+
+  scale_fill_manual(values = Precip_palette)
 
-#############################################
-# Ver.alp - 
+Germ_percent_Sib_pro_four_panels_plot <- ggplot()+ 
+  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.25)+
+  geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
+                               fill = factor(Precip)), alpha=0.35)+
+  geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
+  facet_wrap(~Precip, nrow = 1)+
+  scale_x_continuous("Standardized WP") + 
+  scale_y_continuous("Germination %")+ 
+  theme(panel.background = element_rect(fill='white', colour='black'))+
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+  scale_colour_manual(values = Precip_palette)+
+  scale_fill_manual(values = Precip_palette)
+
+Germ_percent_Sib_pro_main_plot /
+  Germ_percent_Sib_pro_four_panels_plot + 
+  plot_layout(heights = c(4, 1), guides = "collect") & 
+  theme(legend.position='bottom')
+
+#### Days to max germination Veronica alpina ####
 # take out the too many zer0s
 Ver_alp_germination_traits <- Ver_alp_germination_traits %>% 
   mutate(water_potential = as.numeric(water_potential))
@@ -531,11 +573,11 @@ ggplot()+
   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
                                fill = factor(Precip)), alpha=0.35)+
   geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
-  #facet_wrap(~Precip)+
+  facet_wrap(~Precip, nrow = 1)+
   #scale_colour_manual("Treatment", values=c("gray", "red")) + 
   #scale_fill_manual("Treatment", values=c("dark gray", "red")) + 
   scale_x_continuous("Standardized WP") + 
-  scale_y_continuous("Germination %")+ 
+  scale_y_continuous("Days to max germination")+ 
   # theme(axis.text.y = element_text(size=7,colour= "black"),
   #       axis.text.x= element_text(size=7, colour="black"), 
   #       axis.title=element_text(size=7),strip.text=element_text(size=5),
@@ -545,7 +587,9 @@ ggplot()+
   #       legend.box.margin=margin(-10,-2,-10,-5),legend.justification="left",
   #       legend.key.size = unit(0.15, "cm"))+ #labs(title="Colonization probability")+
   theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank()) +
+  scale_colour_manual(values = Precip_palette)+
+  scale_fill_manual(values = Precip_palette)
 
 #########################################################################################
 # germination on a seedling basis
