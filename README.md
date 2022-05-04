@@ -73,3 +73,13 @@ Where:
 -   A: area of chamber frame base (m<sup>2</sup>)
 
 ## Data dictionnaries
+
+### Carbon fluxes
+
+``` r
+knitr::kable(cflux_dic)
+```
+
+| Variable name | Description | Variable type | Variable range or levels | Unit | How measured |
+|:--------------|:------------|:--------------|:-------------------------|:-----|:-------------|
+| flux          | NA          | numeric       | -40.778 - 136.198        | NA   | NA           |
