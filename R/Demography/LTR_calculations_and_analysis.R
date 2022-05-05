@@ -26,7 +26,7 @@ palette <- c("#a6611a", "#dfc27d", "#80cdc1", "#018571")
 ### Making function to make growth matrix
 growth_matrix <-function(Pmatrix, survival_object, growth_object, minSize, maxSize, discrete_trans) {
   
-  growth_only <- coerceSurvObj(survival_object, c(100,0))
+  growth_only <- coerceSurvObj(survival_object, c(100,0,0,0))
   Pmatrix_growth_only <- makeIPMPmatrix(survObj=growth_only, growObj=growth_object, minSize=minSize, maxSize=maxSize, discreteTrans = discrete_trans, correction = "constant", nBigMatrix = 100)
   
   return(Pmatrix_growth_only)
@@ -1399,7 +1399,7 @@ Susanne_plot_ver_alp <- LTRE_treatments %>%
   theme_bw() +
   scale_fill_manual(values = c("#DEDEDE","#6D64E4", "#A1A1A1", "#6E6E6E"))
 
-ggsave(Susanne_plot_ver_alp, filename = "Ver_alp_fecundity.pdf", width = 24, height = 10, units = "cm")
+#ggsave(Susanne_plot_ver_alp, filename = "Ver_alp_fecundity.pdf", width = 24, height = 10, units = "cm")
 
 Susanne_plot_sib_pro <- LTRE_treatments %>% 
   filter(species == "Sib_pro") %>% 
@@ -1414,7 +1414,7 @@ Susanne_plot_sib_pro <- LTRE_treatments %>%
   theme_bw() +
   scale_fill_manual(values = c("#DEDEDE","#FFC300", "#A1A1A1", "#6E6E6E"))
 
-ggsave(Susanne_plot_sib_pro, filename = "Sib_pro_fecundity.pdf", width = 24, height = 10, units = "cm")
+#ggsave(Susanne_plot_sib_pro, filename = "Sib_pro_fecundity.pdf", width = 24, height = 10, units = "cm")
 
 #### Precipitation ####
 #Making LTRE comparisons between precipitation levels within treatments
@@ -1512,3 +1512,232 @@ LTRE_precip %>%
   geom_hline(yintercept = 0) +
   facet_wrap(~treatment, ncol = 3) +
   theme_bw()
+
+#### Susanne sine gjennomsnittsplot ####
+
+growth_VA_CC_precip1 <- growth_matrix(Pmatrix = Pmatrix_VA_CC_precip1,
+                                      survival_object = so_VA_CC,
+                                      growth_object = go_VA_CC_precip1,
+                                      minSize = minSize,
+                                      maxSize = maxSize,
+                                      discrete_trans = dto_VA_CC)
+
+growth_VA_CC_precip2 <- growth_matrix(Pmatrix = Pmatrix_VA_CC_precip2,
+                                      survival_object = so_VA_CC,
+                                      growth_object = go_VA_CC_precip2,
+                                      minSize = minSize,
+                                      maxSize = maxSize,
+                                      discrete_trans = dto_VA_CC)
+
+growth_VA_CC_precip3 <- growth_matrix(Pmatrix = Pmatrix_VA_CC_precip3,
+                                      survival_object = so_VA_CC,
+                                      growth_object = go_VA_CC_precip3,
+                                      minSize = minSize,
+                                      maxSize = maxSize,
+                                      discrete_trans = dto_VA_CC)
+# CN treatment
+
+growth_VA_CN_precip1 <- growth_matrix(Pmatrix = Pmatrix_VA_CN_precip1,
+                                      survival_object = so_VA_CN,
+                                      growth_object = go_VA_CN_precip1,
+                                      minSize = minSize,
+                                      maxSize = maxSize,
+                                      discrete_trans = dto_VA_CN)
+
+growth_VA_CN_precip2 <- growth_matrix(Pmatrix = Pmatrix_VA_CN_precip2,
+                                      survival_object = so_VA_CN,
+                                      growth_object = go_VA_CN_precip2,
+                                      minSize = minSize,
+                                      maxSize = maxSize,
+                                      discrete_trans = dto_VA_CN)
+
+growth_VA_CN_precip3 <- growth_matrix(Pmatrix = Pmatrix_VA_CN_precip3,
+                                      survival_object = so_VA_CN,
+                                      growth_object = go_VA_CN_precip3,
+                                      minSize = minSize,
+                                      maxSize = maxSize,
+                                      discrete_trans = dto_VA_CN)
+
+## WC treatment 
+growth_VA_WC <- growth_matrix(Pmatrix = Pmatrix_VA_WC,
+                                      survival_object = so_VA_WC,
+                                      growth_object = go_VA_WC,
+                                      minSize = minSize,
+                                      maxSize = maxSize,
+                                      discrete_trans = dto_VA_WC)
+
+# WN treatment
+
+growth_VA_WN_precip1 <- growth_matrix(Pmatrix = Pmatrix_VA_WN_precip1,
+                                      survival_object = so_VA_WN,
+                                      growth_object = go_VA_WN_precip1,
+                                      minSize = minSize,
+                                      maxSize = maxSize,
+                                      discrete_trans = dto_VA_WN)
+
+growth_VA_WN_precip2 <- growth_matrix(Pmatrix = Pmatrix_VA_WN_precip2,
+                                      survival_object = so_VA_WN,
+                                      growth_object = go_VA_WN_precip2,
+                                      minSize = minSize,
+                                      maxSize = maxSize,
+                                      discrete_trans = dto_VA_WN)
+
+growth_VA_WN_precip3 <- growth_matrix(Pmatrix = Pmatrix_VA_WN_precip3,
+                                      survival_object = so_VA_WN,
+                                      growth_object = go_VA_WN_precip3,
+                                      minSize = minSize,
+                                      maxSize = maxSize,
+                                      discrete_trans = dto_VA_WN)
+
+## Sib pro
+## CC treament
+
+growth_SP_CC <- growth_matrix(Pmatrix = Pmatrix_SP_CC,
+                                      survival_object = so_SP_CC,
+                                      growth_object = go_SP_CC,
+                                      minSize = minSize,
+                                      maxSize = maxSize,
+                                      discrete_trans = dto_SP_CC)
+# CN treatment
+
+growth_SP_CN_precip1 <- growth_matrix(Pmatrix = Pmatrix_SP_CN_precip1,
+                                      survival_object = so_SP_CN,
+                                      growth_object = go_SP_CN,
+                                      minSize = minSize,
+                                      maxSize = maxSize,
+                                      discrete_trans = dto_SP_CN)
+
+growth_SP_CN_precip2 <- growth_matrix(Pmatrix = Pmatrix_SP_CN_precip2,
+                                      survival_object = so_SP_CN,
+                                      growth_object = go_SP_CN,
+                                      minSize = minSize,
+                                      maxSize = maxSize,
+                                      discrete_trans = dto_SP_CN)
+
+growth_SP_CN_precip3 <- growth_matrix(Pmatrix = Pmatrix_SP_CN_precip3,
+                                      survival_object = so_SP_CN,
+                                      growth_object = go_SP_CN,
+                                      minSize = minSize,
+                                      maxSize = maxSize,
+                                      discrete_trans = dto_SP_CN)
+
+## WC treatment 
+growth_SP_WC <- growth_matrix(Pmatrix = Pmatrix_SP_WC,
+                              survival_object = so_SP_WC,
+                              growth_object = go_SP_WC,
+                              minSize = minSize,
+                              maxSize = maxSize,
+                              discrete_trans = dto_SP_WC)
+
+# WN treatment
+
+growth_SP_WN<- growth_matrix(Pmatrix = Pmatrix_SP_WN,
+                                      survival_object = so_SP_WN,
+                                      growth_object = go_SP_WN,
+                                      minSize = minSize,
+                                      maxSize = maxSize,
+                                      discrete_trans = dto_SP_WN)
+
+
+LTRE_SP_CC_CN_mean_precip <- LTRE_calcultations_Growth(IPM1 = (IPM_SP_CN_precip1 + IPM_SP_CN_precip2 + IPM_SP_CN_precip3)/3, 
+                                             IPM2 = IPM_SP_CC, 
+                                             Fmatrix1 = (Fmatrix_SP_CN_precip1 + Fmatrix_SP_CN_precip2 + Fmatrix_SP_CN_precip3)/3, 
+                                             Fmatrix2 = Fmatrix_SP_CC,
+                                             Pmatrix1 = (Pmatrix_SP_CN_precip1 + Pmatrix_SP_CN_precip2 + Pmatrix_SP_CN_precip3)/3, 
+                                             Pmatrix2 = Pmatrix_SP_CC,
+                                             Cmatrix1 = Cmatrix_SP_CN, 
+                                             Cmatrix2 = Cmatrix_SP_CC, 
+                                             Growth_matrix1 = (growth_SP_CN_precip1 + growth_SP_CN_precip2 + growth_SP_CN_precip3)/3,
+                                             Growth_matrix2 = growth_SP_CC) %>% 
+  mutate(species = "Sib_pro",
+         treatment = "CN - CC")
+
+
+LTRE_SP_CC_WC_mean_precip <- LTRE_calcultations_Growth(IPM1 = (IPM_SP_WC_precip1 + IPM_SP_WC_precip2 + IPM_SP_WC_precip3)/3, 
+                                                       IPM2 = IPM_SP_CC, 
+                                                       Fmatrix1 = (Fmatrix_SP_WC_precip1 + Fmatrix_SP_WC_precip2 + Fmatrix_SP_WC_precip3)/3, 
+                                                       Fmatrix2 = Fmatrix_SP_CC,
+                                                       Pmatrix1 = Pmatrix_SP_WC, 
+                                                       Pmatrix2 = Pmatrix_SP_CC,
+                                                       Cmatrix1 = Cmatrix_SP_WC, 
+                                                       Cmatrix2 = Cmatrix_SP_CC, 
+                                                       Growth_matrix1 = growth_SP_WC,
+                                                       Growth_matrix2 = growth_SP_CC) %>% 
+  mutate(species = "Sib_pro",
+         treatment = "WC - CC")
+
+LTRE_SP_CC_WN_mean_precip <- LTRE_calcultations_Growth(IPM1 = IPM_SP_WN, 
+                                                       IPM2 = IPM_SP_CC, 
+                                                       Fmatrix1 = Fmatrix_SP_WN, 
+                                                       Fmatrix2 = Fmatrix_SP_CC,
+                                                       Pmatrix1 = Pmatrix_SP_WN, 
+                                                       Pmatrix2 = Pmatrix_SP_CC,
+                                                       Cmatrix1 = Cmatrix_SP_WN, 
+                                                       Cmatrix2 = Cmatrix_SP_CC, 
+                                                       Growth_matrix1 = growth_SP_WN,
+                                                       Growth_matrix2 = growth_SP_CC) %>% 
+  mutate(species = "Sib_pro",
+         treatment = "WN - CC")
+
+LTRE_SP_WC_WN_mean_precip <- LTRE_calcultations_Growth(IPM1 = IPM_SP_WN, 
+                                                       IPM2 = (IPM_SP_WC_precip1 + IPM_SP_WC_precip2 + IPM_SP_WC_precip3)/3, 
+                                                       Fmatrix1 = Fmatrix_SP_WN, 
+                                                       Fmatrix2 = (Fmatrix_SP_WC_precip1 + Fmatrix_SP_WC_precip2 + Fmatrix_SP_WC_precip3)/3,
+                                                       Pmatrix1 = Pmatrix_SP_WN, 
+                                                       Pmatrix2 = Pmatrix_SP_WC,
+                                                       Cmatrix1 = Cmatrix_SP_WN, 
+                                                       Cmatrix2 = Cmatrix_SP_WC, 
+                                                       Growth_matrix1 = growth_SP_WN,
+                                                       Growth_matrix2 = growth_SP_WC) %>% 
+  mutate(species = "Sib_pro",
+         treatment = "WN - WC")
+
+
+
+
+LTRE_treatments_mean_precip <- LTRE_VA_WC_WN_mean_precip  %>% 
+  bind_rows(LTRE_VA_CC_WN_mean_precip) %>% 
+  bind_rows(LTRE_VA_CC_WC_mean_precip) %>% 
+  bind_rows(LTRE_VA_CC_CN_mean_precip) %>% 
+  bind_rows(LTRE_SP_CC_CN_mean_precip) %>% 
+  bind_rows(LTRE_SP_CC_WN_mean_precip) %>% 
+  bind_rows(LTRE_SP_CC_WC_mean_precip) %>% 
+  bind_rows(LTRE_SP_WC_WN_mean_precip) 
+  
+Susanne_plot_ver_alp_mean <- LTRE_treatments_mean_precip %>% 
+  filter(species == "Ver_alp") %>% 
+  mutate(treatment = factor(treatment, levels = c("CN - CC", "WN - CC", "WN - WC", "WC - CC"))) %>% 
+  filter(treatment %in% c("WC - CC", "CN - CC", "WN - CC", "WN - WC")) %>% 
+  mutate(treatment = factor(treatment, levels = c("WC - CC", "CN - CC", "WN - WC", "WN - CC"))) %>% 
+  ggplot(aes(fill=vital_rates, y=contributions, x=treatment)) + 
+  geom_bar(position="stack", stat="identity") +
+  geom_point(aes(y = lamda_difference)) +
+  geom_hline(yintercept = 0) +
+  theme_bw() +
+  scale_fill_manual(values = c("#DEDEDE","#6D64E4", "#A1A1A1", "#6E6E6E"))
+
+Susanne_plot_Sib_pro_mean <- LTRE_treatments_mean_precip %>% 
+  filter(species == "Sib_pro") %>% 
+  mutate(treatment = factor(treatment, levels = c("CN - CC", "WN - CC", "WN - WC", "WC - CC"))) %>% 
+  filter(treatment %in% c("WC - CC", "CN - CC", "WN - CC", "WN - WC")) %>% 
+  mutate(treatment = factor(treatment, levels = c("WC - CC", "CN - CC", "WN - WC", "WN - CC"))) %>% 
+  ggplot(aes(fill=vital_rates, y=contributions, x=treatment)) + 
+  geom_bar(position="stack", stat="identity") +
+  geom_point(aes(y = lamda_difference)) +
+  geom_hline(yintercept = 0) +
+  theme_bw() +
+  scale_fill_manual(values = c("#DEDEDE","#FFC300", "#A1A1A1", "#6E6E6E"))
+
+
+plot_ver_alp_mean <- (Susanne_plot_ver_alp_mean /
+  Susanne_plot_ver_alp) +
+  plot_layout(heights = c(2, 1), guides = 'collect') &
+  theme(legend.position = "bottom", text = element_text(size = 15))
+
+plot_sib_pro_mean <- (Susanne_plot_Sib_pro_mean /
+    Susanne_plot_sib_pro) +
+  plot_layout(heights = c(2, 1), guides = 'collect') &
+  theme(legend.position = "bottom", text = element_text(size = 15))
+
+#ggsave(plot_ver_alp_mean, filename = "Ver_alp_fecundity_mean.pdf", width = 20, height = 24, units = "cm")
+#ggsave(plot_sib_pro_mean, filename = "Sib_pro_fecundity_mean.pdf", width = 20, height = 24, units = "cm")
