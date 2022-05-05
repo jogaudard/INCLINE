@@ -44,13 +44,18 @@ lambda_df <- lambda_df %>%
 
 palette <- c("#a6611a", "#dfc27d", "#80cdc1", "#018571")
 
-lambda_plot <- ggplot(aes(x = lambda, y = Treatments, shape = Species, color = Species), data = lambda_df) +
-  geom_point(size = 5) +
-  #geom_segment(aes(x=1, xend=lambda, y=Treatments, yend=Treatments)) +
-  facet_wrap(~precipitation, nrow = 1) +
+#lambda_plot <- 
+  
+  lambda_df %>% 
+  mutate(precipitation = factor(precipitation, levels = c( "1.2 m/year", "2.3 m/year", "3.4 m/year", "Across precipitation"))) %>% 
+ggplot(aes(x = lambda, y = Treatments, color = precipitation)) +
+  geom_point(size = 5, position = position_dodge(width = 0.40)) +
+    geom_linerange(aes(xmin=1, xmax=lambda, y=Treatments), position = position_dodge(width = 0.40))+
+  #geom_segment(aes(x=1, xend=lambda, y=Treatments, yend=Treatments), position = position_dodge(width = 0.90)) +
+  facet_wrap(~Species, nrow = 1, scales = "free") +
   geom_vline(xintercept = 1) +
   scale_y_discrete(limits = rev) +
-  scale_color_manual(values = c("#a6611a","#018571")) +
+  scale_color_manual(values = Precip_palette_black) +
   theme_bw() +
   xlab("λ") +
   ggtitle("A) Population growth rate") +
@@ -74,15 +79,31 @@ lambda_CC_no_precip <- lambda_df %>%
   filter(precipitation == "Across precipitation") %>% 
   select(-lambda, -Treatments, -precipitation) 
 
-lambda_WC_no_precip <- lambda_df %>% 
-  filter(Treatments == "WC",
-         Species == "Sibbaldia procumbens") %>% 
-  mutate(lambda_WC = lambda) %>% 
-  select(-lambda, -Treatments) %>% 
-  filter(!precipitation == "Across precipitation")
+# Adding the precipitation levels to treatments that does not have any precip difference so that we can compare with the WC that has values for different precipitationations.
+precipitation <- c("1.2 m/year", "2.3 m/year", "3.4 m/year")
+precipitation <- data.frame(precipitation)
 
+lambda_WN <- lambda_df %>% 
+  filter(Treatments == "WN",
+         Species == "Sibbaldia procumbens") %>% 
+  mutate(lambda = lambda) %>% 
+  select(-precipitation) %>% 
+  slice(rep(1:n(), each = 3)) %>% 
+  add_column(precipitation)
+
+lambda_CR <- lambda_df %>% 
+  filter(Treatments == "CR",
+         Species == "Sibbaldia procumbens") %>% 
+  mutate(lambda = lambda) %>% 
+  select(-precipitation) %>% 
+  slice(rep(1:n(), each = 3)) %>% 
+  add_column(precipitation)
+
+## Calculate differences in lambda
 
 lambda_df_differences <- lambda_df %>% 
+  bind_rows(lambda_WN) %>% 
+  bind_rows(lambda_CR) %>% 
   left_join(lambda_CC_precip, by = c("Species", "precipitation")) %>% 
   left_join(lambda_WC_precip, by = c("Species", "precipitation")) %>% 
   left_join(lambda_CC_no_precip, by = c("Species")) %>% 
@@ -95,6 +116,7 @@ lambda_df_differences <- lambda_df %>%
 
 lambda_diff_CC_plot <- lambda_df_differences %>% 
   filter(!Treatments == "CC") %>% 
+  filter(!precipitation == "Across precipitation") %>% 
 ggplot(aes(x = CC_comparison, y = Treatments, shape = Species, color = Species)) +
   geom_point(size = 5) +
   #geom_segment(aes(x=0, xend=CC_comparison, y=Treatments, yend=Treatments)) +
@@ -104,11 +126,12 @@ ggplot(aes(x = CC_comparison, y = Treatments, shape = Species, color = Species))
   scale_color_manual(values = c("#a6611a","#018571")) +
   theme_bw()+
   xlab("Δ λ") +
-  ggtitle("b) Comparing λ with extant climate control") +
+  ggtitle("b) Comparing λ with extant climate control (CC)") +
   theme(plot.title = element_text(hjust = 0.5))
 
 lambda_diff_WC_plot <- lambda_df_differences %>% 
   filter(Treatments %in% c("WR", "WE", "WN")) %>% 
+  filter(!precipitation == "Across precipitation") %>% 
 ggplot(aes(x = WC_comparison, y = Treatments, shape = Species, color = Species)) +
   geom_point(size = 5) +
   #geom_segment(aes(x=0, xend=CC_comparison, y=Treatments, yend=Treatments)) +
@@ -118,7 +141,7 @@ ggplot(aes(x = WC_comparison, y = Treatments, shape = Species, color = Species))
   scale_color_manual(values = c("#a6611a","#018571")) +
   theme_bw() +
   xlab("Δ λ") +
-  ggtitle("c) Comparing λ with warmed control") +
+  ggtitle("c) Comparing λ with warmed control (WC)") +
   theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 30))
 
 
