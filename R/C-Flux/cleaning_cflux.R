@@ -187,7 +187,9 @@ ggplot(co2_conc_incline_cut, aes(x=datetime, y=CO2, color = cut)) +
 flux_incline <- filter(co2_conc_incline_cut, cut == "keep") %>% #cut out the discarded parts
   flux.calc2(chamber_volume = 34.3, plot_area = 0.08575) %>%  #need to specify the size of the chamber because it is different than Three-D
   rename(
-    turfID = plot_ID
+    turfID = plot_ID,
+    fluxID = ID,
+    comments = remarks
   )
 
 write_csv(flux_incline, "data_cleaned/INCLINE_c-flux_2020.csv")
