@@ -1356,7 +1356,7 @@ LTRE_treatments <- LTRE_VA_CC_CR_precip_1 %>%
 
 LTRE_treatments %>% 
   filter(species == "Ver_alp") %>% 
-  mutate(treatment = factor(treatment, levels = c("CE - CC", "CN - CC", "CR - CC", "WE - CC", "WN - CC", "WR - CC", "WE - WC", "WN - WC", "WR - WC", "WC - CC"))) %>% 
+  mutate(treatment = factor(treatment, levels = c("CR - CC", "CE - CC", "CN - CC", "WR - CC", "WE - CC", "WN - CC", "WR - WC", "WE - WC", "WN - WC", "WC - CC"))) %>% 
 ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
   geom_bar(position="stack", stat="identity") +
   geom_point(aes(y = lamda_difference, color = "lambda difference")) +
@@ -1371,7 +1371,7 @@ ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) +
 
 LTRE_treatments %>% 
   filter(species == "Sib_pro") %>% 
-  mutate(treatment = factor(treatment, levels = c("CE - CC", "CN - CC", "CR - CC", "WE - CC", "WN - CC", "WR - CC", "WE - WC", "WN - WC", "WR - WC", "WC - CC"))) %>% 
+  mutate(treatment = factor(treatment, levels = c("CR - CC", "CE - CC", "CN - CC", "WR - CC", "WE - CC", "WN - CC","WR - WC", "WE - WC", "WN - WC", "WC - CC"))) %>% 
   ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
   geom_bar(position="stack", stat="identity") +
   geom_point(aes(y = lamda_difference, color = "lambda difference")) +
