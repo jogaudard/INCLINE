@@ -49,11 +49,14 @@ NDVI_2019_2021 <- read_csv2("data/NDVI_2019_2021.csv") %>%
     plotID = "plot"
   )
 
-NDVI <- full_join(NDVI_2020, NDVI_2019_2021)
+NDVI <- full_join(NDVI_2020, NDVI_2019_2021) %>% 
+  rename(
+    comments = comment
+  )
 
 #visually checking values
 ggplot(NDVI, aes(date, NDVI)) +
   geom_point() +
   facet_wrap(vars(site))
 
-write_csv(NDVI, "data/INCLINE_NDVI_2019_2020_2021.csv")  
+write_csv(NDVI, "data_cleaned/INCLINE_NDVI_2019_2020_2021.csv")  
