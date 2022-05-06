@@ -5,11 +5,7 @@
  
 
 # data import -------------------------------------------------------------
-
- get_file(node = "zhk3m",
-          file = "INCLINE_c-flux_2020.csv",
-          path = "data_cleaned",
-          remote_path = "C-Flux")
+source("data_doc/INCLINE_download_cleandata.R")
 
 # data dic function -------------------------------------------------------
 
@@ -67,16 +63,25 @@
    
  }
 
-# co2 fluxes --------------------------------------------------------------
+ 
 
- 
- 
- cflux <- read_csv("data_cleaned/INCLINE_c-flux_2020.csv")
- tableID <- read_csv("data_doc/INCLINE_data_dic.csv") %>% 
+# reading data ------------------------------------------------------------
+ description <- read_csv("data_doc/INCLINE_data_dic.csv") %>% 
    mutate(TableID = as.character(TableID))
  
+ cflux <- read_csv("data_cleaned/INCLINE_c-flux_2020.csv")
+ microclimate <- read_csv("data_cleaned/INCLINE_microclimate.csv")
+ ndvi <- read_csv("data_cleaned/INCLINE_NDVI_2019_2020_2021.csv", col_types = "fdDffffcc")
+ 
+
+# creating data list ------------------------------------------------------
+
+ 
+
+# co2 fluxes --------------------------------------------------------------
+
 cflux_dic <- make_data_dictionary(data = cflux,
-                                  description_table = tableID,
+                                  description_table = description,
                                   table_ID = NA_character_
                                   )
  

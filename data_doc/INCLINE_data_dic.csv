@@ -1,3 +1,15 @@
 TableID, Variable name, Unit, Description, How measured
-,flux,,,
-,type,,,
+,fluxID,,Unique ID for each flux,defined
+,type,,Type of flux measurements,defined
+,replicate,,Replicate measurement of same turf,defined
+,PARavg,micromol/s/sqm,PAR value measured every 15 seconds during flux measurement and averaged,measured
+,temp_airavg,Kelvin,Air temperature measured inside the flux chamber every 10 seconds and averaged,measured
+,r.squared,,R squared of the linear relation between CO2 concentration and time,calculated
+,p.value,,p value of the linear relation between CO2 concentration and time,calculated
+,nobs,,Number of CO2 concentration measurements for each flux,measured
+,flux,mmol/sqm/h,CO2 flux (postive when emitting to atmosphere negative when vegetation uptake),calculated
+,adj.r.squared,,adjusted R squared of the linear relation between CO2 concentration and time,calculated
+,turfID,,ID of each turfs,defined
+,campaign,,field measurement campaign,defined
+,comments,,additional information on the data,defined
+,datetime,yyyy-mm-dd_hh:mm:ss,Date and time of sampling or observation,defined
