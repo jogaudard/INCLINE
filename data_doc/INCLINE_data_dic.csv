@@ -13,3 +13,15 @@ TableID, Variable name, Unit, Description, How measured
 ,campaign,,field measurement campaign,defined
 ,comments,,additional information on the data,defined
 ,datetime,yyyy-mm-dd_hh:mm:ss,Date and time of sampling or observation,defined
+,loggerID,,Unique ID for each microclimate loggers,defined
+,plotID,,Unique ID for each plot,defined
+,site,,Unique site ID,defined
+,soil_temperature,°C,Soil temperature at 5 cm below ground,measured
+,ground_temperature,°C,Ground temperature,measured
+,soilmoisture,percentage,Soil moisture,measured
+,air_temperature,°C,Air temperature 15 cm above ground,measured
+,NDVI,,NDVI measurement for each plot,measured
+,date,yyyy-mm-dd,Date of sampling or observation,defined
+,tomst,,Presence of TMS microclimate logger in the plot when measuing,defined
+,OTC,,Presence of OTC in the plot when measuing,defined
+,date_comment,,Comments specifically about date issue,defined

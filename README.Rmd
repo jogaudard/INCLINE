@@ -78,3 +78,8 @@ knitr::kable(cflux_dic)
 ```{r, echo=FALSE}
 knitr::kable(ndvi_dic)
 ```
+
+### Microclimate
+```{r, echo=FALSE}
+knitr::kable(microclimate_dic)
+```
