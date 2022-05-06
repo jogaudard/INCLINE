@@ -6,6 +6,10 @@
 library(tidyverse)
 library(patchwork)
 
+##### Color palette #####
+palette <- c("#a6611a", "#dfc27d", "#80cdc1", "#018571")
+precip_3_palette <- c("#BAD8F7", "#89B7E1", "#2E75B6", "#000000")
+
 ##### Make dataset with lambdas #####
 
 lambdas <- c(as.numeric(eigen(IPM_SP_CC)$value[1]), as.numeric(eigen(IPM_SP_CE_precip1)$value[1]), as.numeric(eigen(IPM_SP_CE_precip2)$value[1]), as.numeric(eigen(IPM_SP_CE_precip3)$value[1]), as.numeric(eigen(IPM_SP_CN_precip1)$value[1]), as.numeric(eigen(IPM_SP_CN_precip2)$value[1]), as.numeric(eigen(IPM_SP_CN_precip3)$value[1]), as.numeric(eigen(IPM_SP_CR)$value[1]),
@@ -42,24 +46,25 @@ lambda_df <- lambda_df %>%
   mutate(precipitation = factor(precipitation, levels = c("Across precipitation", "1.2 m/year", "2.3 m/year", "3.4 m/year")))
 
 
-palette <- c("#a6611a", "#dfc27d", "#80cdc1", "#018571")
-
 #lambda_plot <- 
   
-  lambda_df %>% 
+  lambda_lolliplot <- lambda_df %>% 
   mutate(precipitation = factor(precipitation, levels = c( "1.2 m/year", "2.3 m/year", "3.4 m/year", "Across precipitation"))) %>% 
 ggplot(aes(x = lambda, y = Treatments, color = precipitation)) +
-  geom_point(size = 5, position = position_dodge(width = 0.40)) +
-    geom_linerange(aes(xmin=1, xmax=lambda, y=Treatments), position = position_dodge(width = 0.40))+
+  #geom_linerange(aes(xmin=1, xmax=lambda, y=Treatments), position = position_dodge(width = 0.40))+
   #geom_segment(aes(x=1, xend=lambda, y=Treatments, yend=Treatments), position = position_dodge(width = 0.90)) +
+  #geom_rect(aes(xmin = 0, xmax = 2, ymin = Treatments - 0.5, ymax = Treatments + 0.5), alpha = 0.2) +
+  #geom_rect(aes(xmin = 0, xmax = 2, ymin = Treatments - 0.5, ymax = Treatments + 0.5), alpha = 0.2) + 
+    geom_point(size = 5, position = position_dodge(width = 0.40)) +
   facet_wrap(~Species, nrow = 1, scales = "free") +
   geom_vline(xintercept = 1) +
   scale_y_discrete(limits = rev) +
-  scale_color_manual(values = Precip_palette_black) +
+  scale_color_manual(values = precip_3_palette) +
   theme_bw() +
   xlab("λ") +
   ggtitle("A) Population growth rate") +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) 
+    #scale_fill_manual(values = c("#a6611a", "#dfc27d"))
 
 lambda_CC_precip <- lambda_df %>% 
   filter(Treatments == "CC") %>% 
@@ -129,6 +134,26 @@ ggplot(aes(x = CC_comparison, y = Treatments, shape = Species, color = Species))
   ggtitle("b) Comparing λ with extant climate control (CC)") +
   theme(plot.title = element_text(hjust = 0.5))
 
+lambda_diff_CC_lolliplot <- lambda_df_differences %>% 
+  filter(!Treatments == "CC") %>% 
+  mutate(precipitation = factor(precipitation, levels = c( "1.2 m/year", "2.3 m/year", "3.4 m/year", "Across precipitation"))) %>% 
+  ggplot(aes(x = CC_comparison, y = Treatments, color = precipitation)) +
+  geom_linerange(aes(xmin=0, xmax=CC_comparison, y=Treatments), position = position_dodge(width = 0.40))+
+  #geom_segment(aes(x=1, xend=lambda, y=Treatments, yend=Treatments), position = position_dodge(width = 0.90)) +
+  #geom_rect(aes(xmin = 0, xmax = 2, ymin = Treatments - 0.5, ymax = Treatments + 0.5), alpha = 0.2) +
+  #geom_rect(aes(xmin = 0, xmax = 2, ymin = Treatments - 0.5, ymax = Treatments + 0.5), alpha = 0.2) + 
+  geom_point(size = 5, position = position_dodge(width = 0.40)) +
+  facet_wrap(~Species, nrow = 1, scales = "free") +
+  geom_vline(xintercept = 0) +
+  scale_y_discrete(limits = rev) +
+  scale_color_manual(values = precip_3_palette) +
+  theme_bw() +
+  xlab("Δ λ") +
+  ggtitle("b) Comparing λ with extant climate control (CC)") +
+  theme(plot.title = element_text(hjust = 0.5)) 
+#scale_fill_manual(values = c("#a6611a", "#dfc27d"))
+
+
 lambda_diff_WC_plot <- lambda_df_differences %>% 
   filter(Treatments %in% c("WR", "WE", "WN")) %>% 
   filter(!precipitation == "Across precipitation") %>% 
@@ -144,7 +169,31 @@ ggplot(aes(x = WC_comparison, y = Treatments, shape = Species, color = Species))
   ggtitle("c) Comparing λ with warmed control (WC)") +
   theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 30))
 
+lambda_diff_WC_lolliplot <- lambda_df_differences %>% 
+  filter(Treatments %in% c("WR", "WE", "WN")) %>% 
+  mutate(precipitation = factor(precipitation, levels = c( "1.2 m/year", "2.3 m/year", "3.4 m/year", "Across precipitation"))) %>% 
+  ggplot(aes(x = CC_comparison, y = Treatments, color = precipitation)) +
+  geom_linerange(aes(xmin=0, xmax=CC_comparison, y=Treatments), position = position_dodge(width = 0.40))+
+  #geom_segment(aes(x=1, xend=lambda, y=Treatments, yend=Treatments), position = position_dodge(width = 0.90)) +
+  #geom_rect(aes(xmin = 0, xmax = 2, ymin = Treatments - 0.5, ymax = Treatments + 0.5), alpha = 0.2) +
+  #geom_rect(aes(xmin = 0, xmax = 2, ymin = Treatments - 0.5, ymax = Treatments + 0.5), alpha = 0.2) + 
+  geom_point(size = 5, position = position_dodge(width = 0.40)) +
+  facet_wrap(~Species, nrow = 1, scales = "free") +
+  geom_vline(xintercept = 0) +
+  scale_y_discrete(limits = rev) +
+  scale_color_manual(values = precip_3_palette) +
+  theme_bw() +
+  xlab("Δ λ") +
+  ggtitle("b) Comparing λ with extant climate control (CC)") +
+  theme(plot.title = element_text(hjust = 0.5)) 
+#scale_fill_manual(values = c("#a6611a", "#dfc27d"))
+
 
 (lambda_plot /  lambda_diff_CC_plot / lambda_diff_WC_plot) + 
   plot_layout(heights = c(2,2, 1), guides = 'collect') &
+  theme(legend.position = "bottom", text = element_text(size = 14))
+
+
+(lambda_lolliplot /  lambda_diff_CC_lolliplot / lambda_diff_WC_lolliplot) + 
+  plot_layout(heights = c(2,1.9, 1), guides = 'collect') &
   theme(legend.position = "bottom", text = element_text(size = 14))
