@@ -76,10 +76,19 @@ Where:
 
 ### Carbon fluxes
 
-``` r
-knitr::kable(cflux_dic)
-```
-
-| Variable name | Description | Variable type | Variable range or levels | Unit | How measured |
-|:--------------|:------------|:--------------|:-------------------------|:-----|:-------------|
-| flux          | NA          | numeric       | -40.778 - 136.198        | NA   | NA           |
+| Variable name | Description                                                                    | Variable type | Variable range or levels                  | Unit                | How measured |
+|:--------------|:-------------------------------------------------------------------------------|:--------------|:------------------------------------------|:--------------------|:-------------|
+| fluxID        | Unique ID for each flux                                                        | numeric       | 1 - 728                                   | NA                  | defined      |
+| p.value       | p value of the linear relation between CO2 concentration and time              | numeric       | 0 - 0.773                                 | NA                  | calculated   |
+| r.squared     | R squared of the linear relation between CO2 concentration and time            | numeric       | 0.001 - 0.998                             | NA                  | calculated   |
+| adj.r.squared | adjusted R squared of the linear relation between CO2 concentration and time   | numeric       | -0.009 - 0.998                            | NA                  | calculated   |
+| nobs          | Number of CO2 concentration measurements for each flux                         | numeric       | 54 - 169                                  | NA                  | measured     |
+| PARavg        | PAR value measured every 15 seconds during flux measurement and averaged       | numeric       | 0.119 - 1959.496                          | micromol/s/sqm      | measured     |
+| temp_airavg   | Air temperature measured inside the flux chamber every 10 seconds and averaged | numeric       | 277.849 - 299.394                         | Kelvin              | measured     |
+| turfID        | ID of each turfs                                                               | categorical   | GUD_1\_3 - ULV_7\_6                       | NA                  | defined      |
+| type          | Type of flux measurements                                                      | categorical   | 1 - NEE                                   | NA                  | defined      |
+| campaign      | field measurement campaign                                                     | categorical   | 2 - LRC                                   | NA                  | defined      |
+| comments      | additional information on the data                                             | categorical   | cliff shade - windy                       | NA                  | defined      |
+| datetime      | Date and time of sampling or observation                                       | date_time     | 2020-07-17 12:15:50 - 2020-08-26 14:09:25 | yyyy-mm-dd_hh:mm:ss | defined      |
+| replicate     | Replicate measurement of same turf                                             | numeric       | 1 - 4                                     | NA                  | defined      |
+| flux          | CO2 flux (postive when emitting to atmosphere negative when vegetation uptake) | numeric       | -40.778 - 136.198                         | mmol/sqm/h          | calculated   |

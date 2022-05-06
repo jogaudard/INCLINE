@@ -78,12 +78,22 @@ source("data_doc/INCLINE_download_cleandata.R")
 
  
 
-# co2 fluxes --------------------------------------------------------------
+# making dictionnaries --------------------------------------------------------------
 
 cflux_dic <- make_data_dictionary(data = cflux,
                                   description_table = description,
                                   table_ID = NA_character_
                                   )
+ 
+ ndvi_dic <- make_data_dictionary(data = ndvi,
+                                  description_table = description,
+                                  table_ID = NA_character_
+                                  )
+ 
+ microclimate_dic <- make_data_dictionary(data = microclimate,
+                                  description_table = description,
+                                  table_ID = NA_character_
+ )
  
  # cflux_range <- cflux %>% 
  #   summarise(
