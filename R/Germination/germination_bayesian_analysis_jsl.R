@@ -913,55 +913,56 @@ root_shoot_zoomed_in <- ggplot()+
     theme(legend.position='bottom')
   
   
-  #### Root biomass Veronica alpina ####
-  
-  dat <- seedlings_VA
-  dat_root <- dat %>% filter(!is.na(dry_mass_g_root)) 
+#### Root biomass Veronica alpina ####
+
+dat <- seedlings_VA
+dat_root <- dat %>% filter(!is.na(dry_mass_g_root)) 
   # group level effects
-  site <- factor(dat_root$siteID)
-  petridish <- factor(dat_root$petri_dish)
+site <- factor(dat_root$siteID)
+petridish <- factor(dat_root$petri_dish)
   
   # independent variables
-  WP <- as.numeric(standard(as.numeric(dat_root$water_potential)))
-  WP_MPa <- as.numeric(standard(dat_root$WP_MPa))
-  Precip <- as.numeric(standard(dat_root$precip))
+WP <- as.numeric(standard(as.numeric(dat_root$water_potential)))
+WP_MPa <- as.numeric(standard(dat_root$WP_MPa))
+Precip <- as.numeric(standard(dat_root$precip))
   
   # dependent variables
-  traits <- as.numeric(log(dat_root$dry_mass_g_root))
-  N <- as.numeric(length(traits))
+traits <- as.numeric(log(dat_root$dry_mass_g_root))
+N <- as.numeric(length(traits))
   
-  treatmat <- model.matrix(~Precip*WP_MPa)
-  n_parm <- as.numeric(ncol(treatmat))
+treatmat <- model.matrix(~Precip*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
   
   # look at the data before the analysis
-  ggplot(dat, aes(x=water_potential, y = log(dry_mass_g_root)), adjust = 0.01)+
-    geom_jitter()+facet_wrap(~siteID)
+ggplot(dat, aes(x=water_potential, y = log(dry_mass_g_root)), adjust = 0.01) +
+  geom_jitter()+facet_wrap(~siteID)
   
-  jags.data <- list("treatmat", "traits", "N",  "site", "n_parm")
-  jags.param <- c("b", "rss", "rss_new", "r", "sig1", "sig_t") 
+jags.data <- list("treatmat", "traits", "N",  "site", "n_parm")
+jags.param <- c("b", "rss", "rss_new", "r", "sig1", "sig_t") 
   
-  results_root_VA <- jags.parallel(data = jags.data,
+results_root_VA <- jags.parallel(data = jags.data,
                                          #inits = inits.fn,
                                          parameters.to.save = jags.param,
-                                         n.iter = 5000,
+                                         n.iter = 10000,
                                          model.file = model_traits,
                                          n.thin = 5,
-                                         n.chains = 3)
-  results_root_VA
+                                         n.chains = 3,
+                                 n.burnin = 5000)
+results_root_VA
   
   # traceplots
-  s <- ggs(as.mcmc(results_root_VA))
-  ggs_traceplot(s, family="b") 
+s <- ggs(as.mcmc(results_root_VA))
+ggs_traceplot(s, family="b") 
   
   # check Gelman Rubin Statistics
-  gelman.diag(as.mcmc(results_root_VA))
+gelman.diag(as.mcmc(results_root_VA))
   
   # Posterior predictive check
-  plot(results_root_VA$BUGSoutput$sims.list$rss_new, results_root_VA$BUGSoutput$sims.list$rss,
+plot(results_root_VA$BUGSoutput$sims.list$rss_new, results_root_VA$BUGSoutput$sims.list$rss,
        main = "",)
-  abline(0,1, lwd = 2, col = "black") 
+abline(0,1, lwd = 2, col = "black") 
   
-  mean(results_root_VA$BUGSoutput$sims.list$rss_new > results_root_VA$BUGSoutput$sims.list$rss)
+mean(results_root_VA$BUGSoutput$sims.list$rss_new > results_root_VA$BUGSoutput$sims.list$rss)
   
   ## put together for figure  and r^2
   mcmc <- results_root_VA$BUGSoutput$sims.matrix
@@ -1000,9 +1001,9 @@ root_shoot_zoomed_in <- ggplot()+
   graphdat$Precip <- as.numeric(standard(dat_root$precip))
   
 root_VA_plot <- ggplot()+ 
-    geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_root, colour = factor(round(Precip, digits = 2))))+
+    geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_root, colour = factor(Precip)))+
     geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
-                                 fill = factor(round(Precip, digits = 2)), alpha=0.35))+
+                                 fill = factor(Precip), alpha=0.35))+
     geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(round(Precip, digits = 2))))+
     xlab("Standardized WP") + 
     ylab("Root biomass")+ 
@@ -1013,9 +1014,6 @@ root_VA_plot <- ggplot()+
 
   
 #### Above ground biomass Veronica alpina ####
-seedlings_VA <- seedlings_VA %>% 
-  mutate(water_potential = as.numeric(water_potential))
-
 dat <- seedlings_VA
 dat_above_ground <- dat %>% filter(!is.na(dry_mass_g_above_ground)) 
 # group level effects
@@ -1044,10 +1042,11 @@ jags.param <- c("b", "rss", "rss_new", "r", "sig1", "sig_t")
 results_above_ground_VA <- jags.parallel(data = jags.data,
                                  #inits = inits.fn,
                                  parameters.to.save = jags.param,
-                                 n.iter = 5000,
+                                 n.iter = 50000,
                                  model.file = model_traits,
                                  n.thin = 5,
-                                 n.chains = 3)
+                                 n.chains = 3,
+                                 n.burnin = 10000)
 results_above_ground_VA
 
 # traceplots
@@ -1137,10 +1136,19 @@ seedlings_SP <- Sib_pro_germ %>%
                             water_potential == 10 ~ -1.70))%>% 
   mutate(water_potential = as.numeric(water_potential))
 
+## Looking at seedlings
+seedlings_SP %>% 
+  #filter(!siteID == "LAV") %>% 
+ggplot(aes(x = as.factor(WP_MPa), y = root_shoot_ratio, fill = as.factor(WP_MPa))) +
+  geom_violin()+
+  geom_jitter(aes(alpha = 0.3)) +
+  facet_wrap(~siteID)
+
 #### Root:shoot ratio Sibbaldia procumbens ####
 
 dat <- seedlings_SP %>% 
-  filter(!siteID == "LAV")
+  #filter(!siteID == "LAV") %>% 
+  filter(WP_MPa > -0.71)
 
 dat_root_shoot <- dat %>% filter(!is.na(root_shoot_ratio)) 
 # group level effects
@@ -1230,8 +1238,7 @@ graphdat$Precip <- as.numeric(standard(dat_root_shoot$precip))
 
 ggplot()+ 
   geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)))+
-  #geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
-  #                             fill = factor(Precip), alpha=0.35))+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, fill = factor(Precip), alpha=0.35))+
   geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
   xlab("Standardized WP") + 
   ylab("Root:shoot ratio")+ 
@@ -1241,10 +1248,19 @@ ggplot()+
   scale_fill_manual(values = Precip_palette) 
 
 #### Root biomass Sibbaldia procumbens ####
-seedlings_SP <- seedlings_SP %>% 
-  mutate(water_potential = as.numeric(water_potential))
 
-dat <- seedlings_SP
+## Looking at seedlings
+seedlings_SP %>% 
+  #filter(!siteID == "LAV") %>% 
+  ggplot(aes(x = as.factor(WP_MPa), y = dry_mass_g_root, fill = as.factor(WP_MPa))) +
+  geom_violin()+
+  geom_jitter(aes(alpha = 0.3)) #+
+  #facet_wrap(~siteID)
+
+dat <- seedlings_SP %>% 
+  filter(WP_MPa > -0.71)
+
+
 dat_root <- dat %>% filter(!is.na(dry_mass_g_root)) 
 # group level effects
 site <- factor(dat_root$siteID)
@@ -1272,10 +1288,11 @@ jags.param <- c("b", "rss", "rss_new", "r", "sig1", "sig_t")
 results_root_SP <- jags.parallel(data = jags.data,
                                  #inits = inits.fn,
                                  parameters.to.save = jags.param,
-                                 n.iter = 5000,
+                                 n.iter = 15000,
                                  model.file = model_traits,
                                  n.thin = 5,
-                                 n.chains = 3)
+                                 n.chains = 3,
+                                 n.burnin = 5000)
 results_root_SP
 
 # traceplots
@@ -1342,7 +1359,16 @@ root_SP_plot <- ggplot()+
 
 
 #### Above ground biomass Sibbaldia procumbens ####
-dat <- seedlings_SP
+seedlings_SP %>% 
+  #filter(!siteID == "LAV") %>% 
+  ggplot(aes(x = as.factor(WP_MPa), y = dry_mass_g_above_ground, fill = as.factor(WP_MPa))) +
+  geom_violin()+
+  geom_jitter(aes(alpha = 0.3)) #+
+#facet_wrap(~siteID)
+
+dat <- seedlings_SP %>% 
+  filter(WP_MPa > -0.71)
+
 dat_above_ground <- dat %>% filter(!is.na(dry_mass_g_above_ground)) 
 # group level effects
 site <- factor(dat_above_ground$siteID)
