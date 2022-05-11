@@ -4,54 +4,54 @@
 
 #### Libraries ####
 library(tidyverse)
-library(dataDownloader)
-library(osfr)
+#library(dataDownloader)
+#library(osfr)
 library(lubridate)
-library(germinationmetrics)
+#library(germinationmetrics)
 
 #### Downloading data from OSF ####
 
 #osf_auth(token = "get from my document every time you run the code") 
-
-get_file(node = "zhk3m",
-         file = "INCLINE_Germination_Seedling_Experiment_Data_Va.csv",
-         path = "data/Germination",
-         remote_path = "RawData/Germination_lab_experiment")
-
-get_file(node = "zhk3m",
-         file = "INCLINE_Germination_Seedling_Experiment_Data_SP.csv",
-         path = "data/Germination",
-         remote_path = "RawData/Germination_lab_experiment")
-
-get_file(node = "zhk3m",
-         file = "comment_dictionary_VA.csv",
-         path = "data/Germination",
-         remote_path = "RawData/Germination_lab_experiment")
-
-get_file(node = "zhk3m",
-         file = "comment_dictionary_SP.csv",
-         path = "data/Germination",
-         remote_path = "RawData/Germination_lab_experiment")
-
-get_file(node = "zhk3m",
-         file = "harvest_comment_dictionary_VA.csv",
-         path = "data/Germination",
-         remote_path = "RawData/Germination_lab_experiment")
-
-get_file(node = "zhk3m",
-         file = "harvest_comment_dictionary_SP.csv",
-         path = "data/Germination",
-         remote_path = "RawData/Germination_lab_experiment")
-
-get_file(node = "zhk3m",
-         file = "dish_comment_dictionary_VA.csv",
-         path = "data/Germination",
-         remote_path = "RawData/Germination_lab_experiment")
-
-get_file(node = "zhk3m",
-         file = "weighing_comment_dictionary_SP.csv",
-         path = "data/Germination",
-         remote_path = "RawData/Germination_lab_experiment")
+# 
+# get_file(node = "zhk3m",
+#          file = "INCLINE_Germination_Seedling_Experiment_Data_Va.csv",
+#          path = "data/Germination",
+#          remote_path = "RawData/Germination_lab_experiment")
+# 
+# get_file(node = "zhk3m",
+#          file = "INCLINE_Germination_Seedling_Experiment_Data_SP.csv",
+#          path = "data/Germination",
+#          remote_path = "RawData/Germination_lab_experiment")
+# 
+# get_file(node = "zhk3m",
+#          file = "comment_dictionary_VA.csv",
+#          path = "data/Germination",
+#          remote_path = "RawData/Germination_lab_experiment")
+# 
+# get_file(node = "zhk3m",
+#          file = "comment_dictionary_SP.csv",
+#          path = "data/Germination",
+#          remote_path = "RawData/Germination_lab_experiment")
+# 
+# get_file(node = "zhk3m",
+#          file = "harvest_comment_dictionary_VA.csv",
+#          path = "data/Germination",
+#          remote_path = "RawData/Germination_lab_experiment")
+# 
+# get_file(node = "zhk3m",
+#          file = "harvest_comment_dictionary_SP.csv",
+#          path = "data/Germination",
+#          remote_path = "RawData/Germination_lab_experiment")
+# 
+# get_file(node = "zhk3m",
+#          file = "dish_comment_dictionary_VA.csv",
+#          path = "data/Germination",
+#          remote_path = "RawData/Germination_lab_experiment")
+# 
+# get_file(node = "zhk3m",
+#          file = "weighing_comment_dictionary_SP.csv",
+#          path = "data/Germination",
+#          remote_path = "RawData/Germination_lab_experiment")
 
 # get_file(node = "zhk3m",
 #          file = "INCLINE_metadata_LoggerDates.csv",
