@@ -955,17 +955,22 @@ seedlings_VA <- Ver_alp_germ %>%
   
 #### Root:shoot ratio Veronica alpina ####
 
-dat <- seedlings_VA
-dat_root_shoot <- dat %>% filter(!is.na(root_shoot_ratio)) 
+seedlings_VA %>% 
+  #filter(water_potential < 6) %>% 
+  ggplot(aes(x = as.factor(water_potential), y = root_shoot_ratio, fill = as.factor(water_potential))) +
+  geom_violin()+
+  geom_jitter()
+
+dat_root_shoot <- seedlings_VA %>% filter(!is.na(root_shoot_ratio)) %>% filter(water_potential < 6)
   # group level effects
-site <- factor(dat_root_shoot$siteID)
+#site <- factor(dat_root_shoot$siteID)
 petridish <- factor(dat_root_shoot$petri_dish)
 n_petri <- length(levels(petridish))
   
 # independent variables
 WP <- as.numeric(standard(as.numeric(dat_root_shoot$water_potential)))
 WP_MPa <- as.numeric(standard(dat_root_shoot$WP_MPa))
-Precip <- as.numeric(standard(dat_root_shoot$precip))
+Precip <- as.factor(dat_root_shoot$precip)
   
 # dependent variables
 traits <- as.numeric(log(dat_root_shoot$root_shoot_ratio))
@@ -975,10 +980,10 @@ treatmat <- model.matrix(~Precip*WP_MPa)
 n_parm <- as.numeric(ncol(treatmat))
   
 # look at the data before the analysis
-ggplot(dat, aes(x=water_potential, y = log(root_shoot_ratio)), adjust = 0.01)+
+ggplot(dat_root_shoot, aes(x=water_potential, y = log(root_shoot_ratio)), adjust = 0.01)+
     geom_jitter()+facet_wrap(~siteID)
   
-jags.data <- list("treatmat", "traits", "N",  "site", "n_parm")
+jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
 jags.param <- c("b", "rss", "rss_new", "r", "sig1", "sig_t") 
   
   
@@ -1033,7 +1038,7 @@ mean(results_root_shoot_VA$BUGSoutput$sims.list$rss_new > results_root_shoot_VA$
   
   ## put together for figure  and r^2
 mcmc <- results_root_shoot_VA$BUGSoutput$sims.matrix
-coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]", "b[5]", "b[6]", "b[7]", "b[8]")]
 fit = coefs %*% t(treatmat)
 resid = sweep(fit, 2, traits, "-")
 var_f = apply(fit, 1, var)
@@ -1046,7 +1051,7 @@ coefs2 = apply(coefs, 2, median)
 fit2 = as.vector(coefs2 %*% t(treatmat))
 resid2 <- traits - fit2
 sresid2 <- resid2/sd(resid2)
-ggplot() + geom_point(data = NULL, aes(y = resid2, x = invlogit(fit2)))
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = (fit2)))
 hist(resid2)
   
 # check predicted versus observed
@@ -1057,7 +1062,7 @@ ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
   
 # generate plots
 newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
-                        Precip = c(unique(standard(dat$precip))))
+                        Precip = c(unique(as.factor(dat$precip))))
   
 xmat <- model.matrix(~Precip*WP_MPa, newdat)
 fit = coefs %*% t(xmat)
@@ -1065,13 +1070,13 @@ newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
   
 graphdat <- dat_root_shoot 
 graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
-graphdat$Precip <- as.numeric(standard(dat_root_shoot$precip))
+graphdat$Precip <- as.factor(dat_root_shoot$precip)
   
-root_shoot_full_plot <- ggplot()+ 
-    geom_point(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(round(Precip, digits = 2))))+
+root_shoot_VA_full_plot <- ggplot()+ 
+    geom_point(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)))+
     geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
-                                 fill = factor(round(Precip, digits = 2)), alpha=0.35))+
-    geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(round(Precip, digits = 2))))+
+                                 fill = factor(Precip), alpha=0.35))+
+    geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
     xlab("Standardized WP") + 
     ylab("Root:shoot ratio")+ 
     theme(panel.background = element_rect(fill='white', colour='black'))+
@@ -1079,34 +1084,48 @@ root_shoot_full_plot <- ggplot()+
      scale_colour_manual(values = Precip_palette)+
      scale_fill_manual(values = Precip_palette)
   
-root_shoot_zoomed_in <- ggplot()+ 
-    geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(round(Precip, digits = 2))))+
-    geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
-                                 fill = factor(round(Precip, digits = 2)), alpha=0.35))+
-    geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(round(Precip, digits = 2))))+
-    xlab("Standardized WP") + 
-    ylab("Root:shoot ratio")+ 
-    theme(panel.background = element_rect(fill='white', colour='black'))+
-    theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
-    scale_colour_manual(values = Precip_palette)+
-    scale_fill_manual(values = Precip_palette) +
-    ylim(0,7.5)
+root_shoot_VA_zoomed_in <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)), width = 0.1)+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(Precip), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+  xlab("Standardized WP") + 
+  ylab("Root:shoot ratio")+ 
+  theme(panel.background = element_rect(fill='white', colour='black'))+
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+  scale_colour_manual(values = Precip_palette)+
+  scale_fill_manual(values = Precip_palette) +
+  ylim(0,7.5)
+
+root_shoot_VA_panels <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)), width = 0.1)+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(Precip), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+  xlab("Standardized WP") + 
+  ylab("Root:shoot ratio")+ 
+  theme(panel.background = element_rect(fill='white', colour='black'))+
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+  scale_colour_manual(values = Precip_palette)+
+  scale_fill_manual(values = Precip_palette) +
+  ylim(0,7.5) +
+  facet_wrap(~factor(Precip), nrow = 1)
   
-  root_shoot_zoomed_in + inset_element(
-    root_shoot_full_plot, 
+  
+ (root_shoot_VA_zoomed_in + inset_element(
+    root_shoot_VA_full_plot, 
     left = 0.7, 
     bottom = 0.5, 
     right = 0.99, 
     top = 0.99
-  ) +
-    plot_layout(guides = "collect") & 
-    theme(legend.position='bottom')
-  
+  )) /
+    root_shoot_VA_panels +
+    plot_layout(heights = c(4, 1), guides = "collect") & 
+    theme(legend.position='bottom', text = element_text(size = 15))
   
 #### Root biomass Veronica alpina ####
 
-dat <- seedlings_VA
-dat_root <- dat %>% filter(!is.na(dry_mass_g_root)) 
+dat_root <- seedlings_VA %>% filter(!is.na(dry_mass_g_root)) 
   # group level effects
 site <- factor(dat_root$siteID)
 petridish <- factor(dat_root$petri_dish)
@@ -1336,11 +1355,13 @@ ggplot(aes(x = as.factor(WP_MPa), y = root_shoot_ratio, fill = as.factor(WP_MPa)
 
 #### Root:shoot ratio Sibbaldia procumbens ####
 
-dat <- seedlings_SP %>% 
-  #filter(!siteID == "LAV") %>% 
-  filter(WP_MPa > -0.71)
+seedlings_SP %>% 
+  #filter(water_potential < 7) %>% 
+  ggplot(aes(x = as.factor(water_potential), y = root_shoot_ratio, fill = as.factor(water_potential))) +
+  geom_violin()+
+  geom_jitter()
 
-dat_root_shoot <- dat %>% filter(!is.na(root_shoot_ratio)) 
+dat_root_shoot <- seedlings_SP %>% filter(!is.na(root_shoot_ratio)) %>% filter(water_potential < 7)
 # group level effects
 #site <- factor(dat_root_shoot$siteID)
 petridish <- factor(dat_root_shoot$petri_dish)
@@ -1350,7 +1371,7 @@ n_petri <- length(levels(petridish))
 WP <- as.numeric(standard(as.numeric(dat_root_shoot$water_potential)))
 WP_MPa <- as.numeric(standard(dat_root_shoot$WP_MPa))
 #Precip <- as.numeric(standard(dat_root_shoot$precip))
-Precip <- as.factor(standard(dat_root_shoot$precip))
+Precip <- as.factor(dat_root_shoot$precip)
 
 # dependent variables
 traits <- as.numeric(log(dat_root_shoot$root_shoot_ratio))
@@ -1391,7 +1412,7 @@ mean(results_root_shoot_SP$BUGSoutput$sims.list$rss_new > results_root_shoot_SP$
 
 ## put together for figure  and r^2
 mcmc <- results_root_shoot_SP$BUGSoutput$sims.matrix
-coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]", "b[5]", "b[6]", "b[7]", "b[8]")] #"b[5]", "b[6]", "b[7]", "b[8]"
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]", "b[5]", "b[6]", "b[7]", "b[8]")]
 fit = coefs %*% t(treatmat)
 resid = sweep(fit, 2, traits, "-")
 var_f = apply(fit, 1, var)
@@ -1404,7 +1425,7 @@ coefs2 = apply(coefs, 2, median)
 fit2 = as.vector(coefs2 %*% t(treatmat))
 resid2 <- traits - fit2
 sresid2 <- resid2/sd(resid2)
-ggplot() + geom_point(data = NULL, aes(y = resid2, x = invlogit(fit2)))
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = fit2))
 hist(resid2)
 
 # check predicted versus observed
@@ -1413,10 +1434,11 @@ ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
                                          fill = "Model"), alpha = 0.5) + 
   geom_density(data = dat_root_shoot, aes(x = (traits), fill = "Obs"), alpha = 0.5)
 
+
 # generate plots
 newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
                       #Precip = c(unique(standard(dat_root_shoot$precip))))
-                      Precip = unique(as.factor(standard(dat$precip))))
+                      Precip = unique(as.factor(dat$precip)))
 
 xmat <- model.matrix(~Precip*WP_MPa, newdat)
 fit = coefs %*% t(xmat)
@@ -1425,18 +1447,56 @@ newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
 graphdat <- dat_root_shoot 
 graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
 #graphdat$Precip <- as.numeric(standard(dat_root_shoot$precip))
-graphdat$Precip <- as.factor(standard(dat_root_shoot$precip))
+graphdat$Precip <- as.factor(dat_root_shoot$precip)
 
-ggplot()+ 
+
+root_shoot_SP_full_plot <- ggplot()+ 
   geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)))+
   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, fill = factor(Precip), alpha=0.35))+
   geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
   xlab("Standardized WP") + 
   ylab("Root:shoot ratio")+ 
   theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())
-  #scale_colour_manual(values = Precip_palette) +
-  #scale_fill_manual(values = Precip_palette) 
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+  scale_colour_manual(values = Precip_palette) +
+  scale_fill_manual(values = Precip_palette) 
+
+root_shoot_SP_zoomed_in <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)))+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, fill = factor(Precip), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+  xlab("Standardized WP") + 
+  ylab("Root:shoot ratio")+ 
+  theme(panel.background = element_rect(fill='white', colour='black'))+
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+  scale_colour_manual(values = Precip_palette) +
+  scale_fill_manual(values = Precip_palette) +
+  ylim(0,2)
+
+root_shoot_SP_panels <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)))+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, fill = factor(Precip), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+  xlab("Standardized WP") + 
+  ylab("Root:shoot ratio")+ 
+  theme(panel.background = element_rect(fill='white', colour='black'))+
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+  scale_colour_manual(values = Precip_palette) +
+  scale_fill_manual(values = Precip_palette) +
+  ylim(0,2) +
+  facet_wrap(~factor(Precip), nrow = 1)
+
+
+(root_shoot_SP_zoomed_in + inset_element(
+  root_shoot_SP_full_plot, 
+  left = 0.7, 
+  bottom = 0.5, 
+  right = 0.99, 
+  top = 0.99
+)) /
+  root_shoot_SP_panels +
+  plot_layout(heights = c(4, 1), guides = "collect") & 
+  theme(legend.position='bottom', text = element_text(size = 15))
 
 #### Root biomass Sibbaldia procumbens ####
 
