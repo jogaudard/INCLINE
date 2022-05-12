@@ -420,7 +420,7 @@ model_DtoM<- function(){
   
   for(i in 1:n_parm){b[i] ~ dnorm(0,1.0E-6)} #dnorm in JAGS uses mean and precision (0 = mean and 1.0E-6 = precision) different from dnorm in R that has variance and not precision.
   prec1 ~ dgamma(0.001, 0.001) 
-  sig1 <- 1/sqrt(prec1) #getting variance of the random effect
+  #sig1 <- 1/sqrt(prec1) #getting variance of the random effect
   r~ dunif(0,50)
   # #derived params
   rss <- sum(res[])
@@ -645,10 +645,10 @@ Sib_pro_germination_traits %>%
 
 # Sib.pro 
 # take out the water potentials with less than 10 data points
-guddat <- Sib_pro_germination_traits %>% filter (siteID == "GUD") %>% filter(water_potential < 7)
-lavdat <- Sib_pro_germination_traits %>% filter (siteID == "LAV") %>% filter(water_potential < 7)
-skjdat <- Sib_pro_germination_traits %>% filter (siteID == "SKJ") %>% filter(water_potential < 7)
-ulvdat <- Sib_pro_germination_traits %>% filter (siteID == "ULV") %>% filter(water_potential < 7)
+guddat <- Sib_pro_germination_traits %>% filter (siteID == "GUD") %>% filter(water_potential < 6)
+lavdat <- Sib_pro_germination_traits %>% filter (siteID == "LAV") %>% filter(water_potential < 6)
+skjdat <- Sib_pro_germination_traits %>% filter (siteID == "SKJ") %>% filter(water_potential < 6)
+ulvdat <- Sib_pro_germination_traits %>% filter (siteID == "ULV") %>% filter(water_potential < 6)
 
 dat <- bind_rows(guddat, lavdat, skjdat, ulvdat)
 dat <- dat %>% filter(!is.na(T50)) 
@@ -673,18 +673,18 @@ n_parm <- as.numeric(ncol(treatmat))
 ggplot(dat, aes(x=water_potential, y = T50), adjust = 0.01)+
   geom_point()+facet_wrap(~siteID)
 
-jags.data <- list("treatmat", "T50", "N",  "site", "n_parm")
+jags.data <- list("treatmat", "T50", "N",  "n_parm")
 jags.param <- c("b", "rss", "rss_new", "r", "sig1") 
 
 
 model_T50 <- function(){
   #group effects
-  for (j in 1:4){lokaliteter[j]~dnorm(0, prec1)}
+  #for (j in 1:4){lokaliteter[j]~dnorm(0, prec1)}
   #likelihood
   for (i in 1:N){
     T50[i] ~ dnegbin(p[i], r)
     # linear predictor
-    log(mu[i]) <- inprod(b, treatmat[i,]) + lokaliteter[site[i]]
+    log(mu[i]) <- inprod(b, treatmat[i,]) #+ lokaliteter[site[i]]
     p[i] <- r/(r+mu[i])
     
     # residual sum of squares
@@ -695,7 +695,7 @@ model_T50 <- function(){
   
   for(i in 1:n_parm){b[i] ~ dnorm(0,1.0E-6)} #dnorm in JAGS uses mean and precision (0 = mean and 1.0E-6 = precision) different from dnorm in R that has variance and not precision.
   prec1 ~ dgamma(0.001, 0.001) 
-  sig1 <- 1/sqrt(prec1) #getting variance of the random effect
+  #sig1 <- 1/sqrt(prec1) #getting variance of the random effect
   r~ dunif(0,50)
   # #derived params
   rss <- sum(res[])
@@ -705,11 +705,11 @@ model_T50 <- function(){
 results_T50_SP <- jags.parallel(data = jags.data,
                               #inits = inits.fn,
                               parameters.to.save = jags.param,
-                              n.iter = 100000,
+                              n.iter = 10000,
                               model.file = model_T50,
                               n.thin = 5,
                               n.chains = 3,
-                              n.burnin = 35000)
+                              n.burnin = 3000)
 results_T50_SP
 
 # traceplots
@@ -728,7 +728,7 @@ mean(results_T50_SP$BUGSoutput$sims.list$rss_new > results_T50_SP$BUGSoutput$sim
 
 ## put together for figure  and r^2
 mcmc <- results_T50_SP$BUGSoutput$sims.matrix
-coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]", "b[5]", "b[6]", "b[7]", "b[8]")]
 fit = coefs %*% t(treatmat)
 resid = sweep(fit, 2, log(T50), "-")
 var_f = apply(fit, 1, var)
@@ -739,20 +739,21 @@ tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
 #residuals
 coefs2 = apply(coefs, 2, median)
 fit2 = as.vector(coefs2 %*% t(treatmat))
-resid2 <- (T50) - exp(fit2)
+resid2 <- log(T50) - (fit2)
 sresid2 <- resid2/sd(resid2)
-ggplot() + geom_point(data = NULL, aes(y = resid2, x = invlogit(fit2)))
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = (fit2)))
 hist(resid2)
+
 
 # check predicted versus observed
 yRep = sapply(1:nrow(mcmc), function(i) rpois(nrow(dat), exp(fit[i,])))
 ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
                                          fill = "Model"), alpha = 0.5) + 
-  geom_density(data = dat, aes(x = (DtoM), fill = "Obs"), alpha = 0.5)
+  geom_density(data = dat, aes(x = (T50), fill = "Obs"), alpha = 0.5)
 
 # generate plots
 newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
-                      Precip = c(unique(standard(dat$precip))))
+                      Precip = c(unique(as.factor(dat$precip))))
 
 xmat <- model.matrix(~Precip*WP_MPa, newdat)
 fit = coefs %*% t(xmat)
@@ -761,30 +762,169 @@ newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
 graphdat <- dat %>% mutate(estimate = T50) %>%
   rename(site = siteID)
 graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
-graphdat$Precip <- as.numeric(standard(dat$precip))
+graphdat$Precip <- as.factor(dat$precip)
 
-ggplot()+ 
+T50_SP_full_plot <- ggplot()+ 
   geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)))+
-  #geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
-  #                             fill = factor(Precip)), alpha=0.35)+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(Precip)), alpha=0.35)+
   geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
-  facet_wrap(~Precip)+
-  #scale_colour_manual("Treatment", values=c("gray", "red")) + 
-  #scale_fill_manual("Treatment", values=c("dark gray", "red")) + 
+  #facet_wrap(~Precip)+
   scale_x_continuous("Standardized WP") + 
   scale_y_continuous("Time to 50 % germination")+ 
-  # theme(axis.text.y = element_text(size=7,colour= "black"),
-  #       axis.text.x= element_text(size=7, colour="black"), 
-  #       axis.title=element_text(size=7),strip.text=element_text(size=5),
-  #       plot.title=element_text(size=7),
-  #       legend.title=element_text(size=5), legend.text=element_text(size=4),
-  #       legend.margin=margin(0,0,0,0),legend.position = c(0.2,0.3),
-  #       legend.box.margin=margin(-10,-2,-10,-5),legend.justification="left",
-  #       legend.key.size = unit(0.15, "cm"))+ #labs(title="Colonization probability")+
   theme(panel.background = element_rect(fill='white', colour='black'))+
   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank()) +
   scale_colour_manual(values = Precip_palette)+
   scale_fill_manual(values = Precip_palette)
+
+T50_SP_panel_plot <- ggplot()+ 
+  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)))+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(Precip)), alpha=0.35)+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+  facet_wrap(~Precip, nrow = 1)+
+  scale_x_continuous("Standardized WP") + 
+  scale_y_continuous("Time to 50 % germination")+ 
+  theme(panel.background = element_rect(fill='white', colour='black'))+
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank()) +
+  scale_colour_manual(values = Precip_palette)+
+  scale_fill_manual(values = Precip_palette)
+
+T50_SP_full_plot /
+  T50_SP_panel_plot + 
+  plot_layout(heights = c(4, 1), guides = "collect") & 
+  theme(legend.position='bottom', text = element_text(size = 15))
+
+#### T50 Veronica alpina ####
+Ver_alp_germination_traits %>% 
+  filter(water_potential < 6) %>% 
+  ggplot(aes(x = as.factor(water_potential), y = T50, fill = as.factor(water_potential))) +
+  geom_violin()+
+  geom_jitter() +
+facet_wrap(~siteID)
+
+# Veronica alpina
+# take out the water potentials with less than 10 data points
+
+dat <- Ver_alp_germination_traits %>% filter(!is.na(T50)) %>% filter(water_potential < 6)
+# group level effects
+#site <- factor(dat$siteID)
+#petridish <- factor(dat$petri_dish)
+
+# independent variables
+WP <- as.numeric(standard(as.numeric(dat$water_potential)))
+WP_MPa <- as.numeric(standard(dat$WP_MPa))
+Precip <- as.factor(dat$precip)
+#Precip <- as.numeric(standard(dat$precip))
+
+# dependent variables
+T50 <- as.numeric(dat$T50)
+N <- as.numeric(length(T50))
+
+treatmat <- model.matrix(~Precip*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
+
+# look at the data before the analysis
+ggplot(dat, aes(x=water_potential, y = T50), adjust = 0.01)+
+  geom_point()+facet_wrap(~siteID)
+
+jags.data <- list("treatmat", "T50", "N",  "n_parm")
+jags.param <- c("b", "rss", "rss_new", "r", "sig1") 
+
+results_T50_VA <- jags.parallel(data = jags.data,
+                                #inits = inits.fn,
+                                parameters.to.save = jags.param,
+                                n.iter = 10000,
+                                model.file = model_T50,
+                                n.thin = 5,
+                                n.chains = 3,
+                                n.burnin = 3000)
+results_T50_VA
+
+# traceplots
+s <- ggs(as.mcmc(results_T50_VA))
+ggs_traceplot(s, family="b") 
+
+# check Gelman Rubin Statistics
+gelman.diag(as.mcmc(results_T50_VA))
+
+# Posterior predictive check
+plot(results_T50_VA$BUGSoutput$sims.list$rss_new, results_T50_VA$BUGSoutput$sims.list$rss,
+     main = "",)
+abline(0,1, lwd = 2, col = "black") # these are still not great but not sure what to do 
+
+mean(results_T50_VA$BUGSoutput$sims.list$rss_new > results_T50_VA$BUGSoutput$sims.list$rss)
+
+## put together for figure  and r^2
+mcmc <- results_T50_VA$BUGSoutput$sims.matrix
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]", "b[5]", "b[6]", "b[7]", "b[8]")]
+fit = coefs %*% t(treatmat)
+resid = sweep(fit, 2, log(T50), "-")
+var_f = apply(fit, 1, var)
+var_e = apply(resid, 1, var)
+R2 = var_f/(var_f + var_e)
+tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
+
+#residuals
+coefs2 = apply(coefs, 2, median)
+fit2 = as.vector(coefs2 %*% t(treatmat))
+resid2 <- log(T50) - (fit2)
+sresid2 <- resid2/sd(resid2)
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = (fit2)))
+hist(resid2)
+
+# check predicted versus observed
+yRep = sapply(1:nrow(mcmc), function(i) rpois(nrow(dat), exp(fit[i,])))
+ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
+                                         fill = "Model"), alpha = 0.5) + 
+  geom_density(data = dat, aes(x = (T50), fill = "Obs"), alpha = 0.5)
+
+
+# generate plots
+newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
+                      Precip = c(unique(as.factor(dat$precip))))
+
+xmat <- model.matrix(~Precip*WP_MPa, newdat)
+fit = coefs %*% t(xmat)
+newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
+
+graphdat <- dat %>% mutate(estimate = T50) %>%
+  rename(site = siteID)
+graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
+graphdat$Precip <- as.factor(dat$precip)
+
+T50_VA_full_plot <- ggplot()+ 
+  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)))+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(Precip)), alpha=0.35)+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+  #facet_wrap(~Precip)+
+  scale_x_continuous("Standardized WP") + 
+  scale_y_continuous("Time to 50 % germination")+ 
+  theme(panel.background = element_rect(fill='white', colour='black'))+
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank()) +
+  scale_colour_manual(values = Precip_palette)+
+  scale_fill_manual(values = Precip_palette)
+
+T50_VA_panel_plot <- ggplot()+ 
+  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)))+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(Precip)), alpha=0.35)+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+  facet_wrap(~Precip, nrow = 1)+
+  scale_x_continuous("Standardized WP") + 
+  scale_y_continuous("Time to 50 % germination")+ 
+  theme(panel.background = element_rect(fill='white', colour='black'))+
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank()) +
+  scale_colour_manual(values = Precip_palette)+
+  scale_fill_manual(values = Precip_palette)
+
+T50_VA_full_plot /
+  T50_VA_panel_plot + 
+  plot_layout(heights = c(4, 1), guides = "collect") & 
+  theme(legend.position='bottom', text = element_text(size = 15))
+
+
 
 ##### Seedlings Veronica alpina #####
 seedlings_VA <- Ver_alp_germ %>% 
