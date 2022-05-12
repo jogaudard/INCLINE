@@ -1274,16 +1274,25 @@ root_VA_plot_panels <- ggplot()+
 
   
 #### Above ground biomass Veronica alpina ####
-dat <- seedlings_VA
-dat_above_ground <- dat %>% filter(!is.na(dry_mass_g_above_ground)) 
+
+seedlings_VA %>% 
+  #filter(water_potential < 6) %>% 
+  ggplot(aes(x = as.factor(water_potential), y = dry_mass_g_above_ground, fill = as.factor(water_potential))) +
+  geom_violin()+
+  geom_jitter()
+
+
+dat_above_ground <- seedlings_VA %>% filter(!is.na(dry_mass_g_above_ground)) %>% filter(water_potential < 6) 
 # group level effects
-site <- factor(dat_above_ground$siteID)
+#site <- factor(dat_above_ground$siteID)
 petridish <- factor(dat_above_ground$petri_dish)
+n_petri <- length(levels(petridish))
 
 # independent variables
 WP <- as.numeric(standard(as.numeric(dat_above_ground$water_potential)))
 WP_MPa <- as.numeric(standard(dat_above_ground$WP_MPa))
-Precip <- as.numeric(standard(dat_above_ground$precip))
+#Precip <- as.numeric(standard(dat_above_ground$precip))
+Precip <- as.factor(dat_above_ground$precip)
 
 # dependent variables
 traits <- as.numeric(log(dat_above_ground$dry_mass_g_above_ground))
@@ -1293,20 +1302,20 @@ treatmat <- model.matrix(~Precip*WP_MPa)
 n_parm <- as.numeric(ncol(treatmat))
 
 # look at the data before the analysis
-ggplot(dat, aes(x=water_potential, y = log(dry_mass_g_above_ground)), adjust = 0.01)+
+ggplot(dat_above_ground, aes(x=water_potential, y = log(dry_mass_g_above_ground)), adjust = 0.01)+
   geom_jitter()+facet_wrap(~siteID)
 
-jags.data <- list("treatmat", "traits", "N",  "site", "n_parm")
+jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
 jags.param <- c("b", "rss", "rss_new", "r", "sig1", "sig_t") 
 
 results_above_ground_VA <- jags.parallel(data = jags.data,
                                  #inits = inits.fn,
                                  parameters.to.save = jags.param,
-                                 n.iter = 50000,
+                                 n.iter = 10000,
                                  model.file = model_traits,
                                  n.thin = 5,
                                  n.chains = 3,
-                                 n.burnin = 10000)
+                                 n.burnin = 3000)
 results_above_ground_VA
 
 # traceplots
@@ -1325,7 +1334,7 @@ mean(results_above_ground_VA$BUGSoutput$sims.list$rss_new > results_above_ground
 
 ## put together for figure  and r^2
 mcmc <- results_above_ground_VA$BUGSoutput$sims.matrix
-coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]", "b[5]", "b[6]", "b[7]", "b[8]")]
 fit = coefs %*% t(treatmat)
 resid = sweep(fit, 2, traits, "-")
 var_f = apply(fit, 1, var)
@@ -1338,7 +1347,7 @@ coefs2 = apply(coefs, 2, median)
 fit2 = as.vector(coefs2 %*% t(treatmat))
 resid2 <- traits - fit2
 sresid2 <- resid2/sd(resid2)
-ggplot() + geom_point(data = NULL, aes(y = resid2, x = invlogit(fit2)))
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = fit2))
 hist(resid2)
 
 # check predicted versus observed
@@ -1349,7 +1358,7 @@ ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
 
 # generate plots
 newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
-                      Precip = c(unique(standard(dat$precip))))
+                      Precip = c(unique(as.factor(dat$precip))))
 
 xmat <- model.matrix(~Precip*WP_MPa, newdat)
 fit = coefs %*% t(xmat)
@@ -1357,19 +1366,39 @@ newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
 
 graphdat <- dat_above_ground 
 graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
-graphdat$Precip <- as.numeric(standard(dat_above_ground$precip))
+graphdat$Precip <- as.factor(dat_above_ground$precip)
 
-ggplot()+ 
-  geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_above_ground, colour = factor(round(Precip, digits = 2))))+
+abg_plot_VA <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_above_ground, colour = factor(Precip)))+
   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
-                               fill = factor(round(Precip, digits = 2)), alpha=0.35))+
-  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(round(Precip, digits = 2))))+
+                               fill = factor(Precip), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
   xlab("Standardized WP") + 
   ylab("Above ground biomass")+ 
   theme(panel.background = element_rect(fill='white', colour='black'))+
   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
   scale_colour_manual(values = Precip_palette)+
   scale_fill_manual(values = Precip_palette)
+
+abg_plot_VA_panels <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_above_ground, colour = factor(Precip)), width = 0.1)+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(Precip), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+  xlab("Standardized WP") + 
+  ylab("Above ground biomass")+ 
+  theme(panel.background = element_rect(fill='white', colour='black'))+
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+  scale_colour_manual(values = Precip_palette)+
+  scale_fill_manual(values = Precip_palette) +
+  facet_wrap(~factor(Precip), nrow = 1)
+
+
+(abg_plot_VA /
+    abg_plot_VA_panels)  +
+  plot_layout(heights = c(4, 1), guides = "collect") & 
+  theme(legend.position='bottom', text = element_text(size = 15))
+
 
 ##### Seedlings Sibbaldia procumbens #####
 seedlings_SP <- Sib_pro_germ %>% 
@@ -1682,23 +1711,23 @@ root_SP_plot_panels <- ggplot()+
 #### Above ground biomass Sibbaldia procumbens ####
 seedlings_SP %>% 
   #filter(!siteID == "LAV") %>% 
-  ggplot(aes(x = as.factor(WP_MPa), y = dry_mass_g_above_ground, fill = as.factor(WP_MPa))) +
+  filter(water_potential < 7) %>% 
+  ggplot(aes(x = as.factor(water_potential), y = dry_mass_g_above_ground, fill = as.factor(water_potential))) +
   geom_violin()+
   geom_jitter(aes(alpha = 0.3)) #+
 #facet_wrap(~siteID)
 
-dat <- seedlings_SP %>% 
-  filter(WP_MPa > -0.71)
-
-dat_above_ground <- dat %>% filter(!is.na(dry_mass_g_above_ground)) 
+dat_above_ground <- seedlings_SP %>%  filter(!is.na(dry_mass_g_above_ground)) %>% filter(water_potential < 7)
 # group level effects
-site <- factor(dat_above_ground$siteID)
+#site <- factor(dat_above_ground$siteID)
 petridish <- factor(dat_above_ground$petri_dish)
+n_petri <- length(levels(petridish))
 
 # independent variables
 WP <- as.numeric(standard(as.numeric(dat_above_ground$water_potential)))
 WP_MPa <- as.numeric(standard(dat_above_ground$WP_MPa))
-Precip <- as.numeric(standard(dat_above_ground$precip))
+#Precip <- as.numeric(standard(dat_above_ground$precip))
+Precip <- as.factor(dat_above_ground$precip)
 
 # dependent variables
 traits <- as.numeric(log(dat_above_ground$dry_mass_g_above_ground))
@@ -1708,10 +1737,10 @@ treatmat <- model.matrix(~Precip*WP_MPa)
 n_parm <- as.numeric(ncol(treatmat))
 
 # look at the data before the analysis
-ggplot(dat, aes(x=water_potential, y = log(dry_mass_g_above_ground)), adjust = 0.01)+
+ggplot(dat_above_ground, aes(x=water_potential, y = log(dry_mass_g_above_ground)), adjust = 0.01)+
   geom_jitter()+facet_wrap(~siteID)
 
-jags.data <- list("treatmat", "traits", "N",  "site", "n_parm")
+jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
 jags.param <- c("b", "rss", "rss_new", "r", "sig1", "sig_t") 
 
 results_above_ground_SP <- jags.parallel(data = jags.data,
@@ -1739,7 +1768,7 @@ mean(results_above_ground_SP$BUGSoutput$sims.list$rss_new > results_above_ground
 
 ## put together for figure  and r^2
 mcmc <- results_above_ground_SP$BUGSoutput$sims.matrix
-coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]", "b[5]", "b[6]", "b[7]", "b[8]")]
 fit = coefs %*% t(treatmat)
 resid = sweep(fit, 2, traits, "-")
 var_f = apply(fit, 1, var)
@@ -1752,7 +1781,7 @@ coefs2 = apply(coefs, 2, median)
 fit2 = as.vector(coefs2 %*% t(treatmat))
 resid2 <- traits - fit2
 sresid2 <- resid2/sd(resid2)
-ggplot() + geom_point(data = NULL, aes(y = resid2, x = invlogit(fit2)))
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = fit2))
 hist(resid2)
 
 # check predicted versus observed
@@ -1763,7 +1792,7 @@ ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
 
 # generate plots
 newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
-                      Precip = c(unique(standard(dat$precip))))
+                      Precip = c(unique(as.factor(dat$precip))))
 
 xmat <- model.matrix(~Precip*WP_MPa, newdat)
 fit = coefs %*% t(xmat)
@@ -1771,16 +1800,35 @@ newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
 
 graphdat <- dat_above_ground 
 graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
-graphdat$Precip <- as.numeric(standard(dat_above_ground$precip))
+graphdat$Precip <- as.factor(dat_above_ground$precip)
 
-ggplot()+ 
-  geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_above_ground, colour = factor(round(Precip, digits = 2))))+
+abg_plot_SP <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_above_ground, colour = factor(Precip)))+
   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
-                               fill = factor(round(Precip, digits = 2)), alpha=0.35))+
-  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(round(Precip, digits = 2))))+
+                               fill = factor(Precip), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
   xlab("Standardized WP") + 
   ylab("Above ground biomass")+ 
   theme(panel.background = element_rect(fill='white', colour='black'))+
   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
   scale_colour_manual(values = Precip_palette)+
   scale_fill_manual(values = Precip_palette)
+
+abg_plot_SP_panels <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_above_ground, colour = factor(Precip)))+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(Precip), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+  xlab("Standardized WP") + 
+  ylab("Above ground biomass")+ 
+  theme(panel.background = element_rect(fill='white', colour='black'))+
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+  scale_colour_manual(values = Precip_palette)+
+  scale_fill_manual(values = Precip_palette)+
+  facet_wrap(~factor(Precip), nrow = 1)
+
+
+(abg_plot_SP /
+    abg_plot_SP_panels)  +
+  plot_layout(heights = c(4, 1), guides = "collect") & 
+  theme(legend.position='bottom', text = element_text(size = 15))
