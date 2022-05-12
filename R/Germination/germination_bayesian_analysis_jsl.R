@@ -537,22 +537,50 @@ Precip <- as.factor(dat$precip)
 # dependent variables
 DtoM <- as.numeric(dat$days_to_max_germination)
 N <- as.numeric(length(DtoM))
+NumDays <- rep(155, length=N)
 
 treatmat <- model.matrix(~Precip*WP_MPa)
 n_parm <- as.numeric(ncol(treatmat))
 
 # look at the data before the analysis
-ggplot(dat, aes(x=water_potential, y = days_to_max_germination), adjust = 0.01)+
+ggplot(dat, aes(x=water_potential, y = logit(as.numeric(days_to_max_germination))), adjust = 0.01)+
   geom_point()+facet_wrap(~siteID)
 
-jags.data <- list("treatmat", "DtoM", "N", "n_parm")
+ggplot(dat, aes(logit(as.numeric(days_to_max_germination/155)))) +
+  geom_histogram()
+
+jags.data <- list("treatmat", "DtoM", "NumDays", "N", "n_parm")
 jags.param <- c("b", "rss", "rss_new", "r") 
+
+model_DtoM_SP<- function(){
+  #group effects
+  #for (j in 1:4){lokaliteter[j]~dnorm(0, prec1)}
+  #likelihood
+  for (i in 1:N){
+    DtoM[i] ~ dbinom(mu[i], NumDays[i])
+    # linear predictor
+    logit(mu[i]) <- inprod(b, treatmat[i,]) #+lokaliteter[site[i]]
+    
+    # residual sum of squares
+    res[i] <- pow(DtoM[i]/NumDays[i] - mu[i], 2)
+    DtoM_new[i] ~ dbinom(mu[i], NumDays[i])
+    res_new[i] <- pow(DtoM_new[i]/NumDays[i] - mu[i], 2)
+  }
+  
+  for(i in 1:n_parm){b[i] ~ dnorm(0,1.0E-6)} #dnorm in JAGS uses mean and precision (0 = mean and 1.0E-6 = precision) different from dnorm in R that has variance and not precision
+  #sig1 <- 1/sqrt(prec1) #getting variance of the random effect
+  # #derived params
+  rss <- sum(res[])
+  rss_new <- sum(res_new[])
+}
+
+
 
 results_DtoM_SP <- jags.parallel(data = jags.data,
                               #inits = inits.fn,
                               parameters.to.save = jags.param,
                               n.iter = 10000,
-                              model.file = model_DtoM,
+                              model.file = model_DtoM_SP,
                               n.thin = 5,
                               n.chains = 3,
                               n.burnin = 5000)
@@ -576,7 +604,7 @@ mean(results_DtoM_SP$BUGSoutput$sims.list$rss_new > results_DtoM_SP$BUGSoutput$s
 mcmc <- results_DtoM_SP$BUGSoutput$sims.matrix
 coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]", "b[5]", "b[6]", "b[7]", "b[8]")]
 fit = coefs %*% t(treatmat)
-resid = sweep(fit, 2, log(DtoM), "-")
+resid = sweep(fit, 2, logit(DtoM/NumDays), "-")
 var_f = apply(fit, 1, var)
 var_e = apply(resid, 1, var)
 R2 = var_f/(var_f + var_e)
@@ -585,16 +613,16 @@ tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
 #residuals
 coefs2 = apply(coefs, 2, median)
 fit2 = as.vector(coefs2 %*% t(treatmat))
-resid2 <- log(DtoM) - (fit2)
+resid2 <- logit(DtoM/NumDays) - (fit2)
 sresid2 <- resid2/sd(resid2)
 ggplot() + geom_point(data = NULL, aes(y = resid2, x = fit2))
 hist(resid2)
 
 # check predicted versus observed
-yRep = sapply(1:nrow(mcmc), function(i) rpois(nrow(dat), exp(fit[i,])))
-ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
+yRep = sapply(1:nrow(mcmc), function(i) rbinom(nrow(dat), NumDays, invlogit(fit[i,])))
+ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep/155)),
                                          fill = "Model"), alpha = 0.5) + 
-  geom_density(data = dat, aes(x = (DtoM), fill = "Obs"), alpha = 0.5)
+  geom_density(data = dat, aes(x = (DtoM/NumDays), fill = "Obs"), alpha = 0.5)
 
 # generate plots
 newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
@@ -612,10 +640,10 @@ graphdat$WP_MPa <- standard(graphdat$WP_MPa)
 graphdat$Precip <- as.factor(dat$precip)
 
 ggplot()+ 
-  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)))+
-  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate/155, colour = factor(Precip)))+
+  geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
                                fill = factor(Precip)), alpha=0.35)+
-  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+  geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
   #facet_wrap(~Precip, nrow = 1)+
   #scale_colour_manual("Treatment", values=c("gray", "red")) + 
   #scale_fill_manual("Treatment", values=c("dark gray", "red")) + 
@@ -637,21 +665,16 @@ ggplot()+
 
 
 #### T50 Sibbaldia procumbens ####
-Sib_pro_germination_traits %>% 
+Sib_pro_germination_traits %>%
+  filter(water_potential<7) %>% 
   ggplot(aes(x = as.factor(water_potential), y = T50, fill = as.factor(water_potential))) +
   geom_violin()+
   geom_jitter() #+
   #facet_wrap(~siteID)
 
 # Sib.pro 
-# take out the water potentials with less than 10 data points
-guddat <- Sib_pro_germination_traits %>% filter (siteID == "GUD") %>% filter(water_potential < 6)
-lavdat <- Sib_pro_germination_traits %>% filter (siteID == "LAV") %>% filter(water_potential < 6)
-skjdat <- Sib_pro_germination_traits %>% filter (siteID == "SKJ") %>% filter(water_potential < 6)
-ulvdat <- Sib_pro_germination_traits %>% filter (siteID == "ULV") %>% filter(water_potential < 6)
-
-dat <- bind_rows(guddat, lavdat, skjdat, ulvdat)
-dat <- dat %>% filter(!is.na(T50)) 
+# take out the water potentials with less than 12 data points
+dat <- Sib_pro_germination_traits  %>% filter(!is.na(T50)) %>% filter(water_potential<6)
 # group level effects
 #site <- factor(dat$siteID)
 #petridish <- factor(dat$petri_dish)
@@ -805,8 +828,8 @@ facet_wrap(~siteID)
 
 # Veronica alpina
 # take out the water potentials with less than 10 data points
-
 dat <- Ver_alp_germination_traits %>% filter(!is.na(T50)) %>% filter(water_potential < 6)
+
 # group level effects
 #site <- factor(dat$siteID)
 #petridish <- factor(dat$petri_dish)
@@ -1125,15 +1148,24 @@ root_shoot_VA_panels <- ggplot()+
   
 #### Root biomass Veronica alpina ####
 
-dat_root <- seedlings_VA %>% filter(!is.na(dry_mass_g_root)) 
+seedlings_VA %>% 
+  #filter(water_potential < 6) %>% 
+  ggplot(aes(x = as.factor(water_potential), y = dry_mass_g_root, fill = as.factor(water_potential))) +
+  geom_violin()+
+  geom_jitter()
+
+
+dat_root <- seedlings_VA %>% filter(!is.na(dry_mass_g_root)) %>% filter(water_potential < 6)
   # group level effects
-site <- factor(dat_root$siteID)
+#site <- factor(dat_root$siteID)
 petridish <- factor(dat_root$petri_dish)
+n_petri <- length(levels(petridish))
   
   # independent variables
 WP <- as.numeric(standard(as.numeric(dat_root$water_potential)))
 WP_MPa <- as.numeric(standard(dat_root$WP_MPa))
-Precip <- as.numeric(standard(dat_root$precip))
+#Precip <- as.numeric(standard(dat_root$precip))
+Precip <- as.factor(dat_root$precip)
   
   # dependent variables
 traits <- as.numeric(log(dat_root$dry_mass_g_root))
@@ -1143,10 +1175,11 @@ treatmat <- model.matrix(~Precip*WP_MPa)
 n_parm <- as.numeric(ncol(treatmat))
   
   # look at the data before the analysis
-ggplot(dat, aes(x=water_potential, y = log(dry_mass_g_root)), adjust = 0.01) +
+ggplot(dat_root, aes(x=water_potential, y = log(dry_mass_g_root)), adjust = 0.01) +
   geom_jitter()+facet_wrap(~siteID)
-  
-jags.data <- list("treatmat", "traits", "N",  "site", "n_parm")
+
+
+jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
 jags.param <- c("b", "rss", "rss_new", "r", "sig1", "sig_t") 
   
 results_root_VA <- jags.parallel(data = jags.data,
@@ -1159,67 +1192,85 @@ results_root_VA <- jags.parallel(data = jags.data,
                                  n.burnin = 5000)
 results_root_VA
   
-  # traceplots
+# traceplots
 s <- ggs(as.mcmc(results_root_VA))
 ggs_traceplot(s, family="b") 
   
-  # check Gelman Rubin Statistics
+# check Gelman Rubin Statistics
 gelman.diag(as.mcmc(results_root_VA))
   
-  # Posterior predictive check
+# Posterior predictive check
 plot(results_root_VA$BUGSoutput$sims.list$rss_new, results_root_VA$BUGSoutput$sims.list$rss,
        main = "",)
 abline(0,1, lwd = 2, col = "black") 
   
 mean(results_root_VA$BUGSoutput$sims.list$rss_new > results_root_VA$BUGSoutput$sims.list$rss)
   
-  ## put together for figure  and r^2
-  mcmc <- results_root_VA$BUGSoutput$sims.matrix
-  coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
-  fit = coefs %*% t(treatmat)
-  resid = sweep(fit, 2, traits, "-")
-  var_f = apply(fit, 1, var)
-  var_e = apply(resid, 1, var)
-  R2 = var_f/(var_f + var_e)
-  tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
+## put together for figure  and r^2
+mcmc <- results_root_VA$BUGSoutput$sims.matrix
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]", "b[5]", "b[6]", "b[7]", "b[8]")]
+fit = coefs %*% t(treatmat)
+resid = sweep(fit, 2, traits, "-")
+var_f = apply(fit, 1, var)
+var_e = apply(resid, 1, var)
+R2 = var_f/(var_f + var_e)
+tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
   
-  #residuals
-  coefs2 = apply(coefs, 2, median)
-  fit2 = as.vector(coefs2 %*% t(treatmat))
-  resid2 <- traits - fit2
-  sresid2 <- resid2/sd(resid2)
-  ggplot() + geom_point(data = NULL, aes(y = resid2, x = invlogit(fit2)))
-  hist(resid2)
+#residuals
+coefs2 = apply(coefs, 2, median)
+fit2 = as.vector(coefs2 %*% t(treatmat))
+resid2 <- traits - fit2
+sresid2 <- resid2/sd(resid2)
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = (fit2)))
+hist(resid2)
   
-  # check predicted versus observed
-  yRep = sapply(1:nrow(mcmc), function(i) rnorm(nrow(dat_root), fit[i,]))
-  ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
-                                           fill = "Model"), alpha = 0.5) + 
-    geom_density(data = dat_root, aes(x = (traits), fill = "Obs"), alpha = 0.5)
+# check predicted versus observed
+yRep = sapply(1:nrow(mcmc), function(i) rnorm(nrow(dat_root), fit[i,]))
+ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
+                                        fill = "Model"), alpha = 0.5) + 
+geom_density(data = dat_root, aes(x = (traits), fill = "Obs"), alpha = 0.5)
   
-  # generate plots
-  newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
-                        Precip = c(unique(standard(dat$precip))))
+# generate plots
+newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
+                      Precip = c(unique(as.factor(dat$precip))))
   
-  xmat <- model.matrix(~Precip*WP_MPa, newdat)
-  fit = coefs %*% t(xmat)
-  newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
+xmat <- model.matrix(~Precip*WP_MPa, newdat)
+fit = coefs %*% t(xmat)
+newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
   
-  graphdat <- dat_root 
-  graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
-  graphdat$Precip <- as.numeric(standard(dat_root$precip))
+graphdat <- dat_root 
+graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
+graphdat$Precip <- as.factor(dat_root$precip)
   
 root_VA_plot <- ggplot()+ 
     geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_root, colour = factor(Precip)))+
     geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
                                  fill = factor(Precip), alpha=0.35))+
-    geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(round(Precip, digits = 2))))+
+    geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
     xlab("Standardized WP") + 
     ylab("Root biomass")+ 
     theme(panel.background = element_rect(fill='white', colour='black'))+
     theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
     scale_colour_manual(values = Precip_palette)+
     scale_fill_manual(values = Precip_palette)
+
+root_VA_plot_panels <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_root, colour = factor(Precip)), width = 0.1)+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(Precip), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+  xlab("Standardized WP") + 
+  ylab("Root biomass")+ 
+  theme(panel.background = element_rect(fill='white', colour='black'))+
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+  scale_colour_manual(values = Precip_palette)+
+  scale_fill_manual(values = Precip_palette) +
+  facet_wrap(~Precip, nrow = 1)
+
+(root_VA_plot /
+  root_VA_plot_panels) +
+  plot_layout(heights = c(4, 1), guides = "collect") & 
+  theme(legend.position='bottom', text = element_text(size = 15))
 
   
 #### Above ground biomass Veronica alpina ####
@@ -1381,7 +1432,7 @@ treatmat <- model.matrix(~Precip*WP_MPa)
 n_parm <- as.numeric(ncol(treatmat))
 
 # look at the data before the analysis
-ggplot(dat, aes(x=water_potential, y = log(root_shoot_ratio)), adjust = 0.01)+
+ggplot(dat_root_shoot, aes(x=water_potential, y = log(root_shoot_ratio)), adjust = 0.01)+
   geom_point()+facet_wrap(~siteID)
 
 jags.data <- list("treatmat", "traits", "N", "petridish", "n_petri", "n_parm")
@@ -1483,7 +1534,7 @@ root_shoot_SP_panels <- ggplot()+
   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
   scale_colour_manual(values = Precip_palette) +
   scale_fill_manual(values = Precip_palette) +
-  ylim(0,2) +
+  ylim(0,1) +
   facet_wrap(~factor(Precip), nrow = 1)
 
 
@@ -1503,24 +1554,24 @@ root_shoot_SP_panels <- ggplot()+
 ## Looking at seedlings
 seedlings_SP %>% 
   #filter(!siteID == "LAV") %>% 
-  ggplot(aes(x = as.factor(WP_MPa), y = dry_mass_g_root, fill = as.factor(WP_MPa))) +
+  filter(water_potential < 7) %>% 
+  ggplot(aes(x = as.factor(water_potential), y = dry_mass_g_root, fill = as.factor(water_potential))) +
   geom_violin()+
   geom_jitter(aes(alpha = 0.3)) #+
   #facet_wrap(~siteID)
 
-dat <- seedlings_SP %>% 
-  filter(WP_MPa > -0.71)
+dat_root <- seedlings_SP %>% filter(!is.na(dry_mass_g_root)) %>% filter(water_potential < 7)
 
-
-dat_root <- dat %>% filter(!is.na(dry_mass_g_root)) 
 # group level effects
-site <- factor(dat_root$siteID)
+#site <- factor(dat_root$siteID)
 petridish <- factor(dat_root$petri_dish)
+n_petri <- length(levels(petridish))
 
 # independent variables
 WP <- as.numeric(standard(as.numeric(dat_root$water_potential)))
 WP_MPa <- as.numeric(standard(dat_root$WP_MPa))
-Precip <- as.numeric(standard(dat_root$precip))
+#Precip <- as.numeric(standard(dat_root$precip))
+Precip <- as.factor(dat_root$precip)
 
 # dependent variables
 traits <- as.numeric(log(dat_root$dry_mass_g_root))
@@ -1530,10 +1581,10 @@ treatmat <- model.matrix(~Precip*WP_MPa)
 n_parm <- as.numeric(ncol(treatmat))
 
 # look at the data before the analysis
-ggplot(dat, aes(x=water_potential, y = log(dry_mass_g_root)), adjust = 0.01)+
+ggplot(dat_root, aes(x=water_potential, y = log(dry_mass_g_root)), adjust = 0.01)+
   geom_jitter()+facet_wrap(~siteID)
 
-jags.data <- list("treatmat", "traits", "N",  "site", "n_parm")
+jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
 jags.param <- c("b", "rss", "rss_new", "r", "sig1", "sig_t") 
 
 results_root_SP <- jags.parallel(data = jags.data,
@@ -1562,7 +1613,7 @@ mean(results_root_SP$BUGSoutput$sims.list$rss_new > results_root_SP$BUGSoutput$s
 
 ## put together for figure  and r^2
 mcmc <- results_root_SP$BUGSoutput$sims.matrix
-coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]", "b[5]", "b[6]", "b[7]", "b[8]")]
 fit = coefs %*% t(treatmat)
 resid = sweep(fit, 2, traits, "-")
 var_f = apply(fit, 1, var)
@@ -1575,7 +1626,7 @@ coefs2 = apply(coefs, 2, median)
 fit2 = as.vector(coefs2 %*% t(treatmat))
 resid2 <- traits - fit2
 sresid2 <- resid2/sd(resid2)
-ggplot() + geom_point(data = NULL, aes(y = resid2, x = invlogit(fit2)))
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = fit2))
 hist(resid2)
 
 # check predicted versus observed
@@ -1586,7 +1637,7 @@ ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
 
 # generate plots
 newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
-                      Precip = c(unique(standard(dat$precip))))
+                      Precip = c(unique(as.factor(dat$precip))))
 
 xmat <- model.matrix(~Precip*WP_MPa, newdat)
 fit = coefs %*% t(xmat)
@@ -1594,19 +1645,38 @@ newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
 
 graphdat <- dat_root 
 graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
-graphdat$Precip <- as.numeric(standard(dat_root$precip))
+graphdat$Precip <- as.factor(dat_root$precip)
 
 root_SP_plot <- ggplot()+ 
-  geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_root, colour = factor(round(Precip, digits = 1))))+
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_root, colour = factor(Precip)))+
   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
-                               fill = factor(round(Precip, digits = 1)), alpha=0.35))+
-  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(round(Precip, digits = 1))))+
+                               fill = factor(Precip), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
   xlab("Standardized WP") + 
   ylab("Root biomass")+ 
   theme(panel.background = element_rect(fill='white', colour='black'))+
   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
   scale_colour_manual(values = Precip_palette)+
   scale_fill_manual(values = Precip_palette)
+
+root_SP_plot_panels <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_root, colour = factor(Precip)))+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(Precip), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+  xlab("Standardized WP") + 
+  ylab("Root biomass")+ 
+  theme(panel.background = element_rect(fill='white', colour='black'))+
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+  scale_colour_manual(values = Precip_palette)+
+  scale_fill_manual(values = Precip_palette) +
+  facet_wrap(~Precip, nrow = 1)
+
+
+(root_SP_plot /
+    root_SP_plot_panels) +
+  plot_layout(heights = c(4, 1), guides = "collect") & 
+  theme(legend.position='bottom', text = element_text(size = 15))
 
 
 #### Above ground biomass Sibbaldia procumbens ####
