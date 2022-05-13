@@ -8,7 +8,13 @@ library(R2jags)
 library(ggmcmc)
 library(broom.mixed)
 library(car) # use car package for logit function- adjusts to avoid infinity
-library("patchwork")
+library(patchwork)
+library(knitr)
+library(BayesPostEst)
+library("flextable")
+library("officer")
+
+
 
 # load data 
 source("R/Germination/cleaning_germination_lab_data.R")
@@ -130,6 +136,16 @@ results_Germ_percent_Ver_alp <- jags.parallel(data = jags.data,
                                n.chains = 3,
                                n.burnin = 35000)
 results_Germ_percent_Ver_alp
+
+Germ_percent_Ver_alp_table <- mcmcTab(results_Germ_percent_Ver_alp)
+
+Germ_percent_Ver_alp_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "RSS", "RSS_new")
+
+Germ_percent_Ver_alp_table_ft <- flextable(Germ_percent_Ver_alp_table)
+Germ_percent_Ver_alp_table_doc <- read_docx()
+Germ_percent_Ver_alp_table_doc <- body_add_flextable(Germ_percent_Ver_alp_table_doc, value = Germ_percent_Ver_alp_table_ft)
+print(Germ_percent_Ver_alp_table_doc, target = "Germ_percent_Ver_alp_table.docx")
+
 
 # traceplots
 s <- ggs(as.mcmc(results_Germ_percent_Ver_alp))
@@ -266,6 +282,16 @@ results_Germ_percent_Sib_pro <- jags.parallel(data = jags.data,
                                n.burnin = 35000)
 results_Germ_percent_Sib_pro
 
+Germ_percent_Sib_pro_table <- mcmcTab(results_Germ_percent_Sib_pro)
+
+Germ_percent_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "RSS", "RSS_new")
+
+Germ_percent_Sib_pro_table_ft <- flextable(Germ_percent_Sib_pro_table)
+Germ_percent_Sib_pro_table_doc <- read_docx()
+Germ_percent_Sib_pro_table_doc <- body_add_flextable(Germ_percent_Sib_pro_table_doc, value = Germ_percent_Sib_pro_table_ft)
+print(Germ_percent_Sib_pro_table_doc, target = "Germ_percent_Sib_pro_table.docx")
+
+
 # traceplots
 s <- ggs(as.mcmc(results_Germ_percent_Sib_pro))
 ggs_traceplot(s, family="b") 
@@ -373,8 +399,8 @@ Germ_percent_Sib_pro_main_plot /
   theme(legend.position='bottom', text = element_text(size = 15))
 
 
-Germ_percent_Ver_alp_main_plot3 /
-  Germ_percent_Sib_pro_main_plot3 + 
+Germ_percent_Ver_alp_main_plot1 /
+  Germ_percent_Sib_pro_main_plot1 + 
   plot_layout(guides = "collect") & 
   theme(legend.position='bottom', text = element_text(size = 15))
 
@@ -446,6 +472,15 @@ results_DtoM_VA <- jags.parallel(data = jags.data,
                                n.chains = 3,
                                n.burnin = 35000)
 results_DtoM_VA
+
+DtoM_Ver_alp_table <- mcmcTab(results_DtoM_VA)
+
+DtoM_Ver_alp_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "Random effect", "RSS", "RSS_new")
+
+DtoM_Ver_alp_table_ft <- flextable(DtoM_Ver_alp_table)
+DtoM_Ver_alp_table_doc <- read_docx()
+DtoM_Ver_alp_table_doc <- body_add_flextable(DtoM_Ver_alp_table_doc, value = DtoM_Ver_alp_table_ft)
+print(DtoM_Ver_alp_table_doc, target = "DtoM_Ver_alp_table.docx")
 
 # traceplots
 s <- ggs(as.mcmc(results_DtoM_VA))
@@ -559,42 +594,27 @@ ggplot(dat, aes(x=water_potential, y = logit(as.numeric(days_to_max_germination)
 ggplot(dat, aes(logit(as.numeric(days_to_max_germination/155)))) +
   geom_histogram()
 
-jags.data <- list("treatmat", "DtoM", "NumDays", "N", "n_parm")
+jags.data <- list("treatmat", "DtoM", "N", "n_parm")
 jags.param <- c("b", "rss", "rss_new", "r") 
-
-model_DtoM_SP<- function(){
-  #group effects
-  #for (j in 1:4){lokaliteter[j]~dnorm(0, prec1)}
-  #likelihood
-  for (i in 1:N){
-    DtoM[i] ~ dbinom(mu[i], NumDays[i])
-    # linear predictor
-    logit(mu[i]) <- inprod(b, treatmat[i,]) #+lokaliteter[site[i]]
-    
-    # residual sum of squares
-    res[i] <- pow(DtoM[i]/NumDays[i] - mu[i], 2)
-    DtoM_new[i] ~ dbinom(mu[i], NumDays[i])
-    res_new[i] <- pow(DtoM_new[i]/NumDays[i] - mu[i], 2)
-  }
-  
-  for(i in 1:n_parm){b[i] ~ dnorm(0,1.0E-6)} #dnorm in JAGS uses mean and precision (0 = mean and 1.0E-6 = precision) different from dnorm in R that has variance and not precision
-  #sig1 <- 1/sqrt(prec1) #getting variance of the random effect
-  # #derived params
-  rss <- sum(res[])
-  rss_new <- sum(res_new[])
-}
-
-
 
 results_DtoM_SP <- jags.parallel(data = jags.data,
                               #inits = inits.fn,
                               parameters.to.save = jags.param,
-                              n.iter = 10000,
-                              model.file = model_DtoM_SP,
+                              n.iter = 100000,
+                              model.file = model_DtoM,
                               n.thin = 5,
                               n.chains = 3,
-                              n.burnin = 5000)
+                              n.burnin = 35000)
 results_DtoM_SP
+
+DtoM_Sib_pro_table <- mcmcTab(results_DtoM_SP)
+
+DtoM_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "Random effect", "RSS", "RSS_new")
+
+DtoM_Sib_pro_table_ft <- flextable(DtoM_Sib_pro_table)
+DtoM_Sib_pro_table_doc <- read_docx()
+DtoM_Sib_pro_table_doc <- body_add_flextable(DtoM_Sib_pro_table_doc, value = DtoM_Sib_pro_table_ft)
+print(DtoM_Sib_pro_table_doc, target = "DtoM_Sib_pro_table.docx")
 
 # traceplots
 s <- ggs(as.mcmc(results_DtoM_SP))
@@ -614,7 +634,7 @@ mean(results_DtoM_SP$BUGSoutput$sims.list$rss_new > results_DtoM_SP$BUGSoutput$s
 mcmc <- results_DtoM_SP$BUGSoutput$sims.matrix
 coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]", "b[5]", "b[6]", "b[7]", "b[8]")]
 fit = coefs %*% t(treatmat)
-resid = sweep(fit, 2, logit(DtoM/NumDays), "-")
+resid = sweep(fit, 2, log(DtoM), "-")
 var_f = apply(fit, 1, var)
 var_e = apply(resid, 1, var)
 R2 = var_f/(var_f + var_e)
@@ -623,7 +643,7 @@ tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
 #residuals
 coefs2 = apply(coefs, 2, median)
 fit2 = as.vector(coefs2 %*% t(treatmat))
-resid2 <- logit(DtoM/NumDays) - (fit2)
+resid2 <- log(DtoM) - (fit2)
 sresid2 <- resid2/sd(resid2)
 ggplot() + geom_point(data = NULL, aes(y = resid2, x = fit2))
 hist(resid2)
@@ -632,7 +652,7 @@ hist(resid2)
 yRep = sapply(1:nrow(mcmc), function(i) rbinom(nrow(dat), NumDays, invlogit(fit[i,])))
 ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep/155)),
                                          fill = "Model"), alpha = 0.5) + 
-  geom_density(data = dat, aes(x = (DtoM/NumDays), fill = "Obs"), alpha = 0.5)
+  geom_density(data = dat, aes(x = (DtoM), fill = "Obs"), alpha = 0.5)
 
 # generate plots
 newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
@@ -651,9 +671,9 @@ graphdat$Precip <- as.factor(dat$precip)
 
 ggplot()+ 
   geom_point(data=graphdat, aes(x=WP_MPa, y=estimate/155, colour = factor(Precip)))+
-  geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
                                fill = factor(Precip)), alpha=0.35)+
-  geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
   #facet_wrap(~Precip, nrow = 1)+
   #scale_colour_manual("Treatment", values=c("gray", "red")) + 
   #scale_fill_manual("Treatment", values=c("dark gray", "red")) + 
@@ -681,6 +701,10 @@ Sib_pro_germination_traits %>%
   geom_violin()+
   geom_jitter() #+
   #facet_wrap(~siteID)
+
+# Sib_pro_germination_traits %>% 
+#   group_by(siteID, water_potential) %>% 
+#   summarise(mean(T50, na.rm = TRUE)) %>% view()
 
 # Sib.pro 
 # take out the water potentials with less than 12 data points
@@ -797,8 +821,8 @@ graphdat <- dat %>% mutate(estimate = T50) %>%
 graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
 graphdat$Precip <- as.factor(dat$precip)
 
-T50_SP_full_plot <- ggplot()+ 
-  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)))+
+T50_SP_full_plot1 <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)), height = 0, width =0.1) +
   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
                                fill = factor(Precip)), alpha=0.35)+
   geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
@@ -835,6 +859,10 @@ Ver_alp_germination_traits %>%
   geom_violin()+
   geom_jitter() +
 facet_wrap(~siteID)
+
+# Ver_alp_germination_traits %>% 
+#   group_by(siteID, water_potential) %>% 
+#   summarise(mean(T50, na.rm = TRUE)) %>% view()
 
 # Veronica alpina
 # take out the water potentials with less than 10 data points
@@ -926,8 +954,8 @@ graphdat <- dat %>% mutate(estimate = T50) %>%
 graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
 graphdat$Precip <- as.factor(dat$precip)
 
-T50_VA_full_plot <- ggplot()+ 
-  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)))+
+T50_VA_full_plot3 <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)), height = 0, width = 0.05)+
   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
                                fill = factor(Precip)), alpha=0.35)+
   geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
@@ -936,8 +964,8 @@ T50_VA_full_plot <- ggplot()+
   scale_y_continuous("Time to 50 % germination")+ 
   theme(panel.background = element_rect(fill='white', colour='black'))+
   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank()) +
-  scale_colour_manual(values = Precip_palette)+
-  scale_fill_manual(values = Precip_palette)
+  scale_colour_manual(values = Precip_palette2)+
+  scale_fill_manual(values = Precip_palette2)
 
 T50_VA_panel_plot <- ggplot()+ 
   geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)))+
@@ -955,6 +983,11 @@ T50_VA_panel_plot <- ggplot()+
 T50_VA_full_plot /
   T50_VA_panel_plot + 
   plot_layout(heights = c(4, 1), guides = "collect") & 
+  theme(legend.position='bottom', text = element_text(size = 15))
+
+T50_VA_full_plot1 /
+  T50_SP_full_plot1 + 
+  plot_layout(guides = "collect") & 
   theme(legend.position='bottom', text = element_text(size = 15))
 
 
@@ -1155,6 +1188,17 @@ root_shoot_VA_panels <- ggplot()+
     root_shoot_VA_panels +
     plot_layout(heights = c(4, 1), guides = "collect") & 
     theme(legend.position='bottom', text = element_text(size = 15))
+
+
+VA_root_shoot1 <- (root_shoot_VA_zoomed_in1 + inset_element(
+  root_shoot_VA_full_plot1, 
+  left = 0.7, 
+  bottom = 0.5, 
+  right = 0.99, 
+  top = 0.99
+)) +
+  plot_layout(guides = "collect") & 
+  theme(legend.position='bottom', text = element_text(size = 15))
   
 #### Root biomass Veronica alpina ####
 
@@ -1551,7 +1595,7 @@ root_shoot_SP_full_plot <- ggplot()+
   scale_colour_manual(values = Precip_palette) +
   scale_fill_manual(values = Precip_palette) 
 
-root_shoot_SP_zoomed_in <- ggplot()+ 
+root_shoot_SP_zoomed_in3 <- ggplot()+ 
   geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)))+
   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, fill = factor(Precip), alpha=0.35))+
   geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
@@ -1559,8 +1603,8 @@ root_shoot_SP_zoomed_in <- ggplot()+
   ylab("Root:shoot ratio")+ 
   theme(panel.background = element_rect(fill='white', colour='black'))+
   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
-  scale_colour_manual(values = Precip_palette) +
-  scale_fill_manual(values = Precip_palette) +
+  scale_colour_manual(values = Precip_palette2) +
+  scale_fill_manual(values = Precip_palette2) +
   ylim(0,2)
 
 root_shoot_SP_panels <- ggplot()+ 
@@ -1587,6 +1631,22 @@ root_shoot_SP_panels <- ggplot()+
   root_shoot_SP_panels +
   plot_layout(heights = c(4, 1), guides = "collect") & 
   theme(legend.position='bottom', text = element_text(size = 15))
+
+SP_root_shoot3 <- (root_shoot_SP_zoomed_in3 + inset_element(
+  root_shoot_SP_full_plot3, 
+  left = 0.7, 
+  bottom = 0.5, 
+  right = 0.99, 
+  top = 0.99
+)) +
+  plot_layout(guides = "collect") & 
+  theme(legend.position='bottom', text = element_text(size = 15))
+
+VA_root_shoot1 /
+  SP_root_shoot1 +
+  plot_layout(guides = "collect") & 
+  theme(legend.position='bottom', text = element_text(size = 15))
+
 
 #### Root biomass Sibbaldia procumbens ####
 
