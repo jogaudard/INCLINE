@@ -143,7 +143,7 @@ plot(results_Germ_percent_Ver_alp$BUGSoutput$sims.list$rss_new, results_Germ_per
      main = "",)
 abline(0,1, lwd = 2, col = "black")
 
-mean(results_Germ_percent_Ver_alp$BUGSoutput$sims.list$rss_new > results_Germ_percent_Ver_alp$BUGSoutput$sims.list$rss)
+mean(results_Germ_percent_Ver_alp$BUGSoutput$sims.list$rss_new^2 > results_Germ_percent_Ver_alp$BUGSoutput$sims.list$rss^2)
 
 ## put together for figure  and r^2
 mcmc <- results_Germ_percent_Ver_alp$BUGSoutput$sims.matrix
@@ -184,18 +184,21 @@ graphdat$WP_MPa <- standard(graphdat$WP_MPa)
 graphdat$Precip <- as.factor(dat$precip)
 #graphdat$Precip <- as.numeric(standard(dat$precip))
 
-Germ_percent_Ver_alp_main_plot <- ggplot()+ 
-  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.15)+
+Precip_palette1 <- c("#9E9E9E", "#89B7E1", "#2E75B6", "#213964")
+Precip_palette2 <-  c("#a6611a", "#dfc27d", "#80cdc1", "#018571")
+
+Germ_percent_Ver_alp_main_plot3 <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)), height = 0, width = 0.03)+
   geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
-                               fill = factor(Precip)), alpha=0.35)+
+                               fill = factor(Precip)), alpha=0.5)+
   geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
   #facet_wrap(~Precip, nrow = 1)+
   scale_x_continuous("Standardized WP") + 
   scale_y_continuous("Germination %")+ 
   theme(panel.background = element_rect(fill='white', colour='black'))+
   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
-  scale_colour_manual(values = Precip_palette)+
-  scale_fill_manual(values = Precip_palette)
+  scale_colour_manual(values = Precip_palette2)+
+  scale_fill_manual(values = Precip_palette2)
 
 Germ_percent_Ver_alp_four_panels_plot <- ggplot()+ 
   geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.15)+
@@ -207,10 +210,10 @@ Germ_percent_Ver_alp_four_panels_plot <- ggplot()+
   scale_y_continuous("Germination %")+ 
   theme(panel.background = element_rect(fill='white', colour='black'))+
   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
-  scale_colour_manual(values = Precip_palette)+
-  scale_fill_manual(values = Precip_palette)
+  scale_colour_manual(values = Precip_palette1)+
+  scale_fill_manual(values = Precip_palette1)
 
-Germ_percent_Ver_alp_main_plot /
+VA_percent_plot <- Germ_percent_Ver_alp_main_plot /
   Germ_percent_Ver_alp_four_panels_plot + 
   plot_layout(heights = c(4, 1), guides = "collect") & 
   theme(legend.position='bottom', text = element_text(size = 15))
@@ -304,7 +307,7 @@ ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)/NumSeedDish),
 # generate plots
 newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
                       #Precip = c(unique(as.numeric(standard(dat$precip)))))
-                      Precip = c(unique(as.factor(standard(dat$precip)))))
+                      Precip = c(unique(as.factor(dat$precip))))
 
 xmat <- model.matrix(~Precip*WP_MPa, newdat)
 fit = coefs %*% t(xmat)
@@ -314,7 +317,7 @@ graphdat <- dat %>% mutate(estimate = (n_germinated/seeds_in_dish)) %>%
   rename(site = siteID)
 graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
 #graphdat$Precip <- as.numeric(standard((dat$precip)))
-graphdat$Precip <- as.factor(standard((dat$precip)))
+graphdat$Precip <- as.factor(dat$precip)
 
 # ggplot()+ 
 #   geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.15)+
@@ -337,10 +340,10 @@ graphdat$Precip <- as.factor(standard((dat$precip)))
 #   theme(panel.background = element_rect(fill='white', colour='black'))+
 #   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())
 
-Germ_percent_Sib_pro_main_plot <- ggplot()+ 
-  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.25)+
+Germ_percent_Sib_pro_main_plot1 <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)), height = 0, width = 0.03)+
   geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
-                               fill = factor(Precip)), alpha=0.35)+
+                               fill = factor(Precip)), alpha=0.5)+
   geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
   #facet_wrap(~Precip, nrow = 1)+
   scale_x_continuous("Standardized WP") + 
@@ -349,6 +352,7 @@ Germ_percent_Sib_pro_main_plot <- ggplot()+
   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
   scale_colour_manual(values = Precip_palette)+
   scale_fill_manual(values = Precip_palette)
+
 
 Germ_percent_Sib_pro_four_panels_plot <- ggplot()+ 
   geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.25)+
@@ -366,6 +370,12 @@ Germ_percent_Sib_pro_four_panels_plot <- ggplot()+
 Germ_percent_Sib_pro_main_plot /
   Germ_percent_Sib_pro_four_panels_plot + 
   plot_layout(heights = c(4, 1), guides = "collect") & 
+  theme(legend.position='bottom', text = element_text(size = 15))
+
+
+Germ_percent_Ver_alp_main_plot3 /
+  Germ_percent_Sib_pro_main_plot3 + 
+  plot_layout(guides = "collect") & 
   theme(legend.position='bottom', text = element_text(size = 15))
 
 #### Days to max germination Veronica alpina ####
