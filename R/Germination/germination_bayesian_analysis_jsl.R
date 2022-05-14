@@ -475,7 +475,7 @@ results_DtoM_VA
 
 DtoM_Ver_alp_table <- mcmcTab(results_DtoM_VA)
 
-DtoM_Ver_alp_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "Random effect", "RSS", "RSS_new")
+DtoM_Ver_alp_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "r", "RSS", "RSS_new")
 
 DtoM_Ver_alp_table_ft <- flextable(DtoM_Ver_alp_table)
 DtoM_Ver_alp_table_doc <- read_docx()
@@ -609,7 +609,7 @@ results_DtoM_SP
 
 DtoM_Sib_pro_table <- mcmcTab(results_DtoM_SP)
 
-DtoM_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "Random effect", "RSS", "RSS_new")
+DtoM_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "r", "RSS", "RSS_new")
 
 DtoM_Sib_pro_table_ft <- flextable(DtoM_Sib_pro_table)
 DtoM_Sib_pro_table_doc <- read_docx()
@@ -762,12 +762,21 @@ model_T50 <- function(){
 results_T50_SP <- jags.parallel(data = jags.data,
                               #inits = inits.fn,
                               parameters.to.save = jags.param,
-                              n.iter = 10000,
+                              n.iter = 50000,
                               model.file = model_T50,
                               n.thin = 5,
                               n.chains = 3,
-                              n.burnin = 3000)
+                              n.burnin = 1500)
 results_T50_SP
+
+T50_Sib_pro_table <- mcmcTab(results_T50_SP)
+
+T50_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "r", "RSS", "RSS_new")
+
+T50_Sib_pro_table_ft <- flextable(T50_Sib_pro_table)
+T50_Sib_pro_table_doc <- read_docx()
+T50_Sib_pro_table_doc <- body_add_flextable(T50_Sib_pro_table_doc, value = T50_Sib_pro_table_ft)
+print(T50_Sib_pro_table_doc, target = "T50_Sib_pro_table.docx")
 
 # traceplots
 s <- ggs(as.mcmc(results_T50_SP))
@@ -895,12 +904,21 @@ jags.param <- c("b", "rss", "rss_new", "r", "sig1")
 results_T50_VA <- jags.parallel(data = jags.data,
                                 #inits = inits.fn,
                                 parameters.to.save = jags.param,
-                                n.iter = 10000,
+                                n.iter = 50000,
                                 model.file = model_T50,
                                 n.thin = 5,
                                 n.chains = 3,
-                                n.burnin = 3000)
+                                n.burnin = 15000)
 results_T50_VA
+
+T50_Ver_alp_table <- mcmcTab(results_T50_VA)
+
+T50_Ver_alp_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "Dispersion", "RSS", "RSS_new")
+
+T50_Ver_alp_table_ft <- flextable(T50_Ver_alp_table)
+T50_Ver_alp_table_doc <- read_docx()
+T50_Ver_alp_table_doc <- body_add_flextable(T50_Ver_alp_table_doc, value = T50_Ver_alp_table_ft)
+print(T50_Ver_alp_table_doc, target = "T50_Ver_alp_table.docx")
 
 # traceplots
 s <- ggs(as.mcmc(results_T50_VA))
@@ -994,7 +1012,7 @@ T50_VA_full_plot1 /
 
 ##### Seedlings Veronica alpina #####
 seedlings_VA <- Ver_alp_germ %>% 
-  select(unique_ID, species, siteID, water_potential, replicate, seed_nr, dry_mass_g_root, dry_mass_g_above_ground, dry_mass_g_total, petri_dish) %>% 
+  select(unique_ID, species, siteID, water_potential, replicate, seed_nr, dry_mass_g_root, dry_mass_g_above_ground, dry_mass_g_total, petri_dish, flag_germination, flag_seedling, flag_whole_petridish) %>% 
   mutate(dry_mass_g_root = dry_mass_g_root + 7.0e-06,
          dry_mass_g_above_ground = dry_mass_g_above_ground + 7.0e-06,
          dry_mass_g_total = dry_mass_g_total + 7.0e-06) %>% 
@@ -1015,7 +1033,8 @@ seedlings_VA <- Ver_alp_germ %>%
                             water_potential == 8 ~ -1.20,
                             water_potential == 9 ~ -1.45,
                             water_potential == 10 ~ -1.70)) %>% 
-  mutate(water_potential = as.numeric(water_potential))
+  mutate(water_potential = as.numeric(water_potential)) %>% 
+  filter(is.na(flag_seedling )|flag_seedling !="Dead_plant")
 
 
   
@@ -1050,7 +1069,7 @@ ggplot(dat_root_shoot, aes(x=water_potential, y = log(root_shoot_ratio)), adjust
     geom_jitter()+facet_wrap(~siteID)
   
 jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
-jags.param <- c("b", "rss", "rss_new", "r", "sig1", "sig_t") 
+jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
   
   
 model_traits<- function(){
@@ -1082,11 +1101,31 @@ model_traits<- function(){
 results_root_shoot_VA <- jags.parallel(data = jags.data,
                                 #inits = inits.fn,
                                 parameters.to.save = jags.param,
-                                n.iter = 5000,
+                                n.iter = 50000,
                                 model.file = model_traits,
                                 n.thin = 5,
-                                n.chains = 3)
+                                n.chains = 3,
+                                n.burnin = 15000)
 results_root_shoot_VA
+
+results_root_shoot_VA_without_sick <- jags.parallel(data = jags.data,
+                                       #inits = inits.fn,
+                                       parameters.to.save = jags.param,
+                                       n.iter = 50000,
+                                       model.file = model_traits,
+                                       n.thin = 5,
+                                       n.chains = 3,
+                                       n.burnin = 15000)
+results_root_shoot_VA_wichout_sick
+
+root_shoot_Ver_alp_table <- mcmcTab(results_root_shoot_VA)
+
+root_shoot_Ver_alp_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+
+root_shoot_Ver_alp_table_ft <- flextable(root_shoot_Ver_alp_table)
+root_shoot_Ver_alp_table_doc <- read_docx()
+root_shoot_Ver_alp_table_doc <- body_add_flextable(root_shoot_Ver_alp_table_doc, value = root_shoot_Ver_alp_table_ft)
+print(root_shoot_Ver_alp_table_doc, target = "root_shoot_Ver_alp_table.docx")
   
 # traceplots
 s <- ggs(as.mcmc(results_root_shoot_VA))
@@ -1234,17 +1273,26 @@ ggplot(dat_root, aes(x=water_potential, y = log(dry_mass_g_root)), adjust = 0.01
 
 
 jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
-jags.param <- c("b", "rss", "rss_new", "r", "sig1", "sig_t") 
+jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
   
 results_root_VA <- jags.parallel(data = jags.data,
                                          #inits = inits.fn,
                                          parameters.to.save = jags.param,
-                                         n.iter = 10000,
+                                         n.iter = 50000,
                                          model.file = model_traits,
                                          n.thin = 5,
                                          n.chains = 3,
-                                 n.burnin = 5000)
+                                 n.burnin = 15000)
 results_root_VA
+
+root_Ver_alp_table <- mcmcTab(results_root_VA)
+
+root_Ver_alp_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+
+root_Ver_alp_table_ft <- flextable(root_Ver_alp_table)
+root_Ver_alp_table_doc <- read_docx()
+root_Ver_alp_table_doc <- body_add_flextable(root_Ver_alp_table_doc, value = root_Ver_alp_table_ft)
+print(root_Ver_alp_table_doc, target = "root_Ver_alp_table.docx")
   
 # traceplots
 s <- ggs(as.mcmc(results_root_VA))
@@ -1360,17 +1408,26 @@ ggplot(dat_above_ground, aes(x=water_potential, y = log(dry_mass_g_above_ground)
   geom_jitter()+facet_wrap(~siteID)
 
 jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
-jags.param <- c("b", "rss", "rss_new", "r", "sig1", "sig_t") 
+jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
 
 results_above_ground_VA <- jags.parallel(data = jags.data,
                                  #inits = inits.fn,
                                  parameters.to.save = jags.param,
-                                 n.iter = 10000,
+                                 n.iter = 50000,
                                  model.file = model_traits,
                                  n.thin = 5,
                                  n.chains = 3,
-                                 n.burnin = 3000)
+                                 n.burnin = 15000)
 results_above_ground_VA
+
+above_ground_Ver_alp_table <- mcmcTab(results_above_ground_VA)
+
+above_ground_Ver_alp_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+
+above_ground_Ver_alp_table_ft <- flextable(above_ground_Ver_alp_table)
+above_ground_Ver_alp_table_doc <- read_docx()
+above_ground_Ver_alp_table_doc <- body_add_flextable(above_ground_Ver_alp_table_doc, value = above_ground_Ver_alp_table_ft)
+print(above_ground_Ver_alp_table_doc, target = "above_ground_Ver_alp_table.docx")
 
 # traceplots
 s <- ggs(as.mcmc(results_above_ground_VA))
@@ -1456,7 +1513,7 @@ abg_plot_VA_panels <- ggplot()+
 
 ##### Seedlings Sibbaldia procumbens #####
 seedlings_SP <- Sib_pro_germ %>% 
-  select(ID, species, siteID, water_potential, replicate, seed_nr, dry_mass_g_root, dry_mass_g_above_ground, dry_mass_g_total, petri_dish) %>% 
+  select(ID, species, siteID, water_potential, replicate, seed_nr, dry_mass_g_root, dry_mass_g_above_ground, dry_mass_g_total, petri_dish, flag_germination, flag_seedling, flag_whole_petridish) %>% 
   mutate(dry_mass_g_root = dry_mass_g_root + 7.0e-06,
          dry_mass_g_above_ground = dry_mass_g_above_ground + 7.0e-06,
          dry_mass_g_total = dry_mass_g_total + 7.0e-06) %>% 
@@ -1519,16 +1576,26 @@ ggplot(dat_root_shoot, aes(x=water_potential, y = log(root_shoot_ratio)), adjust
   geom_point()+facet_wrap(~siteID)
 
 jags.data <- list("treatmat", "traits", "N", "petridish", "n_petri", "n_parm")
-jags.param <- c("b", "rss", "rss_new", "r", "sig1", "sig_t") 
+jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
 
 results_root_shoot_SP <- jags.parallel(data = jags.data,
                                        #inits = inits.fn,
                                        parameters.to.save = jags.param,
-                                       n.iter = 5000,
+                                       n.iter = 50000,
                                        model.file = model_traits,
                                        n.thin = 5,
-                                       n.chains = 3)
+                                       n.chains = 3,
+                                       n.burnin = 15000)
 results_root_shoot_SP
+
+root_shoot_Sib_pro_table <- mcmcTab(results_root_shoot_SP)
+
+root_shoot_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+
+root_shoot_Sib_pro_table_ft <- flextable(root_shoot_Sib_pro_table)
+root_shoot_Sib_pro_table_doc <- read_docx()
+root_shoot_Sib_pro_table_doc <- body_add_flextable(root_shoot_Sib_pro_table_doc, value = root_shoot_Sib_pro_table_ft)
+print(root_shoot_Sib_pro_table_doc, target = "root_shoot_Sib_pro_table.docx")
 
 # traceplots
 s <- ggs(as.mcmc(results_root_shoot_SP))
@@ -1684,17 +1751,26 @@ ggplot(dat_root, aes(x=water_potential, y = log(dry_mass_g_root)), adjust = 0.01
   geom_jitter()+facet_wrap(~siteID)
 
 jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
-jags.param <- c("b", "rss", "rss_new", "r", "sig1", "sig_t") 
+jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
 
 results_root_SP <- jags.parallel(data = jags.data,
                                  #inits = inits.fn,
                                  parameters.to.save = jags.param,
-                                 n.iter = 15000,
+                                 n.iter = 50000,
                                  model.file = model_traits,
                                  n.thin = 5,
                                  n.chains = 3,
-                                 n.burnin = 5000)
+                                 n.burnin = 15000)
 results_root_SP
+
+root_Sib_pro_table <- mcmcTab(results_root_SP)
+
+root_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+
+root_Sib_pro_table_ft <- flextable(root_Sib_pro_table)
+root_Sib_pro_table_doc <- read_docx()
+root_Sib_pro_table_doc <- body_add_flextable(root_Sib_pro_table_doc, value = root_Sib_pro_table_ft)
+print(root_Sib_pro_table_doc, target = "root_Sib_pro_table.docx")
 
 # traceplots
 s <- ggs(as.mcmc(results_root_SP))
@@ -1811,16 +1887,26 @@ ggplot(dat_above_ground, aes(x=water_potential, y = log(dry_mass_g_above_ground)
   geom_jitter()+facet_wrap(~siteID)
 
 jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
-jags.param <- c("b", "rss", "rss_new", "r", "sig1", "sig_t") 
+jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
 
 results_above_ground_SP <- jags.parallel(data = jags.data,
                                          #inits = inits.fn,
                                          parameters.to.save = jags.param,
-                                         n.iter = 5000,
+                                         n.iter = 50000,
                                          model.file = model_traits,
                                          n.thin = 5,
-                                         n.chains = 3)
+                                         n.chains = 3,
+                                         n.burnin = 15000)
 results_above_ground_SP
+
+above_ground_Sib_pro_table <- mcmcTab(results_above_ground_SP)
+
+above_ground_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+
+above_ground_Sib_pro_table_ft <- flextable(above_ground_Sib_pro_table)
+above_ground_Sib_pro_table_doc <- read_docx()
+above_ground_Sib_pro_table_doc <- body_add_flextable(above_ground_Sib_pro_table_doc, value = above_ground_Sib_pro_table_ft)
+print(above_ground_Sib_pro_table_doc, target = "above_ground_Sib_pro_table.docx")
 
 # traceplots
 s <- ggs(as.mcmc(results_above_ground_SP))
