@@ -137,14 +137,14 @@ results_Germ_percent_Ver_alp <- jags.parallel(data = jags.data,
                                n.burnin = 35000)
 results_Germ_percent_Ver_alp
 
-Germ_percent_Ver_alp_table <- mcmcTab(results_Germ_percent_Ver_alp)
-
-Germ_percent_Ver_alp_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "RSS", "RSS_new")
-
-Germ_percent_Ver_alp_table_ft <- flextable(Germ_percent_Ver_alp_table)
-Germ_percent_Ver_alp_table_doc <- read_docx()
-Germ_percent_Ver_alp_table_doc <- body_add_flextable(Germ_percent_Ver_alp_table_doc, value = Germ_percent_Ver_alp_table_ft)
-print(Germ_percent_Ver_alp_table_doc, target = "Germ_percent_Ver_alp_table.docx")
+# Germ_percent_Ver_alp_table <- mcmcTab(results_Germ_percent_Ver_alp)
+# 
+# Germ_percent_Ver_alp_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "RSS", "RSS_new")
+# 
+# Germ_percent_Ver_alp_table_ft <- flextable(Germ_percent_Ver_alp_table)
+# Germ_percent_Ver_alp_table_doc <- read_docx()
+# Germ_percent_Ver_alp_table_doc <- body_add_flextable(Germ_percent_Ver_alp_table_doc, value = Germ_percent_Ver_alp_table_ft)
+# print(Germ_percent_Ver_alp_table_doc, target = "Germ_percent_Ver_alp_table.docx")
 
 
 # traceplots
@@ -203,37 +203,64 @@ graphdat$Precip <- as.factor(dat$precip)
 Precip_palette1 <- c("#9E9E9E", "#89B7E1", "#2E75B6", "#213964")
 Precip_palette2 <-  c("#a6611a", "#dfc27d", "#80cdc1", "#018571")
 
-Germ_percent_Ver_alp_main_plot3 <- ggplot()+ 
+graphdat <- graphdat %>% 
+  mutate(Precip = case_when(Precip == "1.226" ~ 1226,
+                            Precip == "1.561" ~ 1561,
+                            Precip == "2.13" ~ 2130,
+                            Precip == "3.402" ~ 3402))
+newdat <- newdat %>% 
+  mutate(Precip = case_when(Precip == "1.226" ~ 1226,
+                            Precip == "1.561" ~ 1561,
+                            Precip == "2.13" ~ 2130,
+                            Precip == "3.402" ~ 3402))
+
+
+Germ_percent_Ver_alp_main_plot <- ggplot()+ 
   geom_jitter(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)), height = 0, width = 0.03)+
   geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
                                fill = factor(Precip)), alpha=0.5)+
   geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
   #facet_wrap(~Precip, nrow = 1)+
-  scale_x_continuous("Standardized WP") + 
-  scale_y_continuous("Germination %")+ 
-  theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
-  scale_colour_manual(values = Precip_palette2)+
-  scale_fill_manual(values = Precip_palette2)
+  scale_colour_manual(values = Precip_palette)+
+  scale_fill_manual(values = Precip_palette) +
+  scale_x_continuous(name = "Water potential (MPa)",
+                     breaks = c(-2.96, -2.26, -1.56, -0.87, -0.17, 0.19, 0.61, 1.08), 
+                     labels = c(-1.70, -1.45, -1.20, -0.95, -0.70, -0.57, -0.42, -0.25)) +
+  scale_y_continuous("Germination %") +
+  guides(colour = guide_legend(title = "Annual precipitation (mm/year)"),
+         fill = guide_legend(title = "Annual precipitation (mm/year)")) +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
 
-Germ_percent_Ver_alp_four_panels_plot <- ggplot()+ 
-  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.15)+
-  geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
-                               fill = factor(Precip)), alpha=0.35)+
-  geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
-  facet_wrap(~Precip, nrow = 1)+
-  scale_x_continuous("Standardized WP") + 
-  scale_y_continuous("Germination %")+ 
-  theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
-  scale_colour_manual(values = Precip_palette1)+
-  scale_fill_manual(values = Precip_palette1)
+# Germ_percent_Ver_alp_four_panels_plot <- ggplot()+ 
+#   geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.15)+
+#   geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
+#                                fill = factor(Precip)), alpha=0.5)+
+#   geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
+#   facet_wrap(~Precip, nrow = 1,
+#              labeller = labeller(Precip = c("1226" = "Driest",
+#                                          "1561" = "Dry",
+#                                          "2130" = "Wet",
+#                                          "3402" = "Wettest")))+
+#   scale_y_continuous("Germination %")+ 
+#   theme(panel.background = element_rect(fill='white', colour='black'))+
+#   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+#   scale_colour_manual(values = Precip_palette)+
+#   scale_fill_manual(values = Precip_palette) +
+#   guides(colour = "none",
+#          fill = "none") +
+#   scale_x_continuous(name = "Water potential (MPa)",
+#                      breaks = c(-2.36, -0.87, 0.19,  1.08), 
+#                      labels = c(-1.45, -0.95, -0.57, -0.25))
+# 
+# VA_percent_plot <- Germ_percent_Ver_alp_main_plot /
+#   Germ_percent_Ver_alp_four_panels_plot + 
+#   plot_layout(heights = c(3, 1), guides = "collect") & 
+#   theme(legend.position='bottom', text = element_text(size = 15)) &
+#   plot_annotation(tag_levels = 'A')
 
-VA_percent_plot <- Germ_percent_Ver_alp_main_plot /
-  Germ_percent_Ver_alp_four_panels_plot + 
-  plot_layout(heights = c(4, 1), guides = "collect") & 
-  theme(legend.position='bottom', text = element_text(size = 15))
-
+# ggsave(filename = "Germination_percent_VA.pdf", plot = VA_percent_plot, width = 26, height = 21, units = "cm", dpi = 300)
+# ggsave(filename = "Germination_percent_VA.png", plot = VA_percent_plot, width = 26, height = 21, units = "cm", dpi = 300)
 
 #### Germination percentage Sibbaldia procumbens ####
 
@@ -282,14 +309,14 @@ results_Germ_percent_Sib_pro <- jags.parallel(data = jags.data,
                                n.burnin = 35000)
 results_Germ_percent_Sib_pro
 
-Germ_percent_Sib_pro_table <- mcmcTab(results_Germ_percent_Sib_pro)
-
-Germ_percent_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "RSS", "RSS_new")
-
-Germ_percent_Sib_pro_table_ft <- flextable(Germ_percent_Sib_pro_table)
-Germ_percent_Sib_pro_table_doc <- read_docx()
-Germ_percent_Sib_pro_table_doc <- body_add_flextable(Germ_percent_Sib_pro_table_doc, value = Germ_percent_Sib_pro_table_ft)
-print(Germ_percent_Sib_pro_table_doc, target = "Germ_percent_Sib_pro_table.docx")
+# Germ_percent_Sib_pro_table <- mcmcTab(results_Germ_percent_Sib_pro)
+# 
+# Germ_percent_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "RSS", "RSS_new")
+# 
+# Germ_percent_Sib_pro_table_ft <- flextable(Germ_percent_Sib_pro_table)
+# Germ_percent_Sib_pro_table_doc <- read_docx()
+# Germ_percent_Sib_pro_table_doc <- body_add_flextable(Germ_percent_Sib_pro_table_doc, value = Germ_percent_Sib_pro_table_ft)
+# print(Germ_percent_Sib_pro_table_doc, target = "Germ_percent_Sib_pro_table.docx")
 
 
 # traceplots
@@ -345,6 +372,18 @@ graphdat$WP_MPa <- standard(graphdat$WP_MPa)
 #graphdat$Precip <- as.numeric(standard((dat$precip)))
 graphdat$Precip <- as.factor(dat$precip)
 
+
+graphdat <- graphdat %>% 
+  mutate(Precip = case_when(Precip == "1.226" ~ 1226,
+                            Precip == "1.561" ~ 1561,
+                            Precip == "2.13" ~ 2130,
+                            Precip == "3.402" ~ 3402))
+newdat <- newdat %>% 
+  mutate(Precip = case_when(Precip == "1.226" ~ 1226,
+                            Precip == "1.561" ~ 1561,
+                            Precip == "2.13" ~ 2130,
+                            Precip == "3.402" ~ 3402))
+
 # ggplot()+ 
 #   geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.15)+
 #   geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
@@ -366,43 +405,50 @@ graphdat$Precip <- as.factor(dat$precip)
 #   theme(panel.background = element_rect(fill='white', colour='black'))+
 #   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())
 
-Germ_percent_Sib_pro_main_plot1 <- ggplot()+ 
+Germ_percent_Sib_pro_main_plot <- ggplot()+ 
   geom_jitter(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)), height = 0, width = 0.03)+
   geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
                                fill = factor(Precip)), alpha=0.5)+
   geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
-  #facet_wrap(~Precip, nrow = 1)+
-  scale_x_continuous("Standardized WP") + 
-  scale_y_continuous("Germination %")+ 
-  theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
   scale_colour_manual(values = Precip_palette)+
-  scale_fill_manual(values = Precip_palette)
+  scale_fill_manual(values = Precip_palette) +
+  scale_x_continuous(name = "Water potential (MPa)",
+                     breaks = c(-2.96, -2.26, -1.56, -0.87, -0.17, 0.19, 0.61, 1.08), 
+                     labels = c(-1.70, -1.45, -1.20, -0.95, -0.70, -0.57, -0.42, -0.25),
+                     limits = c(-2.96, 1.08)) +
+  scale_y_continuous("Germination %") +
+  guides(colour = guide_legend(title = "Annual precipitation (mm/year)"),
+         fill = guide_legend(title = "Annual precipitation (mm/year)")) +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
 
 
-Germ_percent_Sib_pro_four_panels_plot <- ggplot()+ 
-  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.25)+
-  geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
-                               fill = factor(Precip)), alpha=0.35)+
-  geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
-  facet_wrap(~Precip, nrow = 1)+
-  scale_x_continuous("Standardized WP") + 
-  scale_y_continuous("Germination %")+ 
-  theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
-  scale_colour_manual(values = Precip_palette)+
-  scale_fill_manual(values = Precip_palette)
+# Germ_percent_Sib_pro_four_panels_plot <- ggplot()+ 
+#   geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.25)+
+#   geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
+#                                fill = factor(Precip)), alpha=0.35)+
+#   geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
+#   facet_wrap(~Precip, nrow = 1)+
+#   scale_x_continuous("Standardized WP") + 
+#   scale_y_continuous("Germination %")+ 
+#   theme(panel.background = element_rect(fill='white', colour='black'))+
+#   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+#   scale_colour_manual(values = Precip_palette)+
+#   scale_fill_manual(values = Precip_palette)
+# 
+# Germ_percent_Sib_pro_main_plot /
+#   Germ_percent_Sib_pro_four_panels_plot + 
+#   plot_layout(heights = c(4, 1), guides = "collect") & 
+#   theme(legend.position='bottom', text = element_text(size = 15))
 
-Germ_percent_Sib_pro_main_plot /
-  Germ_percent_Sib_pro_four_panels_plot + 
-  plot_layout(heights = c(4, 1), guides = "collect") & 
-  theme(legend.position='bottom', text = element_text(size = 15))
 
-
-Germ_percent_Ver_alp_main_plot1 /
-  Germ_percent_Sib_pro_main_plot1 + 
+Germination_percent_plot <- Germ_percent_Ver_alp_main_plot /
+  Germ_percent_Sib_pro_main_plot + 
   plot_layout(guides = "collect") & 
   theme(legend.position='bottom', text = element_text(size = 15))
+
+ # ggsave(filename = "Germination_percent.pdf", plot = Germination_percent_plot, width = 21, height = 21, units = "cm", dpi = 300)
+ # ggsave(filename = "Germination_percent.png", plot = Germination_percent_plot, width = 21, height = 21, units = "cm", dpi = 300)
 
 #### Days to max germination Veronica alpina ####
 # take out the too many zer0s
