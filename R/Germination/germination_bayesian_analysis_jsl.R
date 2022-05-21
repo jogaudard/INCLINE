@@ -815,14 +815,14 @@ results_T50_SP <- jags.parallel(data = jags.data,
                               n.burnin = 1500)
 results_T50_SP
 
-T50_Sib_pro_table <- mcmcTab(results_T50_SP)
-
-T50_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "r", "RSS", "RSS_new")
-
-T50_Sib_pro_table_ft <- flextable(T50_Sib_pro_table)
-T50_Sib_pro_table_doc <- read_docx()
-T50_Sib_pro_table_doc <- body_add_flextable(T50_Sib_pro_table_doc, value = T50_Sib_pro_table_ft)
-print(T50_Sib_pro_table_doc, target = "T50_Sib_pro_table.docx")
+# T50_Sib_pro_table <- mcmcTab(results_T50_SP)
+# 
+# T50_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "r", "RSS", "RSS_new")
+# 
+# T50_Sib_pro_table_ft <- flextable(T50_Sib_pro_table)
+# T50_Sib_pro_table_doc <- read_docx()
+# T50_Sib_pro_table_doc <- body_add_flextable(T50_Sib_pro_table_doc, value = T50_Sib_pro_table_ft)
+# print(T50_Sib_pro_table_doc, target = "T50_Sib_pro_table.docx")
 
 # traceplots
 s <- ggs(as.mcmc(results_T50_SP))
@@ -876,36 +876,51 @@ graphdat <- dat %>% mutate(estimate = T50) %>%
 graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
 graphdat$Precip <- as.factor(dat$precip)
 
-T50_SP_full_plot1 <- ggplot()+ 
+
+graphdat <- graphdat %>% 
+  mutate(Precip = case_when(Precip == "1.226" ~ 1226,
+                            Precip == "1.561" ~ 1561,
+                            Precip == "2.13" ~ 2130,
+                            Precip == "3.402" ~ 3402))
+newdat <- newdat %>% 
+  mutate(Precip = case_when(Precip == "1.226" ~ 1226,
+                            Precip == "1.561" ~ 1561,
+                            Precip == "2.13" ~ 2130,
+                            Precip == "3.402" ~ 3402))
+
+T50_SP_full_plot <- ggplot()+ 
   geom_jitter(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)), height = 0, width =0.1) +
   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
                                fill = factor(Precip)), alpha=0.35)+
   geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
-  #facet_wrap(~Precip)+
-  scale_x_continuous("Standardized WP") + 
-  scale_y_continuous("Time to 50 % germination")+ 
-  theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank()) +
   scale_colour_manual(values = Precip_palette)+
-  scale_fill_manual(values = Precip_palette)
-
-T50_SP_panel_plot <- ggplot()+ 
-  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)))+
-  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
-                               fill = factor(Precip)), alpha=0.35)+
-  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
-  facet_wrap(~Precip, nrow = 1)+
-  scale_x_continuous("Standardized WP") + 
+  scale_fill_manual(values = Precip_palette) +
+  scale_x_continuous(name = "Water potential (MPa)",
+                     breaks = c(-1.57, -0.96, -0.27, 0.52, 1.21), 
+                    labels = c(-0.57, -0.50, -0.42, -0.33, -0.25)) +
   scale_y_continuous("Time to 50 % germination")+ 
-  theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank()) +
-  scale_colour_manual(values = Precip_palette)+
-  scale_fill_manual(values = Precip_palette)
+  guides(colour = guide_legend(title = "Annual precipitation (mm/year)"),
+         fill = guide_legend(title = "Annual precipitation (mm/year)")) +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
 
-T50_SP_full_plot /
-  T50_SP_panel_plot + 
-  plot_layout(heights = c(4, 1), guides = "collect") & 
-  theme(legend.position='bottom', text = element_text(size = 15))
+# T50_SP_panel_plot <- ggplot()+ 
+#   geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)))+
+#   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+#                                fill = factor(Precip)), alpha=0.35)+
+#   geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+#   facet_wrap(~Precip, nrow = 1)+
+#   scale_x_continuous("Standardized WP") + 
+#   scale_y_continuous("Time to 50 % germination")+ 
+#   theme(panel.background = element_rect(fill='white', colour='black'))+
+#   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank()) +
+#   scale_colour_manual(values = Precip_palette)+
+#   scale_fill_manual(values = Precip_palette)
+# 
+# T50_SP_full_plot /
+#   T50_SP_panel_plot + 
+#   plot_layout(heights = c(4, 1), guides = "collect") & 
+#   theme(legend.position='bottom', text = element_text(size = 15))
 
 #### T50 Veronica alpina ####
 Ver_alp_germination_traits %>% 
@@ -957,14 +972,14 @@ results_T50_VA <- jags.parallel(data = jags.data,
                                 n.burnin = 15000)
 results_T50_VA
 
-T50_Ver_alp_table <- mcmcTab(results_T50_VA)
-
-T50_Ver_alp_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "Dispersion", "RSS", "RSS_new")
-
-T50_Ver_alp_table_ft <- flextable(T50_Ver_alp_table)
-T50_Ver_alp_table_doc <- read_docx()
-T50_Ver_alp_table_doc <- body_add_flextable(T50_Ver_alp_table_doc, value = T50_Ver_alp_table_ft)
-print(T50_Ver_alp_table_doc, target = "T50_Ver_alp_table.docx")
+# T50_Ver_alp_table <- mcmcTab(results_T50_VA)
+# 
+# T50_Ver_alp_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "Dispersion", "RSS", "RSS_new")
+# 
+# T50_Ver_alp_table_ft <- flextable(T50_Ver_alp_table)
+# T50_Ver_alp_table_doc <- read_docx()
+# T50_Ver_alp_table_doc <- body_add_flextable(T50_Ver_alp_table_doc, value = T50_Ver_alp_table_ft)
+# print(T50_Ver_alp_table_doc, target = "T50_Ver_alp_table.docx")
 
 # traceplots
 s <- ggs(as.mcmc(results_T50_VA))
@@ -1018,43 +1033,60 @@ graphdat <- dat %>% mutate(estimate = T50) %>%
 graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
 graphdat$Precip <- as.factor(dat$precip)
 
-T50_VA_full_plot3 <- ggplot()+ 
+
+graphdat <- graphdat %>% 
+  mutate(Precip = case_when(Precip == "1.226" ~ 1226,
+                            Precip == "1.561" ~ 1561,
+                            Precip == "2.13" ~ 2130,
+                            Precip == "3.402" ~ 3402))
+newdat <- newdat %>% 
+  mutate(Precip = case_when(Precip == "1.226" ~ 1226,
+                            Precip == "1.561" ~ 1561,
+                            Precip == "2.13" ~ 2130,
+                            Precip == "3.402" ~ 3402))
+
+T50_VA_full_plot <- ggplot()+ 
   geom_jitter(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)), height = 0, width = 0.05)+
   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
                                fill = factor(Precip)), alpha=0.35)+
   geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
-  #facet_wrap(~Precip)+
-  scale_x_continuous("Standardized WP") + 
-  scale_y_continuous("Time to 50 % germination")+ 
-  theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank()) +
-  scale_colour_manual(values = Precip_palette2)+
-  scale_fill_manual(values = Precip_palette2)
-
-T50_VA_panel_plot <- ggplot()+ 
-  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)))+
-  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
-                               fill = factor(Precip)), alpha=0.35)+
-  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
-  facet_wrap(~Precip, nrow = 1)+
-  scale_x_continuous("Standardized WP") + 
-  scale_y_continuous("Time to 50 % germination")+ 
-  theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank()) +
   scale_colour_manual(values = Precip_palette)+
-  scale_fill_manual(values = Precip_palette)
+  scale_fill_manual(values = Precip_palette) +
+  scale_x_continuous(name = "Water potential (MPa)",
+                     breaks = c(-1.37, -0.76, -0.06, 0.72, 1.42), 
+                     labels = c(-0.57, -0.50, -0.42, -0.33, -0.25)) +
+  scale_y_continuous("Time to 50 % germination")+ 
+  guides(colour = guide_legend(title = "Annual precipitation (mm/year)"),
+         fill = guide_legend(title = "Annual precipitation (mm/year)")) +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
 
-T50_VA_full_plot /
-  T50_VA_panel_plot + 
-  plot_layout(heights = c(4, 1), guides = "collect") & 
-  theme(legend.position='bottom', text = element_text(size = 15))
+# T50_VA_panel_plot <- ggplot()+ 
+#   geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)))+
+#   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+#                                fill = factor(Precip)), alpha=0.35)+
+#   geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+#   facet_wrap(~Precip, nrow = 1)+
+#   scale_x_continuous("Standardized WP") + 
+#   scale_y_continuous("Time to 50 % germination")+ 
+#   theme(panel.background = element_rect(fill='white', colour='black'))+
+#   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank()) +
+#   scale_colour_manual(values = Precip_palette)+
+#   scale_fill_manual(values = Precip_palette)
+# 
+# T50_VA_full_plot /
+#   T50_VA_panel_plot + 
+#   plot_layout(heights = c(4, 1), guides = "collect") & 
+#   theme(legend.position='bottom', text = element_text(size = 15))
 
-T50_VA_full_plot1 /
-  T50_SP_full_plot1 + 
+T50_plot <- T50_VA_full_plot /
+  T50_SP_full_plot + 
   plot_layout(guides = "collect") & 
   theme(legend.position='bottom', text = element_text(size = 15))
 
 
+# ggsave(filename = "T50.pdf", plot = T50_plot, width = 18, height = 25, units = "cm", dpi = 300)
+# ggsave(filename = "T50.png", plot = T50_plot, width = 18, height = 25, units = "cm", dpi = 300)
 
 ##### Seedlings Veronica alpina #####
 seedlings_VA <- Ver_alp_germ %>% 
@@ -1164,14 +1196,14 @@ results_root_shoot_VA_without_sick <- jags.parallel(data = jags.data,
                                        n.burnin = 15000)
 results_root_shoot_VA_wichout_sick
 
-root_shoot_Ver_alp_table <- mcmcTab(results_root_shoot_VA)
-
-root_shoot_Ver_alp_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
-
-root_shoot_Ver_alp_table_ft <- flextable(root_shoot_Ver_alp_table)
-root_shoot_Ver_alp_table_doc <- read_docx()
-root_shoot_Ver_alp_table_doc <- body_add_flextable(root_shoot_Ver_alp_table_doc, value = root_shoot_Ver_alp_table_ft)
-print(root_shoot_Ver_alp_table_doc, target = "root_shoot_Ver_alp_table.docx")
+# root_shoot_Ver_alp_table <- mcmcTab(results_root_shoot_VA)
+# 
+# root_shoot_Ver_alp_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+# 
+# root_shoot_Ver_alp_table_ft <- flextable(root_shoot_Ver_alp_table)
+# root_shoot_Ver_alp_table_doc <- read_docx()
+# root_shoot_Ver_alp_table_doc <- body_add_flextable(root_shoot_Ver_alp_table_doc, value = root_shoot_Ver_alp_table_ft)
+# print(root_shoot_Ver_alp_table_doc, target = "root_shoot_Ver_alp_table.docx")
   
 # traceplots
 s <- ggs(as.mcmc(results_root_shoot_VA))
@@ -1222,69 +1254,95 @@ newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
 graphdat <- dat_root_shoot 
 graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
 graphdat$Precip <- as.factor(dat_root_shoot$precip)
+
+graphdat <- graphdat %>% 
+  mutate(Precip = case_when(Precip == "1.226" ~ 1226,
+                            Precip == "1.561" ~ 1561,
+                            Precip == "2.13" ~ 2130,
+                            Precip == "3.402" ~ 3402))
+newdat <- newdat %>% 
+  mutate(Precip = case_when(Precip == "1.226" ~ 1226,
+                            Precip == "1.561" ~ 1561,
+                            Precip == "2.13" ~ 2130,
+                            Precip == "3.402" ~ 3402))
   
 root_shoot_VA_full_plot <- ggplot()+ 
     geom_point(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)))+
     geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
                                  fill = factor(Precip), alpha=0.35))+
     geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
-    xlab("Standardized WP") + 
-    ylab("Root:shoot ratio")+ 
-    theme(panel.background = element_rect(fill='white', colour='black'))+
-    theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
-     scale_colour_manual(values = Precip_palette)+
-     scale_fill_manual(values = Precip_palette)
+    scale_colour_manual(values = Precip_palette)+
+    scale_fill_manual(values = Precip_palette)+
+    scale_x_continuous(name = "",
+                     breaks = c(-1.51, -0.18,  1.33), 
+                     labels = c(-0.57, -0.42, -0.25)) +
+    scale_y_continuous(name = "")+ 
+     guides(colour = "none",
+            fill = "none",
+            alpha = "none") +
+    theme(panel.background = element_rect(fill='white', colour='black'),
+          panel.grid.major=element_blank(), panel.grid.minor=element_blank())
   
 root_shoot_VA_zoomed_in <- ggplot()+ 
   geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)), width = 0.1)+
   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
                                fill = factor(Precip), alpha=0.35))+
   geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
-  xlab("Standardized WP") + 
-  ylab("Root:shoot ratio")+ 
-  theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
   scale_colour_manual(values = Precip_palette)+
   scale_fill_manual(values = Precip_palette) +
-  ylim(0,7.5)
+  scale_x_continuous(name = "Water potential (MPa)",
+                     breaks = c(-1.51, -0.86, -0.18, 0.62, 1.33), 
+                     labels = c(-0.57, -0.50, -0.42, -0.33, -0.25)) +
+  scale_y_continuous("Root:shoot ratio (g/g)",
+                     limits = c(0, 6))+ 
+   guides(colour = guide_legend(title = "Annual precipitation (mm/year)"),
+          fill = guide_legend(title = "Annual precipitation (mm/year)"),
+          alpha = "none") +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
 
-root_shoot_VA_panels <- ggplot()+ 
-  geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)), width = 0.1)+
-  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
-                               fill = factor(Precip), alpha=0.35))+
-  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
-  xlab("Standardized WP") + 
-  ylab("Root:shoot ratio")+ 
-  theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
-  scale_colour_manual(values = Precip_palette)+
-  scale_fill_manual(values = Precip_palette) +
-  ylim(0,7.5) +
-  facet_wrap(~factor(Precip), nrow = 1)
+#Calculating percent data removed when zooming in
+ # graphdat %>% 
+ #   filter(root_shoot_ratio > 6) %>% 
+ #   nrow()
+
+# root_shoot_VA_panels <- ggplot()+ 
+#   geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)), width = 0.1)+
+#   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+#                                fill = factor(Precip), alpha=0.35))+
+#   geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+#   xlab("Standardized WP") + 
+#   ylab("Root:shoot ratio")+ 
+#   theme(panel.background = element_rect(fill='white', colour='black'))+
+#   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+#   scale_colour_manual(values = Precip_palette)+
+#   scale_fill_manual(values = Precip_palette) +
+#   ylim(0,7.5) +
+#   facet_wrap(~factor(Precip), nrow = 1)
   
   
- (root_shoot_VA_zoomed_in + inset_element(
-    root_shoot_VA_full_plot, 
-    left = 0.7, 
-    bottom = 0.5, 
-    right = 0.99, 
-    top = 0.99
-  )) /
-    root_shoot_VA_panels +
-    plot_layout(heights = c(4, 1), guides = "collect") & 
-    theme(legend.position='bottom', text = element_text(size = 15))
+ # (root_shoot_VA_zoomed_in + inset_element(
+ #    root_shoot_VA_full_plot, 
+ #    left = 0.7, 
+ #    bottom = 0.5, 
+ #    right = 0.99, 
+ #    top = 0.99
+ #  )) /
+ #    root_shoot_VA_panels +
+ #    plot_layout(heights = c(4, 1), guides = "collect") & 
+ #    theme(legend.position='bottom', text = element_text(size = 15))
 
 
-VA_root_shoot1 <- (root_shoot_VA_zoomed_in1 + inset_element(
-  root_shoot_VA_full_plot1, 
-  left = 0.7, 
+VA_root_shoot <- (root_shoot_VA_zoomed_in + inset_element(
+  root_shoot_VA_full_plot, 
+  left = 0.70, 
   bottom = 0.5, 
-  right = 0.99, 
-  top = 0.99
-)) +
+  right = 0.98, 
+  top = 0.98
+))  +
   plot_layout(guides = "collect") & 
   theme(legend.position='bottom', text = element_text(size = 15))
-  
+
 #### Root biomass Veronica alpina ####
 
 seedlings_VA %>% 
@@ -1598,7 +1656,7 @@ seedlings_SP %>%
   geom_violin()+
   geom_jitter()
 
-dat_root_shoot <- seedlings_SP %>% filter(!is.na(root_shoot_ratio)) %>% filter(water_potential < 7)
+dat_root_shoot <- seedlings_SP %>% filter(!is.na(root_shoot_ratio)) %>% filter(water_potential < 6)
 # group level effects
 #site <- factor(dat_root_shoot$siteID)
 petridish <- factor(dat_root_shoot$petri_dish)
@@ -1634,14 +1692,14 @@ results_root_shoot_SP <- jags.parallel(data = jags.data,
                                        n.burnin = 15000)
 results_root_shoot_SP
 
-root_shoot_Sib_pro_table <- mcmcTab(results_root_shoot_SP)
-
-root_shoot_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
-
-root_shoot_Sib_pro_table_ft <- flextable(root_shoot_Sib_pro_table)
-root_shoot_Sib_pro_table_doc <- read_docx()
-root_shoot_Sib_pro_table_doc <- body_add_flextable(root_shoot_Sib_pro_table_doc, value = root_shoot_Sib_pro_table_ft)
-print(root_shoot_Sib_pro_table_doc, target = "root_shoot_Sib_pro_table.docx")
+# root_shoot_Sib_pro_table <- mcmcTab(results_root_shoot_SP)
+# 
+# root_shoot_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+# 
+# root_shoot_Sib_pro_table_ft <- flextable(root_shoot_Sib_pro_table)
+# root_shoot_Sib_pro_table_doc <- read_docx()
+# root_shoot_Sib_pro_table_doc <- body_add_flextable(root_shoot_Sib_pro_table_doc, value = root_shoot_Sib_pro_table_ft)
+# print(root_shoot_Sib_pro_table_doc, target = "root_shoot_Sib_pro_table.docx")
 
 # traceplots
 s <- ggs(as.mcmc(results_root_shoot_SP))
@@ -1653,7 +1711,7 @@ gelman.diag(as.mcmc(results_root_shoot_SP))
 # Posterior predictive check
 plot(results_root_shoot_SP$BUGSoutput$sims.list$rss_new, results_root_shoot_SP$BUGSoutput$sims.list$rss,
      main = "",)
-abline(0,1, lwd = 2, col = "black") # these are still not great but not sure what to do 
+abline(0,1, lwd = 2, col = "black")
 
 mean(results_root_shoot_SP$BUGSoutput$sims.list$rss_new > results_root_shoot_SP$BUGSoutput$sims.list$rss)
 
@@ -1696,69 +1754,95 @@ graphdat$WP_MPa <- standard(graphdat$WP_MPa)
 #graphdat$Precip <- as.numeric(standard(dat_root_shoot$precip))
 graphdat$Precip <- as.factor(dat_root_shoot$precip)
 
+graphdat <- graphdat %>% 
+  mutate(Precip = case_when(Precip == "1.226" ~ 1226,
+                            Precip == "1.561" ~ 1561,
+                            Precip == "2.13" ~ 2130,
+                            Precip == "3.402" ~ 3402))
+newdat <- newdat %>% 
+  mutate(Precip = case_when(Precip == "1.226" ~ 1226,
+                            Precip == "1.561" ~ 1561,
+                            Precip == "2.13" ~ 2130,
+                            Precip == "3.402" ~ 3402))
+
 
 root_shoot_SP_full_plot <- ggplot()+ 
-  geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)))+
+  geom_point(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)))+
   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, fill = factor(Precip), alpha=0.35))+
   geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
-  xlab("Standardized WP") + 
-  ylab("Root:shoot ratio")+ 
-  theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
-  scale_colour_manual(values = Precip_palette) +
-  scale_fill_manual(values = Precip_palette) 
-
-root_shoot_SP_zoomed_in3 <- ggplot()+ 
-  geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)))+
-  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, fill = factor(Precip), alpha=0.35))+
-  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
-  xlab("Standardized WP") + 
-  ylab("Root:shoot ratio")+ 
-  theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
-  scale_colour_manual(values = Precip_palette2) +
-  scale_fill_manual(values = Precip_palette2) +
-  ylim(0,2)
-
-root_shoot_SP_panels <- ggplot()+ 
-  geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)))+
-  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, fill = factor(Precip), alpha=0.35))+
-  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
-  xlab("Standardized WP") + 
-  ylab("Root:shoot ratio")+ 
-  theme(panel.background = element_rect(fill='white', colour='black'))+
-  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
   scale_colour_manual(values = Precip_palette) +
   scale_fill_manual(values = Precip_palette) +
-  ylim(0,1) +
-  facet_wrap(~factor(Precip), nrow = 1)
+  scale_x_continuous(name = "",
+                     breaks = c(-1.72, -0.37,  1.16), 
+                     labels = c(-0.57, -0.42, -0.25)) +
+  scale_y_continuous(name = "")+ 
+  guides(colour = "none",
+         fill = "none",
+         alpha = "none") +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+
+root_shoot_SP_zoomed_in <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)), width = 0.1)+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, fill = factor(Precip), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+  xlab("Standardized WP") + 
+  ylab("Root:shoot ratio")+ 
+  scale_colour_manual(values = Precip_palette) +
+  scale_fill_manual(values = Precip_palette) +
+  scale_x_continuous(name = "Water potential (MPa)",
+                     breaks = c(-1.72, -1.09, -0.37, 0.44, 1.16), 
+                     labels = c(-0.57, -0.50, -0.42, -0.33, -0.25)) +
+  scale_y_continuous(name = "Root:shoot ratio (g/g)",
+                     limits = c(0,1.2))+ 
+  guides(colour = guide_legend(title = "Annual precipitation (mm/year)"),
+         fill = guide_legend(title = "Annual precipitation (mm/year)"),
+         alpha = "none") +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+
+# root_shoot_SP_panels <- ggplot()+ 
+#   geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(Precip)))+
+#   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, fill = factor(Precip), alpha=0.35))+
+#   geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+#   xlab("Standardized WP") + 
+#   ylab("Root:shoot ratio")+ 
+#   theme(panel.background = element_rect(fill='white', colour='black'))+
+#   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+#   scale_colour_manual(values = Precip_palette) +
+#   scale_fill_manual(values = Precip_palette) +
+#   ylim(0,1) +
+#   facet_wrap(~factor(Precip), nrow = 1)
 
 
-(root_shoot_SP_zoomed_in + inset_element(
+# (root_shoot_SP_zoomed_in + inset_element(
+#   root_shoot_SP_full_plot, 
+#   left = 0.7, 
+#   bottom = 0.5, 
+#   right = 0.99, 
+#   top = 0.99
+# )) /
+#   root_shoot_SP_panels +
+#   plot_layout(heights = c(4, 1), guides = "collect") & 
+#   theme(legend.position='bottom', text = element_text(size = 15))
+
+SP_root_shoot <- (root_shoot_SP_zoomed_in + inset_element(
   root_shoot_SP_full_plot, 
   left = 0.7, 
   bottom = 0.5, 
-  right = 0.99, 
-  top = 0.99
-)) /
-  root_shoot_SP_panels +
-  plot_layout(heights = c(4, 1), guides = "collect") & 
-  theme(legend.position='bottom', text = element_text(size = 15))
-
-SP_root_shoot3 <- (root_shoot_SP_zoomed_in3 + inset_element(
-  root_shoot_SP_full_plot3, 
-  left = 0.7, 
-  bottom = 0.5, 
-  right = 0.99, 
-  top = 0.99
+  right = 0.98, 
+  top = 0.98
 )) +
   plot_layout(guides = "collect") & 
   theme(legend.position='bottom', text = element_text(size = 15))
 
-VA_root_shoot1 /
-  SP_root_shoot1 +
-  plot_layout(guides = "collect") & 
+Root_shoot_plot <- VA_root_shoot /
+  SP_root_shoot  +
+  plot_layout(guides = "collect") + 
   theme(legend.position='bottom', text = element_text(size = 15))
+
+ggsave(filename = "Root_shoot_ratio.pdf", plot = Root_shoot_plot, width = 20, height = 26, units = "cm", dpi = 300)
+ggsave(filename = "Root_shoot_ratio.png", plot = Root_shoot_plot, width = 20, height = 26, units = "cm", dpi = 300)
 
 
 #### Root biomass Sibbaldia procumbens ####
