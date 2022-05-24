@@ -21,19 +21,19 @@ source("R/Germination/cleaning_germination_lab_data.R")
 
 ### Testing time to max gemrination by visually inspecting the data to see if there actually is a problem to fix
 #Veronica looks mostly ok. There is one replicate in SKJ that has T50 of 7 or someting and days to max germination at 90. Otherwise they look ok.
-ggplot(aes(x = as.numeric(T50), y = as.numeric(days_to_max_germination), color = germ_percent), data = Ver_alp_germination_traits) + 
-  geom_point() + 
-  facet_wrap(~siteID) + 
-  geom_smooth(method = "lm") + 
-  geom_abline()
-
-#Sibbaldia at LAV is crazy. I checked, and this is true data. Almost everything germinated in the first weeks, so the T50 is there, and then one after another more seeds germinated, so that they kept increasing until max germination time. This is a very different germination strategy than the other populations and the other species. Not sure what to do with it.
-#Many more points on the one-to-one line, I assume that is because there were only one or two germination time(s).
-ggplot(aes(x = as.numeric(T50), y = as.numeric(days_to_max_germination), color = germ_percent), data = Sib_pro_germination_traits) + 
-  geom_point() + 
-  facet_wrap(~siteID) + 
-  geom_smooth(method = "lm") + 
-  geom_abline()
+# ggplot(aes(x = as.numeric(T50), y = as.numeric(days_to_max_germination), color = germ_percent), data = Ver_alp_germination_traits) + 
+#   geom_point() + 
+#   facet_wrap(~siteID) + 
+#   geom_smooth(method = "lm") + 
+#   geom_abline()
+# 
+# #Sibbaldia at LAV is crazy. I checked, and this is true data. Almost everything germinated in the first weeks, so the T50 is there, and then one after another more seeds germinated, so that they kept increasing until max germination time. This is a very different germination strategy than the other populations and the other species. Not sure what to do with it.
+# #Many more points on the one-to-one line, I assume that is because there were only one or two germination time(s).
+# ggplot(aes(x = as.numeric(T50), y = as.numeric(days_to_max_germination), color = germ_percent), data = Sib_pro_germination_traits) + 
+#   geom_point() + 
+#   facet_wrap(~siteID) + 
+#   geom_smooth(method = "lm") + 
+#   geom_abline()
 
 
 # Smaller changes to the data sets
@@ -413,10 +413,11 @@ Germ_percent_Sib_pro_main_plot <- ggplot()+
   scale_colour_manual(values = Precip_palette)+
   scale_fill_manual(values = Precip_palette) +
   scale_x_continuous(name = "Water potential (MPa)",
-                     breaks = c(-2.96, -2.26, -1.56, -0.87, -0.17, 0.19, 0.61, 1.08), 
+                     breaks = c(-2.96, -2.26, -1.55, -0.85, -0.15, 0.21, 0.63, 1.11), 
                      labels = c(-1.70, -1.45, -1.20, -0.95, -0.70, -0.57, -0.42, -0.25),
-                     limits = c(-2.96, 1.08)) +
-  scale_y_continuous("Germination %") +
+                     limits = c(-2.96, 1.11)) +
+  scale_y_continuous(name = "Germination %",
+                     limits = c(0,1)) +
   guides(colour = guide_legend(title = "Annual precipitation (mm/year)"),
          fill = guide_legend(title = "Annual precipitation (mm/year)")) +
   theme(panel.background = element_rect(fill='white', colour='black'),
@@ -447,7 +448,7 @@ Germination_percent_plot <- Germ_percent_Ver_alp_main_plot /
   plot_layout(guides = "collect") & 
   theme(legend.position='bottom', text = element_text(size = 15))
 
- # ggsave(filename = "Germination_percent.pdf", plot = Germination_percent_plot, width = 21, height = 21, units = "cm", dpi = 300)
+ # ggsave(filename = "Germination_percent1.pdf", plot = Germination_percent_plot, width = 21, height = 21, units = "cm", dpi = 300)
  # ggsave(filename = "Germination_percent.png", plot = Germination_percent_plot, width = 21, height = 21, units = "cm", dpi = 300)
 
 #### Days to max germination Veronica alpina ####
