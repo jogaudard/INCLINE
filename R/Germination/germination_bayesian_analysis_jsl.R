@@ -1115,6 +1115,25 @@ seedlings_VA <- Ver_alp_germ %>%
   mutate(water_potential = as.numeric(water_potential)) %>% 
   filter(is.na(flag_seedling )|flag_seedling !="Dead_plant")
 
+## Calculating average seedlings size overall, and across water potentials
+seedlings_VA %>% 
+  ungroup() %>%
+  select(WP_MPa, dry_mass_g_total) %>%
+  mutate(mean_dry_mass = mean(dry_mass_g_total, na.rm = TRUE)) %>%
+  group_by(WP_MPa) %>%
+  mutate(mean_dry_mass_WP = mean(dry_mass_g_total, na.rm = TRUE)) %>%
+  select(WP_MPa, mean_dry_mass, mean_dry_mass_WP) %>%
+  unique()
+
+## Calculating average root:shoot ratio overall, and across water potentials
+seedlings_VA %>% 
+  ungroup() %>%
+  select(WP_MPa, root_shoot_ratio) %>%
+  mutate(mean_root_shoot_ratio = mean(root_shoot_ratio, na.rm = TRUE)) %>%
+  group_by(WP_MPa) %>%
+  mutate(mean_root_shoot_ratio_WP = mean(root_shoot_ratio, na.rm = TRUE)) %>%
+  select(WP_MPa, mean_root_shoot_ratio, mean_root_shoot_ratio_WP) %>%
+  unique()
 
   
 #### Root:shoot ratio Veronica alpina ####
@@ -1640,6 +1659,26 @@ seedlings_SP <- Sib_pro_germ %>%
                             water_potential == 9 ~ -1.45,
                             water_potential == 10 ~ -1.70))%>% 
   mutate(water_potential = as.numeric(water_potential))
+
+## Calculating average seedlings size overall, and across water potentials
+seedlings_SP %>% 
+  select(WP_MPa, dry_mass_g_total) %>%
+  ungroup() %>%
+  mutate(mean_dry_mass = mean(dry_mass_g_total, na.rm = TRUE)) %>%
+  group_by(WP_MPa) %>%
+  mutate(mean_dry_mass_WP = mean(dry_mass_g_total, na.rm = TRUE)) %>%
+  select(WP_MPa, mean_dry_mass, mean_dry_mass_WP) %>%
+  unique()
+
+## Calculating average root:shoot ratio overall, and across water potentials
+seedlings_SP %>% 
+  ungroup() %>%
+  select(WP_MPa, root_shoot_ratio) %>%
+  mutate(mean_root_shoot_ratio = mean(root_shoot_ratio, na.rm = TRUE)) %>%
+  group_by(WP_MPa) %>%
+  mutate(mean_root_shoot_ratio_WP = mean(root_shoot_ratio, na.rm = TRUE)) %>%
+  select(WP_MPa, mean_root_shoot_ratio, mean_root_shoot_ratio_WP) %>%
+  unique()
 
 ## Looking at seedlings
 seedlings_SP %>% 
