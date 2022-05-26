@@ -26,7 +26,10 @@ conflict_prefer("lmer", "lmerTest")
 
 #### Downloading data from OSF ####
 
-#Make script for reading in ready made data from OSF
+# get_file(node = "zhk3m",
+#           file = "INCLINE_metadata.csv",
+#           path = "data",
+#           remote_path = "RawData")
 
 #### Load data ####
 
