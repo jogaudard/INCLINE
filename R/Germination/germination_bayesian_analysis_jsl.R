@@ -18,7 +18,7 @@ library("officer")
 
 # load data 
 source("R/Germination/cleaning_germination_lab_data.R")
-
+ 
 ### Testing time to max gemrination by visually inspecting the data to see if there actually is a problem to fix
 #Veronica looks mostly ok. There is one replicate in SKJ that has T50 of 7 or someting and days to max germination at 90. Otherwise they look ok.
 # ggplot(aes(x = as.numeric(T50), y = as.numeric(days_to_max_germination), color = germ_percent), data = Ver_alp_germination_traits) + 
