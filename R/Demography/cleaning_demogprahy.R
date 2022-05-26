@@ -114,5 +114,5 @@ INCLINE_demography_Ver_alp <- Ver_alp %>%
   rename(genet_ID = IDG, mother_shoot = MS, shoot_height = SH, number_of_leaves = NL, leaf_length = LL, leaf_width = WL, number_of_flowers = NFL, number_of_buds = NB, number_of_capsules = NC, number_of_aborted_capsules = NAC, comment_field = comment) %>% 
   pivot_longer(cols = c(shoot_height, number_of_leaves, leaf_length, leaf_width, number_of_flowers, number_of_buds, number_of_capsules, number_of_aborted_capsules), names_to = "demographic_trait", values_to = "demographic_value")
 
-
-         
+#write.csv(INCLINE_demography_Sib_pro, file = "data/cleaned_data/INCLINE_demography_Sib_pro.csv", row.names = FALSE)
+#write.csv(INCLINE_demography_Ver_alp, file = "data/cleaned_data/INCLINE_demography_Ver_alp.csv", row.names = FALSE)
