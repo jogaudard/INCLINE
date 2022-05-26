@@ -117,6 +117,7 @@ Ver_alp <- Ver_alp %>%
          OTC = as.factor(OTC),
          treatment = as.factor(treatment))
 
+
 #### Changing numbers to integers as we only measured in full mm ####
 
 Sib_pro <- Sib_pro %>% 
@@ -216,3 +217,4 @@ rm(Sib_pro_seedling_fix)
 rm(Ver_alp_seedling_fix)
 rm(SP_comment_dict)
 rm(VA_comment_dict)
+
