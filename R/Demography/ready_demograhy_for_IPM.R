@@ -5,16 +5,20 @@
 source("R/Demography/cleaning_demogprahy.R")
 
 #### Libraries ####
-library(tidyverse)
+#library(tidyverse)
 library(lme4)
 library(lmerTest)
-library(lubridate)
-library(conflicted)
+#library(lubridate)
+#library(conflicted)
 
 #### Select preferences for conflicts ####
 
-conflict_prefer("select", "dplyr")
+#conflict_prefer("select", "dplyr")
 conflict_prefer("lmer", "lmerTest")
+
+#### Functions ####
+#Function needed to transform back after binomial model used on data
+expit <- function(L) exp(L) / (1+exp(L)) 
 
 
 #### Downloading data from OSF ####
@@ -35,14 +39,19 @@ conflict_prefer("lmer", "lmerTest")
 #          file = "Biomass_Sib_pro.csv",
 #          path = "data/Demography",
 #          remote_path = "RawData/Demography")
+# 
+# get_file(node = "zhk3m",
+#           file = "Seed_bank_survival.csv",
+#           path = "data/Demography",
+#           remote_path = "RawData/Demography")
 
 #### Load data ####
 
 Seeds_per_capsule <- read_csv2("data/Demography/Seeds_per_capsule.csv")
 biomass_Sib_pro <- read_csv2("data/Demography/Biomass_Sib_pro.csv")
-#biomass_Ver_alp_INCLINE <- read_csv2("data/Demography/SG.19_above-below_allocation.csv") #Not using this because some of the biomass rotted while collecting data, so biomass might not be correct
 seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv") 
 biomass_Ver_alp <- read_csv2("data/Demography/VeronicaAlpina_Biomass_Seedclim_edited.csv") #from SeedClim not on INCLINE OSF
+seed_bank <- read_csv2("data/Demography/Seed_bank_survival.csv") 
 
 
 #### Biomass regressions ####
@@ -76,14 +85,6 @@ Sib_pro_coef <- Sib_pro_coef %>%
 
 
 ##### Veronica alpina #####
-
-#Using placeholder data from SeedClim for the biomass regressions there
-# Ver_alp_coef <- biomass_Ver_alp %>% 
-#   filter(species == "valp") %>% 
-#   select(!species) %>% 
-#   rename(Intercept = "(Intercept)", SH_coef = SH, NL_coef = NL, LL_coef = LL, WL_coef = WL)
-
-# biomass Ver_alp
 
 biomass_Ver_alp <- biomass_Ver_alp %>% 
   select(siteID, IDS, SH, NL, LL, WL, ag) %>% 
@@ -139,13 +140,13 @@ summary(seed_SP_null)
 Seeds_per_capsule_SP <- as.numeric(exp(fixef(seed_SP_null)))
 
 
-Seeds_per_capsule_SP_dat %>%  
-  ggplot(aes(x = size, y = Number_of_seeds)) + 
-  geom_point(aes(color = Site)) + 
-  geom_hline(aes(yintercept = Seeds_per_capsule_SP)) + 
-  ggtitle("Number of seeds by size for Sibbaldia procumbens") + 
-  xlab("log2(size)") +
-  ylab("Seed per capsule") + scale_color_viridis_d()
+# Seeds_per_capsule_SP_dat %>%  
+#   ggplot(aes(x = size, y = Number_of_seeds)) + 
+#   geom_point(aes(color = Site)) + 
+#   geom_hline(aes(yintercept = Seeds_per_capsule_SP)) + 
+#   ggtitle("Number of seeds by size for Sibbaldia procumbens") + 
+#   xlab("log2(size)") +
+#   ylab("Seed per capsule") + scale_color_viridis_d()
 
 ###### Veronica alpina ######
 
@@ -177,26 +178,21 @@ summary(seed_VA_null)
 
 Seeds_per_capsule_VA_null <- as.numeric(exp(fixef(seed_VA_null)))
 
-Seeds_per_capsule_VA_dat %>%  
-  ggplot(aes(x = size, y = Number_of_seeds)) + 
-  geom_point(aes(color = Site)) + 
-  geom_hline(aes(yintercept = Seeds_per_capsule_VA_null)) + 
-  #geom_abline(intercept = Seeds_per_capsule_VA$Intercept_seeds, slope = Seeds_per_capsule_VA$seed_number_coef) +
-  ggtitle("Number of seeds by size for Veronica_alpina") + 
-  xlab("log2(size)") + 
-  ylab("Seed per capsule") + 
-  scale_color_viridis_d()
+# Seeds_per_capsule_VA_dat %>%  
+#   ggplot(aes(x = size, y = Number_of_seeds)) + 
+#   geom_point(aes(color = Site)) + 
+#   geom_hline(aes(yintercept = Seeds_per_capsule_VA_null)) + 
+#   #geom_abline(intercept = Seeds_per_capsule_VA$Intercept_seeds, slope = Seeds_per_capsule_VA$seed_number_coef) +
+#   ggtitle("Number of seeds by size for Veronica_alpina") + 
+#   xlab("log2(size)") + 
+#   ylab("Seed per capsule") + 
+#   scale_color_viridis_d()
 
   
 #### Seedling establishment coefficients ####
 #This section calculate the seedling establishment rate for each species in the warmed and unwarmed plots (using the data from the vegetated plots further in the analysis)
 
-#seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv") 
-
-#Function needed to transform back after binomial model used on data
-expit <- function(L) exp(L) / (1+exp(L)) 
-
-seedling_est1 <- seedling_est %>% 
+seedling_est <- seedling_est %>% 
   filter(Year == 2020) %>% 
   select(Site, Block, Plot, PlotID, Date, Species, ID, Vegetation, Present) %>% 
   mutate(Date = dmy(Date)) %>% 
@@ -217,7 +213,7 @@ seedling_est1 <- seedling_est %>%
   rename(Vegetation = treatment)
   
 
-seedling_est_background <- seedling_est1 %>% 
+seedling_est_background <- seedling_est %>% 
   filter(!Plot %in% c("C", "OTC")) %>% 
   filter(campaign_number == "second") %>% 
   mutate(Present = case_when(Present == "yes" ~ 1,
@@ -230,11 +226,11 @@ seedling_est_background <- seedling_est1 %>%
   select(Species, Vegetation, background_germination) %>% 
   unique()
 
-seedling_est2 <- seedling_est1 %>% 
+seedling_est <- seedling_est %>% 
   filter(Plot %in% c("C", "OTC")) %>% 
   rename(Warming = Plot) 
 
-binomial_seedlings <- seedling_est2 %>%
+binomial_seedlings <- seedling_est %>%
   select(Site, Block, Warming, PlotID, plotID, Species, Vegetation, campaign_number) %>%
   filter(campaign_number == "second") %>%
   unique() %>%
@@ -243,7 +239,7 @@ binomial_seedlings <- seedling_est2 %>%
   mutate(ID = c(1:20)) %>% 
   mutate(ID = as.character(ID))
 
-binomial_seedling_data <- seedling_est2 %>% 
+binomial_seedling_data <- seedling_est %>% 
   full_join(binomial_seedlings, by = c("Site", "Block", "Warming", "PlotID", "plotID", "Species", "Vegetation", "campaign_number", "ID")) %>% 
   mutate(Present = case_when(is.na(Present) ~ "no",
                              !is.na(Present) ~ Present)) %>% 
@@ -335,17 +331,7 @@ seedling_est_SP_Veg <- expit(seedling_est_VA$Intercept + seedling_est_VA$Veg)
 ###### Sibaldia procumbens ######
 
 Seedling_info_SP_dat <- Sib_pro %>% 
-  filter(seedling == "yes") %>%   #There are some seedlings that lack information in LSL, NL or LL. Do we need to gap fill the data here?
-  group_by(OTC, treatment) %>% 
-  mutate(mean_LSL = round(mean(LSL, na.rm = TRUE)),
-         mean_NL = round(mean(NL, na.rm = TRUE)),
-         mean_LL = round(mean(LL, na.rm = TRUE))) %>%
-  mutate(LSL = case_when(LSL == 0 ~ mean_LSL,   #Filling in gaps with the mean for each treatments - might have to attack this differently later
-                         LSL > 0 ~ LSL)) %>% 
-  mutate(NL = case_when(NL == 0 ~ mean_NL,
-                        NL > 0 ~ NL)) %>% 
-  mutate(LL = case_when(LL == 0 ~ mean_LL,
-                        LL > 0 ~ LL)) %>%
+  filter(seedling == "yes") %>% 
   left_join(Sib_pro_coef, by = "siteID") %>% 
   mutate(size = Intercept + LSL * LSL_coef + NL * NL_coef + LL * LL_coef) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
   ungroup() %>% 
@@ -385,37 +371,26 @@ Seedling_info_SP <- as.data.frame(mean_NoVeg_SP) %>%
   add_column(sd_SP) %>% 
   rename(mean_NoVeg = mean_NoVeg_SP, mean_Veg = mean_Veg_SP, sd = sd_SP)
 
-SP_max_seedling_size <- Seedling_info_SP_dat %>% 
-  select(max_seedling_size) %>% 
-  unique()
+# SP_max_seedling_size1 <- Seedling_info_SP_dat %>% 
+#   select(max_seedling_size) %>% 
+#   unique()
 
-Seedling_info_SP_dat %>%  
-  ggplot(aes(x = Vegetation, y = size, fill = Vegetation)) + 
-  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
-  geom_jitter(alpha= 0.2) +
-  geom_hline(yintercept = mean_NoVeg_SP,  size = 2, color = "lightgreen") +
-  geom_hline(yintercept = mean_Veg_SP, size = 2, color = "darkgreen") +
-  ggtitle("Seedling size by treatment for Sibbaldia procumbens") + ylab("size") +
-  scale_fill_manual(values = c("lightgreen", "darkgreen")) +
-  theme_bw()
+SP_max_seedling_size <- mean_Veg_SP + 2*sd_SP
+
+# Seedling_info_SP_dat %>%  
+#   ggplot(aes(x = Vegetation, y = size, fill = Vegetation)) + 
+#   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+#   geom_jitter(alpha= 0.2) +
+#   geom_hline(yintercept = mean_NoVeg_SP,  size = 2, color = "lightgreen") +
+#   geom_hline(yintercept = mean_Veg_SP, size = 2, color = "darkgreen") +
+#   ggtitle("Seedling size by treatment for Sibbaldia procumbens") + ylab("size") +
+#   scale_fill_manual(values = c("lightgreen", "darkgreen")) +
+#   theme_bw()
 
 ###### Veronica alpina ######
 
 Seedling_info_VA_dat <- Ver_alp %>% 
   filter(seedling == "yes") %>% 
-  group_by(OTC, treatment) %>% 
-  mutate(mean_SH = round(mean(SH, na.rm = TRUE)),
-         mean_NL = round(mean(NL, na.rm = TRUE)),
-         mean_LL = round(mean(LL, na.rm = TRUE)),
-         mean_WL = round(mean(WL, na.rm = TRUE))) %>%
-  mutate(SH = case_when(SH == 0 ~ mean_SH,   #Filling in gaps with the mean for each treatments - might have to attack this differently later
-                         SH > 0 ~ SH)) %>% 
-  mutate(NL = case_when(NL == 0 ~ mean_NL,
-                        NL > 0 ~ NL)) %>% 
-  mutate(LL = case_when(LL == 0 ~ mean_LL,
-                        LL > 0 ~ LL)) %>% 
-  mutate(LL = case_when(WL == 0 ~ mean_WL,
-                        WL > 0 ~ WL)) %>% 
   add_column(Ver_alp_coef) %>%
   mutate(size = Intercept + SH * SH_coef + NL * NL_coef + LL * LL_coef + WL * WL_coef) %>%  #Making biomass estimate with intercept and coefficients from biomass regression
   ungroup() %>% 
@@ -423,75 +398,110 @@ Seedling_info_VA_dat <- Ver_alp %>%
   mutate(Vegetation = case_when(treatment %in% c("C", "E", "N") ~ "Veg",
                                 treatment == "R" ~ "NoVeg"))
 
-# model_seedling_VA1 <- lmer(size ~ OTC * treatment + (1|siteID/blockID/plotID), data = Seedling_info_VA_dat)
-# summary(model_seedling_VA1)
+#  model_seedling_VA1 <- lmer(size ~ OTC * treatment + (1|siteID/blockID/plotID), data = Seedling_info_VA_dat)
+#  summary(model_seedling_VA1)
+#  
+#  model_seedling_VA2 <- lmer(size ~ OTC + treatment + (1|siteID/blockID/plotID), data = Seedling_info_VA_dat) #Is singularity, need to remove siteID
+#  summary(model_seedling_VA2)
+#  
+#  model_seedling_VA3 <- lmer(size ~ OTC + treatment + (1|blockID/plotID), data = Seedling_info_VA_dat)
+#  summary(model_seedling_VA3)
+#  
+#  model_seedling_VA4 <- lmer(size ~ treatment + (1|blockID/plotID), data = Seedling_info_VA_dat)
+#  summary(model_seedling_VA4)
 # 
-# model_seedling_VA2 <- lmer(size ~ OTC * treatment + (1|blockID/plotID), data = Seedling_info_VA_dat)
-# summary(model_seedling_VA2)
-# 
-# model_seedling_VA3 <- lmer(size ~ OTC * treatment + (1|plotID), data = Seedling_info_VA_dat)
-# summary(model_seedling_VA3)
-# 
-# model_seedling_VA4 <- lmer(size ~ OTC + treatment + (1|plotID), data = Seedling_info_VA_dat)
-# summary(model_seedling_VA4)
-# 
-# model_seedling_VA5 <- lmer(size ~ treatment + (1|plotID), data = Seedling_info_VA_dat)
+# model_seedling_VA5 <- lmer(size ~ Vegetation + (1|blockID/plotID), data = Seedling_info_VA_dat)
 # summary(model_seedling_VA5)
+#
+# model_seedling_VA6 <- lmer(size ~ Vegetation + (1|plotID), data = Seedling_info_VA_dat)
+# summary(model_seedling_VA6)
+# 
+#  model_seedling_VA6 <- lmer(size ~ OTC + (1|blockID/plotID), data = Seedling_info_VA_dat)
+#  summary(model_seedling_VA6)
+ 
+ model_seedling_VA_null <- lmer(size ~ 1 + (1|plotID), data = Seedling_info_VA_dat) 
+ summary(model_seedling_VA_null)
 
-model_seedling_VA6 <- lmer(size ~ Vegetation + (1|plotID), data = Seedling_info_VA_dat)
-summary(model_seedling_VA6)
-
-# model_seedling_VA7 <- lmer(size ~ OTC + (1|plotID), data = Seedling_info_VA_dat)
-# summary(model_seedling_VA7)
-
-Seedling_info_VA_mean <- fixef(model_seedling_VA6)%>% 
-  as.data.frame() %>% 
-  rownames_to_column() %>% 
-  pivot_wider(names_from = "rowname", values_from = ".") %>% 
-  rename(Intercept = "(Intercept)", Veg = VegetationVeg) 
-
-# Need to make this in a format that can be added in the model later
-
-mean_NoVeg_VA <- Seedling_info_VA_mean$Intercept
-
-mean_Veg_VA <- Seedling_info_VA_mean$Intercept + Seedling_info_VA_mean$Veg
-
-sd_VA <- arm::sigma.hat(model_seedling_VA6)$sigma$data #can we get different standard diviations for different groups? google this with lmer.
-
-Seedling_info_VA <- as.data.frame(mean_NoVeg_VA) %>% 
-  add_column(mean_Veg_VA) %>% 
-  add_column(sd_VA) %>% 
-  rename(mean_NoVeg = mean_NoVeg_VA, mean_Veg = mean_Veg_VA, sd = sd_VA)
+ 
+ Seedling_info_VA_mean  <- as.numeric(fixef(model_seedling_VA_null))
+ sd_VA <- arm::sigma.hat(model_seedling_VA_null)$sigma$data
 
 
-Seedling_info_VA_dat %>%  
-  ggplot(aes(x = Vegetation, y = size, fill = Vegetation)) + 
-  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
-  geom_jitter(alpha= 0.2) +
-  geom_hline(yintercept = mean_NoVeg_VA,  size = 2, color = "lightgreen") +
-  geom_hline(yintercept = mean_Veg_VA, size = 2, color = "darkgreen") +
-  ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") +
-  scale_fill_manual(values = c("lightgreen", "darkgreen")) +
-  theme_bw()
-
+# Seedling_info_VA_dat %>%  
+#   ggplot(aes(y = size, x = treatment, fill = treatment)) + 
+#   geom_violin() +
+#   geom_jitter(alpha = 0.2) +
+#   geom_hline(yintercept = Seedling_info_VA_mean,  size = 2, color = "black") +
+#   geom_hline(yintercept = Seedling_info_VA_mean + 2*sd_VA, size = 0.5, color = "black") +
+#   geom_hline(yintercept = Seedling_info_VA_mean - 2*sd_VA, size = 0.5, color = "black") +
+#   ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") +
+#   theme_bw() +
+#   facet_wrap(~OTC)
 
 VA_max_seedling_size <- Seedling_info_VA_dat %>% 
   select(max_seedling_size) %>% 
   unique()
 
+VA_max_seedling_size <-  Seedling_info_VA_mean + 2*sd_VA
+
+#### Seed bank ####
+
+ seed_bank <- seed_bank %>% 
+  rename(missing = "missing/dissentegrated") %>% 
+  mutate(seeds_dead_in_soil_bank = case_when(missing == "Yes" ~ 1,
+                                             missing == "No" ~ 0),
+         seeds_germinate = case_when(germinated == "Yes" ~ 1,
+                                     TRUE ~ 0),
+         seeds_alive_not_germ = case_when(embryo_in_seed == "Yes" ~ 1,
+                                          TRUE ~ 0),
+         seeds_dead_later = case_when(dead == "Yes" ~1,
+                                      TRUE ~ 0)) %>% 
+  group_by(petridish, species) %>% 
+  mutate(seeds_dead_in_soil_bank = sum(seeds_dead_in_soil_bank),
+         seeds_germinate = sum(seeds_germinate),
+         seeds_alive_not_germ = sum(seeds_alive_not_germ),
+         seeds_dead_later = sum(seeds_dead_later),
+         seeds_total = max(seed_number)) %>%
+  select(petridish, plotID, siteID, warming, species, seeds_dead_in_soil_bank, seeds_germinate, seeds_alive_not_germ, seeds_total, seeds_dead_later) %>%
+  unique() %>% 
+  mutate(seeds_alive_total = seeds_germinate + seeds_alive_not_germ,
+         seeds_dead_total = seeds_dead_in_soil_bank + seeds_dead_later,
+         seeds_alive_total_prop = seeds_alive_total/seeds_total,
+         seeds_dead_total_prop = seeds_dead_total/seeds_total,
+         seeds_germinate_prop = seeds_germinate/seeds_total,
+         seeds_staySB = seeds_alive_not_germ/seeds_total) %>% 
+  ungroup()
+
+seed_bank_model_dataset <- seed_bank %>% 
+  group_by(siteID, species, warming) %>% 
+  mutate(seeds_alive_total = round(mean(seeds_alive_total), digits = 0),
+         seeds_alive_total_prop = mean(seeds_alive_total_prop),
+         seeds_dead_total = round(mean(seeds_dead_total), digits = 0),
+         seeds_dead_total_prop = mean(seeds_dead_total_prop),
+         seeds_germinate_prop = seeds_germinate/seeds_total,
+         seeds_staySB = seeds_alive_not_germ/seeds_total) %>% 
+  select(siteID, species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop, seeds_germinate_prop, seeds_staySB) %>% 
+  unique() 
+
+seed_bank_model <- glm(cbind(seeds_alive_total, seeds_dead_total) ~  warming + species + siteID, family = binomial, data = seed_bank_model_dataset)
+summary(seed_bank_model) #Should maybe use the model and predict for different sites and species and treatment
+
+seed_bank <- seed_bank %>% 
+  group_by(species, warming) %>% 
+  mutate(seeds_alive_total = round(mean(seeds_alive_total), digits = 0),
+         seeds_alive_total_prop = mean(seeds_alive_total_prop),
+         seeds_dead_total = round(mean(seeds_dead_total), digits = 0),
+         seeds_dead_total_prop = mean(seeds_dead_total_prop),
+         seeds_germinate_prop = mean(seeds_germinate_prop),
+         seeds_staySB = mean(seeds_staySB)) %>% 
+  select(species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop, seeds_germinate_prop, seeds_staySB) %>% 
+  unique()
+
+
 #### Making transitions ####
 #This section calculates the size of individuals, estimates of seed number. And cleaning the data so that we have the correct variables, and variable names for the analysis.
 
 # Clone function to match new individuals with parents and calculate the distance between child and parent
-
-# For testing the function:
-# child <- Sib_pro_2018_2019 %>% 
-#   filter(is.na(size) & sizeNext > 0) %>% 
-#   filter(plotID == "Gud_2_4") 
-# 
-# parent <- Sib_pro_2018_2019 %>% 
-#   filter(plotID == "Gud_2_4") %>% 
-#   filter(seedling == "no", juvenile == "no") 
 
 clone_function <- function(child, parent){
   
@@ -576,16 +586,22 @@ Sib_pro_2018_2019 <- Sib_pro_2018 %>%
   mutate(size = Intercept + (NL_2018 * NL_coef) + (LL_2018 * LL_coef),
          sizeNext = Intercept + (NL_2019 * NL_coef) + (LL_2019 * LL_coef),
          fec = (Seeds_per_capsule_SP * NFL_2018) + (Seeds_per_capsule_SP * NB_2018) + (Seeds_per_capsule_SP * NC_2018),
-         surv = ifelse(size > 0 & is.na(sizeNext), 0,
-                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
-  mutate(flo.no = rowSums(dplyr::select(., NB_2018, NFL_2018, NC_2018), na.rm=TRUE),
-        flo.if = ifelse(flo.no > 0, 1, 0),
-        flo.no = case_when(flo.no == 0 ~ NA_real_,
-                           TRUE ~ flo.no)) %>%
-  #mutate(flo.no = case_when(is.na(flo.if) ~ NA, !is.na(flo.if) ~ flo.no))
+         surv = case_when(is.numeric(size) & is.na(sizeNext) ~ 0,
+                          is.numeric(size) & is.numeric(size) ~ 1, 
+                          TRUE ~ NA_real_)) %>% 
+  mutate(NB_2018 = as.numeric(NB_2018),
+         NFL_2018 = as.numeric(NFL_2018),
+         NC_2018 = as.numeric(NC_2018)) %>% 
+  rowwise() %>% 
+  mutate(flo.no = sum(NB_2018, NFL_2018, NC_2018, na.rm=TRUE),
+         flo.if = ifelse(flo.no > 0, 1, 0),
+         flo.no = case_when(flo.no == 0 ~ NA_real_,
+                            TRUE ~ flo.no),
+         fec = Seeds_per_capsule_SP * flo.no) %>%
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                               ifelse(juvenile_next == "yes" & is.na(size), "sexual",
-                                     ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
+                                     ifelse(is.na(size) & sizeNext>0, "clonal", NA)))) %>% 
+  ungroup() %>% 
   select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
   mutate(transition = "2018-2019")
 
@@ -597,15 +613,21 @@ Sib_pro_2019_2020 <- Sib_pro_2019 %>%
   mutate(size = Intercept + NL_2019 * NL_coef + LL_2019 * LL_coef,
          sizeNext = Intercept + NL_2020 * NL_coef + LL_2020 * LL_coef,
          fec = (Seeds_per_capsule_SP * NFL_2019) + (Seeds_per_capsule_SP * NB_2019) + (Seeds_per_capsule_SP * NC_2019), 
-         surv = ifelse(size > 0 & is.na(sizeNext), 0,
-                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
-  mutate(flo.no = rowSums(dplyr::select(., NB_2019, NFL_2019, NC_2019), na.rm=TRUE),
+         surv = case_when(is.numeric(size) & is.na(sizeNext) ~ 0,
+                          is.numeric(size) & is.numeric(size) ~ 1, 
+                          TRUE ~ NA_real_)) %>% 
+  mutate(NB_2019 = as.numeric(NB_2019),
+         NFL_2019 = as.numeric(NFL_2019),
+         NC_2019 = as.numeric(NC_2019)) %>%
+  rowwise() %>% 
+  mutate(flo.no = sum(NB_2019, NFL_2019, NC_2019, na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
          flo.no = case_when(flo.no == 0 ~ NA_real_,
-                            TRUE ~ flo.no)) %>%
+                            TRUE ~ flo.no),
+         fec = Seeds_per_capsule_SP * flo.no) %>%
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_next == "yes" & is.na(size), "sexual",
-                                       ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>%
+                                       ifelse(is.na(size) & sizeNext>0, "clonal", NA)))) %>%
   select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
   mutate(transition = "2019-2020")
 
@@ -617,15 +639,21 @@ Sib_pro_2020_2021 <- Sib_pro_2020 %>%
   mutate(size = Intercept + NL_2020 * NL_coef + LL_2020 * LL_coef,
          sizeNext = Intercept + NL_2021 * NL_coef + LL_2021 * LL_coef,
          fec = (Seeds_per_capsule_SP * NFL_2020) + (Seeds_per_capsule_SP * NB_2020) + (Seeds_per_capsule_SP * NC_2020), 
-         surv = ifelse(size > 0 & is.na(sizeNext), 0,
-                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
-  mutate(flo.no = rowSums(dplyr::select(., NB_2020, NFL_2020, NC_2020), na.rm=TRUE),
+         surv = case_when(is.numeric(size) & is.na(sizeNext) ~ 0,
+                          is.numeric(size) & is.numeric(size) ~ 1, 
+                          TRUE ~ NA_real_)) %>% 
+  mutate(NB_2020 = as.numeric(NB_2020),
+         NFL_2020 = as.numeric(NFL_2020),
+         NC_2020 = as.numeric(NC_2020)) %>% 
+  rowwise() %>% 
+  mutate(flo.no = sum(NB_2020, NFL_2020, NC_2020, na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
          flo.no = case_when(flo.no == 0 ~ NA_real_,
-                            TRUE ~ flo.no)) %>%
+                            TRUE ~ flo.no),
+         fec = Seeds_per_capsule_SP * flo.no) %>%
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_next == "yes" & is.na(size), "sexual",
-                                       ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
+                                       ifelse(is.na(size) & sizeNext>0, "clonal", NA)))) %>% 
   select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>% 
   mutate(transition = "2020-2021")
 
@@ -639,12 +667,12 @@ clones_SP <- Sib_pro_2018_2021 %>%
   mutate(clonal_information = map(data, ~ {
     child <- .x %>% 
       filter(is.na(size) & sizeNext > 0) %>% 
-      filter(offspringNext == "clone")
+      filter(offspringNext == "clonal")
     
     parent <- .x %>% 
       filter(seedling == "no", juvenile == "no") %>% 
       select(unique_IDS, X, Y, size) %>% 
-      filter(size > (SP_max_seedling_size$max_seedling_size))
+      filter(size > SP_max_seedling_size)
     
     
     clone_function(child, parent)
@@ -662,8 +690,8 @@ Sib_pro_2018_2021 <- Sib_pro_2018_2021 %>%
   left_join(clonal_information_SP, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_child", "X_next", "Y_next", "sizeNext"))
 
 Sib_pro_2018_2021 <- Sib_pro_2018_2021 %>% 
-  mutate(size = case_when((offspringNext == "clone" & distance_parent < 5) ~ size_parent,
-                          (offspringNext == "clone" & distance_parent > 5) ~ size,
+  mutate(size = case_when((offspringNext == "clonal" & distance_parent < 5) ~ size_parent,
+                          (offspringNext == "clonal" & distance_parent > 5) ~ size,
                           offspringNext %in% c(NA, "sexual") ~ size)) %>% 
   mutate(distance_parent = case_when(distance_parent > 5 ~ NA_real_,
                                      distance_parent < 5 ~ distance_parent,
@@ -688,15 +716,26 @@ clone_information_SP <- Sib_pro_2018_2021 %>%
 Sib_pro_2018_2021 <- Sib_pro_2018_2021 %>% 
   left_join(clone_information_SP, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_parent")) %>% 
   mutate(clo.if = case_when(clo.no > 0.1 ~ 1,
-                            is.na(clo.no) ~ 0))
+                            is.na(clo.no) ~ 0)) %>% 
+  ungroup() %>%
+  as.data.frame() %>%
+  mutate(stage = case_when(!is.na(size) ~ "continuous",
+                           is.na(size) ~ NA_character_),
+         stageNext = case_when(!is.na(size) & !is.na(sizeNext) ~ "continuous",
+                               is.na(size) & !is.na(sizeNext) ~ "continuous",
+                               !is.na(size) & is.na(sizeNext) ~ "dead",
+                               TRUE ~ NA_character_))
+
 
 
 #Some plots fro visualization/checking
-Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = flo.if)) + geom_point() + geom_abline()
-Sib_pro_2018_2021 %>% filter(seedling == "yes") %>% ggplot(aes(y = sizeNext, x = size)) + geom_point() + geom_abline()
-Sib_pro_2018_2021 %>% filter(offspringNext == "clone") %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
-Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline()
-Sib_pro_2018_2021 %>% ggplot(aes(x = sizeNext, fill = offspringNext, alpha = 0.5)) + geom_density()
+# Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = as.factor(flo.if))) + geom_point() + geom_abline()
+# Sib_pro_2018_2021 %>% filter(seedling == "yes") %>% ggplot(aes(y = sizeNext, x = size)) + geom_point() + geom_abline()
+# Sib_pro_2018_2021 %>% filter(offspringNext == "clonal") %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
+# Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline()
+# Sib_pro_2018_2021 %>% ggplot(aes(x = sizeNext, fill = offspringNext, alpha = 0.5)) + geom_density()
+# Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = offspringNext, fill = offspringNext)) + geom_violin() + geom_jitter(alpha = 0.2)
+
 
 
 ##### Veronica alpina #####
@@ -725,16 +764,21 @@ Ver_alp_2018_2019 <- Ver_alp_2018 %>%
   add_column(Seeds_per_capsule_VA_null) %>% 
   mutate(size = Intercept + (SH_2018 * SH_coef) + (NL_2018 * NL_coef) + (LL_2018 * LL_coef) + (WL_2018 * WL_coef), 
          sizeNext = Intercept + (SH_2019 * SH_coef) + (NL_2019 * NL_coef) + (LL_2019 * LL_coef) + (WL_2019 * WL_coef),
-         surv = ifelse(size > 0 & is.na(sizeNext), 0,
-                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
-  mutate(flo.no = rowSums(dplyr::select(., NB_2018, NFL_2018, NC_2018), na.rm=TRUE),
+         surv = case_when(is.numeric(size) & is.na(sizeNext) ~ 0,
+                          is.numeric(size) & is.numeric(size) ~ 1, 
+                          TRUE ~ NA_real_)) %>% 
+  mutate(NB_2018 = as.numeric(NB_2018),
+         NFL_2018 = as.numeric(NFL_2018),
+         NC_2018 = as.numeric(NC_2018)) %>% 
+  rowwise() %>% 
+  mutate(flo.no = sum(NB_2018, NFL_2018, NC_2018, na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
          flo.no = case_when(flo.no == 0 ~ NA_real_,
                             TRUE ~ flo.no),
          fec = Seeds_per_capsule_VA_null * flo.no) %>%
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_next == "yes" & is.na(size), "sexual",
-                                       ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
+                                       ifelse(is.na(size) & sizeNext>0, "clonal", NA)))) %>% 
   select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
   mutate(transition = "2018-2019")
 
@@ -746,16 +790,21 @@ Ver_alp_2019_2020 <- Ver_alp_2019 %>%
   add_column(Seeds_per_capsule_VA_null) %>% 
   mutate(size = Intercept + (SH_2019 * SH_coef) + (NL_2019 * NL_coef) + (LL_2019 * LL_coef) + (WL_2019 * WL_coef), 
          sizeNext = Intercept + (SH_2020 * SH_coef) + (NL_2020 * NL_coef) + (LL_2020 * LL_coef) + (WL_2020 * WL_coef), 
-         surv = ifelse(size > 0 & is.na(sizeNext), 0,
-                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
-  mutate(flo.no = rowSums(dplyr::select(., NB_2019, NFL_2019, NC_2019), na.rm=TRUE),
+         surv = case_when(is.numeric(size) & is.na(sizeNext) ~ 0,
+                          is.numeric(size) & is.numeric(size) ~ 1, 
+                          TRUE ~ NA_real_)) %>% 
+  mutate(NB_2019 = as.numeric(NB_2019),
+         NFL_2019 = as.numeric(NFL_2019),
+         NC_2019 = as.numeric(NC_2019)) %>% 
+  rowwise() %>% 
+  mutate(flo.no = sum(NB_2019, NFL_2019, NC_2019, na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
          flo.no = case_when(flo.no == 0 ~ NA_real_,
                             TRUE ~ flo.no),
          fec = Seeds_per_capsule_VA_null * flo.no) %>%
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_next == "yes" & is.na(size), "sexual",
-                                       ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
+                                       ifelse(is.na(size) & sizeNext>0, "clonal", NA)))) %>% 
   select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>%
   mutate(transition = "2019-2020")
 
@@ -767,16 +816,21 @@ Ver_alp_2020_2021 <- Ver_alp_2020 %>%
   add_column(Seeds_per_capsule_VA_null) %>% 
   mutate(size = Intercept + (SH_2020 * SH_coef) + (NL_2020 * NL_coef) + (LL_2020 * LL_coef) + (WL_2020 * WL_coef), 
          sizeNext = Intercept + (SH_2021 * SH_coef) + (NL_2021 * NL_coef) + (LL_2021 * LL_coef) + (WL_2021 * WL_coef), 
-         surv = ifelse(size > 0 & is.na(sizeNext), 0,
-                       ifelse(size > 0 & sizeNext > 0, 1, NA))) %>% 
-  mutate(flo.no = rowSums(dplyr::select(., NB_2020, NFL_2020, NC_2020), na.rm=TRUE),
+         surv = case_when(is.numeric(size) & is.na(sizeNext) ~ 0,
+                          is.numeric(size) & is.numeric(size) ~ 1, 
+                          TRUE ~ NA_real_)) %>% 
+  mutate(NB_2020 = as.numeric(NB_2020),
+         NFL_2020 = as.numeric(NFL_2020),
+         NC_2020 = as.numeric(NC_2020)) %>% 
+  rowwise() %>% 
+  mutate(flo.no = sum(NB_2020, NFL_2020, NC_2020, na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
          flo.no = case_when(flo.no == 0 ~ NA_real_,
                             TRUE ~ flo.no),
          fec = Seeds_per_capsule_VA_null * flo.no) %>%
   mutate(offspringNext = ifelse(seedling_next == "yes" & is.na(size), "sexual",
                                 ifelse(juvenile_next == "yes" & is.na(size), "sexual",
-                                       ifelse(is.na(size) & sizeNext>0, "clone", NA)))) %>% 
+                                       ifelse(is.na(size) & sizeNext>0, "clonal", NA)))) %>% 
   select(siteID, blockID, plotID, unique_IDS, X, Y, X_next, Y_next, OTC, treatment, size, sizeNext, fec, surv, flo.no, flo.if, offspringNext, seedling, juvenile, seedling_next, juvenile_next, MS, MS_next) %>% 
   mutate(transition = "2020-2021")
 
@@ -791,12 +845,12 @@ clones_VA <- Ver_alp_2018_2021 %>%
   mutate(clonal_information = map(data, ~ {
     child <- .x %>% 
       filter(is.na(size) & sizeNext > 0) %>% 
-      filter(offspringNext == "clone")
+      filter(offspringNext == "clonal")
     
     parent <- .x %>% 
       filter(seedling == "no", juvenile == "no") %>% 
       select(unique_IDS, X, Y, size) %>% 
-      filter(size > (VA_max_seedling_size$max_seedling_size))
+      filter(size > (VA_max_seedling_size))
     
     
     clone_function(child, parent)
@@ -814,8 +868,8 @@ Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>%
   left_join(clonal_information_VA, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_child", "X_next", "Y_next", "sizeNext"))
 
 Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
-  mutate(size = case_when((offspringNext == "clone" & distance_parent < 5) ~ size_parent,
-                          (offspringNext == "clone" & distance_parent > 5) ~ size,
+  mutate(size = case_when((offspringNext == "clonal" & distance_parent < 5) ~ size_parent,
+                          (offspringNext == "clonal" & distance_parent > 5) ~ size,
                           offspringNext %in% c(NA, "sexual") ~ size)) %>% 
   mutate(distance_parent = case_when(distance_parent > 5 ~ NA_real_,
                                      distance_parent < 5 ~ distance_parent,
@@ -840,16 +894,51 @@ clone_information_VA <- Ver_alp_2018_2021 %>%
 Ver_alp_2018_2021 <- Ver_alp_2018_2021 %>% 
   left_join(clone_information_VA, by = c("plotID", "transition", "unique_IDS" = "unique_IDS_parent")) %>% 
   mutate(clo.if = case_when(clo.no > 0.1 ~ 1,
-                            is.na(clo.no) ~ 0))
+                            is.na(clo.no) ~ 0)) %>% 
+  ungroup() %>%
+  as.data.frame() %>%
+  mutate(stage = case_when(!is.na(size) ~ "continuous",
+                           is.na(size) ~ NA_character_),
+         stageNext = case_when(!is.na(size) & !is.na(sizeNext) ~ "continuous",
+                               is.na(size) & !is.na(sizeNext) ~ "continuous",
+                               !is.na(size) & is.na(sizeNext) ~ "dead",
+                               TRUE ~ NA_character_))
+
 
 
 #Some plots fro visualization/checking
-Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = flo.if)) + geom_point() + geom_abline()
-Ver_alp_2018_2021 %>% ggplot(aes(y = flo.no, x = size, color = transition)) + geom_point() + geom_abline()
-Ver_alp_2018_2021 %>% ggplot(aes(y = fec, x = size, color = transition)) + geom_point() + geom_abline()
-Ver_alp_2018_2021 %>% filter(seedling == "yes") %>% ggplot(aes(y = sizeNext, x = size)) + geom_point()
-Ver_alp_2018_2021 %>% filter(offspringNext == "clone") %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
-Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline()
-Ver_alp_2018_2021 %>% ggplot(aes(x = sizeNext, fill = offspringNext, alpha = 0.5)) + geom_density()
-Ver_alp_2018_2021 %>% ggplot(aes(x = sizeNext, fill = as.factor(clo.if), alpha = 0.5)) + geom_density()
+# Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, color = flo.if)) + geom_point() + geom_abline()
+# Ver_alp_2018_2021 %>% ggplot(aes(y = flo.no, x = size, color = transition)) + geom_point() + geom_abline()
+# Ver_alp_2018_2021 %>% ggplot(aes(y = fec, x = size, color = transition)) + geom_point() + geom_abline()
+# Ver_alp_2018_2021 %>% filter(seedling == "yes") %>% ggplot(aes(y = sizeNext, x = size)) + geom_point()
+# Ver_alp_2018_2021 %>% filter(offspringNext == "clonal") %>% ggplot(aes(y = sizeNext, x = size_parent, col = distance_parent)) + geom_point() + geom_abline()
+# Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline()
+# Ver_alp_2018_2021 %>% ggplot(aes(x = sizeNext, fill = offspringNext, alpha = 0.5)) + geom_density()
+# Ver_alp_2018_2021 %>% ggplot(aes(x = sizeNext, fill = as.factor(clo.if), alpha = 0.5)) + geom_density()
+# Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = offspringNext, fill = offspringNext)) + geom_violin() + geom_jitter(alpha = 0.2)
 
+
+#### Remove data and objects ####
+rm(Ver_alp_2018)
+rm(Ver_alp_2019)
+rm(Ver_alp_2020)
+rm(Ver_alp_2021)
+rm(Sib_pro_2018)
+rm(Sib_pro_2019)
+rm(Sib_pro_2020)
+rm(Sib_pro_2021)
+rm(clonal_information_SP)
+rm(clonal_information_VA)
+rm(clone_information_SP)
+rm(clone_information_VA)
+rm(clones_SP)
+rm(clones_VA)
+# rm(Sib_pro_2018_2019)
+# rm(Sib_pro_2019_2020)
+# rm(Sib_pro_2020_2021)
+# rm(Ver_alp_2018_2019)
+# rm(Ver_alp_2019_2020)
+# rm(Ver_alp_2020_2021)
+rm(Seeds_per_capsule)
+#rm(Seeds_per_capsule_SP)
+rm(Seeds_per_capsule_VA)
