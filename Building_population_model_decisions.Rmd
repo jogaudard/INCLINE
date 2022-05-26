@@ -26,13 +26,15 @@ source("R/Demography/ready_demograhy_for_IPM.R", local = knitr::knit_global())
 
 ## Biomass regressions  
 
+All biomass values have been log 2 transformed.
+
 ### Sibbaldia procumbens  
-Using Madeleins Dybdahls dataset from the summer of 2019, she collected individuals of all sizes from randomly selected plots at the sites. We are using biomass of above ground structures, without the reproductive parts, so only leaves and stems. Here we are using a mixed effect model to test if above ground biomass relates to leaf stalk length (LSL), number of leaves (NL) and leaf length (LL), using site as random effect.
+To test how the different size attributes relate to biomass we measured the size attrbites and distructively harvested some individuals that we measured the total biomass off. In these models we use biomass of above ground structures, without the reproductive parts. Here we are using a mixed effect model to test if above ground biomass relates to leaf stalk length (LSL), number of leaves (NL) and leaf length (LL), using site as random effect.
 
 ```{r cars}
 summary(lmer(full_leaf_mass ~ LSL + NL + LL + (1|siteID), data = biomass_Sib_pro))
 ```
-Choosing to use coefficients all traits and different intercepts for each site from the model:
+Choosing to use coefficients off all the attributes (LSL = Leaf stalk length, NL = Number of leaves, LL = leaf length) and different intercepts for each site from the model:
 
 ```{r}
 Sib_pro_coef
@@ -41,17 +43,13 @@ Sib_pro_coef
 
 
 ### Veronica alpina  
-Here we use Tessa Bargmanns data from her masters in SeedClim from 2009 (because of the biomass problems in Lasses master thesis). We are using biomass of above ground structures, without the reproductive parts (only leaves and stems) to match with Sibbaldia procumbens. When we used a mixed effect model, we got a warning message about singularity. Switched to a linear model.
+We are using biomass of above ground structures, without the reproductive parts. We are using a linear model because the mixed effect model gave a singularity warning because of overfitting the data. The linear model with siteID as a fixed effect gave no significant difference between sites, so we simplified the model by removing siteID as a fixed effect. Hence, we ended up with this model:
 
 ```{r}
-summary(lmer(ag ~ SH + NL + LL + WL + (1|siteID), data = biomass_Ver_alp))
+summary(lm(ag ~ SH + NL + LL + WL, data = biomass_Ver_alp))
 ```
 
-```{r}
-summary(lm(ag ~ SH + NL + LL + WL , data = biomass_Ver_alp))
-```
-
-Choosing to use coefficients from all traits and same intercepts for each site from the model:
+Because all attributes had a significant impact on biomass, we choose coefficients from all attributes and because siteID was not significantly different we use the same same intercepts for each site from the model.
 
 ```{r}
 Ver_alp_coef
@@ -60,43 +58,14 @@ Ver_alp_coef
 
 ##Seeds per capsule  
 
-
-Based of data collections done in 2020 where we collected 10 reproductive individuals of each species at each site. We measured the same size traits as in the demography dataset in the field. Then we brought them back to the lab and counted how many seeds there were in each capsule. There were between `r min(Seeds_per_capsule_VA_dat$Number_of_capsules)` and `r max(Seeds_per_capsule_VA_dat$Number_of_capsules)` capsules for Veronica alpina, and between `r min(Seeds_per_capsule_SP_dat$Number_of_capsules)`and `r max(Seeds_per_capsule_SP_dat$Number_of_capsules)` capsules for Sibbaldia procumbens. Althought the highest number for Sibbaldia was quite an outlier, so the next max number is: `r  Seeds_per_capsule_SP_dat %>% filter(!Number_of_capsules == 32) %>% mutate(max = max(Number_of_capsules)) %>% select(max) %>% unique() %>% pull()`.
+We sampled 10 individuals from each site and counted number of seeds to see if it related to the size attributes. Of the individuals we collected there were between `r min(Seeds_per_capsule_VA_dat$Number_of_capsules)` and `r max(Seeds_per_capsule_VA_dat$Number_of_capsules)` capsules for Veronica alpina, and between `r min(Seeds_per_capsule_SP_dat$Number_of_capsules)`and `r max(Seeds_per_capsule_SP_dat$Number_of_capsules)` capsules for Sibbaldia procumbens. However, the highest number for Sibbaldia was quite an outlier, so the individual with the second biggest number of capsules had `r  Seeds_per_capsule_SP_dat %>% filter(!Number_of_capsules == 32) %>% mutate(max = max(Number_of_capsules)) %>% select(max) %>% unique() %>% pull()` capsules.
 
 
 ###Sibbaldia procumbens  
 
-Ran mixed effect models with seed per capsule explained by size, site or number of capsules produced by the mother. Starting with using site and individual ID as random effects. When model failed to converge we either removed random variables or interactions between variables. Then we used a backward selection to remove variables in the model until we ended up with the null model = seeds per capsules does not depend on size, site or number of capsules in the mother.
+We ran mixed effect models with seed per capsule explained by size (biomass), site or number of capsules produced by the mother. Starting with using site and individual ID as random effects. When model failed to converge we either removed random variables or interactions between variables and used a backward selection method to remove variables in the model until we ended up with the null model. Hence, number of seeds per capsules does not depend on size, site or number of capsules in the mother.
 
-```{r}
-summary(glmer(Number_of_seeds ~ size * Site + (1|Site) + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log")))
-```
-```{r}
-
-summary(glmer(Number_of_seeds ~ size + Site + (1|Site) + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log")))
-
-```
-```{r}
-summary(glmer(Number_of_seeds ~ size + Site + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log")))
-```
-```{r}
-summary(glmer(Number_of_seeds ~ Number_of_capsules + (1|Site) + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log")))
-```
-```{r}
-summary(glmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log")))
-```
-
-
-Hence, I choose the predicted number of seeds per capsule from the model
-```{r}
-seed_SP_null <- glmer(Number_of_seeds ~ 1 + (1|ID), data = Seeds_per_capsule_SP_dat, family = poisson(link = "log"))
-summary(seed_SP_null)
-```
-```{r}
-Seeds_per_capsule_SP <- as.numeric(exp(fixef(seed_SP_null)))
-
-Seeds_per_capsule_SP
-```
+Hence, we choose the predicted number of seeds per capsule from the model: `r Seeds_per_capsule_SP`
 
 
 ```{r, echo = FALSE}
@@ -106,95 +75,36 @@ Seeds_per_capsule_SP_dat %>%
   geom_hline(aes(yintercept = Seeds_per_capsule_SP)) + 
   ggtitle("Number of seeds by size for Sibbaldia procumbens") + 
   xlab("log2(size)") +
-  ylab("Seed per capsule") + scale_color_viridis_d()
+  ylab("Seed per capsule") + 
+  scale_color_manual(values = c("#BAD8F7", "#89B7E1", "#2E75B6", "#213964")) +
+  theme_minimal()
 ```
 
 
 ###Veronica alpina  
 
-Ran mixed effect models with seed per capsule explained by size, site or number of capsules produced by the mother. Starting with using site and individual ID as random effects. When models failed to converge we removed the random variables or the intercation between variables. Then we used backward selection to remove variables in the model until we ended up with a model with seeds per capsule depending on size. However, this trend was driven by one individual with a very low biomass. When we removed this outlier the trend was not significant. Since the trend was already very little significant when we included this individual we decided to go for the null model for Veronica alpina as well.
 
-```{r}
-summary(glmer(Number_of_seeds ~ size * Site + (1|Site) + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
-```
-```{r}
-summary(glmer(Number_of_seeds ~ size + Site + (1|Site) + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
-```
-```{r}
-summary(glmer(Number_of_seeds ~ size * Site + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
+We ran mixed effect models with seed per capsule explained by size (biomass), site or number of capsules produced by the mother. Starting with using site and individual ID as random effects. When models failed to converge we removed the random variables or the interaction between variables. Then we used backward selection to remove variables in the model until we ended up with a model with seeds per capsule depending on size. However, this trend was driven by one individual with a very low biomass. When we removed this outlier the trend was not significant. Since the trend was already very little significant when we included this individual we decided to go for the null model for Veronica alpina as well. In addition, we ran a model to test if seeds per capsule was affected by number of capsules, but there was no significant effect. Hence, we choose the predicted number of seeds per capsule from the null model
 
-```
-```{r}
-summary(glmer(Number_of_seeds ~ size + Site + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
- 
-```
-```{r}
-summary(glmer(Number_of_seeds ~ size + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
-```
-
-Running the model on the data without the outlier individual:
-
-```{r}
-
-summary(glmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = (Seeds_per_capsule_VA_dat %>% filter(size >10)), family = poisson(link = "log")))
-```
-
-
-I also ran a model with seeds per capsule explained by number of capsules, but number of capsules did not affect the number of seeds per capsule.
-
-```{r}
-summary(glmer(Number_of_seeds ~ Number_of_capsules + (1|Site) + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
-```
-```{r}
-summary(glmer(Number_of_seeds ~ Number_of_capsules + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
-```
-
-
-Hence, I choose the predicted number of seeds per capsule from the model
-
-```{r}
-summary(glmer(Number_of_seeds ~ 1 + (1|ID), data = Seeds_per_capsule_VA_dat, family = poisson(link = "log")))
-
-```
-
-```{r}
-Seeds_per_capsule_VA_null <- as.numeric(exp(fixef(seed_VA_null)))
-
-```
-
-With the outlier
-```{r, echo = FALSE}
-Seeds_per_capsule_VA_dat %>%  
-  ggplot(aes(x = size, y = Number_of_seeds)) + 
-  geom_point(aes(color = Site)) + 
-  geom_hline(aes(yintercept = Seeds_per_capsule_VA_null)) + 
-  #geom_abline(intercept = Seeds_per_capsule_VA$Intercept_seeds, slope = Seeds_per_capsule_VA$seed_number_coef) +
-  ggtitle("Number of seeds by size for Veronica_alpina") + 
-  xlab("log2(size)") + 
-  ylab("Seed per capsule") + 
-  scale_color_viridis_d()
-```
-
-Without the outlier
+Hence the number of seeds per capsule for Veronica alpina did not depend on size, site or number of capsules in the mother. We used the constant from the null model in the population model:  `r as.numeric(exp(fixef(seed_VA_null)))`
 
 ```{r, echo = FALSE}
 Seeds_per_capsule_VA_dat %>%
   filter(size > 10) %>% 
   ggplot(aes(x = size, y = Number_of_seeds)) + 
   geom_point(aes(color = Site)) + 
-  geom_hline(aes(yintercept = Seeds_per_capsule_VA_null)) + 
-  #geom_abline(intercept = Seeds_per_capsule_VA$Intercept_seeds, slope = Seeds_per_capsule_VA$seed_number_coef) +
+  geom_hline(aes(yintercept = as.numeric(exp(fixef(seed_VA_null))))) + 
   ggtitle("Number of seeds by size for Veronica_alpina") + 
   xlab("log2(size)") + 
   ylab("Seed per capsule") + 
-  scale_color_viridis_d()
+  scale_color_manual(values = c("#BAD8F7", "#89B7E1", "#2E75B6", "#213964")) +
+  theme_minimal()
 ```
 
 
 ##Seedling establishment rate  
 
-
-These data come from an add on experiment where we sowed out 20 seeds of each species in vegetated and non-vegetated plots, inside and outside of the OTC. We have five replicates of each treatment combination. Seeds were glued to toothpicks to stop the seeds from blowing away. To control for background seed rain we used subplot 3 in each of the control and removal plot of the overall INCLINE experiment. The seeds were sowed out in September (2019) and checked for germination at three intervals in 2020: i) a couple of weeks after snow melt out, ii) in the peak growing season and iii) in the end of the growing season. Here we use the data from the peak growing season check-point. 
+These data come from an experiment where we sowed out 20 seeds of each species in vegetated and non-vegetated plots, inside and outside of the OTC. We have five replicates of each treatment combination. To control for background seed rain we used subplot 3 in each of the control and removal plot of the overall INCLINE experiment. The seeds were sowed out in September (2019) and checked for germination at three intervals in 2020: i) a couple of weeks after snow melt out, ii) in the peak growing season and iii) in the end of the growing season. Here we use the data from the peak growing season check-point. 
 We calculated background seed rain from the overall INCLINE experiment. There was a marked difference between the removal and control plots, so we decided to calculate an average background germination rate for each species in removal and controls. We used these numbers and subtracted that number of seedlings from every replicate in the germination experiment.
 
 ```{r}
@@ -204,190 +114,79 @@ seedling_est_background
 
 ###Veronica alpina  
 
-We calculated the germination percentage and tested if it was different in warmed and unwarmed plots, and in plots with and without vegetation, using site and blockID as random effects. By backward selection we remove interactions and variables until we find the right model.
+We calculated the germination percentage and tested if it was different in warmed and unwarmed plots, and in plots with and without vegetation, using site and blockID as random effects. By backward selection we removed the interaction between warming and vegetation and ended up with this model:
 
-```{r}
-summary(glmer(count ~ Warming * Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_VA_dat))
-```
 ```{r}
 summary(glmer(count ~ Warming + Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_VA_dat))
 ```
-Warming and Vegetation was significant, but not interactively. We calculated the seedling establishment rate in warmed and unwarmed plots, and vegetated and unvegetated plots base don the model.
 
-```{r}
-seedling_est_VA <- fixef(model_seedl_VA2) %>% 
-  as.data.frame() %>% 
-  rownames_to_column() %>% 
-  pivot_wider(names_from = "rowname", values_from = ".") %>% 
-  rename(Intercept = "(Intercept)", OTC = WarmingOTC, Veg = VegetationVeg)
+Warming and Vegetation did significantly affect the number of seeds that germinated. We calculated the germination probability in warmed and unwarmed plots, and vegetated and unvegetated plots based on the model.
 
-seedling_est_VA_C_NoVeg <- expit(seedling_est_VA$Intercept)
-
-seedling_est_VA_C_Veg <- expit(seedling_est_VA$Intercept + seedling_est_VA$Veg)
-
-seedling_est_VA_OTC_NoVeg <- expit(seedling_est_VA$Intercept + seedling_est_VA$OTC)
-
-seedling_est_VA_OTC_Veg <- expit(seedling_est_VA$Intercept + seedling_est_VA$OTC + seedling_est_VA$Veg)
-
-```
-
-Seedling establishment in cold and non-vegetated plots:
-```{r}
-seedling_est_VA_C_NoVeg
-```
-Seedling establishment in cold and vegetated plots:
-```{r}
-seedling_est_VA_C_Veg
-```
-Seedling establishment in warm and non-vegetated plots:
-```{r}
-seedling_est_VA_OTC_NoVeg
-```
-Seedling establishment in warm and vegetated plots:
-```{r}
-
-seedling_est_VA_OTC_Veg
-```
-
+Seedling establishment in cold and non-vegetated plots: `r seedling_est_VA_C_NoVeg`
+Seedling establishment in cold and vegetated plots: `r seedling_est_VA_C_Veg`
+Seedling establishment in warm and non-vegetated plots: `r seedling_est_VA_OTC_NoVeg`
+Seedling establishment in warm and vegetated plots: `r seedling_est_VA_OTC_Veg`
 
 ###Sibbaldia procumbens  
 
-We calculated the germination percentage and tested if it was different in warmed and unwarmed plots, and in plots with and without vegetation, using site and blockID as random effects. By backward selection we remove interactions and variables until we find the right model.
+We calculated the germination percentage and tested if it was different in warmed and unwarmed plots, and in plots with and without vegetation, using site and blockID as random effects. By backward selection we remove interactions and variables until we found the right model. We found that germination probability was not affected by warming, but differed between vegetated and unvegetated plots:
 
-```{r}
-summary(glmer(count ~ Warming * Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_SP_dat))
-```
-```{r}
-summary(glmer(count ~ Warming + Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_SP_dat))
-```
 ```{r}
 summary(glmer(count ~ Vegetation + (1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_SP_dat))
 ```
 
 
-Hence, we calculated the seedling establishment rate in vegetation and unvegetated plots for Sibbaldia procumbens:
+Hence, we calculated the seedling establishment rate in vegetated and non-vegetated plots for Sibbaldia procumbens:
 
-```{r}
-seedling_est_SP <- fixef(model_seedl_SP3) %>% 
-  as.data.frame() %>% 
-  rownames_to_column() %>% 
-  pivot_wider(names_from = "rowname", values_from = ".") %>% 
-  rename(Intercept = "(Intercept)", Veg = VegetationVeg)
-
-seedling_est_SP_NoVeg <- expit(seedling_est_SP$Intercept)
-
-seedling_est_SP_Veg <- expit(seedling_est_VA$Intercept + seedling_est_VA$Veg)
-```
-
-Seedling establishment in non-vegetated plots:
-```{r}
-seedling_est_SP_NoVeg
-```
-Seedling establishment in vegetated plots:
-```{r}
-seedling_est_SP_Veg
-```
+Seedling establishment in non-vegetated plots: `r seedling_est_SP_NoVeg`
+Seedling establishment in vegetated plots: `r seedling_est_SP_Veg`
 
 ##Seedling size information  
 
-
 ###Sibbaldia procumbens  
 
-Investigated whether seedlings size changed between treatments (control, extant trait transplants, novel trait transplants, removal), and warmed and unwarmed plots. Using nested site/block/plot as random effect. Using backward selection to eliminated variables.
-
-```{r}
-summary(lmer(size ~ OTC * treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat))
-```
-```{r}
-summary(lmer(size ~ OTC + treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat))
-```
-```{r}
-summary(lmer(size ~ treatment + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat))
-```
-```{r}
-summary(lmer(size ~ OTC + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat))
-```
-
-Neither warming nor treatment did significantly change the seedling size for Sibbaldia procumbens. So we combined the vegetated plots and tested if they differed from the non-vegetated plots. This ended up being the final model
+We investigated whether seedlings size changed between treatments (control, extant trait transplants, novel trait transplants, removal), and warmed and unwarmed plots. Using nested site/block/plot as random effect, and a backward selection method to eliminated variables. Neither warming, nor the treatments affected seedling size. However, when we combined all the vegetated treatments (control, extant traits transplant and novel traits transplants), and compared that with the non-vegetated treatments (removal), we saw a difference: 
 
 ```{r}
 summary(lmer(size ~ Vegetation + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat))
 ```
 
-We calculated the mean seedling size for the vegetated and non-vegetated plots, and the sd from the model.
+We calculated the mean seedling size (in log2) for the vegetated and non-vegetated plots, and the standard deviation from the model.
 
 ```{r}
 Seedling_info_SP 
 ```
 
-We also calculated maximum seedling size from the data, as a cut off when assigning parents of the clonal offsprings.
+We also calculated maximum seedling size by adding two standard deviations from the mean of the vegetated seedling size (because it was the largest size), as a cut off when assigning parents of the clonal offsprings, which was: `r SP_max_seedling_size`
 
-```{r}
-
-SP_max_seedling_size
-```
 
 ```{r, echo = FALSE}
 Seedling_info_SP_dat %>%  
   ggplot(aes(x = Vegetation, y = size, fill = Vegetation)) + 
   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
   geom_jitter(alpha= 0.2) +
-  geom_hline(yintercept = mean_NoVeg_SP,  size = 2, color = "lightgreen") +
-  geom_hline(yintercept = mean_Veg_SP, size = 2, color = "darkgreen") +
-  ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") +
-  scale_fill_manual(values = c("lightgreen", "darkgreen")) +
+  geom_hline(yintercept = mean_NoVeg_SP,  size = 2, color = "#a6611a") +
+  geom_hline(yintercept = mean_Veg_SP, size = 2, color = "#018571") +
+  ggtitle("Seedling size by treatment for Sibbaldia procumbens") + ylab("size") +
+  scale_fill_manual(values = c("#a6611a", "#018571")) +
   theme_bw()
 ```
 
 ### Veronica alpina  
 
-Investigated whether seedlings size changed between treatments (control, extant trait transplants, novel trait transplants, removal), and warmed and unwarmed plots. Using nested site/block/plot as random effect. Using backward selection to eliminated variables, starting with random efects, then interactions, then fixed effects.
+We investigated whether seedlings size changed between treatments (control, extant trait transplants, novel trait transplants, removal), and warmed and unwarmed plots. Using nested site/block/plot as random effect. Using backward selection to eliminated variables, starting with random efects, then interactions, then fixed effects.  Neither warming, nor the treatments affected seedling size. However, when we combined all the vegetated treatments (control, extant traits transplant and novel traits transplants), and compared that with the non-vegetated treatments (removal). There was also no significant difference there. Hence we ended up using the null model to calculated the mean seedling size (in log2): `r Seedling_info_VA_mean ` and the standard deviation `r sd_VA` from the model.
 
-```{r}
-summary(lmer(size ~ OTC * treatment + (1|siteID/blockID/plotID), data = Seedling_info_VA_dat))
-```
-```{r}
-summary(lmer(size ~ OTC * treatment + (1|blockID/plotID), data = Seedling_info_VA_dat))
-```
-```{r}
-summary(lmer(size ~ OTC * treatment + (1|plotID), data = Seedling_info_VA_dat))
-```
-```{r}
-summary(lmer(size ~ OTC + treatment + (1|plotID), data = Seedling_info_VA_dat))
-```
-```{r}
-summary(lmer(size ~ treatment + (1|plotID), data = Seedling_info_VA_dat))
-```
-
-Neither warming nor treatment did significantly change the seedling size for Veronica alpina. So we combined the vegetated plots and tested if they differed from the non-vegetated plots. This ended up being the final model
-
-```{r}
-summary(lmer(size ~ Vegetation + (1|plotID), data = Seedling_info_VA_dat))
-```
-
-
-We calculated the mean seedling size for the vegetated and non-vegetated plots, and the sd from the model.
-
-```{r}
-Seedling_info_VA
-```
-
-We also calculated maximum seedling size from the data, as a cut off when assigning parents of the clonal offsprings.
-
-```{r}
-
-VA_max_seedling_size
-```
+We also calculated maximum seedling size by adding two standard deviations from the mean of the seedling size, as a cut off when assigning parents of the clonal offsprings, which was: `r VA_max_seedling_size`
 
 ```{r, echo = FALSE}
 Seedling_info_VA_dat %>%  
   ggplot(aes(x = Vegetation, y = size, fill = Vegetation)) + 
   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
   geom_jitter(alpha= 0.2) +
-  geom_hline(yintercept = mean_NoVeg_VA,  size = 2, color = "lightgreen") +
-  geom_hline(yintercept = mean_Veg_VA, size = 2, color = "darkgreen") +
+  geom_hline(yintercept = Seedling_info_VA_mean,  size = 2, color = "black") +
+  #geom_hline(yintercept = mean_Veg_VA, size = 2, color = "darkgreen") +
   ggtitle("Seedling size by treatment for Veronica alpina") + ylab("size") +
-  scale_fill_manual(values = c("lightgreen", "darkgreen")) +
+  scale_fill_manual(values = c("#a6611a", "#018571")) +
   theme_bw()
 ```
 
@@ -396,15 +195,29 @@ Seedling_info_VA_dat %>%
 
 
 For both species:
-Finding all the clones by selecting individuals that has a size in the next year, but not the start year. For each plot we identify the potential parents by excluding all individuals that was recorded as seedlings or juveniles, pluss any individuals that have a size smaller than the maximum seedling size for that species. The distance between each clone and potential parents was calculated, and the parent with the shortest distance was picked. We then added the size of the parent to the first-year size of the clone. Afterwards we filtered out the parents that were more than 5 cm away from the clone.
+Finding all the clones by selecting individuals that has a size in the next year, but not the start year. For each plot we identify the potential parents by excluding all individuals that was recorded as seedlings or juveniles, plus any individuals that have a size smaller than the maximum seedling size for that species. The distance between each clone and potential parents was calculated, and the parent with the shortest distance was picked and filtered out the parents that were more than 5 cm away from the clone. We then added the size of the parent to the first-year size of the clone.
 
 
 ```{r, echo = FALSE}
-Sib_pro_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline() +
-  ggtitle("Size of clones and other individuals of Sibbaldia procumbens")
+Sib_pro_2018_2021 %>% 
+  filter(is.na(offspringNext)|offspringNext == "clonal") %>% 
+  ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + 
+  geom_point() +
+  geom_abline() +
+  ggtitle("Size of clones and other individuals of Sibbaldia procumbens") +
+    scale_color_manual(values = c("#a6611a", "grey"),
+                     name="Reproduction type",
+                    labels=c("Clones", "Non-clones")) +
+  guides(alpha = FALSE)
 ```
 ```{r, echo = FALSE}
-Ver_alp_2018_2021 %>% ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline() +
-  ggtitle("Size of clones and other individuals of Veronica alpina")
+Ver_alp_2018_2021 %>% 
+  filter(is.na(offspringNext)|offspringNext == "clonal") %>% 
+  ggplot(aes(y = sizeNext, x = size, col = offspringNext, alpha = 0.5)) + geom_point() + geom_abline() +
+  ggtitle("Size of clones and other individuals of Veronica alpina") +
+  scale_color_manual(values = c("#a6611a", "grey"),
+                     name="Reproduction type",
+                    labels=c("Clones", "Non-clones")) +
+  guides(alpha = FALSE)
 ```
 
