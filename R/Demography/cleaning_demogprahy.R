@@ -101,18 +101,3 @@ Ver_alp <- Ver_alp %>%
          siteID = as.factor(siteID), #changing siteID, OTC and treatment to factor
          OTC = as.factor(OTC),
          treatment = as.factor(treatment))
-
-#### Making data set ready for OSF storage - changing variable names and pivot longer ####
-
-INCLINE_demography_Sib_pro <- Sib_pro %>% 
-  select(siteID, blockID, plotID, year, date, regitrator, OTC, treatment, unique_IDS, IDG, MS, X, Y, LSL, NL, LL, NFS, NFL, NB, NC, NAC, seedling, juvenile, comment_registrator, comment_transcription) %>% 
-  rename(registrator = regitrator, unique_ID = unique_IDS, genet_ID = IDG, mother_shoot = MS, leaf_stalk_length = LSL, number_of_leaves = NL, leaf_length = LL, number_of_flower_stems = NFS, number_of_flowers = NFL, number_of_buds = NB, number_of_capsules = NC, number_of_aborted_capsules = NAC, comment_field = comment_registrator) %>% 
-  pivot_longer(cols = c(leaf_stalk_length, number_of_leaves, leaf_length, number_of_flower_stems, number_of_flowers, number_of_buds, number_of_capsules, number_of_aborted_capsules), names_to = "demographic_trait", values_to = "demographic_value")
-
-INCLINE_demography_Ver_alp <- Ver_alp %>% 
-  select(siteID, blockID, plotID, year, date, registrator, OTC, treatment, unique_IDS, IDG, MS, X, Y, SH, NL, LL, WL, NFL, NB, NC, NAC, seedling, juvenile, comment, comment_transcription) %>% 
-  rename(genet_ID = IDG, mother_shoot = MS, shoot_height = SH, number_of_leaves = NL, leaf_length = LL, leaf_width = WL, number_of_flowers = NFL, number_of_buds = NB, number_of_capsules = NC, number_of_aborted_capsules = NAC, comment_field = comment) %>% 
-  pivot_longer(cols = c(shoot_height, number_of_leaves, leaf_length, leaf_width, number_of_flowers, number_of_buds, number_of_capsules, number_of_aborted_capsules), names_to = "demographic_trait", values_to = "demographic_value")
-
-#write.csv(INCLINE_demography_Sib_pro, file = "data/cleaned_data/INCLINE_demography_Sib_pro.csv", row.names = FALSE)
-#write.csv(INCLINE_demography_Ver_alp, file = "data/cleaned_data/INCLINE_demography_Ver_alp.csv", row.names = FALSE)
