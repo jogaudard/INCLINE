@@ -3,6 +3,8 @@
 ################################################################
 
 source("R/Demography/cleaning_demogprahy.R")
+rm(INCLINE_demography_Sib_pro)
+rm(INCLINE_demography_Ver_alp)
 
 #### Libraries ####
 #library(tidyverse)
