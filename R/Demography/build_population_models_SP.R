@@ -6,6 +6,8 @@
 source("R/Demography/cleaning_demogprahy.R")
 source("R/Demography/ready_demograhy_for_IPM.R")
 source("R/Demography/functions_for_IPM_building.R")
+rm(INCLINE_demography_Sib_pro)
+rm(INCLINE_demography_Ver_alp)
 
 #### Libraries ####
 library(tidyverse)
