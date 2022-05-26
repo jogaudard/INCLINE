@@ -43,6 +43,7 @@ biomass_Sib_pro <- read_csv2("data/Demography/Biomass_Sib_pro.csv")
 #biomass_Ver_alp_INCLINE <- read_csv2("data/Demography/SG.19_above-below_allocation.csv") #Not using this because some of the biomass rotted while collecting data, so biomass might not be correct
 seedling_est <- read.csv2("data/Demography/INCLINE_seedling_data.csv") 
 biomass_Ver_alp <- read_csv2("data/Demography/VeronicaAlpina_Biomass_Seedclim_edited.csv") #from SeedClim not on INCLINE OSF
+seed_bank <- read_csv2("data/Demography/Seed_bank_survival.csv") 
 
 
 #### Biomass regressions ####
@@ -477,6 +478,59 @@ Seedling_info_VA_dat %>%
 
 VA_max_seedling_size <- Seedling_info_VA_dat %>% 
   select(max_seedling_size) %>% 
+  unique()
+
+#### Seed bank ####
+
+seed_bank <- seed_bank %>% 
+  rename(missing = "missing/dissentegrated") %>% 
+  mutate(seeds_dead_in_soil_bank = case_when(missing == "Yes" ~ 1,
+                                             missing == "No" ~ 0),
+         seeds_germinate = case_when(germinated == "Yes" ~ 1,
+                                     TRUE ~ 0),
+         seeds_alive_not_germ = case_when(embryo_in_seed == "Yes" ~ 1,
+                                          TRUE ~ 0),
+         seeds_dead_later = case_when(dead == "Yes" ~1,
+                                      TRUE ~ 0)) %>% 
+  group_by(petridish, species) %>% 
+  mutate(seeds_dead_in_soil_bank = sum(seeds_dead_in_soil_bank),
+         seeds_germinate = sum(seeds_germinate),
+         seeds_alive_not_germ = sum(seeds_alive_not_germ),
+         seeds_dead_later = sum(seeds_dead_later),
+         seeds_total = max(seed_number)) %>%
+  select(petridish, plotID, siteID, warming, species, seeds_dead_in_soil_bank, seeds_germinate, seeds_alive_not_germ, seeds_total, seeds_dead_later) %>%
+  unique() %>% 
+  mutate(seeds_alive_total = seeds_germinate + seeds_alive_not_germ,
+         seeds_dead_total = seeds_dead_in_soil_bank + seeds_dead_later,
+         seeds_alive_total_prop = seeds_alive_total/seeds_total,
+         seeds_dead_total_prop = seeds_dead_total/seeds_total,
+         seeds_germinate_prop = seeds_germinate/seeds_total,
+         seeds_staySB = seeds_alive_not_germ/seeds_total) %>% 
+  ungroup()
+
+seed_bank_model_dataset <- seed_bank %>% 
+  group_by(siteID, species, warming) %>% 
+  mutate(seeds_alive_total = round(mean(seeds_alive_total), digits = 0),
+         seeds_alive_total_prop = mean(seeds_alive_total_prop),
+         seeds_dead_total = round(mean(seeds_dead_total), digits = 0),
+         seeds_dead_total_prop = mean(seeds_dead_total_prop),
+         seeds_germinate_prop = seeds_germinate/seeds_total,
+         seeds_staySB = seeds_alive_not_germ/seeds_total) %>% 
+  select(siteID, species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop, seeds_germinate_prop, seeds_staySB) %>% 
+  unique() 
+
+seed_bank_model <- glm(cbind(seeds_alive_total, seeds_dead_total) ~  warming + species + siteID, family = binomial, data = seed_bank_model_dataset)
+summary(seed_bank_model) #Should maybe use the model and predict for different sites and species and treatment
+
+seed_bank <- seed_bank %>% 
+  group_by(species, warming) %>% 
+  mutate(seeds_alive_total = round(mean(seeds_alive_total), digits = 0),
+         seeds_alive_total_prop = mean(seeds_alive_total_prop),
+         seeds_dead_total = round(mean(seeds_dead_total), digits = 0),
+         seeds_dead_total_prop = mean(seeds_dead_total_prop),
+         seeds_germinate_prop = mean(seeds_germinate_prop),
+         seeds_staySB = mean(seeds_staySB)) %>% 
+  select(species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop, seeds_germinate_prop, seeds_staySB) %>% 
   unique()
 
 #### Making transitions ####
