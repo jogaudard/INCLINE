@@ -396,21 +396,21 @@ contourPlot2(t(Cmatrix_VA_CC), Cmatrix_VA_CC@meshpoints, maxSize, 0.03, 0, title
 IPM_VA_CC_precip1 <- Pmatrix_VA_CC_precip1 + Fmatrix_VA_CC_precip1 + Cmatrix_VA_CC
 #contourPlot2(t( M = IPM_VA_CC_precip1, meshpts = Pmatrix_VA_CC_precip1@meshpoints, maxSize = maxSize, lower = 0.03, upper = 0))
 IPM_plot(IPM_control = IPM_VA_CC_precip1, minSize = minSize, maxSize = maxSize, zrange = c(-0.03, 0.04)) + ggtitle("Veronica alpina CC precip 1.2 m/year")
-persp(IPM_VA_CC_precip1)
+#persp(IPM_VA_CC_precip1)
 as.numeric(eigen(IPM_VA_CC_precip1)$value[1])
 
 
 IPM_VA_CC_precip2 <- Pmatrix_VA_CC_precip2 + Fmatrix_VA_CC_precip2 + Cmatrix_VA_CC
-image(t(IPM_VA_CC_precip2))
+#image(t(IPM_VA_CC_precip2))
 IPM_plot(IPM_control = IPM_VA_CC_precip2, minSize = minSize, maxSize = maxSize, zrange = c(-0.03, 0.04)) + ggtitle("Veronica alpina CC precip 2.3 m/year")
-persp(IPM_VA_CC_precip2)
+#persp(IPM_VA_CC_precip2)
 as.numeric(eigen(IPM_VA_CC_precip2)$value[1])
 
 
 IPM_VA_CC_precip3 <- Pmatrix_VA_CC_precip3 + Fmatrix_VA_CC_precip3 + Cmatrix_VA_CC
-image(t(IPM_VA_CC_precip3))
+#image(t(IPM_VA_CC_precip3))
 IPM_plot(IPM_control = IPM_VA_CC_precip3, minSize = minSize, maxSize = maxSize, zrange = c(-0.03, 0.04)) + ggtitle("Veronica alpina CC precip 3.4 m/year")
-persp(IPM_VA_CC_precip3)
+#persp(IPM_VA_CC_precip3)
 as.numeric(eigen(IPM_VA_CC_precip3)$value[1])
 
 x11()
@@ -721,20 +721,20 @@ contourPlot2(t(Cmatrix_VA_CR), Cmatrix_VA_CR@meshpoints, maxSize, 0.03, 0, title
 
 #### Build IPM ####
 IPM_VA_CR_precip1 <- Pmatrix_VA_CR_precip1 + Fmatrix_VA_CR + Cmatrix_VA_CR
-contourPlot2(t(IPM_VA_CR_precip1, Pmatrix_VA_CR_precip1@meshpoints, maxSize, 0.03, 0))
-persp(IPM_VA_CR_precip1)
+#contourPlot2(t(IPM_VA_CR_precip1, Pmatrix_VA_CR_precip1@meshpoints, maxSize, 0.03, 0))
+#persp(IPM_VA_CR_precip1)
 as.numeric(eigen(IPM_VA_CR_precip1)$value[1])
 
 
 IPM_VA_CR_precip2 <- Pmatrix_VA_CR_precip2 + Fmatrix_VA_CR + Cmatrix_VA_CR
-contourPlot2(t(IPM_VA_CR_precip2, Pmatrix_VA_CR_precip2@meshpoints, maxSize, 0.03, 0))
-persp(IPM_VA_CR_precip2)
+#contourPlot2(t(IPM_VA_CR_precip2, Pmatrix_VA_CR_precip2@meshpoints, maxSize, 0.03, 0))
+#persp(IPM_VA_CR_precip2)
 as.numeric(eigen(IPM_VA_CR_precip2)$value[1])
 
 
 IPM_VA_CR_precip3 <- Pmatrix_VA_CR_precip3 + Fmatrix_VA_CR + Cmatrix_VA_CR
-contourPlot2(t(IPM_VA_CR_precip3, Pmatrix_VA_CR_precip3@meshpoints, maxSize, 0.03, 0))
-persp(IPM_VA_CR_precip3)
+#contourPlot2(t(IPM_VA_CR_precip3, Pmatrix_VA_CR_precip3@meshpoints, maxSize, 0.03, 0))
+#persp(IPM_VA_CR_precip3)
 as.numeric(eigen(IPM_VA_CR_precip3)$value[1])
 
 x11()
@@ -2540,7 +2540,7 @@ co_VA_WN@offspringRel$coefficients <- as.numeric(fixef(mod_clone_growth_VA_WN)[1
 
 Cmatrix_VA_WN <- makeIPMCmatrix(clonalObj = co_VA_WN, minSize=minSize, maxSize=maxSize, nBigMatrix = 100, correction = "constant")
 
-contourPlot2(t(Cmatrix_VA_WN), Cmatrix_VA_WN_precip1@meshpoints, maxSize, 0.03, 0, title = "Cmatrix: clones")
+#contourPlot2(t(Cmatrix_VA_WN), Cmatrix_VA_WN@meshpoints, maxSize, 0.03, 0, title = "Cmatrix: clones")
 
 
 #### Build IPM ####
