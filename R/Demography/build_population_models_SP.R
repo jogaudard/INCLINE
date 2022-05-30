@@ -6,8 +6,6 @@
 source("R/Demography/cleaning_demogprahy.R")
 source("R/Demography/ready_demograhy_for_IPM.R")
 source("R/Demography/functions_for_IPM_building.R")
-rm(INCLINE_demography_Sib_pro)
-rm(INCLINE_demography_Ver_alp)
 
 #### Libraries ####
 library(tidyverse)
@@ -799,23 +797,24 @@ fo_SP_CE <-makeFecObj(SP_CE,
 
 fo_SP_CE@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_SP_CE)[1]) + 1.2*as.numeric(fixef(mod_flo_if_SP_CE)[3]),
                                        as.numeric(fixef(mod_flo_if_SP_CE)[2]))
-fo_SP_CE@fitFec[[2]]$coefficients <- as.numeric(coef(mod_flo_no_SP_CE)[1] + 1.2*as.numeric(coef(mod_flo_no_SP_CE)[2]) + (1.2)^2*as.numeric(coef(mod_flo_no_SP_CE)[3]))
+fo_SP_CE@fitFec[[2]]$coefficients <- as.numeric(coef(mod_flo_no_SP_CE)[1])
 fo_SP_CE_precip1 <- fo_SP_CE
 
 fo_SP_CE@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_SP_CE)[1]) + 2.3*as.numeric(fixef(mod_flo_if_SP_CE)[3]),
                                        as.numeric(fixef(mod_flo_if_SP_CE)[2]))
-fo_SP_CE@fitFec[[2]]$coefficients <- as.numeric(coef(mod_flo_no_SP_CE)[1] + 2.3*as.numeric(coef(mod_flo_no_SP_CE)[2]) + (2.3)^2*as.numeric(coef(mod_flo_no_SP_CE)[3]))
+fo_SP_CE@fitFec[[2]]$coefficients <- as.numeric(coef(mod_flo_no_SP_CE)[1])
 fo_SP_CE_precip2 <- fo_SP_CE
 
 fo_SP_CE@fitFec[[1]]$coefficients <- c(as.numeric(fixef(mod_flo_if_SP_CE)[1]) + 3.4*as.numeric(fixef(mod_flo_if_SP_CE)[3]),
                                        as.numeric(fixef(mod_flo_if_SP_CE)[2]))
-fo_SP_CE@fitFec[[2]]$coefficients <- as.numeric(coef(mod_flo_no_SP_CE)[1] + 3.4*as.numeric(coef(mod_flo_no_SP_CE)[2]) + (3.4)^2*as.numeric(coef(mod_flo_no_SP_CE)[3]))
+fo_SP_CE@fitFec[[2]]$coefficients <- as.numeric(coef(mod_flo_no_SP_CE)[1])
 fo_SP_CE_precip3 <- fo_SP_CE
 
 
 Fmatrix_SP_CE_precip1 <- makeIPMFmatrix(fecObj=fo_SP_CE_precip1, minSize=minSize_SP, maxSize=maxSize_SP, correction = "continuous", nBigMatrix = 100)
 Fmatrix_SP_CE_precip2 <- makeIPMFmatrix(fecObj=fo_SP_CE_precip2, minSize=minSize_SP, maxSize=maxSize_SP, correction = "continuous", nBigMatrix = 100)
 Fmatrix_SP_CE_precip3 <- makeIPMFmatrix(fecObj=fo_SP_CE_precip3, minSize=minSize_SP, maxSize=maxSize_SP, correction = "continuous", nBigMatrix = 100)
+
 
 #Plotting the matrix
 contourPlot2(t(Fmatrix_SP_CE_precip1), Fmatrix_SP_CE_precip1@meshpoints, maxSize, 0.003, 0, title = "Fmatrix: flower and seedlings")
@@ -2204,7 +2203,7 @@ go_SP_WN <- coerceGrowthObj(go_SP_WN, fixef(mod_growth_SP_WN),
                             sigma.hat(mod_growth_SP_WN)$sigma$data)
 
 
-# Make discrete transition object
+  # Make discrete transition object
 dto_SP_WN <- makeDiscreteTrans(SP_WN, discreteTrans = matrix(
   c(SP_OTC_seed_bank$seeds_staySB,
     (1-SP_OTC_seed_bank$seeds_staySB)*seedling_est_SP_Veg,
