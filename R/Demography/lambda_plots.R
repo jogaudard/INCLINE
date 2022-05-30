@@ -211,8 +211,8 @@ ggplot(aes(x = WC_comparison, y = Treatments, shape = Species, color = Species))
 lambda_diff_WC_lolliplot <- lambda_df_differences %>% 
   filter(Treatments %in% c("WR", "WE", "WN")) %>% 
   mutate(precipitation = factor(precipitation, levels = c( "1.2 m/year", "2.3 m/year", "3.4 m/year", "Across precipitation"))) %>% 
-  ggplot(aes(x = CC_comparison, y = Treatments, color = precipitation)) +
-  geom_linerange(aes(xmin=0, xmax=CC_comparison, y=Treatments), position = position_dodge(width = 0.40))+
+  ggplot(aes(x = WC_comparison, y = Treatments, color = precipitation)) +
+  geom_linerange(aes(xmin=0, xmax=WC_comparison, y=Treatments), position = position_dodge(width = 0.40))+
   #geom_segment(aes(x=1, xend=lambda, y=Treatments, yend=Treatments), position = position_dodge(width = 0.90)) +
   #geom_rect(aes(xmin = 0, xmax = 2, ymin = Treatments - 0.5, ymax = Treatments + 0.5), alpha = 0.2) +
   #geom_rect(aes(xmin = 0, xmax = 2, ymin = Treatments - 0.5, ymax = Treatments + 0.5), alpha = 0.2) + 
@@ -223,7 +223,7 @@ lambda_diff_WC_lolliplot <- lambda_df_differences %>%
   scale_color_manual(values = precip_3_palette) +
   theme_bw() +
   xlab("Δ λ") +
-  ggtitle("b) Comparing λ with extant climate control (CC)") +
+  ggtitle("b) Comparing λ with warming control (WC)") +
   theme(plot.title = element_text(hjust = 0.5)) 
 #scale_fill_manual(values = c("#a6611a", "#dfc27d"))
 
@@ -241,3 +241,142 @@ lambda_diff_WC_lolliplot <- lambda_df_differences %>%
 (lambda_lolliplot2 /  lambda_diff_CC_lolliplot2 / lambda_diff_WC_lolliplot) + 
   plot_layout(heights = c(2,1.9, 1), guides = 'collect') &
   theme(legend.position = "bottom", text = element_text(size = 14))
+
+
+(lambda_lolliplot /  lambda_diff_CC_lolliplot) + 
+  plot_layout(heights = c(2,1.9), guides = 'collect') &
+  theme(legend.position = "bottom", text = element_text(size = 14))
+
+#### trying some new plots ####
+
+lambda_horizontal <- lambda_df %>% 
+  mutate(precipitation = factor(precipitation, levels = c( "1.2 m/year", "2.3 m/year", "3.4 m/year", "Across precipitation"))) %>% 
+  ggplot(aes(y = lambda, x = Treatments, color = precipitation)) +
+  #geom_linerange(aes(xmin=1, xmax=lambda, y=Treatments), position = position_dodge(width = 0.40))+
+  #geom_segment(aes(x=1, xend=lambda, y=Treatments, yend=Treatments), position = position_dodge(width = 0.90)) +
+  #geom_rect(aes(xmin = 0, xmax = 2, ymin = Treatments - 0.5, ymax = Treatments + 0.5), alpha = 0.2) +
+  #geom_rect(aes(xmin = 0, xmax = 2, ymin = Treatments - 0.5, ymax = Treatments + 0.5), alpha = 0.2) + 
+  geom_point(size = 5, position = position_dodge(width = 0.40)) +
+  facet_wrap(~Species, nrow = 1, scales = "free") +
+  geom_hline(yintercept = 1) +
+  #scale_y_discrete(limits = rev) +
+  scale_color_manual(values = precip_3_palette) +
+  theme_bw() +
+  ylab("λ") +
+  ggtitle("A) Population growth rate") +
+  theme(plot.title = element_text(hjust = 0.5)) 
+#scale_fill_manual(values = c("#a6611a", "#dfc27d"))
+
+### Calculate differences in lambda to other things than the controls
+
+lambda_df_differences <- lambda_df %>% 
+  bind_rows(lambda_WN) %>% 
+  bind_rows(lambda_CR) %>% 
+  left_join(lambda_CC_precip, by = c("Species", "precipitation")) %>% 
+  left_join(lambda_WC_precip, by = c("Species", "precipitation")) %>% 
+  left_join(lambda_CC_no_precip, by = c("Species")) %>% 
+  mutate(lambda_CC = case_when(is.na(lambda_CC.x) ~ lambda_CC.y,
+                               !is.na(lambda_CC.x) ~ lambda_CC.x)) %>% 
+  select(-lambda_CC.y, -lambda_CC.x) %>% 
+  mutate(CC_comparison = lambda - lambda_CC,
+         WC_comparison = lambda - lambda_WC)
+
+lambda_df_differences2 <- lambda_df_differences %>% 
+  mutate(lambda_CR = case_when(Treatments == "CR" ~ lambda),
+         lambda_CN = case_when(Treatments == "CN" ~ lambda),
+         lambda_CE = case_when(Treatments == "CE" ~ lambda),
+         lambda_WE = case_when(Treatments == "WE" ~ lambda)) %>% 
+  fill(lambda_CR, .direction = "downup") %>% 
+  fill(lambda_CN, .direction = "downup") %>% 
+  fill(lambda_CE, .direction = "downup") %>% 
+  fill(lambda_WE, .direction = "downup") %>% 
+  mutate(CR_comparison = lambda - lambda_CR,
+         CE_comparison = lambda - lambda_CE,
+         CN_comparison = lambda - lambda_CN,
+         WE_comparison = lambda - lambda_WE)
+
+
+lambda_diff_CR_lolliplot <- lambda_df_differences2 %>% 
+  filter(Treatments == "WR") %>% 
+  mutate(precipitation = factor(precipitation, levels = c( "1.2 m/year", "2.3 m/year", "3.4 m/year", "Across precipitation"))) %>% 
+  ggplot(aes(y = CR_comparison, x = Species, color = precipitation)) +
+  geom_linerange(aes(ymin=0, ymax=CR_comparison, x=Species), position = position_dodge(width = 0.40))+
+  geom_point(size = 5, position = position_dodge(width = 0.40)) +
+  #facet_wrap(~Species, nrow = 2, scales = "free") +
+  geom_hline(yintercept = 0) +
+  scale_x_discrete(limits = rev) +
+  scale_color_manual(values = precip_3_palette) +
+  theme_bw() +
+  ylab("Δ λ") +
+  xlab("") +
+  ggtitle("WR - CR") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+lambda_diff_WC_CC_lolliplot <- lambda_df_differences2 %>% 
+  filter(Treatments == "WC") %>% 
+  mutate(precipitation = factor(precipitation, levels = c( "1.2 m/year", "2.3 m/year", "3.4 m/year", "Across precipitation"))) %>% 
+  ggplot(aes(y = CC_comparison, x = Species, color = precipitation)) +
+  geom_linerange(aes(ymin=0, ymax=CC_comparison, x=Species), position = position_dodge(width = 0.40))+
+  geom_point(size = 5, position = position_dodge(width = 0.40)) +
+  #facet_wrap(~Species, nrow = 2, scales = "free") +
+  geom_hline(yintercept = 0) +
+  scale_x_discrete(limits = rev) +
+  scale_color_manual(values = precip_3_palette) +
+  theme_bw() +
+  ylab("Δ λ") +
+  xlab("") +
+  ggtitle("WC - CC") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+lambda_diff_WN_CN_lolliplot <- lambda_df_differences2 %>% 
+  filter(Treatments == "WN") %>% 
+  mutate(precipitation = factor(precipitation, levels = c( "1.2 m/year", "2.3 m/year", "3.4 m/year", "Across precipitation"))) %>% 
+  ggplot(aes(y = CN_comparison, x = Species, color = precipitation)) +
+  geom_linerange(aes(ymin=0, ymax=CN_comparison, x=Species), position = position_dodge(width = 0.40))+
+  geom_point(size = 5, position = position_dodge(width = 0.40)) +
+  #facet_wrap(~Species, nrow = 2, scales = "free") +
+  geom_hline(yintercept = 0) +
+  scale_x_discrete(limits = rev) +
+  scale_color_manual(values = precip_3_palette) +
+  theme_bw() +
+  ylab("Δ λ") +
+  xlab("") +
+  ggtitle("WN - CN") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+lambda_diff_WE_CE_lolliplot <- lambda_df_differences2 %>% 
+  filter(Treatments == "WE") %>% 
+  mutate(precipitation = factor(precipitation, levels = c( "1.2 m/year", "2.3 m/year", "3.4 m/year", "Across precipitation"))) %>% 
+  ggplot(aes(y = CE_comparison, x = Species, color = precipitation)) +
+  geom_linerange(aes(ymin=0, ymax = CE_comparison, x=Species), position = position_dodge(width = 0.40))+
+  geom_point(size = 5, position = position_dodge(width = 0.40)) +
+  #facet_wrap(~Species, nrow = 2, scales = "free") +
+  geom_hline(yintercept = 0) +
+  scale_x_discrete(limits = rev) +
+  scale_color_manual(values = precip_3_palette) +
+  theme_bw() +
+  ylab("Δ λ") +
+  xlab("") +
+  ggtitle("WE - CE") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+lambda_diff_CN_CE_lolliplot <- lambda_df_differences2 %>% 
+  filter(Treatments == "CN") %>% 
+  mutate(precipitation = factor(precipitation, levels = c( "1.2 m/year", "2.3 m/year", "3.4 m/year", "Across precipitation"))) %>% 
+  ggplot(aes(y = CE_comparison, x = Species, color = precipitation)) +
+  geom_linerange(aes(ymin=0, ymax = CE_comparison, x=Species), position = position_dodge(width = 0.40))+
+  geom_point(size = 5, position = position_dodge(width = 0.40)) +
+  #facet_wrap(~Species, nrow = 2, scales = "free") +
+  geom_hline(yintercept = 0) +
+  scale_x_discrete(limits = rev) +
+  scale_color_manual(values = precip_3_palette) +
+  theme_bw() +
+  ylab("Δ λ") +
+  ggtitle("CN - CE") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+( lambda_horizontal /  (lambda_diff_CR_lolliplot + lambda_diff_WC_CC_lolliplot) / (lambda_diff_WN_CN_lolliplot +lambda_diff_WE_CE_lolliplot ) / (lambda_diff_CN_CE_lolliplot )) + 
+  plot_layout(heights = c(2,3,3,3), guides = 'collect') &
+  theme(legend.position = "bottom", text = element_text(size = 14))
+
