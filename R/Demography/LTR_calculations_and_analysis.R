@@ -1354,7 +1354,7 @@ LTRE_treatments <- LTRE_VA_CC_CR_precip_1 %>%
 
 ##### Making plots #####
 
-LTRE_treatments %>% 
+Ver_alp_LTRE_all_treatments <- LTRE_treatments %>% 
   filter(species == "Ver_alp") %>% 
   mutate(treatment = factor(treatment, levels = c("CR - CC", "CE - CC", "CN - CC", "WR - CC", "WE - CC", "WN - CC", "WR - WC", "WE - WC", "WN - WC", "WC - CC"))) %>% 
 ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
@@ -1367,9 +1367,29 @@ ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) +
   scale_color_manual(values = "#000000") +
   #scale_fill_manual(values = c("#DEDEDE", "#A1A1A1", "#6E6E6E", "#000000")) +
   #scale_color_manual(values = "#B50E00") +
-  ggtitle("Vital rate contribution to lambda difference in Veronica alpina")
+  ggtitle("Vital rate contribution to lambda difference in Veronica alpina") +
+  ylab("Change in population growth rate (λ)") +
+  xlab("Annual precipitation (m/year)")
 
-LTRE_treatments %>% 
+Ver_alp_LTRE_CC_comparison <- LTRE_treatments %>% 
+  filter(species == "Ver_alp") %>% 
+  filter(treatment %in% c("CR - CC", "CE - CC", "CN - CC", "WR - CC", "WE - CC", "WN - CC", "WC - CC")) %>% 
+  mutate(treatment = factor(treatment, levels = c("CR - CC", "CE - CC", "CN - CC", "WC - CC","WR - CC", "WE - CC", "WN - CC"))) %>% 
+  ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
+  geom_bar(position="stack", stat="identity") +
+  geom_point(aes(y = lamda_difference, color = "lambda difference")) +
+  geom_hline(yintercept = 0) +
+  facet_wrap(~treatment, ncol = 4) +
+  theme_bw() +
+  scale_fill_manual(values = palette) +
+  scale_color_manual(values = "#000000") +
+  #scale_fill_manual(values = c("#DEDEDE", "#A1A1A1", "#6E6E6E", "#000000")) +
+  #scale_color_manual(values = "#B50E00") +
+  ggtitle("Vital rate contribution to lambda difference in Veronica alpina")+
+  ylab("Change in population growth rate (λ)") +
+  xlab("Annual precipitation (m/year)")
+
+Sib_pro_LTRE_all_treatments <- LTRE_treatments %>% 
   filter(species == "Sib_pro") %>% 
   mutate(treatment = factor(treatment, levels = c("CR - CC", "CE - CC", "CN - CC", "WR - CC", "WE - CC", "WN - CC","WR - WC", "WE - WC", "WN - WC", "WC - CC"))) %>% 
   ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
@@ -1383,7 +1403,28 @@ LTRE_treatments %>%
   scale_color_manual(values = "#000000") +
   #scale_fill_manual(values = c("#DEDEDE", "#A1A1A1", "#6E6E6E", "#000000")) +
   #scale_color_manual(values = "#B50E00") +
-  ggtitle("Vital rate contribution to lambda difference in Sibbaldia procumbens")
+  ggtitle("Vital rate contribution to lambda difference in Sibbaldia procumbens") +
+  ylab("Change in population growth rate (λ)") +
+  xlab("Annual precipitation (m/year)")
+
+Sib_pro_LTRE_CC_comparisons <- LTRE_treatments %>% 
+  filter(species == "Sib_pro") %>% 
+  filter(treatment %in% c("CR - CC", "CE - CC", "CN - CC", "WR - CC", "WE - CC", "WN - CC", "WC - CC")) %>% 
+  mutate(treatment = factor(treatment, levels = c("CR - CC", "CE - CC", "CN - CC", "WC - CC","WR - CC", "WE - CC", "WN - CC"))) %>% 
+  ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
+  geom_bar(position="stack", stat="identity") +
+  geom_point(aes(y = lamda_difference, color = "lambda difference")) +
+  geom_hline(yintercept = 0) +
+  facet_wrap(~treatment, ncol = 4) +
+  theme_bw() +
+  scale_fill_manual(values = palette) +
+  #scale_fill_viridis_d()+
+  scale_color_manual(values = "#000000") +
+  #scale_fill_manual(values = c("#DEDEDE", "#A1A1A1", "#6E6E6E", "#000000")) +
+  #scale_color_manual(values = "#B50E00") +
+  ggtitle("Vital rate contribution to lambda difference in Sibbaldia procumbens") +
+  ylab("Change in population growth rate (λ)") +
+  xlab("Annual precipitation (m/year)")
 
 
 Susanne_plot_ver_alp <- LTRE_treatments %>% 
