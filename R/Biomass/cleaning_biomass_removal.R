@@ -41,7 +41,13 @@ removal1 %>% group_by(Year, Site, plotID) %>% mutate(total_biomass = sum(value, 
 #### Plot data ####
 
 #### Color palette ####
+Brown_Green_full_palette <- c("#543005", "#8C510A", "#BF812D","#DFC27D", "#F6E8C3","#F5F5F5", "#C7EAE5","#80CDC1","#35978F","#01665E", "#003C30")
+Brown_Green_6_color_palette <- c("#8C510A", "#BF812D", "#F6E8C3","#C7EAE5","#80CDC1","#35978F","#01665E")
 cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00")
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+palette_with_white <- c("#a6611a", "#dfc27d", "#f5f5f5", "#80cdc1", "#018571")
+palette <- c("#a6611a", "#dfc27d", "#80cdc1", "#018571")
+
 
 #### Biomass removal plot ####
 
@@ -49,11 +55,11 @@ plot1 <- removal1 %>%
   ggplot(aes(y = value, x = Year, fill = FunctionalGroup))+
   geom_bar(position = "stack", stat = "identity") +
   facet_wrap(Treatment ~ Site, nrow = 2) +
-  scale_fill_manual(values=rev(cbPalette)) +
+  scale_fill_manual(values= rev(Brown_Green_6_color_palette)) +
   ggtitle("Biomass removed in the first year") +
   ylab("Biomass (g)") +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5, size = 40),
         text = element_text(size = 35))
 
-ggsave(filename = "biomass_removal_year_treatment_site.jpg", plot = plot1, width = 20, height = 12)
+ggsave(filename = "biomass_removal_year_treatment_site2.jpg", plot = plot1, width = 20, height = 12)
