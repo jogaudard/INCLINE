@@ -19,23 +19,34 @@ get_file(node = "zhk3m",
 
 #### Load data ####
 
-removal <-read.delim("Data/Biomass/Removal_experiment_biomass_data.csv", sep = ",", header = TRUE, dec = ".")
+removal <- read.delim("Data/Biomass/Removal_experiment_biomass_data.csv", sep = ",", header = TRUE, dec = ".")
 
 #### Clean data ####
 
-removal1 <- removal %>% 
+removal <- removal %>% 
+  mutate(Site = case_when(Site == "SKJ" ~ "Skj",
+                          Site == "GUD" ~ "Gud",
+                          Site == "LAV" ~ "Lav",
+                          Site == "ULV" ~ "Ulv")) %>% 
   mutate(plotID = paste0(Site, "_", Plot)) %>% 
   pivot_longer(cols = c("Graminoid", "Forb", "Bryophyte", "Woody", "Fern", "Lichen", "Litter"), names_to = "FunctionalGroup", values_to = "value") %>% 
-  mutate(Site = factor(Site, levels = c("ULV", "LAV", "GUD", "SKJ")), #Ordering the sites from dry to wet
+  mutate(Site = factor(Site, levels = c("Ulv", "Lla", "Gud", "Skj")), #Ordering the sites from dry to wet
          FunctionalGroup = factor(FunctionalGroup, levels = c("Graminoid", "Forb", "Fern","Woody", "Bryophyte", "Lichen", "Litter"))) %>%  #Ordering the functional groups like I wan them in the figure
   group_by(Year, plotID, FunctionalGroup) %>% 
-  mutate(value = sum(value))
+  mutate(value = sum(value)) %>% 
+    rename(siteID = Site, year = Year, date_removal = Removal_date, date_sorting = Sorting_date, date_weighing = Weighing_date, recorder_removal = Removal_person, recorder_sorting = Sorting_person, recorder_weighing = Weighing_person, treatment = Treatment, comments = Comments, functional_group = FunctionalGroup) %>% 
+  select(-Plot)
 
 
 #### Calculate numbers for biomass information in manuscripts ####
-removal1 %>% group_by(Year, Site, plotID) %>% mutate(total_biomass = sum(value, na.rm = TRUE)) %>% ungroup() %>% group_by(Year) %>% mutate(mean_biomass = mean(total_biomass)) %>%  ungroup() %>%  select(Year,  mean_biomass) %>% unique() 
+#Mean biomass removed per year
+removal %>% group_by(year, siteID, plotID) %>% mutate(total_biomass = sum(value, na.rm = TRUE)) %>% ungroup() %>% group_by(year) %>% mutate(mean_biomass = mean(total_biomass)) %>%  ungroup() %>%  select(year,  mean_biomass) %>% unique() 
 
-removal1 %>% group_by(Year, Site, plotID) %>% mutate(total_biomass = sum(value, na.rm = TRUE)) %>% ungroup() %>% group_by(Year, Treatment) %>% mutate(mean_biomass_treatment = mean(total_biomass)) %>%  ungroup() %>%  select(Year, Treatment, mean_biomass_treatment) %>% unique() 
+#Mean biomass removed per year per treatment
+removal %>% group_by(year, siteID, plotID) %>% mutate(total_biomass = sum(value, na.rm = TRUE)) %>% ungroup() %>% group_by(year, treatment) %>% mutate(mean_biomass_treatment = mean(total_biomass)) %>%  ungroup() %>%  select(year, treatment, mean_biomass_treatment) %>% unique() 
+
+#Mean biomass removed per functional group
+removal %>% group_by(functional_group, siteID, plotID) %>% mutate(total_biomass = sum(value, na.rm = TRUE)) %>% ungroup() %>% group_by(functional_group) %>% mutate(mean_biomass = mean(total_biomass)) %>%  ungroup() %>%  select(functional_group,  mean_biomass) %>% unique() 
 
 
 #### Plot data ####
@@ -51,12 +62,12 @@ palette <- c("#a6611a", "#dfc27d", "#80cdc1", "#018571")
 
 #### Biomass removal plot ####
 
-plot1 <- removal1 %>% 
-  ggplot(aes(y = value, x = Year, fill = FunctionalGroup))+
+plot1 <- removal %>% 
+  ggplot(aes(y = value, x = year, fill = functional_group))+
   geom_bar(position = "stack", stat = "identity") +
-  facet_wrap(Treatment ~ Site, nrow = 2) +
+  facet_wrap(treatment ~ siteID, nrow = 2) +
   scale_fill_manual(values= rev(Brown_Green_6_color_palette)) +
-  ggtitle("Biomass removed in the first year") +
+  #ggtitle("Biomass removed") +
   ylab("Biomass (g)") +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5, size = 40),
