@@ -30,7 +30,7 @@ removal <- removal %>%
                           Site == "ULV" ~ "Ulv")) %>% 
   mutate(plotID = paste0(Site, "_", Plot)) %>% 
   pivot_longer(cols = c("Graminoid", "Forb", "Bryophyte", "Woody", "Fern", "Lichen", "Litter"), names_to = "FunctionalGroup", values_to = "value") %>% 
-  mutate(Site = factor(Site, levels = c("Ulv", "Lla", "Gud", "Skj")), #Ordering the sites from dry to wet
+  mutate(Site = factor(Site, levels = c("Ulv", "Lav", "Gud", "Skj")), #Ordering the sites from dry to wet
          FunctionalGroup = factor(FunctionalGroup, levels = c("Graminoid", "Forb", "Fern","Woody", "Bryophyte", "Lichen", "Litter"))) %>%  #Ordering the functional groups like I wan them in the figure
   group_by(Year, plotID, FunctionalGroup) %>% 
   mutate(value = sum(value)) %>% 
