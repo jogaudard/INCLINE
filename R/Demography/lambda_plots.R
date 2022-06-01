@@ -286,6 +286,7 @@ lambda_df_differences2 <- lambda_df_differences %>%
          lambda_CN = case_when(Treatments == "CN" ~ lambda),
          lambda_CE = case_when(Treatments == "CE" ~ lambda),
          lambda_WE = case_when(Treatments == "WE" ~ lambda)) %>% 
+  group_by(Species, precipitation) %>% 
   fill(lambda_CR, .direction = "downup") %>% 
   fill(lambda_CN, .direction = "downup") %>% 
   fill(lambda_CE, .direction = "downup") %>% 
@@ -370,13 +371,13 @@ lambda_diff_SP_WC_CC_lolliplot <- lambda_df_differences2 %>%
   ylim(-0.1, 0.1)
 
 P0_VA_plot <- ((lambda_diff_VA_WR_CR_lolliplot + lambda_diff_VA_WC_CC_lolliplot)) + 
-  plot_annotation( title = "Direct and indirect effects in the current alpine community",
+  plot_annotation( title = "Direct and indirect effects of warming in the current alpine community",
                    subtitle = 'Veronica alpina') +
   plot_layout(widths = c(1,1), guides = 'collect') &
   theme(legend.position = "bottom", text = element_text(size = 14))
 
 P0_SP_plot <- ((lambda_diff_SP_WR_CR_lolliplot + lambda_diff_SP_WC_CC_lolliplot)) + 
-  plot_annotation( title = "Direct and indirect effects in the current alpine community",
+  plot_annotation( title = "Direct and indirect effects of warming in the current alpine community",
                    subtitle = 'Sibbaldia procumbens') +
   plot_layout(widths = c(1,1), guides = 'collect') &
   theme(legend.position = "bottom", text = element_text(size = 14))
