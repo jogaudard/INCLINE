@@ -44,12 +44,13 @@ Sib_pro_coef
 
 ### Veronica alpina  
 We are using biomass of above ground structures, without the reproductive parts. We are using a linear model because the mixed effect model gave a singularity warning because of overfitting the data. The linear model with siteID as a fixed effect gave no significant difference between sites, so we simplified the model by removing siteID as a fixed effect. Hence, we ended up with this model:
+SH = Shoot height, NL = number of leaves, LL = length of largest leaf and WL = width of largest leaf. 
 
 ```{r}
 summary(lm(ag ~ SH + NL + LL + WL, data = biomass_Ver_alp))
 ```
 
-Because all attributes had a significant impact on biomass, we choose coefficients from all attributes and because siteID was not significantly different we use the same same intercepts for each site from the model.
+Because all attributes had a significant impact on biomass, we choose coefficients from all attributes, and because siteID was not significantly different we use the same same intercepts for each site from the model. SH = shoot height, NL = number of leaves, LL = length of largest leaf and WL = width of largest leaf.
 
 ```{r}
 Ver_alp_coef
@@ -65,7 +66,7 @@ We sampled 10 individuals from each site and counted number of seeds to see if i
 
 We ran mixed effect models with seed per capsule explained by size (biomass), site or number of capsules produced by the mother. Starting with using site and individual ID as random effects. When model failed to converge we either removed random variables or interactions between variables and used a backward selection method to remove variables in the model until we ended up with the null model. Hence, number of seeds per capsules does not depend on size, site or number of capsules in the mother.
 
-Hence, we choose the predicted number of seeds per capsule from the model: `r Seeds_per_capsule_SP`
+Hence, we choose the predicted number of seeds per capsule from the model: `r round(Seeds_per_capsule_SP, digits = 2)`
 
 
 ```{r, echo = FALSE}
@@ -86,7 +87,7 @@ Seeds_per_capsule_SP_dat %>%
 
 We ran mixed effect models with seed per capsule explained by size (biomass), site or number of capsules produced by the mother. Starting with using site and individual ID as random effects. When models failed to converge we removed the random variables or the interaction between variables. Then we used backward selection to remove variables in the model until we ended up with a model with seeds per capsule depending on size. However, this trend was driven by one individual with a very low biomass. When we removed this outlier the trend was not significant. Since the trend was already very little significant when we included this individual we decided to go for the null model for Veronica alpina as well. In addition, we ran a model to test if seeds per capsule was affected by number of capsules, but there was no significant effect. Hence, we choose the predicted number of seeds per capsule from the null model
 
-Hence the number of seeds per capsule for Veronica alpina did not depend on size, site or number of capsules in the mother. We used the constant from the null model in the population model:  `r as.numeric(exp(fixef(seed_VA_null)))`
+Hence the number of seeds per capsule for Veronica alpina did not depend on size, site or number of capsules in the mother. We used the constant from the null model in the population model:  `r round(as.numeric(exp(fixef(seed_VA_null))), digits = 2)`
 
 ```{r, echo = FALSE}
 Seeds_per_capsule_VA_dat %>%
@@ -101,6 +102,16 @@ Seeds_per_capsule_VA_dat %>%
   theme_minimal()
 ```
 
+
+##Survival in seed bank
+To estimate the survival of seeds in the seedbank we buried 20 seeds of each species in nylon socks about 5 cm below ground, in five replicates of warmed and ambient control plots in 2019. After one year the seeds were dug up from the soil and tested for viability. 
+
+```{r}
+seed_bank_model <- glm(cbind(seeds_alive_total, seeds_dead_total) ~  warming + species, family = binomial, data = seed_bank_model_dataset)
+summary(seed_bank_model)
+```
+
+Based on the dataset we calculated the average seed survival after one year in the seed bank for the different species in warmed and unwarmed plots. In the population model we only used the proportion that stayed in the seed bank. This was calculated by using the proportion of seeds that were alive after one year, but did not germinate in the lab (because these seeds left the soil bank by germinating). For V.alpina the proportion of seeds that stayed in the seed bank in ambient climate conditions were `r round(VA_C_seed_bank$seeds_staySB, digits = 4)`, while in warmed climates it was `r round(VA_OTC_seed_bank$seeds_staySB, digits = 4)`. While for S. procumbens the proportion of seeds that stayed in the seed bank was much higher, in the ambient climate conditions it was `r round(SP_C_seed_bank$seeds_staySB, digits = 4)`, while in warmed climates it was `r round(SP_OTC_seed_bank$seeds_staySB, digits = 4)`.
 
 ##Seedling establishment rate  
 
@@ -120,12 +131,9 @@ We calculated the germination percentage and tested if it was different in warme
 summary(glmer(count ~ Warming + Vegetation +(1|Site) + (1|blockID), family = binomial, data = seedling_est_bi_VA_dat))
 ```
 
-Warming and Vegetation did significantly affect the number of seeds that germinated. We calculated the germination probability in warmed and unwarmed plots, and vegetated and unvegetated plots based on the model.
+Warming and vegetation did significantly affect the number of seeds that germinated. We calculated the germination probability in warmed and unwarmed plots, and vegetated and unvegetated plots based on the model.
 
-Seedling establishment in cold and non-vegetated plots: `r seedling_est_VA_C_NoVeg`
-Seedling establishment in cold and vegetated plots: `r seedling_est_VA_C_Veg`
-Seedling establishment in warm and non-vegetated plots: `r seedling_est_VA_OTC_NoVeg`
-Seedling establishment in warm and vegetated plots: `r seedling_est_VA_OTC_Veg`
+Seedling establishment rate in ambient temperature and non-vegetated plots: `r round(seedling_est_VA_C_NoVeg, digits = 3)`, in ambient temperature and vegetated plot `r round(seedling_est_VA_C_Veg, digits = 3`, in warmed an non-vegetated plots: `r round(seedling_est_VA_OTC_NoVeg, digits = 3)`, and warmed and vegetated plots: `r round(seedling_est_VA_OTC_Veg, digits = 3)`
 
 ###Sibbaldia procumbens  
 
@@ -138,14 +146,13 @@ summary(glmer(count ~ Vegetation + (1|Site) + (1|blockID), family = binomial, da
 
 Hence, we calculated the seedling establishment rate in vegetated and non-vegetated plots for Sibbaldia procumbens:
 
-Seedling establishment in non-vegetated plots: `r seedling_est_SP_NoVeg`
-Seedling establishment in vegetated plots: `r seedling_est_SP_Veg`
+Seedling establishment rate in non-vegetated plots: `r round(seedling_est_SP_NoVeg, digits = 3)`, and in vegetated plots: `r round(seedling_est_SP_Veg, digits = 3)`
 
 ##Seedling size information  
 
 ###Sibbaldia procumbens  
 
-We investigated whether seedlings size changed between treatments (control, extant trait transplants, novel trait transplants, removal), and warmed and unwarmed plots. Using nested site/block/plot as random effect, and a backward selection method to eliminated variables. Neither warming, nor the treatments affected seedling size. However, when we combined all the vegetated treatments (control, extant traits transplant and novel traits transplants), and compared that with the non-vegetated treatments (removal), we saw a difference: 
+We investigated whether seedlings size changed between treatments (control, extant trait transplants, novel trait transplants, removal), and ambient temperature and warmed plots. Using nested site/block/plot as random effect, and a backward selection method to eliminated variables. Neither warming, nor the treatments affected seedling size. However, when we combined all the vegetated treatments (control, extant traits transplant and novel traits transplants), and compared that with the non-vegetated treatments (removal), we saw a difference: 
 
 ```{r}
 summary(lmer(size ~ Vegetation + (1|siteID/blockID/plotID), data = Seedling_info_SP_dat))
@@ -157,7 +164,7 @@ We calculated the mean seedling size (in log2) for the vegetated and non-vegetat
 Seedling_info_SP 
 ```
 
-We also calculated maximum seedling size by adding two standard deviations from the mean of the vegetated seedling size (because it was the largest size), as a cut off when assigning parents of the clonal offsprings, which was: `r SP_max_seedling_size`
+We also calculated maximum seedling size by adding two standard deviations from the mean of the vegetated seedling size (because it was the largest size), as a cut off when assigning parents of the clonal offsprings, which was: `r round(SP_max_seedling_size, digits = 2)`
 
 
 ```{r, echo = FALSE}
@@ -174,9 +181,9 @@ Seedling_info_SP_dat %>%
 
 ### Veronica alpina  
 
-We investigated whether seedlings size changed between treatments (control, extant trait transplants, novel trait transplants, removal), and warmed and unwarmed plots. Using nested site/block/plot as random effect. Using backward selection to eliminated variables, starting with random efects, then interactions, then fixed effects.  Neither warming, nor the treatments affected seedling size. However, when we combined all the vegetated treatments (control, extant traits transplant and novel traits transplants), and compared that with the non-vegetated treatments (removal). There was also no significant difference there. Hence we ended up using the null model to calculated the mean seedling size (in log2): `r Seedling_info_VA_mean ` and the standard deviation `r sd_VA` from the model.
+We investigated whether seedlings size changed between treatments (control, extant trait transplants, novel trait transplants, removal), and warmed and unwarmed plots. Using nested site/block/plot as random effect. Using backward selection to eliminated variables, starting with random efects, then interactions, then fixed effects.  Neither warming, nor the treatments affected seedling size. However, when we combined all the vegetated treatments (control, extant traits transplant and novel traits transplants), and compared that with the non-vegetated treatments (removal). There was also no significant difference there. Hence we ended up using the null model to calculated the mean seedling size (in log2): `r round(Seedling_info_VA_mean, digits = 2) ` and the standard deviation `r round(sd_VA, digits = 2)` from the model.
 
-We also calculated maximum seedling size by adding two standard deviations from the mean of the seedling size, as a cut off when assigning parents of the clonal offsprings, which was: `r VA_max_seedling_size`
+We also calculated maximum seedling size by adding two standard deviations from the mean of the seedling size, as a cut off when assigning parents of the clonal offsprings, which was: `r round(VA_max_seedling_size, digits = 2)`
 
 ```{r, echo = FALSE}
 Seedling_info_VA_dat %>%  
