@@ -83,6 +83,7 @@ removal %>% group_by(functional_group, siteID, plotID) %>% mutate(total_biomass 
 #   ylab("Biomass (g)") +
 #   theme_minimal() +
 #   theme(plot.title = element_text(hjust = 0.5, size = 40),
-#         text = element_text(size = 35))
-# 
+#         text = element_text(size = 35)) +
+#   labs(fill = "Functional group")
+#
 # ggsave(filename = "biomass_removal_year_treatment_site2.jpg", plot = plot1, width = 20, height = 12)
