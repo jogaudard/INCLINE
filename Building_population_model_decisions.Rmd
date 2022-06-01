@@ -110,6 +110,27 @@ To estimate the survival of seeds in the seedbank we buried 20 seeds of each spe
 seed_bank_model <- glm(cbind(seeds_alive_total, seeds_dead_total) ~  warming + species, family = binomial, data = seed_bank_model_dataset)
 summary(seed_bank_model)
 ```
+```{r, echo = FALSE}
+VA_C_seed_bank <- seed_bank %>% 
+   filter(species == "Ver_alp",
+          warming == "C") %>% 
+   ungroup()
+
+VA_OTC_seed_bank <- seed_bank %>% 
+   filter(species == "Ver_alp",
+          warming == "OTC") %>% 
+   ungroup() 
+
+SP_C_seed_bank <- seed_bank %>% 
+  filter(species == "Sib_pro",
+         warming == "C") %>% 
+  ungroup()
+
+SP_OTC_seed_bank <- seed_bank %>% 
+  filter(species == "Sib_pro",
+         warming == "OTC") %>% 
+  ungroup() 
+```
 
 Based on the dataset we calculated the average seed survival after one year in the seed bank for the different species in warmed and unwarmed plots. In the population model we only used the proportion that stayed in the seed bank. This was calculated by using the proportion of seeds that were alive after one year, but did not germinate in the lab (because these seeds left the soil bank by germinating). For V.alpina the proportion of seeds that stayed in the seed bank in ambient climate conditions were `r round(VA_C_seed_bank$seeds_staySB, digits = 4)`, while in warmed climates it was `r round(VA_OTC_seed_bank$seeds_staySB, digits = 4)`. While for S. procumbens the proportion of seeds that stayed in the seed bank was much higher, in the ambient climate conditions it was `r round(SP_C_seed_bank$seeds_staySB, digits = 4)`, while in warmed climates it was `r round(SP_OTC_seed_bank$seeds_staySB, digits = 4)`.
 
@@ -133,7 +154,7 @@ summary(glmer(count ~ Warming + Vegetation +(1|Site) + (1|blockID), family = bin
 
 Warming and vegetation did significantly affect the number of seeds that germinated. We calculated the germination probability in warmed and unwarmed plots, and vegetated and unvegetated plots based on the model.
 
-Seedling establishment rate in ambient temperature and non-vegetated plots: `r round(seedling_est_VA_C_NoVeg, digits = 3)`, in ambient temperature and vegetated plot `r round(seedling_est_VA_C_Veg, digits = 3`, in warmed an non-vegetated plots: `r round(seedling_est_VA_OTC_NoVeg, digits = 3)`, and warmed and vegetated plots: `r round(seedling_est_VA_OTC_Veg, digits = 3)`
+Seedling establishment rate in ambient temperature and non-vegetated plots: `r round(seedling_est_VA_C_NoVeg, digits = 3)`, in ambient temperature and vegetated plot `r round(seedling_est_VA_C_Veg, digits = 3)`, in warmed an non-vegetated plots: `r round(seedling_est_VA_OTC_NoVeg, digits = 3)`, and warmed and vegetated plots: `r round(seedling_est_VA_OTC_Veg, digits = 3)`
 
 ###Sibbaldia procumbens  
 
