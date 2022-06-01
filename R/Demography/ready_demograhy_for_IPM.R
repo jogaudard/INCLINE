@@ -485,8 +485,10 @@ seed_bank_model_dataset <- seed_bank %>%
   select(siteID, species, warming, seeds_alive_total, seeds_alive_total_prop, seeds_dead_total, seeds_dead_total_prop, seeds_germinate_prop, seeds_staySB) %>% 
   unique() 
 
-seed_bank_model <- glm(cbind(seeds_alive_total, seeds_dead_total) ~  warming + species + siteID, family = binomial, data = seed_bank_model_dataset)
+seed_bank_model <- glm(cbind(seeds_alive_total, seeds_dead_total) ~  warming + species, family = binomial, data = seed_bank_model_dataset)
 summary(seed_bank_model) #Should maybe use the model and predict for different sites and species and treatment
+# seed_bank_model1 <- lm(seeds_staySB ~  warming + species, data = seed_bank_model_dataset)
+# summary(seed_bank_model1) 
 
 seed_bank <- seed_bank %>% 
   group_by(species, warming) %>% 
