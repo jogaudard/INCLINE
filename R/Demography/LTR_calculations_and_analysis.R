@@ -768,6 +768,66 @@ LTRE_VA_WC_WN_precip_3 <- LTRE_calcultations(IPM1 = IPM_VA_WN_precip3,
          treatment = "WN - WC",
          precipitation = "3")
 
+LTRE_VA_CR_WR_precip_1 <- LTRE_calcultations(IPM1 = IPM_VA_WR_precip1, 
+                                             IPM2 = IPM_VA_CR_precip1, 
+                                             Fmatrix1 = Fmatrix_VA_WR_precip1, 
+                                             Fmatrix2 = Fmatrix_VA_CR, 
+                                             Pmatrix1 = Pmatrix_VA_WR_precip1, 
+                                             Pmatrix2 = Pmatrix_VA_CR_precip1, 
+                                             Cmatrix1 = Cmatrix_VA_WR_precip1, 
+                                             Cmatrix2 = Cmatrix_VA_CR, 
+                                             survival_object1 = so_VA_WR, 
+                                             survival_object2 = so_VA_CR_precip1, 
+                                             growth_object1 = go_VA_WR_precip1, 
+                                             growth_object2 = go_VA_CR_precip1, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WR, 
+                                             discrete_trans2 = dto_VA_CR) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WR - CR",
+         precipitation = "1")
+
+LTRE_VA_CR_WR_precip_2 <- LTRE_calcultations(IPM1 = IPM_VA_WR_precip2, 
+                                             IPM2 = IPM_VA_CR_precip2, 
+                                             Fmatrix1 = Fmatrix_VA_WR_precip2, 
+                                             Fmatrix2 = Fmatrix_VA_CR, 
+                                             Pmatrix1 = Pmatrix_VA_WR_precip2, 
+                                             Pmatrix2 = Pmatrix_VA_CR_precip2, 
+                                             Cmatrix1 = Cmatrix_VA_WR_precip2, 
+                                             Cmatrix2 = Cmatrix_VA_CR, 
+                                             survival_object1 = so_VA_WR, 
+                                             survival_object2 = so_VA_CR_precip2, 
+                                             growth_object1 = go_VA_WR_precip2, 
+                                             growth_object2 = go_VA_CR_precip2, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WR, 
+                                             discrete_trans2 = dto_VA_CR) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WR - CR",
+         precipitation = "2")
+
+LTRE_VA_CR_WR_precip_3 <- LTRE_calcultations(IPM1 = IPM_VA_WR_precip3, 
+                                             IPM2 = IPM_VA_CR_precip3, 
+                                             Fmatrix1 = Fmatrix_VA_WR_precip3, 
+                                             Fmatrix2 = Fmatrix_VA_CR, 
+                                             Pmatrix1 = Pmatrix_VA_WR_precip3, 
+                                             Pmatrix2 = Pmatrix_VA_CR_precip3, 
+                                             Cmatrix1 = Cmatrix_VA_WR_precip3, 
+                                             Cmatrix2 = Cmatrix_VA_CR, 
+                                             survival_object1 = so_VA_WR, 
+                                             survival_object2 = so_VA_CR_precip3, 
+                                             growth_object1 = go_VA_WR_precip3, 
+                                             growth_object2 = go_VA_CR_precip3, 
+                                             minSize = minSize, 
+                                             maxSize = maxSize, 
+                                             discrete_trans1 = dto_VA_WR, 
+                                             discrete_trans2 = dto_VA_CR) %>% 
+  mutate(species = "Ver_alp",
+         treatment = "WR - CR",
+         precipitation = "3")
+
 ##### Sibbaldia #####
 
 LTRE_SP_CC_CR <- LTRE_calcultations(IPM1 = IPM_SP_CR, 
@@ -1291,6 +1351,67 @@ LTRE_SP_WC_WN_precip_3 <- LTRE_calcultations(IPM1 = IPM_SP_WN,
          treatment = "WN - WC",
          precipitation = "3")
 
+LTRE_SP_CR_WR_precip_1 <- LTRE_calcultations(IPM1 = IPM_SP_WR_precip1, 
+                                             IPM2 = IPM_SP_CR, 
+                                             Fmatrix1 = Fmatrix_SP_WR_precip1, 
+                                             Fmatrix2 = Fmatrix_SP_CR,
+                                             Pmatrix1 = Pmatrix_SP_WR, 
+                                             Pmatrix2 = Pmatrix_SP_CR, 
+                                             Cmatrix1 = Cmatrix_SP_WR, 
+                                             Cmatrix2 = Cmatrix_SP_CR, 
+                                             survival_object1 = so_SP_WR, 
+                                             survival_object2 = so_SP_CR, 
+                                             growth_object1 = go_SP_WR, 
+                                             growth_object2 = go_SP_CR, 
+                                             minSize = minSize_SP, 
+                                             maxSize = maxSize_SP, 
+                                             discrete_trans1 = dto_SP_WR, 
+                                             discrete_trans2 = dto_SP_CR) %>% 
+  mutate(species = "Sib_pro",
+         treatment = "WR - CR",
+         precipitation = "1")
+
+LTRE_SP_CR_WR_precip_2 <- LTRE_calcultations(IPM1 = IPM_SP_WR_precip2, 
+                                             IPM2 = IPM_SP_CR, 
+                                             Fmatrix1 = Fmatrix_SP_WR_precip2, 
+                                             Fmatrix2 = Fmatrix_SP_CR,
+                                             Pmatrix1 = Pmatrix_SP_WR, 
+                                             Pmatrix2 = Pmatrix_SP_CR, 
+                                             Cmatrix1 = Cmatrix_SP_WR, 
+                                             Cmatrix2 = Cmatrix_SP_CR, 
+                                             survival_object1 = so_SP_WR, 
+                                             survival_object2 = so_SP_CR, 
+                                             growth_object1 = go_SP_WR, 
+                                             growth_object2 = go_SP_CR, 
+                                             minSize = minSize_SP, 
+                                             maxSize = maxSize_SP, 
+                                             discrete_trans1 = dto_SP_WR, 
+                                             discrete_trans2 = dto_SP_CR) %>% 
+  mutate(species = "Sib_pro",
+         treatment = "WR - CR",
+         precipitation = "2")
+
+
+LTRE_SP_CR_WR_precip_3 <- LTRE_calcultations(IPM1 = IPM_SP_WR_precip3, 
+                                             IPM2 = IPM_SP_CR, 
+                                             Fmatrix1 = Fmatrix_SP_WR_precip3, 
+                                             Fmatrix2 = Fmatrix_SP_CR,
+                                             Pmatrix1 = Pmatrix_SP_WR, 
+                                             Pmatrix2 = Pmatrix_SP_CR, 
+                                             Cmatrix1 = Cmatrix_SP_WR, 
+                                             Cmatrix2 = Cmatrix_SP_CR, 
+                                             survival_object1 = so_SP_WR, 
+                                             survival_object2 = so_SP_CR, 
+                                             growth_object1 = go_SP_WR, 
+                                             growth_object2 = go_SP_CR, 
+                                             minSize = minSize_SP, 
+                                             maxSize = maxSize_SP, 
+                                             discrete_trans1 = dto_SP_WR, 
+                                             discrete_trans2 = dto_SP_CR) %>% 
+  mutate(species = "Sib_pro",
+         treatment = "WR - CR",
+         precipitation = "3")
+
 
 ##### Making LTRE data phrame #####
 
@@ -1324,6 +1445,9 @@ LTRE_treatments <- LTRE_VA_CC_CR_precip_1 %>%
   bind_rows(LTRE_VA_WC_WN_precip_1) %>%
   bind_rows(LTRE_VA_WC_WN_precip_2) %>%
   bind_rows(LTRE_VA_WC_WN_precip_3) %>% 
+  bind_rows(LTRE_VA_CR_WR_precip_1) %>% 
+  bind_rows(LTRE_VA_CR_WR_precip_2) %>% 
+  bind_rows(LTRE_VA_CR_WR_precip_3) %>% 
   bind_rows(LTRE_SP_CC_CR) %>% 
   bind_rows(LTRE_SP_CC_CN_precip_1) %>% 
   bind_rows(LTRE_SP_CC_CN_precip_2) %>% 
@@ -1349,13 +1473,55 @@ LTRE_treatments <- LTRE_VA_CC_CR_precip_1 %>%
   bind_rows(LTRE_SP_WC_WE_precip_3) %>% 
   bind_rows(LTRE_SP_WC_WN_precip_1) %>%
   bind_rows(LTRE_SP_WC_WN_precip_2) %>%
-  bind_rows(LTRE_SP_WC_WN_precip_3)
+  bind_rows(LTRE_SP_WC_WN_precip_3) %>% 
+  bind_rows(LTRE_SP_CR_WR_precip_1) %>% 
+  bind_rows(LTRE_SP_CR_WR_precip_2) %>% 
+  bind_rows(LTRE_SP_CR_WR_precip_3)
 
 
 ##### Making plots #####
 
+# Prediction specific plots
+Ver_alp_LTRE_predictions <- LTRE_treatments %>% 
+  filter(species == "Ver_alp") %>% 
+  filter(treatment %in% c("WR - CR", "CR - CC", "WC - CC", "WR - WC", "CE - CC", "CN - CC", "WE - WC", "WN - WC")) %>% 
+  mutate(treatment = factor(treatment, levels = c("WC - CC", "WR - CR", "CR - CC",  "WR - WC", "CE - CC", "CN - CC", "WE - WC", "WN - WC"))) %>% 
+  ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
+  geom_bar(position="stack", stat="identity") +
+  geom_point(aes(y = lamda_difference, color = "lambda difference")) +
+  geom_hline(yintercept = 0) +
+  facet_wrap(~treatment, ncol = 4) +
+  theme_bw() +
+  scale_fill_manual(values = palette) +
+  scale_color_manual(values = "#000000") +
+  #scale_fill_manual(values = c("#DEDEDE", "#A1A1A1", "#6E6E6E", "#000000")) +
+  #scale_color_manual(values = "#B50E00") +
+  ggtitle("Vital rate contribution to lambda difference in Veronica alpina") +
+  ylab("Change in population growth rate (λ)") +
+  xlab("Annual precipitation (m/year)")
+
+Sib_pro_LTRE_predictions <- LTRE_treatments %>% 
+  filter(species == "Sib_pro") %>% 
+  filter(treatment %in% c("WR - CR", "CR - CC", "WC - CC", "WR - WC", "CE - CC", "CN - CC", "WE - WC", "WN - WC")) %>% 
+  mutate(treatment = factor(treatment, levels = c("WC - CC", "WR - CR", "CR - CC",  "WR - WC", "CE - CC", "CN - CC", "WE - WC", "WN - WC"))) %>% 
+  ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
+  geom_bar(position="stack", stat="identity") +
+  geom_point(aes(y = lamda_difference, color = "lambda difference")) +
+  geom_hline(yintercept = 0) +
+  facet_wrap(~treatment, ncol = 4) +
+  theme_bw() +
+  scale_fill_manual(values = palette) +
+  scale_color_manual(values = "#000000") +
+  #scale_fill_manual(values = c("#DEDEDE", "#A1A1A1", "#6E6E6E", "#000000")) +
+  #scale_color_manual(values = "#B50E00") +
+  ggtitle("Vital rate contribution to lambda difference in Sibbaldia procumbens") +
+  ylab("Change in population growth rate (λ)") +
+  xlab("Annual precipitation (m/year)")
+
+
 Ver_alp_LTRE_all_treatments <- LTRE_treatments %>% 
   filter(species == "Ver_alp") %>% 
+  filter(treatment != "WR - CR") %>% 
   mutate(treatment = factor(treatment, levels = c("CR - CC", "CE - CC", "CN - CC", "WR - CC", "WE - CC", "WN - CC", "WR - WC", "WE - WC", "WN - WC", "WC - CC"))) %>% 
 ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
   geom_bar(position="stack", stat="identity") +
@@ -1373,6 +1539,7 @@ ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) +
 
 Ver_alp_LTRE_CC_comparison <- LTRE_treatments %>% 
   filter(species == "Ver_alp") %>% 
+  filter(treatment != "WR - CR") %>% 
   filter(treatment %in% c("CR - CC", "CE - CC", "CN - CC", "WR - CC", "WE - CC", "WN - CC", "WC - CC")) %>% 
   mutate(treatment = factor(treatment, levels = c("CR - CC", "CE - CC", "CN - CC", "WC - CC","WR - CC", "WE - CC", "WN - CC"))) %>% 
   ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
@@ -1391,6 +1558,7 @@ Ver_alp_LTRE_CC_comparison <- LTRE_treatments %>%
 
 Sib_pro_LTRE_all_treatments <- LTRE_treatments %>% 
   filter(species == "Sib_pro") %>% 
+  filter(treatment != "WR - CR") %>% 
   mutate(treatment = factor(treatment, levels = c("CR - CC", "CE - CC", "CN - CC", "WR - CC", "WE - CC", "WN - CC","WR - WC", "WE - WC", "WN - WC", "WC - CC"))) %>% 
   ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
   geom_bar(position="stack", stat="identity") +
@@ -1409,6 +1577,7 @@ Sib_pro_LTRE_all_treatments <- LTRE_treatments %>%
 
 Sib_pro_LTRE_CC_comparisons <- LTRE_treatments %>% 
   filter(species == "Sib_pro") %>% 
+  filter(treatment != "WR - CR") %>% 
   filter(treatment %in% c("CR - CC", "CE - CC", "CN - CC", "WR - CC", "WE - CC", "WN - CC", "WC - CC")) %>% 
   mutate(treatment = factor(treatment, levels = c("CR - CC", "CE - CC", "CN - CC", "WC - CC","WR - CC", "WE - CC", "WN - CC"))) %>% 
   ggplot(aes(fill=vital_rates, y=contributions, x=precipitation)) + 
