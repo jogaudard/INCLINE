@@ -43,7 +43,11 @@ removal <- removal %>%
   mutate(year = as.numeric(year),
          date_removal = dmy(date_removal),
          date_sorting = dmy(date_sorting),
-         date_weighing = dmy(date_weighing))
+         date_weighing = dmy(date_weighing)) %>% 
+  mutate(siteID = case_when(siteID == "Lav" ~ "Lavisdalen",
+                            siteID == "Ulv" ~ "Ulvehaugen",
+                            siteID == "Gud" ~ "Gudmedalen",
+                            siteID == "Skj" ~ "Skjellingahaugen"))
 
 
 #### Calculate numbers for biomass information in manuscripts ####
