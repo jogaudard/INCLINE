@@ -3,13 +3,16 @@
 #### FLOWER PRODUCTION IN THE ALPINE PLANT COMMUNITY ####
 #########################################################
 
-
 #### Loading libraries ####
 library(tidyverse)
+library(dataDownloader)
+
+get_file(node = "zhk3m",
+         file = "INCLINE_flowering_2021.csv",
+         path = "Raw_data",
+         remote_path = "RawData/Flowering")
 
 
-library(INLA)
-inla.upgrade()
 
 
 #################################################################
@@ -24,9 +27,6 @@ sib_pro_demography <- read.csv("Sib_pro_2018-2021.csv", header = TRUE, sep = ";"
 
 #Veronica alpina
 ver_alp_demography <- read.csv("Ver_alp_2018-2021.csv", header = TRUE, sep = ";", dec = ",") #first row is headers
-
-
-
 
 
 
@@ -119,9 +119,6 @@ ver_alp_demography <- ver_alp_demography %>%
 
 
 
-
-
-
 #### Summarising number of reproductive organs ####
 
 #Sibbaldia procumbens
@@ -137,7 +134,6 @@ sib_pro_sum_reproduction <- sib_pro_demography %>%
   distinct() #selecting only distinct columns
 
 
-
 #Veronica alpina
 ver_alp_sum_reproduction <- ver_alp_demography %>% 
   group_by(Site, Block, Plot, Subplot) %>% 
@@ -147,16 +143,12 @@ ver_alp_sum_reproduction <- ver_alp_demography %>%
   distinct()
 
 
-
-
-
-
-
+##################################
 #### Importing community data ####
+##################################
 
-#Reproduction data
-reproduction_data <- read.csv("INCLINE_reproduction_2021.csv", header = TRUE, sep = ";", dec = ",") #first row is headers
-
+#Flowering data
+reproduction_data <- read.csv("INCLINE_flowering_2021.csv", header = TRUE, sep = ";", dec = ",") #first row is headers
 
 
 
@@ -169,20 +161,14 @@ full_reproduction_data <- reproduction_data %>%
 
 
 
-
-
-
-###########################################################
-#### Pivoting the reproduction dataset before analysis ####
-###########################################################
+############################################################
+#### Pivoting the reproduction data set before analysis ####
+############################################################
 
 
 #### Removing numbered suffix from species names ####
 
 colnames(full_reproduction_data) <- gsub("\\_[0-99]*$", "" , colnames(full_reproduction_data))
-
-
-
 
 
 #### Pivot data from wide to long ####
@@ -192,9 +178,6 @@ pivot_reproduction_data <- full_reproduction_data %>%
                             names_to = "Species", #what to call the column where the pivoted headers (species) go
                             values_to = "Reproduction_value", #what to call the column where the pivoted values go
                             values_drop_na = TRUE)  #remove NA-values
- 
-
-
 
 
 
@@ -210,8 +193,6 @@ pivot_reproduction_data <- full_reproduction_data %>%
 summed_reproduction_data <- pivot_reproduction_data %>% 
   group_by(Site, Block, Plot, Subplot, Species, Treat) %>% 
   summarise(Reproduction_value = sum(Reproduction_value))
-
-
 
 
 
@@ -239,23 +220,8 @@ standardised_reproduction_data <- summed_reproduction_data %>%
 
 
 
-
 standardised_reproduction_data <- standardised_reproduction_data %>%
    mutate(Reproduction_value_standard = Reproduction_value_standard + abs(min(Reproduction_value_standard))) #moving up above 0
-
-
-
-
-#Plotting to check that the case_when above worked
-
-#For warming:
-ggplot(standardised_reproduction_data, aes(y = as.numeric(Warming), x = Treat)) + geom_jitter()
-
-#For novel transplants:
-ggplot(standardised_reproduction_data, aes(y = as.numeric(Novel), x = Treat)) + geom_jitter()
-
-#For precipitation:
-ggplot(standardised_reproduction_data, aes(y = as.numeric(Precipitation), x = Site)) + geom_jitter()
 
 
 
@@ -268,7 +234,7 @@ ggplot(standardised_reproduction_data, aes(y = as.numeric(Precipitation), x = Si
 species_systematics <- read.csv("species_systematics.csv", header = TRUE, sep = ";",  dec = ",")
 
 
-#### Merging the datasets by species ####
+#### Merging the data sets by species ####
 systematics_reproduction_data <- standardised_reproduction_data %>% 
   left_join(species_systematics, by = "Species") %>% 
   filter(!Functional_group %in% "Fern") %>% 
