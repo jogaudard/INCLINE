@@ -48,9 +48,9 @@ Seeds_per_capsule <- Seeds_per_capsule %>%
 Seeds_per_capsule <- Seeds_per_capsule %>% 
   pivot_longer(cols = c(leaf_stalk_length, shoot_height, leaf_length, leaf_width, number_of_leaves, number_of_capsules, number_of_flower_stems),
                names_to = "demographic_trait",
-               values_to = "value") %>% 
-  filter(!is.na(value)) %>% 
-  select(species, siteID, date, uniqueID, comments, demographic_trait, value, capsuleID, number_of_seeds)
+               values_to = "demographic_value") %>% 
+  filter(!is.na(demographic_value)) %>% 
+  select(species, siteID, date, uniqueID, comments, demographic_trait, demographic_value, capsuleID, number_of_seeds)
 
 ### Save data to upload as cleaned on OSF
 
