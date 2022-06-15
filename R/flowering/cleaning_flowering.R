@@ -6,11 +6,25 @@
 #### Loading libraries ####
 library(tidyverse)
 library(dataDownloader)
+library(lubridate)
 
+#Flowering data
 get_file(node = "zhk3m",
          file = "INCLINE_flowering_2021.csv",
          path = "Raw_data",
          remote_path = "RawData/Flowering")
+
+#Sibbaldia procumbens demography
+get_file(node = "zhk3m",
+         file = "INCLINE_demography_Sib_pro.csv",
+         path = "Cleaned_demography",
+         remote_path = "Demography")
+
+#Veronica alpina demography
+get_file(node = "zhk3m",
+         file = "INCLINE_demography_Ver_alp.csv",
+         path = "Cleaned_demography",
+         remote_path = "Demography")
 
 
 
@@ -23,10 +37,10 @@ get_file(node = "zhk3m",
 #### Importing demography data ####
 
 #Sibbaldia procumbens
-sib_pro_demography <- read.csv("Sib_pro_2018-2021.csv", header = TRUE, sep = ";", dec = ",") #first row is headers
+sib_pro_demography <- read.csv("Cleaned_demography/INCLINE_demography_Sib_pro.csv", header = TRUE, sep = ",", dec = ".") #first row is headers
 
 #Veronica alpina
-ver_alp_demography <- read.csv("Ver_alp_2018-2021.csv", header = TRUE, sep = ";", dec = ",") #first row is headers
+ver_alp_demography <- read.csv("Cleaned_demography/INCLINE_demography_Ver_alp.csv", header = TRUE, sep = ",", dec = ".") #first row is headers
 
 
 
@@ -34,9 +48,8 @@ ver_alp_demography <- read.csv("Ver_alp_2018-2021.csv", header = TRUE, sep = ";"
 
 #Sibbaldia procumbens
 sib_pro_demography <- sib_pro_demography %>%
-  filter(Year == 2021) %>% 
-  select(Site:comment_transcription) %>% 
-  mutate(Subplot = case_when((X >= 0 & X < 5) & (Y >= 20 & Y <= 25) ~ 1,
+  filter(year == 2021) %>%  
+  mutate(subplot = case_when((X >= 0 & X < 5) & (Y >= 20 & Y <= 25) ~ 1,
                              (X >= 5 & X < 10) & (Y >= 20 & Y <= 25) ~ 2,
                              (X >= 10 & X < 15) & (Y >= 20 & Y <= 25) ~ 3,
                              (X >= 15 & X < 20) & (Y >= 20 & Y <= 25) ~ 4,
@@ -71,16 +84,15 @@ sib_pro_demography <- sib_pro_demography %>%
                              (X >= 20 & X < 25) & (Y >= 0 & Y < 5) ~ 33,
                              (X >= 25 & X < 30) & (Y >= 0 & Y < 5) ~ 34,
                              (X >= 30 & X <= 35) & (Y >= 0 & Y < 5) ~ 35)) %>% 
-  filter(!is.na(Subplot))
+  filter(!is.na(subplot))
 
 
 
 
 #Veronica alpina
 ver_alp_demography <- ver_alp_demography %>% 
-  filter(Year == 2021) %>%  #choosing only data from 2021
-  select(Site:comment_transcription) %>%  #removing unwanted columns (X.1, X.2, ...)
-  mutate(Subplot = case_when((X >= 0 & X < 5) & (Y >= 20 & Y <= 25) ~ 1,
+  filter(year == 2021) %>%  #choosing only data from 2021
+  mutate(subplot = case_when((X >= 0 & X < 5) & (Y >= 20 & Y <= 25) ~ 1,
                              (X >= 5 & X < 10) & (Y >= 20 & Y <= 25) ~ 2,
                              (X >= 10 & X < 15) & (Y >= 20 & Y <= 25) ~ 3,
                              (X >= 15 & X < 20) & (Y >= 20 & Y <= 25) ~ 4,
@@ -115,7 +127,7 @@ ver_alp_demography <- ver_alp_demography %>%
                              (X >= 20 & X < 25) & (Y >= 0 & Y < 5) ~ 33,
                              (X >= 25 & X < 30) & (Y >= 0 & Y < 5) ~ 34,
                              (X >= 30 & X <= 35) & (Y >= 0 & Y < 5) ~ 35)) %>% #adding a new column where I define which coordinates belong to each of the 35 subplots
-  filter(!is.na(Subplot)) #filtering out data for individuals when Subplot = NA (outside frame, gone or new seedling)
+  filter(!is.na(subplot)) #filtering out data for individuals when subplot = NA (outside frame, gone or new seedling)
 
 
 
@@ -123,23 +135,21 @@ ver_alp_demography <- ver_alp_demography %>%
 
 #Sibbaldia procumbens
 sib_pro_sum_reproduction <- sib_pro_demography %>% 
-  group_by(Site, Block, Plot, Subplot) %>%     #grouping data (for summing)
-  mutate(Sib_pro = sum(NFL, NFL1, NFL2, NFL3, NFL4, 
-                             NB, NB1, NB2, NB3, NB4,
-                             NC, NC1, NC2, NC3, NC4, NC5, NC6, NC7,
-                             NAC, NAC1, NAC2, NAC3, NAC4,
-                             na.rm = TRUE),
+  filter(demographic_trait %in% c("number_of_capsules", "number_of_flowers", "number_of_aborted_capsules", "number_of_buds")) %>% 
+  group_by(plotID, subplot) %>% #grouping data (for summing)
+  mutate(Sib_pro = sum(demographic_value, na.rm = TRUE),
          Sib_pro = na_if(Sib_pro, 0)) %>%    #summarise reproductive organs and create a new column with total sum
-  select(Site, Block, Plot, Treat, Subplot, Year, Date, Registrator, Sib_pro, comment_registrator, comment_transcription) %>%   #selecting which columns I want to keep from original dataset (because I will add the info to the flower-data set)
+  select(siteID, blockID, plotID, OTC, treatment, subplot, year, date, registrator, Sib_pro) %>%   #selecting which columns I want to keep from original dataset (because I will add the info to the flower-data set)
   distinct() #selecting only distinct columns
 
 
 #Veronica alpina
-ver_alp_sum_reproduction <- ver_alp_demography %>% 
-  group_by(Site, Block, Plot, Subplot) %>% 
-  mutate(Ver_alp = sum(NFL, NB, NC, NAC, na.rm = TRUE),
+ver_alp_sum_reproduction <- ver_alp_demography %>%
+  filter(demographic_trait %in% c("number_of_capsules", "number_of_flowers", "number_of_aborted_capsules", "number_of_buds")) %>% 
+  group_by(plotID, subplot) %>% 
+  mutate(Ver_alp = sum(demographic_value, na.rm = TRUE),
          Ver_alp = na_if(Ver_alp, 0)) %>% 
-  select(Site, Block, Plot, Treat, Subplot, Year, Date, Registrator, Ver_alp, comment, comment_transcription) %>% 
+  select(siteID, blockID, plotID, OTC, treatment, subplot, year, date, registrator, Ver_alp) %>% 
   distinct()
 
 
@@ -148,16 +158,28 @@ ver_alp_sum_reproduction <- ver_alp_demography %>%
 ##################################
 
 #Flowering data
-reproduction_data <- read.csv("INCLINE_flowering_2021.csv", header = TRUE, sep = ";", dec = ",") #first row is headers
+reproduction_data <- read.csv("Raw_data/INCLINE_flowering_2021.csv", header = TRUE, sep = ";", dec = ",") #first row is headers
 
 
+reproduction_data <- reproduction_data %>% 
+  mutate(OTC = substr(Treat, 1, 1), 
+         treatment = substr(Treat, 2, 2)) %>% 
+  mutate(blockID = paste0(Site, "_", Block), 
+         plotID = paste0(blockID, "_", Plot)) %>% 
+  mutate(date = dmy(Date)) %>% 
+  rename(siteID = Site, subplot = Subplot, year = Year, registrator = Registrator, writer = Writer, weather = Weather, comments = Comments) %>% 
+  select(!c(Block, Plot, Treat, Date))
+  
+          
 
 #### Merging the "summed" Veronica and Sibbaldia data with the "reproduction" data ####
 
 full_reproduction_data <- reproduction_data %>% 
-  left_join(sib_pro_sum_reproduction, by = c("Site", "Block", "Plot", "Treat", "Subplot", "Year"), suffix = c("_rep", "_demo_sp")) %>% #suffix to avoid confusion between columns with same name from previous datasets
-  left_join(ver_alp_sum_reproduction, by = c("Site", "Block", "Plot", "Treat", "Subplot", "Year"))
+  left_join(sib_pro_sum_reproduction, by = c("siteID", "blockID", "plotID", "OTC", "treatment", "subplot", "year"), suffix = c("_rep", "_demo_sp")) %>% #suffix to avoid confusion between columns with same name from previous datasets
+  left_join(ver_alp_sum_reproduction, by = c("siteID", "blockID", "plotID", "OTC", "treatment", "subplot", "year"))
 
+full_reproduction_data %>% 
+  case_when(!is.na(registrator_demo_sp) ~ paste0(registrator, " & ", registrator_demo_sp))
 
 
 
@@ -174,7 +196,7 @@ colnames(full_reproduction_data) <- gsub("\\_[0-99]*$", "" , colnames(full_repro
 #### Pivot data from wide to long ####
 
 pivot_reproduction_data <- full_reproduction_data %>%
-  pivot_longer(!c(Site, Block, Plot, Treat, Subplot, Year, Date_rep, Registrator_rep, Writer, Weather, Comments, Date_demo_sp, Registrator_demo_sp, comment_registrator, comment_transcription.x, Date, Registrator, comment, comment_transcription.y), #columns I don't want to pivot
+  pivot_longer(!c(siteID, blockID, plotID, OTC, treatment, subplot, year, date_rep, registrator_rep, writer, eather, Comments, Date_demo_sp, Registrator_demo_sp, comment_registrator, comment_transcription.x, Date, Registrator, comment, comment_transcription.y), #columns I don't want to pivot
                             names_to = "Species", #what to call the column where the pivoted headers (species) go
                             values_to = "Reproduction_value", #what to call the column where the pivoted values go
                             values_drop_na = TRUE)  #remove NA-values
