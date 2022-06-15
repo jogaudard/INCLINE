@@ -51,12 +51,20 @@ NDVI_2019_2021 <- read_csv2("data/NDVI_2019_2021.csv") %>%
 
 NDVI <- full_join(NDVI_2020, NDVI_2019_2021) %>% 
   rename(
-    comments = comment
+    comments = "comment",
+    siteID = "site",
+    OTC_removed = "OTC",
+    tomst_presence = "tomst"
+  ) %>% 
+  mutate(
+    OTC_removed = case_when(
+      OTC_removed == "ON" ~ TRUE
+    )
   )
 
 #visually checking values
 ggplot(NDVI, aes(date, NDVI)) +
   geom_point() +
-  facet_wrap(vars(site))
+  facet_wrap(vars(siteID))
 
-write_csv(NDVI, "data_cleaned/INCLINE_NDVI_2019_2020_2021.csv")  
+write_csv(NDVI, "data_cleaned/INCLINE_NDVI_2019_2020_2021.csv")
