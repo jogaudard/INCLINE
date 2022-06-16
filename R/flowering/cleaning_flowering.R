@@ -153,9 +153,9 @@ ver_alp_sum_reproduction <- ver_alp_demography %>%
   distinct()
 
 
-##################################
+
 #### Importing community data ####
-##################################
+
 
 #Flowering data
 reproduction_data <- read.csv("Raw_data/INCLINE_flowering_2021.csv", header = TRUE, sep = ";", dec = ",") #first row is headers
@@ -168,6 +168,10 @@ reproduction_data <- reproduction_data %>%
          plotID = paste0(blockID, "_", Plot)) %>% 
   mutate(date = dmy(Date)) %>% 
   rename(siteID = Site, subplot = Subplot, year = Year, registrator = Registrator, writer = Writer, weather = Weather, comments = Comments) %>% 
+  mutate(siteID = case_when(siteID == "Ulv" ~ "Ulvehaugen",
+                            siteID == "Lav" ~ "Lavisdalen",
+                            siteID == "Gud" ~ "Gudmedalen",
+                            siteID == "Skj" ~ "Skjellingahaugen")) %>% 
   select(!c(Block, Plot, Treat, Date))
   
           
@@ -176,10 +180,27 @@ reproduction_data <- reproduction_data %>%
 
 full_reproduction_data <- reproduction_data %>% 
   left_join(sib_pro_sum_reproduction, by = c("siteID", "blockID", "plotID", "OTC", "treatment", "subplot", "year"), suffix = c("_rep", "_demo_sp")) %>% #suffix to avoid confusion between columns with same name from previous datasets
-  left_join(ver_alp_sum_reproduction, by = c("siteID", "blockID", "plotID", "OTC", "treatment", "subplot", "year"))
+  left_join(ver_alp_sum_reproduction, by = c("siteID", "blockID", "plotID", "OTC", "treatment", "subplot", "year")) %>% 
+  rename(registrator_demo_va = registrator, date_demo_va = date)
 
-full_reproduction_data %>% 
-  case_when(!is.na(registrator_demo_sp) ~ paste0(registrator, " & ", registrator_demo_sp))
+
+#Combining the three registrator columns from the three merged data sets into one column + renaming date columns + removing former registrator columns + adding precipitation levels
+full_reproduction_data <- full_reproduction_data %>% 
+  mutate(registrator = case_when(!is.na(registrator_rep) & is.na(registrator_demo_sp) & is.na(registrator_demo_va) ~ registrator_rep,
+                                 is.na(registrator_rep) & !is.na(registrator_demo_sp) & is.na(registrator_demo_va) ~ registrator_demo_sp,
+                                 is.na(registrator_rep) & is.na(registrator_demo_sp) & !is.na(registrator_demo_va) ~ registrator_demo_va,
+                                 !is.na(registrator_rep) & !is.na(registrator_demo_sp) & is.na(registrator_demo_va) ~ paste0(registrator_rep, " & ", registrator_demo_sp),
+                                 !is.na(registrator_rep) & is.na(registrator_demo_sp) & !is.na(registrator_demo_va) ~ paste0(registrator_rep, " & ", registrator_demo_va),
+                                 is.na(registrator_rep) & !is.na(registrator_demo_sp) & !is.na(registrator_demo_va) ~ paste0(registrator_demo_sp, " & ", registrator_demo_va),
+                                 TRUE ~ paste0(registrator_rep, " & ", registrator_demo_sp, " & ", registrator_demo_va))) %>% 
+  rename(date_community = date_rep, date_Sib_pro = date_demo_sp, date_Ver_alp = date_demo_va) %>% 
+  select(!c(registrator_rep, registrator_demo_sp, registrator_demo_va)) %>% 
+  mutate(precipitation = case_when(siteID == "Skj" ~ 3402,
+                                   siteID == "Gud" ~ 2130,
+                                   siteID == "Lav" ~ 1561,
+                                   TRUE ~ 1226))
+
+
 
 
 
@@ -196,7 +217,7 @@ colnames(full_reproduction_data) <- gsub("\\_[0-99]*$", "" , colnames(full_repro
 #### Pivot data from wide to long ####
 
 pivot_reproduction_data <- full_reproduction_data %>%
-  pivot_longer(!c(siteID, blockID, plotID, OTC, treatment, subplot, year, date_rep, registrator_rep, writer, weather, comments, date_demo_sp, registrator_demo_sp, date, registrator), #columns I don't want to pivot
+  pivot_longer(!c(siteID, blockID, plotID, subplot, OTC, treatment, precipitation, year, date_community, date_Sib_pro, date_Ver_alp, registrator, writer, weather, comments), #columns I don't want to pivot
                             names_to = "species", #what to call the column where the pivoted headers (species) go
                             values_to = "reproduction_value", #what to call the column where the pivoted values go
                             values_drop_na = TRUE)  #remove NA-values
@@ -212,8 +233,8 @@ pivot_reproduction_data <- full_reproduction_data %>%
 #### Summing of multiple values for several individuals of the same species within the same subplot ####
 
 #Summing variable by group
-summed_reproduction_data <- pivot_reproduction_data %>% 
-  group_by(siteID, blockID, plotID, subplot, species, OTC, treatment) %>% 
+summed_reproduction_data <- pivot_reproduction_data %>%
+  group_by(siteID, blockID, plotID, subplot, OTC, treatment, precipitation, species) %>% 
   summarise(reproduction_value = sum(reproduction_value))
 
 
@@ -223,20 +244,7 @@ summed_reproduction_data <- pivot_reproduction_data %>%
 standardised_reproduction_data <- summed_reproduction_data %>% 
   group_by(species) %>% #need to create new column called species when pivoting the data
   mutate(total_mean = mean(reproduction_value)) %>% #making a new column with mean values for all species
-  mutate(reproduction_value_standard = (reproduction_value - total_mean)/total_mean) %>%
-#standardizing values by removing units. When subtracting the total mean we "erase" differences between species (which we have measured differently)
-  mutate(warming = case_when(OTC == "C" & treatment == "C" ~ "0",
-                             OTC == "C" & treatment == "N" ~ "0",
-                             OTC == "W" & treatment == "C" ~ "1",
-                             TRUE ~ "1"),
-         novel = case_when(OTC == "C" & treatment == "C" ~ "0",
-                           OTC == "C" & treatment == "N" ~ "1",
-                           OTC == "W" & treatment == "C" ~ "0",
-                           TRUE ~ "1"),
-         precipitation = case_when(siteID == "Skj" ~ 3402,
-                                   siteID == "Gud" ~ 2130,
-                                   siteID == "Lav" ~ 1561,
-                                   TRUE ~ 1226))
+  mutate(reproduction_value_standard = (reproduction_value - total_mean)/total_mean) #standardizing values by removing units. When subtracting the total mean we "erase" differences between species (which we have measured differently)
 
 
 
@@ -260,12 +268,6 @@ systematics_reproduction_data <- standardised_reproduction_data %>%
   filter(!Functional_group %in% "Fern") %>% 
   filter(!Functional_group %in% "Lycophyte") %>% 
   filter(!Functional_group %in% "Dwarf shrub") %>% 
-  mutate(FG = case_when(Functional_group == "Graminoid" ~ "Agraminoid",
-                        TRUE ~ "Forb")) %>% 
-  mutate(SiteID = case_when(Site == "Gud" ~ "Gud",
-                            Site == "Lav" ~ "Lav",
-                            Site == "Ulv" ~ "Ulv",
-                            TRUE ~ "ASkj")) %>% 
   mutate(Flower_count = case_when(Measurement_type == "Flower count" ~ Reproduction_value)) %>% 
                                   #Measurement_type == "Flower head count" ~ Reproduction_value,
                                   #Measurement_type == "Number of flowering individuals" ~ Reproduction_value,
@@ -283,30 +285,4 @@ systematics_reproduction_data <- standardised_reproduction_data %>%
 
 
 
-d <- as.matrix(systematics_reproduction_data[,24:29])
-
-
-#Checking number of observations for each proxy
-sum(systematics_reproduction_data$proxy_flower_head) #100
-sum(systematics_reproduction_data$proxy_flower_ind) #244
-sum(systematics_reproduction_data$proxy_spikelets) #151
-sum(systematics_reproduction_data$proxy_inflorescence) #488
-sum(systematics_reproduction_data$proxy_percent_cover) #29
-
-
-#### Running model using 'Integrated Nested Laplace Approximation', a deterministic Bayesian method ####
-
-inla.mod <- inla(Y ~ proxy1 + proxy2 + proxy3 + proxy4 + proxy5 + Warming + Novel + Functional_group + Warming:Novel + Warming:Functional_group + Novel:Functional_group + Warming:Novel:Functional_group + f(Block_ID, model = "iid") + f(Data_ID, model = "iid"), 
-                 data = list(Y = d, 
-                             proxy1 = systematics_reproduction_data$proxy_flower_head,
-                             proxy2 = systematics_reproduction_data$proxy_flower_ind,
-                             proxy3 = systematics_reproduction_data$proxy_spikelets,
-                             proxy4 = systematics_reproduction_data$proxy_inflorescence,
-                             proxy5 = systematics_reproduction_data$proxy_percent_cover,
-                             Warming = systematics_reproduction_data$Warming,
-                             Novel = systematics_reproduction_data$Novel,
-                             Functional_group = systematics_reproduction_data$Functional_group,
-                             Block_ID = systematics_reproduction_data$Block_ID,
-                             Data_ID = systematics_reproduction_data$Data_ID),
-                 family = c("poisson", "poisson", "poisson", "poisson", "gamma", "gamma"))
 
