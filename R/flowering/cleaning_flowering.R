@@ -28,10 +28,9 @@ get_file(node = "zhk3m",
 
 
 
-
-#################################################################
-#### Adding demography data to my "flowering" community data ####
-#################################################################
+######################################################
+#### Adding demography data to the flowering data ####
+######################################################
 
 
 #### Importing demography data ####
@@ -199,8 +198,7 @@ full_reproduction_data <- full_reproduction_data %>%
                                    siteID == "Gud" ~ 2130,
                                    siteID == "Lav" ~ 1561,
                                    TRUE ~ 1226))
-
-
+  
 
 
 
@@ -229,14 +227,12 @@ pivot_reproduction_data <- full_reproduction_data %>%
 ##############################################################
 
 
-
 #### Summing of multiple values for several individuals of the same species within the same subplot ####
 
 #Summing variable by group
 summed_reproduction_data <- pivot_reproduction_data %>%
   group_by(siteID, blockID, plotID, subplot, OTC, treatment, precipitation, species) %>% 
-  summarise(reproduction_value = sum(reproduction_value))
-
+  mutate(reproduction_value = sum(reproduction_value))
 
 
 #### Create total means for species and standardising ####
@@ -245,7 +241,6 @@ standardised_reproduction_data <- summed_reproduction_data %>%
   group_by(species) %>% #need to create new column called species when pivoting the data
   mutate(total_mean = mean(reproduction_value)) %>% #making a new column with mean values for all species
   mutate(reproduction_value_standard = (reproduction_value - total_mean)/total_mean) #standardizing values by removing units. When subtracting the total mean we "erase" differences between species (which we have measured differently)
-
 
 
 standardised_reproduction_data <- standardised_reproduction_data %>%
