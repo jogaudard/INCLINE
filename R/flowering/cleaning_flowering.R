@@ -254,4 +254,4 @@ flowering_data <- summed_reproduction_data %>%
 
 
 
-#write.csv(biomass_allocation, file = "data/cleaned_data/INCLINE_species_level_biomass_allocation.csv", row.names = FALSE)
+#write.csv(flowering_data, file = "Cleaned_flowering/INCLINE_flowering.csv", row.names = FALSE)
