@@ -26,6 +26,12 @@ get_file(node = "zhk3m",
          path = "Cleaned_demography",
          remote_path = "Demography")
 
+#Flowering measurement types
+get_file(node = "zhk3m",
+         file = "INCLINE_flowering_measurements_2021.csv",
+         path = "Raw_data",
+         remote_path = "RawData/Flowering")
+
 
 
 ######################################################
@@ -193,12 +199,7 @@ full_reproduction_data <- full_reproduction_data %>%
                                  is.na(registrator_rep) & !is.na(registrator_demo_sp) & !is.na(registrator_demo_va) ~ paste0(registrator_demo_sp, " & ", registrator_demo_va),
                                  TRUE ~ paste0(registrator_rep, " & ", registrator_demo_sp, " & ", registrator_demo_va))) %>% 
   rename(date_community = date_rep, date_Sib_pro = date_demo_sp, date_Ver_alp = date_demo_va) %>% 
-  select(!c(registrator_rep, registrator_demo_sp, registrator_demo_va)) %>% 
-  mutate(precipitation = case_when(siteID == "Skj" ~ 3402,
-                                   siteID == "Gud" ~ 2130,
-                                   siteID == "Lav" ~ 1561,
-                                   TRUE ~ 1226))
-  
+  select(!c(registrator_rep, registrator_demo_sp, registrator_demo_va)) 
 
 
 
@@ -215,69 +216,42 @@ colnames(full_reproduction_data) <- gsub("\\_[0-99]*$", "" , colnames(full_repro
 #### Pivot data from wide to long ####
 
 pivot_reproduction_data <- full_reproduction_data %>%
-  pivot_longer(!c(siteID, blockID, plotID, subplot, OTC, treatment, precipitation, year, date_community, date_Sib_pro, date_Ver_alp, registrator, writer, weather, comments), #columns I don't want to pivot
+  pivot_longer(!c(siteID, blockID, plotID, subplot, OTC, treatment, year, date_community, date_Sib_pro, date_Ver_alp, registrator, writer, weather, comments), #columns I don't want to pivot
                             names_to = "species", #what to call the column where the pivoted headers (species) go
                             values_to = "reproduction_value", #what to call the column where the pivoted values go
                             values_drop_na = TRUE)  #remove NA-values
 
 
 
-##############################################################
-#### Standardising the flowering data/reproduction values ####
-##############################################################
-
-
+########################################################################################################
 #### Summing of multiple values for several individuals of the same species within the same subplot ####
+########################################################################################################
 
 #Summing variable by group
 summed_reproduction_data <- pivot_reproduction_data %>%
-  group_by(siteID, blockID, plotID, subplot, OTC, treatment, precipitation, species) %>% 
-  mutate(reproduction_value = sum(reproduction_value))
-
-
-#### Create total means for species and standardising ####
-
-standardised_reproduction_data <- summed_reproduction_data %>% 
-  group_by(species) %>% #need to create new column called species when pivoting the data
-  mutate(total_mean = mean(reproduction_value)) %>% #making a new column with mean values for all species
-  mutate(reproduction_value_standard = (reproduction_value - total_mean)/total_mean) #standardizing values by removing units. When subtracting the total mean we "erase" differences between species (which we have measured differently)
-
-
-standardised_reproduction_data <- standardised_reproduction_data %>%
-   mutate(reproduction_value_standard = reproduction_value_standard + abs(min(reproduction_value_standard))) #moving up above 0
+  group_by(siteID, plotID, subplot, species) %>% 
+  mutate(flowering_value = sum(reproduction_value)) %>% 
+  select(siteID, blockID, plotID, subplot, OTC, treatment, year, date_community, date_Sib_pro, date_Ver_alp, registrator, writer, weather, species, flowering_value)
 
 
 
 
-#########################################################################
-#### Merging species systematics with standardised reproduction data ####
-#########################################################################
+####################################################################
+#### Merging flowering measurement types with reproduction data ####
+####################################################################
 
-#### Importing systematics data ####
-species_systematics <- read.csv("species_systematics.csv", header = TRUE, sep = ";",  dec = ",")
+#### Importing flowering measurement data ####
+flowering_measurement_types <- read.csv("Raw_data/INCLINE_flowering_measurements_2021.csv", header = TRUE, sep = ";",  dec = ",") %>% 
+  rename(species = Species)
 
 
 #### Merging the data sets by species ####
-systematics_reproduction_data <- standardised_reproduction_data %>% 
-  left_join(species_systematics, by = "Species") %>% 
-  filter(!Functional_group %in% "Fern") %>% 
-  filter(!Functional_group %in% "Lycophyte") %>% 
-  filter(!Functional_group %in% "Dwarf shrub") %>% 
-  mutate(Flower_count = case_when(Measurement_type == "Flower count" ~ Reproduction_value)) %>% 
-                                  #Measurement_type == "Flower head count" ~ Reproduction_value,
-                                  #Measurement_type == "Number of flowering individuals" ~ Reproduction_value,
-                                  #Measurement_type == "Number of inflorescence units" ~ Reproduction_value)) %>% 
-  mutate(Flower_head = case_when(Measurement_type == "Flower head count" ~ Reproduction_value)) %>% 
-  mutate(Flower_ind = case_when(Measurement_type == "Number of flowering individuals" ~ Reproduction_value)) %>%
-  mutate(Spikelets = case_when(Measurement_type == "Number of inflorescence units" ~ Reproduction_value)) %>%
-  mutate(Inflorescence = case_when(Measurement_type == "Length of inflorescence" ~ Reproduction_value)) %>%
-  mutate(Percent_cover = case_when(Measurement_type == "Percent cover" ~ Reproduction_value/100)) %>%
-  mutate(proxy_flower_head = case_when(Measurement_type == "Flower head count" ~ 1, TRUE ~ 0)) %>% 
-  mutate(proxy_flower_ind = case_when(Measurement_type == "Number of flowering individuals" ~ 1, TRUE ~ 0)) %>%
-  mutate(proxy_spikelets = case_when(Measurement_type == "Number of inflorescence units" ~ 1, TRUE ~ 0)) %>%
-  mutate(proxy_inflorescence = case_when(Measurement_type == "Length of inflorescence" ~ 1, TRUE ~ 0)) %>%
-  mutate(proxy_percent_cover = case_when(Measurement_type == "Percent cover" ~ 1, TRUE ~ 0))
+flowering_data <- summed_reproduction_data %>% 
+  left_join(flowering_measurement_types, by = "species") %>% 
+  rename(flowering_measurement_type = Measurement_type) %>% 
+  select(siteID, blockID, plotID, subplot, OTC, treatment, year, date_community, date_Sib_pro, date_Ver_alp, registrator, writer, weather, species, flowering_measurement_type, flowering_value)
 
 
 
 
+#write.csv(biomass_allocation, file = "data/cleaned_data/INCLINE_species_level_biomass_allocation.csv", row.names = FALSE)
