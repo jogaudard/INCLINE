@@ -17,7 +17,7 @@ TableID, Variable name, Unit, Description, How measured
 ,plotID,,Unique ID for each plot,defined
 ,soil_temperature,°C,Soil temperature at 5 cm below ground,measured
 ,ground_temperature,°C,Ground temperature,measured
-,soilmoisture,percentage,Soil moisture,measured
+,soil_moisture,percentage,Soil moisture,measured
 ,air_temperature,°C,Air temperature 15 cm above ground,measured
 ,NDVI,°C,NDVI measurement for each plot,measured
 ,date,yyyy-mm-dd,Date of sampling or observation,recorded

@@ -83,3 +83,60 @@ knitr::kable(ndvi_dic)
 ```{r, echo=FALSE}
 knitr::kable(microclimate_dic)
 ```
+
+### Biomass removal
+```{r, echo=FALSE}
+knitr::kable(biomass_removal_dic)
+```
+
+### Demography
+```{r, echo=FALSE}
+knitr::kable(demography_dic)
+```
+
+### Germination alpine
+```{r, echo=FALSE}
+knitr::kable(seedling_traits_alpine_dic)
+```
+
+### Seedbank
+```{r, echo=FALSE}
+knitr::kable(seedbank_survival_dic)
+```
+
+### Seeds per capsule
+```{r, echo=FALSE}
+knitr::kable(seeds_per_capsule_dic)
+```
+
+### Species level biomass allocation
+```{r, echo=FALSE}
+knitr::kable(species_level_biomass_allocation_dic)
+```
+
+
+
+<!-- ### -->
+<!-- ```{r, echo=FALSE} -->
+<!-- knitr::kable() -->
+<!-- ``` -->
+
+<!-- ### -->
+<!-- ```{r, echo=FALSE} -->
+<!-- knitr::kable() -->
+<!-- ``` -->
+
+<!-- ### -->
+<!-- ```{r, echo=FALSE} -->
+<!-- knitr::kable() -->
+<!-- ``` -->
+
+<!-- ### -->
+<!-- ```{r, echo=FALSE} -->
+<!-- knitr::kable() -->
+<!-- ``` -->
+
+<!-- ### -->
+<!-- ```{r, echo=FALSE} -->
+<!-- knitr::kable() -->
+<!-- ``` -->
