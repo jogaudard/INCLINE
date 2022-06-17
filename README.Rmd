@@ -7,6 +7,7 @@ output: github_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+source("data_doc/INCLINE_data-dictionnary.R")
 ```
 
 # Introduction
@@ -67,3 +68,18 @@ Where:
 - A: area of chamber frame base (m^2^)
 
 ## Data dictionnaries
+
+### Carbon fluxes
+```{r cfluxdic, echo=FALSE}
+knitr::kable(cflux_dic)
+```
+
+### NDVI
+```{r, echo=FALSE}
+knitr::kable(ndvi_dic)
+```
+
+### Microclimate
+```{r, echo=FALSE}
+knitr::kable(microclimate_dic)
+```
