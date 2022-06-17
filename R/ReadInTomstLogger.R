@@ -25,6 +25,7 @@ get_file(node = "zhk3m",
          remote_path = "RawData/Climate")
 
 unzip("data/INCLINE_microclimate.zip", exdir = "data")
+file.remove("data/INCLINE_microclimate.zip") #let's free some space
 
 #### CLIMATE DATA ####
 
@@ -503,11 +504,64 @@ microclimate_clean <- microclimate %>%
   filter(
     cutting == "keep"
   ) %>% 
-  select(datetime, loggerID, plotID, site, block, plot, OTC, treatment, comment, sensor, value)
+  select(datetime, loggerID, plotID, site, OTC, treatment, comment, sensor, value) %>% 
+  rename(
+    siteID = "site",
+    comments = "comment"
+  ) %>% #apparently some loggers got stuck at x datetime during several days. I need to delete these data as we cannot know when they were recorded.
+  # distinct(datetime, loggerID, plotID, siteID, OTC, treatment, comments, sensor) %>% 
+  group_by(datetime, loggerID, plotID, siteID, OTC, treatment, comments, sensor) %>%
+  mutate(
+    n = n()
+  ) %>% 
+  filter(n == 1) %>%  # we keep only the row that are unique
+  select(!n)
+
+gc()
+
+# making separate dataset for each sensor as it is way too big
+
+microclimate_air_temperature <- microclimate_clean %>% 
+  filter(sensor == "air_temperature") %>% 
+  rename(air_temperature = "value")
+gc()
+write_csv(microclimate_air_temperature, "data_cleaned/INCLINE_microclimate_air_temperature.csv")
+
+
+microclimate_soil_temperature <- microclimate_clean %>% 
+  filter(sensor == "soil_temperature") %>% 
+  rename(soil_temperature = "value")
+gc()
+write_csv(microclimate_soil_temperature, "data_cleaned/INCLINE_microclimate_soil_temperature.csv")
+
+
+microclimate_ground_temperature <- microclimate_clean %>% 
+  filter(sensor == "ground_temperature") %>% 
+  rename(ground_temperature = "value")
+gc()
+write_csv(microclimate_ground_temperature, "data_cleaned/INCLINE_microclimate_ground_temperature.csv")
+
+
+microclimate_soil_moisture <- microclimate_clean %>% 
+  filter(sensor == "soil_moisture") %>% 
+  rename(soil_moisture = "value")
+gc()
+write_csv(microclimate_soil_moisture, "data_cleaned/INCLINE_microclimate_soil_moisture.csv")
+
+
+# microclimate_clean <- microclimate_clean %>% 
+#   select(!n) %>% 
+#   pivot_wider(names_from = sensor, values_from = value)
+  
 
 gc()
 
 # beepr::beep(sound = 5) #makes a happy sound when you are done cleaning the data
 # Save clean file
-write_csv(microclimate_clean, "data_cleaned/INCLINE_microclimate.csv")
-zip("data_cleaned/INCLINE_microclimate.zip", "data_cleaned/INCLINE_microclimate.csv")
+# write_csv(microclimate_clean, "data_cleaned/INCLINE_microclimate.csv")
+zip("data_cleaned/INCLINE_microclimate.zip", c("data_cleaned/INCLINE_microclimate_air_temperature.csv",
+                                               "data_cleaned/INCLINE_microclimate_soil_temperature.csv",
+                                               "data_cleaned/INCLINE_microclimate_ground_temperature.csv",
+                                               "data_cleaned/INCLINE_microclimate_soil_moisture.csv"))
+
+gc()
