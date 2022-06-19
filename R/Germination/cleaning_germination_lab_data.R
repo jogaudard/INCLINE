@@ -555,6 +555,19 @@ Sib_pro_germination_traits <- Sib_pro_germination_traits %>%
                             water_potential == 10 ~ -1.70))
 
 
+# seed_mass_SP_value <- seed_mass_Sib_pro %>% 
+#   group_by(siteID) %>% 
+#   mutate(seed_mass = mean(weight_per_seed)*1000) %>% 
+#   select(siteID, seed_mass) %>% 
+#   unique() %>% 
+#   mutate(siteID = case_when(siteID == "Gudmedalen" ~ "GUD",
+#                             siteID == "Lavisdalen" ~ "LAV",
+#                             siteID == "Ulvehaugen" ~ "ULV",
+#                             siteID == "Skjellingahaugen" ~ "SKJ"))
+# 
+# Sib_pro_germination_traits1 <- Sib_pro_germination_traits %>% 
+#   left_join(seed_mass_SP_value, by = "siteID")
+
 
 #### Make plot of germination ####
 Germination_Sib_pro %>% 
