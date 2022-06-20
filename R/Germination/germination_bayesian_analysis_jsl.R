@@ -668,17 +668,22 @@ WP <- as.numeric(standard(as.numeric(dat$water_potential)))
 WP_MPa <- as.numeric(standard(dat$WP_MPa))
 #Precip <- as.numeric(standard(dat$precip))
 Precip <- as.factor(dat$precip)
+seed_mass <- standard(as.numeric(dat$seed_mass))
 
 # dependent variables
 DtoM <- as.numeric(dat$days_to_max_germination)
 N <- as.numeric(length(DtoM))
 
-treatmat <- model.matrix(~Precip*WP_MPa)
-n_parm <- as.numeric(ncol(treatmat))
-
 # look at the data before the analysis
 ggplot(dat, aes(x=water_potential, y = days_to_max_germination), adjust = 0.01)+
   geom_point()+facet_wrap(~siteID)
+
+#------------------ Chose to run the model with precipitation (keep running the next lines of code) or seed mass (jump to the next code section)
+
+##### Model with precipitation #####
+
+treatmat <- model.matrix(~Precip*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
 
 jags.data <- list("treatmat", "DtoM", "N", "n_parm")
 jags.param <- c("b", "rss", "rss_new", "r") 
@@ -720,6 +725,110 @@ mean(results_DtoM_VA$BUGSoutput$sims.list$rss_new > results_DtoM_VA$BUGSoutput$s
 ## put together for figure  and r^2
 mcmc <- results_DtoM_VA$BUGSoutput$sims.matrix
 coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]", "b[5]", "b[6]", "b[7]", "b[8]")]
+fit = coefs %*% t(treatmat)
+resid = sweep(fit, 2, log(DtoM), "-")
+var_f = apply(fit, 1, var)
+var_e = apply(resid, 1, var)
+R2 = var_f/(var_f + var_e)
+tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
+
+#residuals
+coefs2 = apply(coefs, 2, median)
+fit2 = as.vector(coefs2 %*% t(treatmat))
+resid2 <- log(DtoM) - (fit2)
+sresid2 <- resid2/sd(resid2)
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = (fit2)))
+hist(resid2)
+
+# check predicted versus observed
+yRep = sapply(1:nrow(mcmc), function(i) rpois(nrow(dat), exp(fit[i,])))
+ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
+                                         fill = "Model"), alpha = 0.5) + 
+  geom_density(data = dat, aes(x = (DtoM), fill = "Obs"), alpha = 0.5)
+
+# generate plots
+newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
+                      #Precip = c(unique(standard(dat$precip))))
+                      Precip = unique(as.factor(dat$precip)))
+
+xmat <- model.matrix(~Precip*WP_MPa, newdat)
+fit = coefs %*% t(xmat)
+newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
+
+graphdat <- dat %>% mutate(estimate = days_to_max_germination) %>%
+  rename(site = siteID)
+graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
+graphdat$Precip <- as.factor(dat$precip)
+
+ggplot()+ 
+  geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.15)+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(Precip)), alpha=0.35)+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+  #facet_wrap(~Precip)+
+  #scale_colour_manual("Treatment", values=c("gray", "red")) + 
+  #scale_fill_manual("Treatment", values=c("dark gray", "red")) + 
+  scale_x_continuous("Standardized WP") + 
+  scale_y_continuous("Days to max germination")+ 
+  # theme(axis.text.y = element_text(size=7,colour= "black"),
+  #       axis.text.x= element_text(size=7, colour="black"), 
+  #       axis.title=element_text(size=7),strip.text=element_text(size=5),
+  #       plot.title=element_text(size=7),
+  #       legend.title=element_text(size=5), legend.text=element_text(size=4),
+  #       legend.margin=margin(0,0,0,0),legend.position = c(0.2,0.3),
+  #       legend.box.margin=margin(-10,-2,-10,-5),legend.justification="left",
+  #       legend.key.size = unit(0.15, "cm"))+ #labs(title="Colonization probability")+
+  theme(panel.background = element_rect(fill='white', colour='black'))+
+  theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
+  scale_colour_manual(values = Precip_palette) +
+  scale_fill_manual(values = Precip_palette) +
+  theme(text = element_text(size = 15))
+
+##### Model with seed mass #####
+
+treatmat <- model.matrix(~seed_mass*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
+
+jags.data <- list("treatmat", "DtoM", "N", "n_parm")
+jags.param <- c("b", "rss", "rss_new", "r") 
+
+#Run model
+results_DtoM_VA_seed_mass <- jags.parallel(data = jags.data,
+                                           #inits = inits.fn,
+                                           parameters.to.save = jags.param,
+                                           n.iter = 100000,
+                                           model.file = model_DtoM,
+                                           n.thin = 5,
+                                           n.chains = 3,
+                                           n.burnin = 35000)
+results_DtoM_VA_seed_mass
+
+DtoM_Ver_alp_table_SM <- mcmcTab(results_DtoM_VA_seed_mass)
+
+DtoM_Ver_alp_table_SM$Variable <- c("Intercept", "Seed mass", "Water potential", "Seed mass:Water potential", "Deviance", "RSS", "RSS_new")
+
+DtoM_Ver_alp_table_ft_SM <- flextable(DtoM_Ver_alp_table_SM)
+DtoM_Ver_alp_table_doc_SM <- read_docx()
+DtoM_Ver_alp_table_doc_SM <- body_add_flextable(DtoM_Ver_alp_table_doc_SM, value = DtoM_Ver_alp_table_ft_SM)
+print(DtoM_Ver_alp_table_doc_SM, target = "DtoM_Ver_alp_table_seed_mass.docx")
+
+# traceplots
+s <- ggs(as.mcmc(results_DtoM_VA))
+ggs_traceplot(s, family="b") 
+
+# check Gelman Rubin Statistics
+gelman.diag(as.mcmc(results_DtoM_VA))
+
+# Posterior predictive check
+plot(results_DtoM_VA$BUGSoutput$sims.list$rss_new, results_DtoM_VA$BUGSoutput$sims.list$rss,
+     main = "",)
+abline(0,1, lwd = 2, col = "black")
+
+mean(results_DtoM_VA$BUGSoutput$sims.list$rss_new > results_DtoM_VA$BUGSoutput$sims.list$rss)
+
+## put together for figure  and r^2
+mcmc <- results_DtoM_VA_seed_mass$BUGSoutput$sims.matrix
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
 fit = coefs %*% t(treatmat)
 resid = sweep(fit, 2, log(DtoM), "-")
 var_f = apply(fit, 1, var)
@@ -941,7 +1050,7 @@ results_DtoM_SP_seed_mass
 #Save model output in table
 # DtoM_Sib_pro_table_SM <- mcmcTab(results_DtoM_SP_seed_mass)
 # 
-# DtoM_Sib_pro_table$Variable <- c("Intercept", "Seed mass", "Water potential", "Seed mass:Water potential", "Deviance", "RSS", "RSS_new")
+# DtoM_Sib_pro_table_SM$Variable <- c("Intercept", "Seed mass", "Water potential", "Seed mass:Water potential", "Deviance", "r", "RSS", "RSS_new")
 # 
 # DtoM_Sib_pro_table_ft_SM <- flextable(DtoM_Sib_pro_table_SM)
 # DtoM_Sib_pro_table_SM_doc <- read_docx()
@@ -1799,14 +1908,14 @@ results_root_shoot_VA_seed_mass <- jags.parallel(data = jags.data,
 results_root_shoot_VA_seed_mass
 
 
-# root_shoot_Ver_alp_table <- mcmcTab(results_root_shoot_VA)
-# 
-# root_shoot_Ver_alp_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
-# 
-# root_shoot_Ver_alp_table_ft <- flextable(root_shoot_Ver_alp_table)
-# root_shoot_Ver_alp_table_doc <- read_docx()
-# root_shoot_Ver_alp_table_doc <- body_add_flextable(root_shoot_Ver_alp_table_doc, value = root_shoot_Ver_alp_table_ft)
-# print(root_shoot_Ver_alp_table_doc, target = "root_shoot_Ver_alp_table.docx")
+ # root_shoot_Ver_alp_table_SM <- mcmcTab(results_root_shoot_VA_seed_mass)
+ # 
+ # root_shoot_Ver_alp_table_SM$Variable <- c("Intercept", "Seed mass", "Water potential", "Seed mass:Water potential", "Deviance", "RSS", "RSS_new", "Variance of trait","Variance random effect")
+ # 
+ # root_shoot_Ver_alp_table_ft_SM <- flextable(root_shoot_Ver_alp_table_SM)
+ # root_shoot_Ver_alp_table_doc_SM <- read_docx()
+ # root_shoot_Ver_alp_table_doc_SM <- body_add_flextable(root_shoot_Ver_alp_table_doc_SM, value = root_shoot_Ver_alp_table_ft_SM)
+ # print(root_shoot_Ver_alp_table_doc_SM, target = "root_shoot_Ver_alp_table_seed_mass.docx")
 
 # traceplots
 s <- ggs(as.mcmc(results_root_shoot_VA_seed_mass))
@@ -2066,7 +2175,7 @@ results_root_VA_seed_mass
 
 root_Ver_alp_table_SM <- mcmcTab(results_root_VA_seed_mass)
 
-root_Ver_alp_table_SM$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+root_Ver_alp_table_SM$Variable <- c("Intercept", "Seed mass", "Water potential", "Seed mass:Water potential", "Deviance", "RSS", "RSS_new", "Variance of trait","Variance random effect")
 
 root_Ver_alp_table_ft_SM <- flextable(root_Ver_alp_table_SM)
 root_Ver_alp_table_doc_SM <- read_docx()
@@ -2303,7 +2412,7 @@ results_above_ground_VA_seed_mass
 
 above_ground_Ver_alp_table_SM <- mcmcTab(results_above_ground_VA_seed_mass)
 
-above_ground_Ver_alp_table_SM$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+above_ground_Ver_alp_table_SM$Variable <-  c("Intercept", "Seed mass", "Water potential", "Seed mass:Water potential", "Deviance", "RSS", "RSS_new", "Variance of trait","Variance random effect")
 
 above_ground_Ver_alp_table_ft_SM <- flextable(above_ground_Ver_alp_table_SM)
 above_ground_Ver_alp_table_doc_SM <- read_docx()
@@ -2654,14 +2763,14 @@ results_root_shoot_SP_seed_mass <- jags.parallel(data = jags.data,
                                                  n.burnin = 15000)
 results_root_shoot_SP_seed_mass
 
-# root_shoot_Sib_pro_table <- mcmcTab(results_root_shoot_SP)
-# 
-# root_shoot_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
-# 
-# root_shoot_Sib_pro_table_ft <- flextable(root_shoot_Sib_pro_table)
-# root_shoot_Sib_pro_table_doc <- read_docx()
-# root_shoot_Sib_pro_table_doc <- body_add_flextable(root_shoot_Sib_pro_table_doc, value = root_shoot_Sib_pro_table_ft)
-# print(root_shoot_Sib_pro_table_doc, target = "root_shoot_Sib_pro_table.docx")
+ root_shoot_Sib_pro_table_SM <- mcmcTab(results_root_shoot_SP_seed_mass)
+ 
+ root_shoot_Sib_pro_table_SM$Variable <- c("Intercept", "Seed mass", "Water potential", "Seed mass:Water potential", "Deviance", "RSS", "RSS_new", "Variance of trait","Variance random effect")
+ 
+ root_shoot_Sib_pro_table_ft_SM <- flextable(root_shoot_Sib_pro_table_SM)
+ root_shoot_Sib_pro_table_doc_SM <- read_docx()
+ root_shoot_Sib_pro_table_doc_SM <- body_add_flextable(root_shoot_Sib_pro_table_doc_SM, value = root_shoot_Sib_pro_table_ft_SM)
+ print(root_shoot_Sib_pro_table_doc_SM, target = "root_shoot_Sib_pro_table_seed_mass.docx")
 
 # traceplots
 s <- ggs(as.mcmc(results_root_shoot_SP_seed_mass))
@@ -2930,7 +3039,7 @@ results_root_SP_seed_mass
 
 root_Sib_pro_table_seed_mass <- mcmcTab(results_root_SP_seed_mass)
 
-#root_Sib_pro_table_seed_mass$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+root_Sib_pro_table_seed_mass$Variable <- c("Intercept", "Seed mass", "Water potential", "Seed mass:Water potential", "Deviance", "RSS", "RSS_new", "Variance of trait","Variance random effect")
 
 root_Sib_pro_table_ft_seed_mass <- flextable(root_Sib_pro_table_seed_mass)
 root_Sib_pro_table_doc_seed_mass <- read_docx()
@@ -3170,7 +3279,7 @@ results_above_ground_SP_seed_mass
 
 above_ground_Sib_pro_table_seed_mass <- mcmcTab(results_above_ground_SP_seed_mass)
 
-#above_ground_Sib_pro_table_seed_mass$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+above_ground_Sib_pro_table_seed_mass$Variable <- c("Intercept", "Seed mass", "Water potential", "Seed mass:Water potential", "Deviance", "RSS", "RSS_new", "Variance of trait","Variance random effect")
 
 above_ground_Sib_pro_table_ft_seed_mass <- flextable(above_ground_Sib_pro_table_seed_mass)
 above_ground_Sib_pro_table_doc_seed_mass <- read_docx()

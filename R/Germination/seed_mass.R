@@ -9,6 +9,7 @@ library(osfr)
 library(lubridate)
 library(multcompView)
 library(patchwork)
+library(lmerTest)
 
 #### Downloading data from OSF ####
 
@@ -93,7 +94,7 @@ ggplot(aes(x = siteID, y = (weight_per_seed*1000), fill = siteID)) +
 seed_mass_VA_plot <- seed_mass_VA %>% 
   mutate(siteID = factor(siteID, levels = c("Ulvehaugen","Lavisdalen",  "Gudmedalen", "Skjellingahaugen"))) %>% 
   ggplot(aes(x = siteID, y = (weight_per_seed*1000), fill = siteID)) +
-  geom_boxplot(alpha = 0.7)+
+  geom_boxplot(alpha = 0.7, outlier.shape = NA)+
   geom_jitter(alpha = 0.3, width = 0.1, height = 0)+
   #facet_wrap(~species, nrow = 2, scales = "free_y") +
   theme_bw() +
@@ -126,4 +127,49 @@ plot <- (seed_mass_VA_plot /
   seed_mass_SP_plot )
 
 ggsave(plot, filename = "Seed_mass_plot.pdf", width = 14, height = 18, units = "cm", dpi = 300)
+
+
+### Running models to test for seed mass effects on germination percentage
+
+seed_mass_SP_value <- seed_mass_Sib_pro %>% 
+   group_by(siteID) %>% 
+   mutate(seed_mass = mean(weight_per_seed)*1000) %>% 
+   select(siteID, seed_mass) %>% 
+   unique() %>% 
+   mutate(siteID = case_when(siteID == "Gudmedalen" ~ "GUD",
+                             siteID == "Lavisdalen" ~ "LAV",
+                             siteID == "Ulvehaugen" ~ "ULV",
+                             siteID == "Skjellingahaugen" ~ "SKJ"))
+ 
+Sib_pro_germination_traits1 <- Sib_pro_germination_traits %>% 
+   left_join(seed_mass_SP_value, by = "siteID")
+
+model_germ_percentage <- glmer(cbind(n_germinated, seeds_in_dish) ~ as.factor(seed_mass) * WP_MPa + (1|siteID), family = binomial, data = Sib_pro_germination_traits1)
+summary(model_germ_percentage)
+
+model_T50 <- glmer(T50 ~ seed_mass * WP_MPa + (1|siteID), family = poisson, data = Sib_pro_germination_traits1)
+summary(model_T50)
+
+
+Sib_pro_germination_traits1 %>% 
+  mutate(siteID = factor(siteID, levels = c("ULV","LAV","GUD", "SKJ"))) %>% 
+  ggplot(aes(y = n_germinated/seeds_in_dish, x = WP_MPa, color = factor(seed_mass))) +
+  geom_jitter(height= 0.01, width = 0.001, alpha = 0.5) +
+  geom_smooth( method = "lm") +
+  #scale_color_manual(values = c("#BAD8F7", "#89B7E1", "#2E75B6", "#213964")) +
+  theme_bw()
+
+Sib_pro_germination_traits1 %>% 
+  mutate(siteID = factor(siteID, levels = c("ULV","LAV","GUD", "SKJ"))) %>% 
+  ggplot(aes(y = T50, x = seed_mass, color = siteID)) +
+ geom_jitter(height= 0.01, width = 0.001, alpha = 0.5) +
+  scale_color_manual(values = c("#BAD8F7", "#89B7E1", "#2E75B6", "#213964")) +
+  theme_bw()
+
+Sib_pro_germination_traits1 %>% 
+  mutate(siteID = factor(siteID, levels = c("ULV","LAV","GUD", "SKJ"))) %>% 
+  ggplot(aes(y = T50, x = seed_mass, color = siteID)) +
+  geom_jitter(height= 0.01, width = 0.001, alpha = 0.5) +
+  scale_color_manual(values = c("#BAD8F7", "#89B7E1", "#2E75B6", "#213964")) +
+  theme_bw()
                                            
