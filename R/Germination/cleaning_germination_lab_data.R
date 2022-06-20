@@ -69,6 +69,16 @@ dish_comment_dict_VA <- read_delim("data/Germination/dish_comment_dictionary_VA.
 comment_dict_SP <- read_delim("data/Germination/comment_dictionary_SP.csv", delim = ";")
 harvest_comment_dict_SP <- read_delim("data/Germination/harvest_comment_dictionary_SP.csv", delim = ";")
 weighing_comment_dict_SP <- read_delim("data/Germination/weighing_comment_dictionary_SP.csv", delim = ";")
+seed_mass <- read.delim("data/Germination/Seed_weight.csv", sep = ",", dec = ".")
+
+#### Clean seed mass data ####
+
+seed_mass <- seed_mass %>% 
+  mutate(weight_per_seed = total_weight/number_of_seeds) %>% 
+  mutate(siteID = as.factor(siteID),
+         species = as.factor(species)) %>% 
+  mutate(siteID = factor(siteID, levels = c("Skjellingahaugen", "Lavisdalen", "Ulvehaugen", "Gudmedalen"))) %>% 
+  mutate(species = factor(species, levels = c("Sib_pro", "Ver_alp")))
 
 ##### Veronica alpina #####
 
@@ -403,6 +413,48 @@ Germination_Ver_alp <- Ver_alp_germ %>%
   mutate(days_to_germination = as.numeric(days_to_germination),
          days_to_max_germination = as.numeric(days_to_max_germination))
 
+Germination_Ver_alp_1 <- Germination_Ver_alp %>% 
+  dplyr::select(petri_dish, germ_percent, T50, days_to_max_germination, n_germinated) %>% 
+  unique()
+
+Ver_alp_germination_traits <- Ver_alp_germ %>% 
+  left_join(Germination_Ver_alp_1, by = c("petri_dish")) %>% 
+  mutate(n_germinated = case_when(is.na(n_germinated) ~ 0,
+                                   !is.na(n_germinated) ~ n_germinated))
+
+Ver_alp_germination_traits <- Ver_alp_germination_traits %>% 
+  filter(is.na(flag_germination)) %>% 
+  dplyr::select(petri_dish, species, siteID, water_potential, replicate, precip,  seeds_in_dish, n_germinated,  days_to_max_germination, germ_percent, T50) %>% 
+  unique() %>% 
+  mutate(precip = precip/1000) %>% 
+  mutate(WP_MPa = case_when(water_potential == 1 ~ -0.25,
+                            water_potential == 2 ~ -0.33,
+                            water_potential == 3 ~ -0.42,
+                            water_potential == 4 ~ -0.50,
+                            water_potential == 5 ~ -0.57,
+                            water_potential == 6 ~ -0.70,
+                            water_potential == 7 ~ -0.95,
+                            water_potential == 8 ~ -1.20,
+                            water_potential == 9 ~ -1.45,
+                            water_potential == 10 ~ -1.70))
+
+## Add seed mass
+
+seed_mass_VA <- seed_mass %>% filter(species == "Ver_alp")
+
+seed_mass_VA_value <- seed_mass_VA %>% 
+  group_by(siteID) %>% 
+  mutate(seed_mass = mean(weight_per_seed)*1000) %>% 
+  select(siteID, seed_mass) %>% 
+  unique() %>% 
+  mutate(siteID = case_when(siteID == "Gudmedalen" ~ "GUD",
+                            siteID == "Lavisdalen" ~ "LAV",
+                            siteID == "Ulvehaugen" ~ "ULV",
+                            siteID == "Skjellingahaugen" ~ "SKJ"))
+
+Ver_alp_germination_traits <- Ver_alp_germination_traits %>% 
+  left_join(seed_mass_SP_value, by = "siteID")
+
 #### Make plot of germination ####
 
 WP_names <- c(
@@ -459,31 +511,6 @@ Germination_Ver_alp %>%
                                         colour = "lightgrey"),
         text = element_text(size = 18)) +
   scale_color_viridis_c()
-
-Germination_Ver_alp_1 <- Germination_Ver_alp %>% 
-  dplyr::select(petri_dish, germ_percent, T50, days_to_max_germination, n_germinated) %>% 
-  unique()
-
-Ver_alp_germination_traits <- Ver_alp_germ %>% 
-  left_join(Germination_Ver_alp_1, by = c("petri_dish")) %>% 
-  mutate(n_germinated = case_when(is.na(n_germinated) ~ 0,
-                                   !is.na(n_germinated) ~ n_germinated))
-
-Ver_alp_germination_traits <- Ver_alp_germination_traits %>% 
-  filter(is.na(flag_germination)) %>% 
-  dplyr::select(petri_dish, species, siteID, water_potential, replicate, precip,  seeds_in_dish, n_germinated,  days_to_max_germination, germ_percent, T50) %>% 
-  unique() %>% 
-  mutate(precip = precip/1000) %>% 
-  mutate(WP_MPa = case_when(water_potential == 1 ~ -0.25,
-                            water_potential == 2 ~ -0.33,
-                            water_potential == 3 ~ -0.42,
-                            water_potential == 4 ~ -0.50,
-                            water_potential == 5 ~ -0.57,
-                            water_potential == 6 ~ -0.70,
-                            water_potential == 7 ~ -0.95,
-                            water_potential == 8 ~ -1.20,
-                            water_potential == 9 ~ -1.45,
-                            water_potential == 10 ~ -1.70))
 
 #### Make germination metrics Sib pro ####
 
@@ -553,6 +580,23 @@ Sib_pro_germination_traits <- Sib_pro_germination_traits %>%
                             water_potential == 8 ~ -1.20,
                             water_potential == 9 ~ -1.45,
                             water_potential == 10 ~ -1.70))
+
+## Add seed mass
+
+seed_mass_SP <- seed_mass %>% filter(species == "Sib_pro")
+
+seed_mass_SP_value <- seed_mass_SP %>% 
+  group_by(siteID) %>% 
+  mutate(seed_mass = mean(weight_per_seed)*1000) %>% 
+  select(siteID, seed_mass) %>% 
+  unique() %>% 
+  mutate(siteID = case_when(siteID == "Gudmedalen" ~ "GUD",
+                            siteID == "Lavisdalen" ~ "LAV",
+                            siteID == "Ulvehaugen" ~ "ULV",
+                            siteID == "Skjellingahaugen" ~ "SKJ"))
+
+Sib_pro_germination_traits <- Sib_pro_germination_traits %>% 
+  left_join(seed_mass_SP_value, by = "siteID")
 
 
 # seed_mass_SP_value <- seed_mass_Sib_pro %>% 
