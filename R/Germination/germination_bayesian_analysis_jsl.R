@@ -62,9 +62,38 @@ standard <- function(x) round((x - mean(x, na.rm=T)) / ((sd(x, na.rm=T))), digit
 
 # Palette for plotting
 Precip_palette <- c("#BAD8F7", "#89B7E1", "#2E75B6", "#213964")
+seed_mass_palette <- c("#DFC27D",  "#BF812D", "#8C510A","#543005")
 
 #Jags hates NA in independent variables
 #Take out NAs in the data that you don't want to model
+
+# ------------------------------------------ ####  Germination percentage model ####
+
+model_GermN <- function(){
+  #group effects
+  #for (j in 1:4){lokaliteter[j]~dnorm(0, prec1)}
+  
+  #likelihood
+  for (i in 1:N){
+    GermN[i] ~ dbinom(mu[i], NumSeedDish[i])
+    
+    # linear predictor
+    car::logit(mu[i]) <- inprod(b, treatmat[i,]) #+ lokaliteter[site[i]]
+    
+    # residual sum of squares
+    res[i] <- pow((GermN[i]/NumSeedDish[i]) - (mu[i]), 2)
+    GermN_new[i] ~ dbinom(mu[i], NumSeedDish[i])
+    res_new[i] <- pow((GermN_new[i]/NumSeedDish[i]) - (mu[i]), 2)
+  }
+  
+  for(i in 1:n_parm){b[i] ~ dnorm(0,1.0E-6)} #dnorm in JAGS uses mean and precision (0 = mean and 1.0E-6 = precision) different from dnorm in R that has variance and not precision.
+  #prec1 ~ dgamma(0.001, 0.001) 
+  #sig1 <- 1/sqrt(prec1) #getting variance of the random effect
+  
+  # #derived params
+  rss <- sum(res[])
+  rss_new <- sum(res_new[])
+}
 
 #### Germination percentage Veronica alpina ####
 # take out the too many zer0s
@@ -84,48 +113,27 @@ WP <- as.numeric(standard(as.numeric(dat$water_potential)))
 WP_MPa <- as.numeric(standard(dat$WP_MPa))
 #Precip <- as.numeric(standard(dat$precip))
 Precip <- as.factor(dat$precip)
+seed_mass <- as.numeric(standard(dat$seed_mass))
 
 # dependent variables
 GermN <- as.numeric(dat$n_germinated)
 NumSeedDish <- as.numeric(dat$seeds_in_dish)
 N <- as.numeric(length(GermN))
 
+# look at the data before the analysis
+ggplot(dat, aes(x=water_potential,y = car::logit(n_germinated/seeds_in_dish, adjust = 0.01)))+
+  geom_point()+facet_wrap(~siteID)
 
+#------------------ Chose to run the model with precipitation (keep running the next lines of code) or seed mass (jump to the next code section)
+
+##### Model with precipitation #####
 treatmat <- model.matrix(~Precip*WP_MPa) 
 n_parm <- as.numeric(ncol(treatmat))
 
-# look at the data before the analysis
-ggplot(dat, aes(x=water_potential,y = logit(n_germinated/seeds_in_dish, adjust = 0.01)))+
-  geom_point()+facet_wrap(~siteID)
 
 jags.data <- list("treatmat", "GermN", "N", "NumSeedDish", "n_parm")
 jags.param <- c("b",  "Presi", "rss", "rss_new", "sig1") 
 
-model_GermN <- function(){
-  #group effects
-  #for (j in 1:4){lokaliteter[j]~dnorm(0, prec1)}
-  
-  #likelihood
-  for (i in 1:N){
-    GermN[i] ~ dbinom(mu[i], NumSeedDish[i])
-    
-    # linear predictor
-      logit(mu[i]) <- inprod(b, treatmat[i,]) #+ lokaliteter[site[i]]
-
-     # residual sum of squares
-     res[i] <- pow((GermN[i]/NumSeedDish[i]) - (mu[i]), 2)
-     GermN_new[i] ~ dbinom(mu[i], NumSeedDish[i])
-     res_new[i] <- pow((GermN_new[i]/NumSeedDish[i]) - (mu[i]), 2)
-   }
-   
-    for(i in 1:n_parm){b[i] ~ dnorm(0,1.0E-6)} #dnorm in JAGS uses mean and precision (0 = mean and 1.0E-6 = precision) different from dnorm in R that has variance and not precision.
-    #prec1 ~ dgamma(0.001, 0.001) 
-    #sig1 <- 1/sqrt(prec1) #getting variance of the random effect
-  
-  # #derived params
-   rss <- sum(res[])
-   rss_new <- sum(res_new[])
-}
 
 results_Germ_percent_Ver_alp <- jags.parallel(data = jags.data,
                                #inits = inits.fn,
@@ -136,6 +144,8 @@ results_Germ_percent_Ver_alp <- jags.parallel(data = jags.data,
                                n.chains = 3,
                                n.burnin = 35000)
 results_Germ_percent_Ver_alp
+
+# Save model output in table
 
 # Germ_percent_Ver_alp_table <- mcmcTab(results_Germ_percent_Ver_alp)
 # 
@@ -165,7 +175,7 @@ mean(results_Germ_percent_Ver_alp$BUGSoutput$sims.list$rss_new^2 > results_Germ_
 mcmc <- results_Germ_percent_Ver_alp$BUGSoutput$sims.matrix
 coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]", "b[5]", "b[6]", "b[7]", "b[8]")]
 fit = coefs %*% t(treatmat)
-resid = sweep(fit, 2, logit(GermN/NumSeedDish, adjust = 0.01), "-")
+resid = sweep(fit, 2, car::logit(GermN/NumSeedDish, adjust = 0.01), "-")
 var_f = apply(fit, 1, var)
 var_e = apply(resid, 1, var)
 R2 = var_f/(var_f + var_e)
@@ -262,6 +272,108 @@ Germ_percent_Ver_alp_main_plot <- ggplot()+
 # ggsave(filename = "Germination_percent_VA.pdf", plot = VA_percent_plot, width = 26, height = 21, units = "cm", dpi = 300)
 # ggsave(filename = "Germination_percent_VA.png", plot = VA_percent_plot, width = 26, height = 21, units = "cm", dpi = 300)
 
+##### Model with seed mass #####
+treatmat <- model.matrix(~seed_mass*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
+
+jags.data <- list("treatmat", "GermN", "N", "NumSeedDish", "n_parm")
+jags.param <- c("b",  "Presi", "rss", "rss_new", "sig1") 
+
+#Run the model
+results_Germ_percent_Ver_alp_seed_mass <- jags.parallel(data = jags.data,
+                                                        #inits = inits.fn,
+                                                        parameters.to.save = jags.param,
+                                                        n.iter = 100000,
+                                                        model.file = model_GermN,
+                                                        n.thin = 5,
+                                                        n.chains = 3,
+                                                        n.burnin = 35000)
+results_Germ_percent_Ver_alp_seed_mass
+
+# Save model output in table
+
+# Germ_percent_Ver_alp_table_SM <- mcmcTab(results_Germ_percent_Ver_alp_seed_mass)
+# 
+# Germ_percent_Ver_alp_table_SM$Variable <- c("Intercept", "Seed mass", "Water potential", "Seed mass:Water potential", "Deviance", "RSS", "RSS_new")
+# 
+# Germ_percent_Ver_alp_table_ft_SM <- flextable(Germ_percent_Ver_alp_table_SM)
+# Germ_percent_Ver_alp_table_SM_doc <- read_docx()
+# Germ_percent_Ver_alp_table_SM_doc <- body_add_flextable(Germ_percent_Ver_alp_table_SM_doc, value = Germ_percent_Ver_alp_table_ft_SM)
+# print(Germ_percent_Ver_alp_table_SM_doc, target = "Germ_percent_Ver_alp_seed_mass_table.docx")
+
+
+# traceplots
+s <- ggs(as.mcmc(results_Germ_percent_Ver_alp_seed_mass))
+ggs_traceplot(s, family="b") 
+
+# check Gelman Rubin Statistics
+gelman.diag(as.mcmc(results_Germ_percent_Ver_alp_seed_mass))
+
+# Posterior predictive check
+plot(results_Germ_percent_Ver_alp_seed_mass$BUGSoutput$sims.list$rss_new, results_Germ_percent_Ver_alp_seed_mass$BUGSoutput$sims.list$rss,
+     main = "",)
+abline(0,1, lwd = 2, col = "black")
+
+mean(results_Germ_percent_Ver_alp_seed_mass$BUGSoutput$sims.list$rss_new > results_Germ_percent_Ver_alp_seed_mass$BUGSoutput$sims.list$rss)
+
+## put together for figure  and r^2
+mcmc <- results_Germ_percent_Ver_alp_seed_mass$BUGSoutput$sims.matrix 
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
+fit = coefs %*% t(treatmat)
+resid = sweep(fit, 2, car::logit(GermN/NumSeedDish, adjust = 0.01), "-")
+var_f = apply(fit, 1, var)
+var_e = apply(resid, 1, var)
+R2 = var_f/(var_f + var_e)
+tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
+
+#residuals
+coefs2 = apply(coefs, 2, median)
+fit2 = as.vector(coefs2 %*% t(treatmat))
+resid2 <- (GermN/NumSeedDish) - invlogit(fit2)
+sresid2 <- resid2/sd(resid2)
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = invlogit(fit2)))
+hist(resid2)
+
+# check predicted versus observed
+yRep = sapply(1:nrow(mcmc), function(i) rbinom(nrow(dat), NumSeedDish[i], invlogit(fit[i,])))
+ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)/NumSeedDish),
+                                         fill = "Model"), alpha = 0.5) + 
+  geom_density(data = dat, aes(x = (GermN/NumSeedDish), fill = "Obs"), alpha = 0.5)
+
+# generate plots
+newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
+                      seed_mass = c(unique(standard(as.numeric(dat$seed_mass)))))
+
+xmat <- model.matrix(~seed_mass*WP_MPa, newdat)
+fit = coefs %*% t(xmat)
+newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
+
+graphdat <- dat %>% mutate(estimate = (n_germinated/seeds_in_dish)) %>%
+  rename(site = siteID)
+graphdat$WP_MPa <- standard(graphdat$WP_MPa)                
+graphdat$seed_mass <- standard(as.numeric(dat$seed_mass))
+
+Germ_percent_Ver_alp_seed_mass_plot <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(round(seed_mass, digits = 4))), height = 0, width = 0.03)+
+  geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
+                               fill = factor(round(seed_mass, digits = 4))), alpha=0.5)+
+  geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(round(seed_mass, digits = 4))))+
+  scale_colour_manual(values = seed_mass_palette, labels = c("-1.2" = "0.0632", "-0.74" = "0.0644", "0.95" = "0.0688", "1.11" = "0.0692"))+
+  scale_fill_manual(values = seed_mass_palette, labels = c("-1.2" = "0.0632", "-0.74" = "0.0644", "0.95" = "0.0688", "1.11" = "0.0692")) +
+  scale_x_continuous(name = "Water potential (MPa)",
+                     breaks = c(-2.96, -2.26, -1.55, -0.85, -0.15, 0.21, 0.63, 1.11), 
+                     labels = c(-1.70, -1.45, -1.20, -0.95, -0.70, -0.57, -0.42, -0.25),
+                     limits = c(-2.96, 1.11)) +
+  scale_y_continuous(name = "Germination %",
+                     limits = c(0,1)) +
+  guides(colour = guide_legend(title = "Seed mass (mg)"),
+         fill = guide_legend(title = "Seed mass (mg)")) +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+
+# ggsave(filename = "Germination_percent_Sib_pro_seed_mass.pdf", plot = Germ_percent_Sib_pro_seed_mass_plot , width = 21, height = 14, units = "cm", dpi = 300)
+
+
 #### Germination percentage Sibbaldia procumbens ####
 
 # take out the too many zer0s
@@ -281,24 +393,28 @@ WP <- as.numeric(standard(as.numeric(dat$water_potential)))
 WP_MPa <- as.numeric(standard(dat$WP_MPa))
 #Precip <- as.numeric(standard(dat$precip))
 Precip <- as.factor(dat$precip)
+seed_mass <- standard(as.numeric(dat$seed_mass))
+
+# look at the data before the analysis
+ggplot(dat, aes(x=water_potential,y = car::logit(n_germinated/seeds_in_dish,
+                                                                   adjust = 0.01)))+
+  geom_point()+facet_wrap(~siteID)
 
 # dependent variables
 GermN <- as.numeric(dat$n_germinated)
 NumSeedDish <- as.numeric(dat$seeds_in_dish)
 N <- as.numeric(length(GermN))
 
+#------------------ Chose to run the model with precipitation (keep running the next lines of code) or seed mass (jump to the next code section)
+
+##### Model with precipitation #####
 treatmat <- model.matrix(~Precip*WP_MPa)
 n_parm <- as.numeric(ncol(treatmat))
-
-# look at the data before the analysis
-ggplot(dat, aes(x=water_potential,y = logit(n_germinated/seeds_in_dish,
-                                                                   adjust = 0.01)))+
-  geom_point()+facet_wrap(~siteID)
 
 jags.data <- list("treatmat", "GermN", "N", "NumSeedDish", "n_parm")
 jags.param <- c("b",  "Presi", "rss", "rss_new", "sig1") 
 
-#Run the model 
+#Run the model
 results_Germ_percent_Sib_pro <- jags.parallel(data = jags.data,
                                #inits = inits.fn,
                                parameters.to.save = jags.param,
@@ -309,7 +425,9 @@ results_Germ_percent_Sib_pro <- jags.parallel(data = jags.data,
                                n.burnin = 35000)
 results_Germ_percent_Sib_pro
 
-# Germ_percent_Sib_pro_table <- mcmcTab(results_Germ_percent_Sib_pro)
+# Save model output in table
+
+#Germ_percent_Sib_pro_table <- mcmcTab(results_Germ_percent_Sib_pro)
 # 
 # Germ_percent_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "RSS", "RSS_new")
 # 
@@ -335,9 +453,9 @@ mean(results_Germ_percent_Sib_pro$BUGSoutput$sims.list$rss_new > results_Germ_pe
 
 ## put together for figure  and r^2
 mcmc <- results_Germ_percent_Sib_pro$BUGSoutput$sims.matrix 
-coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]", "b[5]", "b[6]", "b[7]", "b[8]")] # "b[5]", "b[6]", "b[7]", "b[8]"
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]" ,"b[5]", "b[6]", "b[7]", "b[8]")]
 fit = coefs %*% t(treatmat)
-resid = sweep(fit, 2, logit(GermN/NumSeedDish, adjust = 0.01), "-")
+resid = sweep(fit, 2, car::logit(GermN/NumSeedDish, adjust = 0.01), "-")
 var_f = apply(fit, 1, var)
 var_e = apply(resid, 1, var)
 R2 = var_f/(var_f + var_e)
@@ -372,7 +490,6 @@ graphdat$WP_MPa <- standard(graphdat$WP_MPa)
 #graphdat$Precip <- as.numeric(standard((dat$precip)))
 graphdat$Precip <- as.factor(dat$precip)
 
-
 graphdat <- graphdat %>% 
   mutate(Precip = case_when(Precip == "1.226" ~ 1226,
                             Precip == "1.561" ~ 1561,
@@ -383,27 +500,6 @@ newdat <- newdat %>%
                             Precip == "1.561" ~ 1561,
                             Precip == "2.13" ~ 2130,
                             Precip == "3.402" ~ 3402))
-
-# ggplot()+ 
-#   geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.15)+
-#   geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
-#                                fill = factor(Precip)), alpha=0.35)+
-#   geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
-#   #facet_wrap(~Precip)+
-#   #scale_colour_manual("Treatment", values=c("gray", "red")) + 
-#   #scale_fill_manual("Treatment", values=c("dark gray", "red")) + 
-#   scale_x_continuous("Standardized WP") + 
-#   scale_y_continuous("Germination %")+ 
-#   # theme(axis.text.y = element_text(size=7,colour= "black"),
-#   #       axis.text.x= element_text(size=7, colour="black"), 
-#   #       axis.title=element_text(size=7),strip.text=element_text(size=5),
-#   #       plot.title=element_text(size=7),
-#   #       legend.title=element_text(size=5), legend.text=element_text(size=4),
-#   #       legend.margin=margin(0,0,0,0),legend.position = c(0.2,0.3),
-#   #       legend.box.margin=margin(-10,-2,-10,-5),legend.justification="left",
-#   #       legend.key.size = unit(0.15, "cm"))+ #labs(title="Colonization probability")+
-#   theme(panel.background = element_rect(fill='white', colour='black'))+
-#   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())
 
 Germ_percent_Sib_pro_main_plot <- ggplot()+ 
   geom_jitter(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)), height = 0, width = 0.03)+
@@ -423,33 +519,135 @@ Germ_percent_Sib_pro_main_plot <- ggplot()+
   theme(panel.background = element_rect(fill='white', colour='black'),
         panel.grid.major=element_blank(), panel.grid.minor=element_blank())
 
+##### Model with seed mass #####
+treatmat <- model.matrix(~seed_mass*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
 
-# Germ_percent_Sib_pro_four_panels_plot <- ggplot()+ 
-#   geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)),alpha=.25)+
-#   geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
-#                                fill = factor(Precip)), alpha=0.35)+
-#   geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(Precip)))+
-#   facet_wrap(~Precip, nrow = 1)+
-#   scale_x_continuous("Standardized WP") + 
-#   scale_y_continuous("Germination %")+ 
-#   theme(panel.background = element_rect(fill='white', colour='black'))+
-#   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+
-#   scale_colour_manual(values = Precip_palette)+
-#   scale_fill_manual(values = Precip_palette)
+jags.data <- list("treatmat", "GermN", "N", "NumSeedDish", "n_parm")
+jags.param <- c("b",  "Presi", "rss", "rss_new", "sig1") 
+
+#Run the model
+results_Germ_percent_Sib_pro_seed_mass <- jags.parallel(data = jags.data,
+                                                        #inits = inits.fn,
+                                                        parameters.to.save = jags.param,
+                                                        n.iter = 100000,
+                                                        model.file = model_GermN,
+                                                        n.thin = 5,
+                                                        n.chains = 3,
+                                                        n.burnin = 35000)
+results_Germ_percent_Sib_pro_seed_mass
+
+# Save model output in table
+
+# Germ_percent_Sib_pro_table_SM <- mcmcTab(results_Germ_percent_Sib_pro_seed_mass)
 # 
-# Germ_percent_Sib_pro_main_plot /
-#   Germ_percent_Sib_pro_four_panels_plot + 
-#   plot_layout(heights = c(4, 1), guides = "collect") & 
-#   theme(legend.position='bottom', text = element_text(size = 15))
+# Germ_percent_Sib_pro_table_SM$Variable <- c("Intercept", "Seed mass", "Water potential", "Seed mass:Water potential", "Deviance", "RSS", "RSS_new")
+# 
+# Germ_percent_Sib_pro_table_ft_SM <- flextable(Germ_percent_Sib_pro_table_SM)
+# Germ_percent_Sib_pro_table_SM_doc <- read_docx()
+# Germ_percent_Sib_pro_table_SM_doc <- body_add_flextable(Germ_percent_Sib_pro_table_SM_doc, value = Germ_percent_Sib_pro_table_ft_SM)
+# print(Germ_percent_Sib_pro_table_SM_doc, target = "Germ_percent_Sib_pro_seed_mass_table.docx")
+
+# traceplots
+s <- ggs(as.mcmc(results_Germ_percent_Sib_pro_seed_mass))
+ggs_traceplot(s, family="b") 
+
+# check Gelman Rubin Statistics
+gelman.diag(as.mcmc(results_Germ_percent_Sib_pro_seed_mass))
+
+# Posterior predictive check
+plot(results_Germ_percent_Sib_pro_seed_mass$BUGSoutput$sims.list$rss_new, results_Germ_percent_Sib_pro_seed_mass$BUGSoutput$sims.list$rss,
+     main = "",)
+abline(0,1, lwd = 2, col = "black")
+
+mean(results_Germ_percent_Sib_pro_seed_mass$BUGSoutput$sims.list$rss_new > results_Germ_percent_Sib_pro_seed_mass$BUGSoutput$sims.list$rss)
+
+## put together for figure  and r^2
+mcmc <- results_Germ_percent_Sib_pro_seed_mass$BUGSoutput$sims.matrix 
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
+fit = coefs %*% t(treatmat)
+resid = sweep(fit, 2, car::logit(GermN/NumSeedDish, adjust = 0.01), "-")
+var_f = apply(fit, 1, var)
+var_e = apply(resid, 1, var)
+R2 = var_f/(var_f + var_e)
+tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
+
+#residuals
+coefs2 = apply(coefs, 2, median)
+fit2 = as.vector(coefs2 %*% t(treatmat))
+resid2 <- (GermN/NumSeedDish) - invlogit(fit2)
+sresid2 <- resid2/sd(resid2)
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = invlogit(fit2)))
+hist(resid2)
+
+# check predicted versus observed
+yRep = sapply(1:nrow(mcmc), function(i) rbinom(nrow(dat), NumSeedDish[i], invlogit(fit[i,])))
+ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)/NumSeedDish),
+                                         fill = "Model"), alpha = 0.5) + 
+  geom_density(data = dat, aes(x = (GermN/NumSeedDish), fill = "Obs"), alpha = 0.5)
+
+# generate plots
+newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
+                      seed_mass = c(unique(standard(as.numeric(dat$seed_mass)))))
+
+xmat <- model.matrix(~standard(seed_mass)*WP_MPa, newdat)
+fit = coefs %*% t(xmat)
+newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
+
+graphdat <- dat %>% mutate(estimate = (n_germinated/seeds_in_dish)) %>%
+  rename(site = siteID)
+graphdat$WP_MPa <- standard(graphdat$WP_MPa)                
+graphdat$seed_mass <- standard(as.numeric(dat$seed_mass))
+
+Germ_percent_Sib_pro_seed_mass_plot <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(round(seed_mass, digits = 3))), height = 0, width = 0.03)+
+  geom_ribbon(data=newdat, aes(ymin=invlogit(conf.low), ymax=invlogit(conf.high), x=WP_MPa, 
+                               fill = factor(round(seed_mass, digits = 3))), alpha=0.5)+
+  geom_line(data=newdat, aes(y = invlogit(estimate), x = WP_MPa, colour = factor(round(seed_mass, digits = 3))))+
+  scale_colour_manual(values = seed_mass_palette, labels = c("-1.21" = "0.461", "-0.84" = "0.478", "0.4" = "0.534", "1.17" = "0.569"))+
+  scale_fill_manual(values = seed_mass_palette, labels = c("-1.21" = "0.461", "-0.84" = "0.478", "0.4" = "0.534", "1.17" = "0.569")) +
+  scale_x_continuous(name = "Water potential (MPa)",
+                     breaks = c(-2.96, -2.26, -1.55, -0.85, -0.15, 0.21, 0.63, 1.11), 
+                     labels = c(-1.70, -1.45, -1.20, -0.95, -0.70, -0.57, -0.42, -0.25),
+                     limits = c(-2.96, 1.11)) +
+  scale_y_continuous(name = "Germination %",
+                     limits = c(0,1)) +
+  guides(colour = guide_legend(title = "Seed mass (mg)"),
+         fill = guide_legend(title = "Seed mass (mg)")) +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+
+ # ggsave(filename = "Germination_percent_Sib_pro_seed_mass.pdf", plot = Germ_percent_Sib_pro_seed_mass_plot , width = 21, height = 14, units = "cm", dpi = 300)
 
 
-Germination_percent_plot <- Germ_percent_Ver_alp_main_plot /
-  Germ_percent_Sib_pro_main_plot + 
-  plot_layout(guides = "collect") & 
-  theme(legend.position='bottom', text = element_text(size = 15))
 
- # ggsave(filename = "Germination_percent1.pdf", plot = Germination_percent_plot, width = 21, height = 21, units = "cm", dpi = 300)
- # ggsave(filename = "Germination_percent.png", plot = Germination_percent_plot, width = 21, height = 21, units = "cm", dpi = 300)
+# ------------------------------------------ #### Days to max germination model ####
+
+model_DtoM<- function(){
+  #group effects
+  #for (j in 1:4){lokaliteter[j]~dnorm(0, prec1)}
+  #likelihood
+  for (i in 1:N){
+    DtoM[i] ~ dnegbin(p[i], r)
+    # linear predictor
+    log(mu[i]) <- inprod(b, treatmat[i,]) #+lokaliteter[site[i]]
+    p[i] <- r/(r+mu[i])
+    
+    # residual sum of squares
+    res[i] <- pow(DtoM[i] - mu[i], 2)
+    DtoM_new[i] ~ dnegbin(p[i], r)
+    res_new[i] <- pow(DtoM_new[i] - mu[i], 2)
+  }
+  
+  for(i in 1:n_parm){b[i] ~ dnorm(0,1.0E-6)} #dnorm in JAGS uses mean and precision (0 = mean and 1.0E-6 = precision) different from dnorm in R that has variance and not precision.
+  prec1 ~ dgamma(0.001, 0.001) 
+  #sig1 <- 1/sqrt(prec1) #getting variance of the random effect
+  r~ dunif(0,50)
+  # #derived params
+  rss <- sum(res[])
+  rss_new <- sum(res_new[])
+}
+
 
 #### Days to max germination Veronica alpina ####
 # take out the too many zer0s
@@ -485,31 +683,7 @@ ggplot(dat, aes(x=water_potential, y = days_to_max_germination), adjust = 0.01)+
 jags.data <- list("treatmat", "DtoM", "N", "n_parm")
 jags.param <- c("b", "rss", "rss_new", "r") 
 
-model_DtoM<- function(){
-  #group effects
-  #for (j in 1:4){lokaliteter[j]~dnorm(0, prec1)}
-  #likelihood
-  for (i in 1:N){
-    DtoM[i] ~ dnegbin(p[i], r)
-    # linear predictor
-    log(mu[i]) <- inprod(b, treatmat[i,]) #+lokaliteter[site[i]]
-    p[i] <- r/(r+mu[i])
-    
-    # residual sum of squares
-    res[i] <- pow(DtoM[i] - mu[i], 2)
-    DtoM_new[i] ~ dnegbin(p[i], r)
-    res_new[i] <- pow(DtoM_new[i] - mu[i], 2)
-  }
-  
-  for(i in 1:n_parm){b[i] ~ dnorm(0,1.0E-6)} #dnorm in JAGS uses mean and precision (0 = mean and 1.0E-6 = precision) different from dnorm in R that has variance and not precision.
-  prec1 ~ dgamma(0.001, 0.001) 
-  #sig1 <- 1/sqrt(prec1) #getting variance of the random effect
-  r~ dunif(0,50)
-  # #derived params
-  rss <- sum(res[])
-  rss_new <- sum(res_new[])
-}
-
+#Run model
 results_DtoM_VA <- jags.parallel(data = jags.data,
                                #inits = inits.fn,
                                parameters.to.save = jags.param,
@@ -625,25 +799,30 @@ dat <- dat %>% filter(!is.na(days_to_max_germination)) %>% filter(water_potentia
 WP_MPa <- as.numeric(standard(dat$WP_MPa))
 #Precip <- as.numeric(standard(dat$precip))
 Precip <- as.factor(dat$precip)
+seed_mass <- standard(as.numeric(dat$seed_mass))
 
 # dependent variables
 DtoM <- as.numeric(dat$days_to_max_germination)
 N <- as.numeric(length(DtoM))
 NumDays <- rep(155, length=N)
 
-treatmat <- model.matrix(~Precip*WP_MPa)
-n_parm <- as.numeric(ncol(treatmat))
-
 # look at the data before the analysis
-ggplot(dat, aes(x=water_potential, y = logit(as.numeric(days_to_max_germination))), adjust = 0.01)+
+ggplot(dat, aes(x=water_potential, y = car::logit(as.numeric(days_to_max_germination))), adjust = 0.01)+
   geom_point()+facet_wrap(~siteID)
 
-ggplot(dat, aes(logit(as.numeric(days_to_max_germination/155)))) +
+ggplot(dat, aes(car::logit(as.numeric(days_to_max_germination)))) +
   geom_histogram()
+
+#------------------ Chose to run the model with precipitation (keep running the next lines of code) or seed mass (jump to the next code section)
+
+##### Model with precipitation #####
+treatmat <- model.matrix(~Precip*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
 
 jags.data <- list("treatmat", "DtoM", "N", "n_parm")
 jags.param <- c("b", "rss", "rss_new", "r") 
 
+#Run the model
 results_DtoM_SP <- jags.parallel(data = jags.data,
                               #inits = inits.fn,
                               parameters.to.save = jags.param,
@@ -654,6 +833,7 @@ results_DtoM_SP <- jags.parallel(data = jags.data,
                               n.burnin = 35000)
 results_DtoM_SP
 
+#Save model output in table
 DtoM_Sib_pro_table <- mcmcTab(results_DtoM_SP)
 
 DtoM_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance", "r", "RSS", "RSS_new")
@@ -740,46 +920,103 @@ ggplot()+
   scale_fill_manual(values = Precip_palette) +
   theme(text = element_text(size = 15))
 
-
-#### T50 Sibbaldia procumbens ####
-Sib_pro_germination_traits %>%
-  filter(water_potential<7) %>% 
-  ggplot(aes(x = as.factor(water_potential), y = T50, fill = as.factor(water_potential))) +
-  geom_violin()+
-  geom_jitter() #+
-  #facet_wrap(~siteID)
-
-# Sib_pro_germination_traits %>% 
-#   group_by(siteID, water_potential) %>% 
-#   summarise(mean(T50, na.rm = TRUE)) %>% view()
-
-# Sib.pro 
-# take out the water potentials with less than 12 data points
-dat <- Sib_pro_germination_traits  %>% filter(!is.na(T50)) %>% filter(water_potential<6)
-# group level effects
-#site <- factor(dat$siteID)
-#petridish <- factor(dat$petri_dish)
-
-# independent variables
-WP <- as.numeric(standard(as.numeric(dat$water_potential)))
-WP_MPa <- as.numeric(standard(dat$WP_MPa))
-Precip <- as.factor(dat$precip)
-#Precip <- as.numeric(standard(dat$precip))
-
-# dependent variables
-T50 <- as.numeric(dat$T50)
-N <- as.numeric(length(T50))
-
-treatmat <- model.matrix(~Precip*WP_MPa)
+##### Model with seed mass #####
+treatmat <- model.matrix(~seed_mass*WP_MPa)
 n_parm <- as.numeric(ncol(treatmat))
 
-# look at the data before the analysis
-ggplot(dat, aes(x=water_potential, y = T50), adjust = 0.01)+
-  geom_point()+facet_wrap(~siteID)
+jags.data <- list("treatmat", "DtoM", "N", "n_parm")
+jags.param <- c("b", "rss", "rss_new", "r") 
 
-jags.data <- list("treatmat", "T50", "N",  "n_parm")
-jags.param <- c("b", "rss", "rss_new", "r", "sig1") 
+#Run the model
+results_DtoM_SP_seed_mass <- jags.parallel(data = jags.data,
+                                           #inits = inits.fn,
+                                           parameters.to.save = jags.param,
+                                           n.iter = 100000,
+                                           model.file = model_DtoM,
+                                           n.thin = 5,
+                                           n.chains = 3,
+                                           n.burnin = 35000)
+results_DtoM_SP_seed_mass
 
+#Save model output in table
+# DtoM_Sib_pro_table_SM <- mcmcTab(results_DtoM_SP_seed_mass)
+# 
+# DtoM_Sib_pro_table$Variable <- c("Intercept", "Seed mass", "Water potential", "Seed mass:Water potential", "Deviance", "RSS", "RSS_new")
+# 
+# DtoM_Sib_pro_table_ft_SM <- flextable(DtoM_Sib_pro_table_SM)
+# DtoM_Sib_pro_table_SM_doc <- read_docx()
+# DtoM_Sib_pro_table_SM_doc <- body_add_flextable(DtoM_Sib_pro_table_SM_doc, value = DtoM_Sib_pro_table_ft_SM)
+# print(DtoM_Sib_pro_table_SM_doc, target = "DtoM_Sib_pro_seed_mass_table.docx")
+
+# traceplots
+s <- ggs(as.mcmc(results_DtoM_SP_seed_mass))
+ggs_traceplot(s, family="b") 
+
+# check Gelman Rubin Statistics
+gelman.diag(as.mcmc(results_DtoM_SP_seed_mass))
+
+# Posterior predictive check
+plot(results_DtoM_SP_seed_mass$BUGSoutput$sims.list$rss_new, results_DtoM_SP_seed_mass$BUGSoutput$sims.list$rss,
+     main = "",)
+abline(0,1, lwd = 2, col = "black")
+
+mean(results_DtoM_SP_seed_mass$BUGSoutput$sims.list$rss_new > results_DtoM_SP_seed_mass$BUGSoutput$sims.list$rss)
+
+## put together for figure  and r^2
+mcmc <- results_DtoM_SP_seed_mass$BUGSoutput$sims.matrix
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
+fit = coefs %*% t(treatmat)
+resid = sweep(fit, 2, log(DtoM), "-")
+var_f = apply(fit, 1, var)
+var_e = apply(resid, 1, var)
+R2 = var_f/(var_f + var_e)
+tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
+
+#residuals
+coefs2 = apply(coefs, 2, median)
+fit2 = as.vector(coefs2 %*% t(treatmat))
+resid2 <- log(DtoM) - (fit2)
+sresid2 <- resid2/sd(resid2)
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = fit2))
+hist(resid2)
+
+# check predicted versus observed
+yRep = sapply(1:nrow(mcmc), function(i) rbinom(nrow(dat), NumDays, invlogit(fit[i,])))
+ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep/155)),
+                                         fill = "Model"), alpha = 0.5) + 
+  geom_density(data = dat, aes(x = (DtoM), fill = "Obs"), alpha = 0.5)
+
+# generate plots
+newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
+                      seed_mass = standard(as.numeric(dat$seed_mass)))
+
+xmat <- model.matrix(~standard(seed_mass)*WP_MPa, newdat)
+fit = coefs %*% t(xmat)
+newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
+
+graphdat <- dat %>% mutate(estimate = days_to_max_germination) %>%
+  rename(site = siteID)
+graphdat$WP_MPa <- standard(graphdat$WP_MPa) 
+graphdat$seed_mass <- standard(graphdat$seed_mass)
+
+DtoM_Sib_pro_seed_mass_plot <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(round(seed_mass, digits = 3))), height = 0, width = 0.03)+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(round(seed_mass, digits = 3))), alpha=0.35)+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(round(seed_mass, digits = 3))))+
+  scale_colour_manual(values = seed_mass_palette)+
+  scale_fill_manual(values = seed_mass_palette) +
+  scale_x_continuous(name = "Water potential (MPa)",
+                     breaks = c(-1.57, -0.96, -0.27, 0.52, 1.21), 
+                     labels = c(-0.57, -0.50, -0.42, -0.33, -0.25)) +
+  scale_y_continuous(name = "Days to max germination") +
+  guides(colour = guide_legend(title = "Seed mass (mg)"),
+         fill = guide_legend(title = "Seed mass (mg)")) +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+
+
+# ------------------------------------------ #### Time to 50 % germination model ####
 
 model_T50 <- function(){
   #group effects
@@ -805,6 +1042,51 @@ model_T50 <- function(){
   rss <- sum(res[])
   rss_new <- sum(res_new[])
 }
+
+
+#### T50 Sibbaldia procumbens ####
+# Sib_pro_germination_traits %>%
+#   filter(water_potential<7) %>% 
+#   ggplot(aes(x = as.factor(water_potential), y = T50, fill = as.factor(water_potential))) +
+#   geom_violin() +
+#   geom_jitter() #+
+#   #facet_wrap(~siteID)
+
+# Sib_pro_germination_traits %>% 
+#   group_by(siteID, water_potential) %>% 
+#   summarise(mean(T50, na.rm = TRUE)) %>% view()
+
+
+# take out the water potentials with very few datapoints, hence modeling only for waterpotential 1-5
+dat <- Sib_pro_germination_traits  %>% filter(!is.na(T50)) %>% filter(water_potential<6)
+# group level effects
+#site <- factor(dat$siteID)
+#petridish <- factor(dat$petri_dish)
+
+# independent variables
+WP <- as.numeric(standard(as.numeric(dat$water_potential)))
+WP_MPa <- as.numeric(standard(dat$WP_MPa))
+Precip <- as.factor(dat$precip)
+seed_mass <- standard(as.numeric(dat$seed_mass))
+
+# dependent variables
+T50 <- as.numeric(dat$T50)
+N <- as.numeric(length(T50))
+
+# look at the data before the analysis
+ggplot(dat, aes(x=water_potential, y = T50), adjust = 0.01)+
+  geom_point()+facet_wrap(~siteID)
+
+#------------------ Chose to run the model with precipitation (keep running the next lines of code) or seed mass (jump to the next code section)
+
+##### Model with precipitation #####
+treatmat <- model.matrix(~Precip*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
+
+
+jags.data <- list("treatmat", "T50", "N",  "n_parm")
+jags.param <- c("b", "rss", "rss_new", "r", "sig1") 
+
 
 results_T50_SP <- jags.parallel(data = jags.data,
                               #inits = inits.fn,
@@ -922,6 +1204,136 @@ T50_SP_full_plot <- ggplot()+
 #   T50_SP_panel_plot + 
 #   plot_layout(heights = c(4, 1), guides = "collect") & 
 #   theme(legend.position='bottom', text = element_text(size = 15))
+
+
+
+##### Model with seed mass #####
+treatmat <- model.matrix(~seed_mass*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
+
+
+jags.data <- list("treatmat", "T50", "N",  "n_parm")
+jags.param <- c("b", "rss", "rss_new", "r", "sig1") 
+
+
+results_T50_SP_seed_mass <- jags.parallel(data = jags.data,
+                                          #inits = inits.fn,
+                                          parameters.to.save = jags.param,
+                                          n.iter = 50000,
+                                          model.file = model_T50,
+                                          n.thin = 5,
+                                          n.chains = 3,
+                                          n.burnin = 1500)
+results_T50_SP_seed_mass
+
+# T50_Sib_pro_table_SM <- mcmcTab(results_T50_SP_seed_mass)
+# 
+# T50_Sib_pro_table_SM$Variable <-  c("Intercept", "Seed mass", "Water potential", "Seed mass:Water potential", "Deviance", "RSS", "RSS_new")
+# 
+# T50_Sib_pro_table_ft_SM <- flextable(T50_Sib_pro_table_SM)
+# T50_Sib_pro_table_doc_SM <- read_docx()
+# T50_Sib_pro_table_doc_SM <- body_add_flextable(T50_Sib_pro_table_doc_SM, value = T50_Sib_pro_table_ft_SM)
+# print(T50_Sib_pro_table_doc_SM, target = "T50_Sib_pro_table_seed_mass.docx")
+
+# traceplots
+s <- ggs(as.mcmc(results_T50_SP))
+ggs_traceplot(s, family="b") 
+
+# check Gelman Rubin Statistics
+gelman.diag(as.mcmc(results_T50_SP))
+
+# Posterior predictive check
+plot(results_T50_SP$BUGSoutput$sims.list$rss_new, results_T50_SP$BUGSoutput$sims.list$rss,
+     main = "",)
+abline(0,1, lwd = 2, col = "black") # these are still not great but not sure what to do 
+
+mean(results_T50_SP$BUGSoutput$sims.list$rss_new > results_T50_SP$BUGSoutput$sims.list$rss)
+
+## put together for figure  and r^2
+mcmc <- results_T50_SP$BUGSoutput$sims.matrix
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]", "b[5]", "b[6]", "b[7]", "b[8]")]
+fit = coefs %*% t(treatmat)
+resid = sweep(fit, 2, log(T50), "-")
+var_f = apply(fit, 1, var)
+var_e = apply(resid, 1, var)
+R2 = var_f/(var_f + var_e)
+tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
+
+#residuals
+coefs2 = apply(coefs, 2, median)
+fit2 = as.vector(coefs2 %*% t(treatmat))
+resid2 <- log(T50) - (fit2)
+sresid2 <- resid2/sd(resid2)
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = (fit2)))
+hist(resid2)
+
+
+# check predicted versus observed
+yRep = sapply(1:nrow(mcmc), function(i) rpois(nrow(dat), exp(fit[i,])))
+ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
+                                         fill = "Model"), alpha = 0.5) + 
+  geom_density(data = dat, aes(x = (T50), fill = "Obs"), alpha = 0.5)
+
+# generate plots
+newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
+                      Precip = c(unique(as.factor(dat$precip))))
+
+xmat <- model.matrix(~Precip*WP_MPa, newdat)
+fit = coefs %*% t(xmat)
+newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
+
+graphdat <- dat %>% mutate(estimate = T50) %>%
+  rename(site = siteID)
+graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
+graphdat$Precip <- as.factor(dat$precip)
+
+
+graphdat <- graphdat %>% 
+  mutate(Precip = case_when(Precip == "1.226" ~ 1226,
+                            Precip == "1.561" ~ 1561,
+                            Precip == "2.13" ~ 2130,
+                            Precip == "3.402" ~ 3402))
+newdat <- newdat %>% 
+  mutate(Precip = case_when(Precip == "1.226" ~ 1226,
+                            Precip == "1.561" ~ 1561,
+                            Precip == "2.13" ~ 2130,
+                            Precip == "3.402" ~ 3402))
+
+T50_SP_full_plot <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)), height = 0, width =0.1) +
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(Precip)), alpha=0.35)+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+  scale_colour_manual(values = Precip_palette)+
+  scale_fill_manual(values = Precip_palette) +
+  scale_x_continuous(name = "Water potential (MPa)",
+                     breaks = c(-1.57, -0.96, -0.27, 0.52, 1.21), 
+                     labels = c(-0.57, -0.50, -0.42, -0.33, -0.25)) +
+  scale_y_continuous("Time to 50 % germination")+ 
+  guides(colour = guide_legend(title = "Annual precipitation (mm/year)"),
+         fill = guide_legend(title = "Annual precipitation (mm/year)")) +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+
+# T50_SP_panel_plot <- ggplot()+ 
+#   geom_point(data=graphdat, aes(x=WP_MPa, y=estimate, colour = factor(Precip)))+
+#   geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+#                                fill = factor(Precip)), alpha=0.35)+
+#   geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(Precip)))+
+#   facet_wrap(~Precip, nrow = 1)+
+#   scale_x_continuous("Standardized WP") + 
+#   scale_y_continuous("Time to 50 % germination")+ 
+#   theme(panel.background = element_rect(fill='white', colour='black'))+
+#   theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank()) +
+#   scale_colour_manual(values = Precip_palette)+
+#   scale_fill_manual(values = Precip_palette)
+# 
+# T50_SP_full_plot /
+#   T50_SP_panel_plot + 
+#   plot_layout(heights = c(4, 1), guides = "collect") & 
+#   theme(legend.position='bottom', text = element_text(size = 15))
+
+
 
 #### T50 Veronica alpina ####
 Ver_alp_germination_traits %>% 
@@ -1089,7 +1501,7 @@ T50_plot <- T50_VA_full_plot /
 # ggsave(filename = "T50.pdf", plot = T50_plot, width = 18, height = 25, units = "cm", dpi = 300)
 # ggsave(filename = "T50.png", plot = T50_plot, width = 18, height = 25, units = "cm", dpi = 300)
 
-##### Seedlings Veronica alpina #####
+#### Seedlings Veronica alpina ####
 seedlings_VA <- Ver_alp_germ %>% 
   select(unique_ID, species, siteID, water_potential, replicate, seed_nr, dry_mass_g_root, dry_mass_g_above_ground, dry_mass_g_total, petri_dish, flag_germination, flag_seedling, flag_whole_petridish) %>% 
   mutate(dry_mass_g_root = dry_mass_g_root + 7.0e-06,
@@ -1113,7 +1525,8 @@ seedlings_VA <- Ver_alp_germ %>%
                             water_potential == 9 ~ -1.45,
                             water_potential == 10 ~ -1.70)) %>% 
   mutate(water_potential = as.numeric(water_potential)) %>% 
-  filter(is.na(flag_seedling )|flag_seedling !="Dead_plant")
+  filter(is.na(flag_seedling )|flag_seedling !="Dead_plant") %>% 
+  left_join(seed_mass_VA_value, by = "siteID")
 
 ## Calculating average seedlings size overall, and across water potentials
 seedlings_VA %>% 
@@ -1135,6 +1548,33 @@ seedlings_VA %>%
   select(WP_MPa, mean_root_shoot_ratio, mean_root_shoot_ratio_WP) %>%
   unique()
 
+# ------------------------------------------ #### Seedling trait model ####
+
+model_traits<- function(){
+  #group effects
+  for (j in 1:n_petri){dish[j]~dnorm(0, prec1)}
+  #likelihood
+  for (i in 1:N){
+    traits[i] ~ dnorm(mu[i], prec_t)
+    # linear predictor
+    mu[i] <- inprod(b, treatmat[i,]) + dish[petridish[i]]
+    
+    # residual sum of squares
+    res[i] <- pow(traits[i] - mu[i], 2)
+    traits_new[i] ~ dnorm(mu[i], prec_t)
+    res_new[i] <- pow(traits_new[i] - mu[i], 2)
+  }
+  
+  for(i in 1:n_parm){b[i] ~ dnorm(0,1.0E-6)} #dnorm in JAGS uses mean and precision (0 = mean and 1.0E-6 = precision) different from dnorm in R that has variance and not precision.
+  prec1 ~ dgamma(0.001, 0.001) 
+  sig1 <- 1/sqrt(prec1) #getting variance of the random effect
+  prec_t ~ dgamma(0.001, 0.001) 
+  sig_t <- 1/sqrt(prec_t) #getting variance of the trait
+  # #derived params
+  rss <- sum(res[])
+  rss_new <- sum(res_new[])
+}
+
   
 #### Root:shoot ratio Veronica alpina ####
 
@@ -1154,47 +1594,24 @@ n_petri <- length(levels(petridish))
 WP <- as.numeric(standard(as.numeric(dat_root_shoot$water_potential)))
 WP_MPa <- as.numeric(standard(dat_root_shoot$WP_MPa))
 Precip <- as.factor(dat_root_shoot$precip)
+seed_mass <- standard(as.numeric(dat_root_shoot$seed_mass))
   
 # dependent variables
 traits <- as.numeric(log(dat_root_shoot$root_shoot_ratio))
 N <- as.numeric(length(traits))
   
-treatmat <- model.matrix(~Precip*WP_MPa)
-n_parm <- as.numeric(ncol(treatmat))
-  
 # look at the data before the analysis
 ggplot(dat_root_shoot, aes(x=water_potential, y = log(root_shoot_ratio)), adjust = 0.01)+
     geom_jitter()+facet_wrap(~siteID)
+
+#------------------ Chose to run the model with precipitation (keep running the next lines of code) or seed mass (jump to the next code section)
+
+##### Model with precipitation #####
+treatmat <- model.matrix(~Precip*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
   
 jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
 jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
-  
-  
-model_traits<- function(){
-    #group effects
-    for (j in 1:n_petri){dish[j]~dnorm(0, prec1)}
-    #likelihood
-    for (i in 1:N){
-      traits[i] ~ dnorm(mu[i], prec_t)
-      # linear predictor
-      mu[i] <- inprod(b, treatmat[i,]) + dish[petridish[i]]
-      
-      # residual sum of squares
-      res[i] <- pow(traits[i] - mu[i], 2)
-      traits_new[i] ~ dnorm(mu[i], prec_t)
-      res_new[i] <- pow(traits_new[i] - mu[i], 2)
-    }
-    
-    for(i in 1:n_parm){b[i] ~ dnorm(0,1.0E-6)} #dnorm in JAGS uses mean and precision (0 = mean and 1.0E-6 = precision) different from dnorm in R that has variance and not precision.
-    prec1 ~ dgamma(0.001, 0.001) 
-    sig1 <- 1/sqrt(prec1) #getting variance of the random effect
-    prec_t ~ dgamma(0.001, 0.001) 
-    sig_t <- 1/sqrt(prec_t) #getting variance of the trait
-    # #derived params
-    rss <- sum(res[])
-    rss_new <- sum(res_new[])
-  }
-  
   
 results_root_shoot_VA <- jags.parallel(data = jags.data,
                                 #inits = inits.fn,
@@ -1265,7 +1682,7 @@ ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
   
 # generate plots
 newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
-                        Precip = c(unique(as.factor(dat$precip))))
+                        Precip = c(unique(as.factor(dat_root_shoot$precip))))
   
 xmat <- model.matrix(~Precip*WP_MPa, newdat)
 fit = coefs %*% t(xmat)
@@ -1363,6 +1780,129 @@ VA_root_shoot <- (root_shoot_VA_zoomed_in + inset_element(
   plot_layout(guides = "collect") & 
   theme(legend.position='bottom', text = element_text(size = 15))
 
+
+##### Model with seed mass #####
+treatmat <- model.matrix(~seed_mass*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
+
+jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
+jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
+
+results_root_shoot_VA_seed_mass <- jags.parallel(data = jags.data,
+                                                 #inits = inits.fn,
+                                                 parameters.to.save = jags.param,
+                                                 n.iter = 50000,
+                                                 model.file = model_traits,
+                                                 n.thin = 5,
+                                                 n.chains = 3,
+                                                 n.burnin = 15000)
+results_root_shoot_VA_seed_mass
+
+
+# root_shoot_Ver_alp_table <- mcmcTab(results_root_shoot_VA)
+# 
+# root_shoot_Ver_alp_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+# 
+# root_shoot_Ver_alp_table_ft <- flextable(root_shoot_Ver_alp_table)
+# root_shoot_Ver_alp_table_doc <- read_docx()
+# root_shoot_Ver_alp_table_doc <- body_add_flextable(root_shoot_Ver_alp_table_doc, value = root_shoot_Ver_alp_table_ft)
+# print(root_shoot_Ver_alp_table_doc, target = "root_shoot_Ver_alp_table.docx")
+
+# traceplots
+s <- ggs(as.mcmc(results_root_shoot_VA_seed_mass))
+ggs_traceplot(s, family="b") 
+
+# check Gelman Rubin Statistics
+gelman.diag(as.mcmc(results_root_shoot_VA_seed_mass))
+
+# Posterior predictive check
+plot(results_root_shoot_VA_seed_mass$BUGSoutput$sims.list$rss_new, results_root_shoot_VA_seed_mass$BUGSoutput$sims.list$rss,
+     main = "",)
+abline(0,1, lwd = 2, col = "black") 
+
+mean(results_root_shoot_VA_seed_mass$BUGSoutput$sims.list$rss_new > results_root_shoot_VA_seed_mass$BUGSoutput$sims.list$rss)
+
+## put together for figure  and r^2
+mcmc <- results_root_shoot_VA_seed_mass$BUGSoutput$sims.matrix
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
+fit = coefs %*% t(treatmat)
+resid = sweep(fit, 2, traits, "-")
+var_f = apply(fit, 1, var)
+var_e = apply(resid, 1, var)
+R2 = var_f/(var_f + var_e)
+tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
+
+#residuals
+coefs2 = apply(coefs, 2, median)
+fit2 = as.vector(coefs2 %*% t(treatmat))
+resid2 <- traits - fit2
+sresid2 <- resid2/sd(resid2)
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = (fit2)))
+hist(resid2)
+
+# check predicted versus observed
+yRep = sapply(1:nrow(mcmc), function(i) rnorm(nrow(dat_root_shoot), fit[i,]))
+ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
+                                         fill = "Model"), alpha = 0.5) + 
+  geom_density(data = dat_root_shoot, aes(x = (traits), fill = "Obs"), alpha = 0.5)
+
+# generate plots
+newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
+                      seed_mass = unique(standard(as.numeric(dat_root_shoot$seed_mass))))
+
+xmat <- model.matrix(~seed_mass*WP_MPa, newdat)
+fit = coefs %*% t(xmat)
+newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
+
+graphdat <- dat_root_shoot 
+graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
+graphdat$seed_mass <- standard(as.numeric(dat_root_shoot$seed_mass))
+
+root_shoot_VA_full_plot_seed_mass <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(seed_mass)), width = 0.1)+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(seed_mass)), alpha=0.35)+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(seed_mass)))+
+  scale_colour_manual(values = seed_mass_palette, labels = c("-1.19" = "0.0632", "-0.73" = "0.0644", "0.96" = "0.0688", "1.11" = "0.0692"))+
+  scale_fill_manual(values = seed_mass_palette, labels = c("-1.19" = "0.0632", "-0.73" = "0.0644", "0.96" = "0.0688", "1.11" = "0.0692")) +
+  scale_x_continuous(name = "Water potential (MPa)",
+                     breaks = c(-1.57, -0.96, -0.27, 0.52, 1.21), 
+                     labels = c(-0.57, -0.50, -0.42, -0.33, -0.25)) +
+  scale_y_continuous("Root:shoot ratio (g/g)")+ 
+  guides(colour = guide_legend(title = "Seed mass (mg)"),
+         fill = guide_legend(title = "Seed mass (mg)")) +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+
+root_shoot_VA_seed_mass <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(seed_mass)), width = 0.1)+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(seed_mass)), alpha=0.35)+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(seed_mass)))+
+  scale_colour_manual(values = seed_mass_palette, labels = c("-1.19" = "0.0632", "-0.73" = "0.0644", "0.96" = "0.0688", "1.11" = "0.0692"))+
+  scale_fill_manual(values = seed_mass_palette, labels = c("-1.19" = "0.0632", "-0.73" = "0.0644", "0.96" = "0.0688", "1.11" = "0.0692")) +
+  scale_x_continuous(name = "Water potential (MPa)",
+                     breaks = c(-1.57, -0.96, -0.27, 0.52, 1.21), 
+                     labels = c(-0.57, -0.50, -0.42, -0.33, -0.25)) +
+  scale_y_continuous("Root:shoot ratio (g/g)",
+                     limits = c(0, 6))+ 
+  guides(colour = guide_legend(title = "Seed mass (mg)"),
+         fill = guide_legend(title = "Seed mass (mg)")) +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+
+
+VA_root_shoot_seed_mass_plot <- (root_shoot_VA_seed_mass + inset_element(
+  root_shoot_VA_full_plot_seed_mass, 
+  left = 0.70, 
+  bottom = 0.5, 
+  right = 0.98, 
+  top = 0.98
+))  +
+  plot_layout(guides = "collect") & 
+  theme(legend.position='bottom', text = element_text(size = 15))
+
+
 #### Root biomass Veronica alpina ####
 
 seedlings_VA %>% 
@@ -1383,17 +1923,23 @@ WP <- as.numeric(standard(as.numeric(dat_root$water_potential)))
 WP_MPa <- as.numeric(standard(dat_root$WP_MPa))
 #Precip <- as.numeric(standard(dat_root$precip))
 Precip <- as.factor(dat_root$precip)
+seed_mass <- standard(as.numeric(dat_root$seed_mass))
   
   # dependent variables
 traits <- as.numeric(log(dat_root$dry_mass_g_root))
 N <- as.numeric(length(traits))
-  
-treatmat <- model.matrix(~Precip*WP_MPa)
-n_parm <- as.numeric(ncol(treatmat))
-  
-  # look at the data before the analysis
+
+
+# look at the data before the analysis
 ggplot(dat_root, aes(x=water_potential, y = log(dry_mass_g_root)), adjust = 0.01) +
   geom_jitter()+facet_wrap(~siteID)
+
+
+#------------------ Chose to run the model with precipitation (keep running the next lines of code) or seed mass (jump to the next code section)
+
+##### Model with precipitation #####
+treatmat <- model.matrix(~Precip*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
 
 
 jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
@@ -1458,7 +2004,7 @@ geom_density(data = dat_root, aes(x = (traits), fill = "Obs"), alpha = 0.5)
   
 # generate plots
 newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
-                      Precip = c(unique(as.factor(dat$precip))))
+                      Precip = c(unique(as.factor(dat_root$precip))))
   
 xmat <- model.matrix(~Precip*WP_MPa, newdat)
 fit = coefs %*% t(xmat)
@@ -1498,6 +2044,102 @@ root_VA_plot_panels <- ggplot()+
   plot_layout(heights = c(4, 1), guides = "collect") & 
   theme(legend.position='bottom', text = element_text(size = 15))
 
+
+
+##### Model with seed mass #####
+treatmat <- model.matrix(~seed_mass*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
+
+
+jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
+jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
+
+results_root_VA_seed_mass <- jags.parallel(data = jags.data,
+                                           #inits = inits.fn,
+                                           parameters.to.save = jags.param,
+                                           n.iter = 50000,
+                                           model.file = model_traits,
+                                           n.thin = 5,
+                                           n.chains = 3,
+                                           n.burnin = 15000)
+results_root_VA_seed_mass
+
+root_Ver_alp_table_SM <- mcmcTab(results_root_VA_seed_mass)
+
+root_Ver_alp_table_SM$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+
+root_Ver_alp_table_ft_SM <- flextable(root_Ver_alp_table_SM)
+root_Ver_alp_table_doc_SM <- read_docx()
+root_Ver_alp_table_doc_SM <- body_add_flextable(root_Ver_alp_table_doc_SM, value = root_Ver_alp_table_ft_SM)
+print(root_Ver_alp_table_doc_SM, target = "root_Ver_alp_table_seed_mass.docx")
+
+# traceplots
+s <- ggs(as.mcmc(results_root_VA_seed_mass))
+ggs_traceplot(s, family="b") 
+
+# check Gelman Rubin Statistics
+gelman.diag(as.mcmc(results_root_VA_seed_mass))
+
+# Posterior predictive check
+plot(results_root_VA_seed_mass$BUGSoutput$sims.list$rss_new, results_root_VA_seed_mass$BUGSoutput$sims.list$rss,
+     main = "",)
+abline(0,1, lwd = 2, col = "black") 
+
+mean(results_root_VA_seed_mass$BUGSoutput$sims.list$rss_new > results_root_VA_seed_mass$BUGSoutput$sims.list$rss)
+
+## put together for figure  and r^2
+mcmc <- results_root_VA_seed_mass$BUGSoutput$sims.matrix
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
+fit = coefs %*% t(treatmat)
+resid = sweep(fit, 2, traits, "-")
+var_f = apply(fit, 1, var)
+var_e = apply(resid, 1, var)
+R2 = var_f/(var_f + var_e)
+tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
+
+#residuals
+coefs2 = apply(coefs, 2, median)
+fit2 = as.vector(coefs2 %*% t(treatmat))
+resid2 <- traits - fit2
+sresid2 <- resid2/sd(resid2)
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = (fit2)))
+hist(resid2)
+
+# check predicted versus observed
+yRep = sapply(1:nrow(mcmc), function(i) rnorm(nrow(dat_root), fit[i,]))
+ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
+                                         fill = "Model"), alpha = 0.5) + 
+  geom_density(data = dat_root, aes(x = (traits), fill = "Obs"), alpha = 0.5)
+
+# generate plots
+newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
+                      seed_mass = c(unique(standard(as.numeric(dat_root$seed_mass)))))
+
+xmat <- model.matrix(~seed_mass*WP_MPa, newdat)
+fit = coefs %*% t(xmat)
+newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
+
+graphdat <- dat_root 
+graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
+graphdat$seed_mass <- standard(as.numeric(dat_root$seed_mass))
+
+root_VA_plot_seed_mass <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_root, colour = factor(seed_mass)))+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(seed_mass), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(seed_mass)))+
+  scale_colour_manual(values = seed_mass_palette, labels = c("-1.19" = "0.0632", "-0.73" = "0.0644", "0.96" = "0.0688", "1.11" = "0.0692"))+
+  scale_fill_manual(values = seed_mass_palette, labels = c("-1.19" = "0.0632", "-0.73" = "0.0644", "0.96" = "0.0688", "1.11" = "0.0692")) +
+  scale_x_continuous(name = "Water potential (MPa)",
+                     breaks = c(-1.57, -0.96, -0.27, 0.52, 1.21), 
+                     labels = c(-0.57, -0.50, -0.42, -0.33, -0.25)) +
+  scale_y_continuous("Root biomass (g)") +
+  guides(colour = guide_legend(title = "Seed mass (mg)"),
+         fill = guide_legend(title = "Seed mass (mg)"),
+         alpha = "none") +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+
   
 #### Above ground biomass Veronica alpina ####
 
@@ -1519,17 +2161,23 @@ WP <- as.numeric(standard(as.numeric(dat_above_ground$water_potential)))
 WP_MPa <- as.numeric(standard(dat_above_ground$WP_MPa))
 #Precip <- as.numeric(standard(dat_above_ground$precip))
 Precip <- as.factor(dat_above_ground$precip)
+seed_mass <- standard(as.numeric(dat_above_ground$seed_mass))
 
 # dependent variables
 traits <- as.numeric(log(dat_above_ground$dry_mass_g_above_ground))
 N <- as.numeric(length(traits))
 
-treatmat <- model.matrix(~Precip*WP_MPa)
-n_parm <- as.numeric(ncol(treatmat))
 
 # look at the data before the analysis
 ggplot(dat_above_ground, aes(x=water_potential, y = log(dry_mass_g_above_ground)), adjust = 0.01)+
   geom_jitter()+facet_wrap(~siteID)
+
+#------------------ Chose to run the model with precipitation (keep running the next lines of code) or seed mass (jump to the next code section)
+
+##### Model with precipitation #####
+treatmat <- model.matrix(~Precip*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
+
 
 jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
 jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
@@ -1635,6 +2283,102 @@ abg_plot_VA_panels <- ggplot()+
   theme(legend.position='bottom', text = element_text(size = 15))
 
 
+##### Model with seed mass #####
+treatmat <- model.matrix(~seed_mass*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
+
+
+jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
+jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
+
+results_above_ground_VA_seed_mass <- jags.parallel(data = jags.data,
+                                                   #inits = inits.fn,
+                                                   parameters.to.save = jags.param,
+                                                   n.iter = 50000,
+                                                   model.file = model_traits,
+                                                   n.thin = 5,
+                                                   n.chains = 3,
+                                                   n.burnin = 15000)
+results_above_ground_VA_seed_mass
+
+above_ground_Ver_alp_table_SM <- mcmcTab(results_above_ground_VA_seed_mass)
+
+above_ground_Ver_alp_table_SM$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+
+above_ground_Ver_alp_table_ft_SM <- flextable(above_ground_Ver_alp_table_SM)
+above_ground_Ver_alp_table_doc_SM <- read_docx()
+above_ground_Ver_alp_table_doc_SM <- body_add_flextable(above_ground_Ver_alp_table_doc_SM, value = above_ground_Ver_alp_table_ft_SM)
+print(above_ground_Ver_alp_table_doc_SM, target = "above_ground_Ver_alp_table_seed_mass.docx")
+
+# traceplots
+s <- ggs(as.mcmc(results_above_ground_VA_seed_mass))
+ggs_traceplot(s, family="b") 
+
+# check Gelman Rubin Statistics
+gelman.diag(as.mcmc(results_above_ground_VA_seed_mass))
+
+# Posterior predictive check
+plot(results_above_ground_VA_seed_mass$BUGSoutput$sims.list$rss_new, results_above_ground_VA_seed_mass$BUGSoutput$sims.list$rss,
+     main = "",)
+abline(0,1, lwd = 2, col = "black") 
+
+mean(results_above_ground_VA_seed_mass$BUGSoutput$sims.list$rss_new > results_above_ground_VA_seed_mass$BUGSoutput$sims.list$rss)
+
+## put together for figure  and r^2
+mcmc <- results_above_ground_VA_seed_mass$BUGSoutput$sims.matrix
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
+fit = coefs %*% t(treatmat)
+resid = sweep(fit, 2, traits, "-")
+var_f = apply(fit, 1, var)
+var_e = apply(resid, 1, var)
+R2 = var_f/(var_f + var_e)
+tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
+
+#residuals
+coefs2 = apply(coefs, 2, median)
+fit2 = as.vector(coefs2 %*% t(treatmat))
+resid2 <- traits - fit2
+sresid2 <- resid2/sd(resid2)
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = fit2))
+hist(resid2)
+
+# check predicted versus observed
+yRep = sapply(1:nrow(mcmc), function(i) rnorm(nrow(dat_above_ground), fit[i,]))
+ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
+                                         fill = "Model"), alpha = 0.5) + 
+  geom_density(data = dat_above_ground, aes(x = (traits), fill = "Obs"), alpha = 0.5)
+
+# generate plots
+newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
+                      seed_mass = c(unique(standard(as.numeric(dat_above_ground$seed_mass)))))
+
+xmat <- model.matrix(~seed_mass*WP_MPa, newdat)
+fit = coefs %*% t(xmat)
+newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
+
+graphdat <- dat_above_ground 
+graphdat$WP_MPa <- standard(graphdat$WP_MPa)
+graphdat$seed_mass <- standard(as.numeric(dat_above_ground$seed_mass))
+
+abg_plot_VA_seed_mass <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_above_ground, colour = factor(seed_mass)))+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(seed_mass), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(seed_mass)))+
+  scale_colour_manual(values = seed_mass_palette, labels = c("-1.19" = "0.0632", "-0.73" = "0.0644", "0.96" = "0.0688", "1.11" = "0.0692"))+
+  scale_fill_manual(values = seed_mass_palette, labels = c("-1.19" = "0.0632", "-0.73" = "0.0644", "0.96" = "0.0688", "1.11" = "0.0692")) +
+  scale_x_continuous(name = "Water potential (MPa)",
+                     breaks = c(-1.57, -0.96, -0.27, 0.52, 1.21), 
+                     labels = c(-0.57, -0.50, -0.42, -0.33, -0.25)) +
+  scale_y_continuous("Aboveground biomass (g)") +
+  guides(colour = guide_legend(title = "Seed mass (mg)"),
+         fill = guide_legend(title = "Seed mass (mg)"),
+         alpha = "none") +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+
+
+
 ##### Seedlings Sibbaldia procumbens #####
 seedlings_SP <- Sib_pro_germ %>% 
   select(ID, species, siteID, water_potential, replicate, seed_nr, dry_mass_g_root, dry_mass_g_above_ground, dry_mass_g_total, petri_dish, flag_germination, flag_seedling, flag_whole_petridish) %>% 
@@ -1658,7 +2402,8 @@ seedlings_SP <- Sib_pro_germ %>%
                             water_potential == 8 ~ -1.20,
                             water_potential == 9 ~ -1.45,
                             water_potential == 10 ~ -1.70))%>% 
-  mutate(water_potential = as.numeric(water_potential))
+  mutate(water_potential = as.numeric(water_potential)) %>% 
+  left_join(seed_mass_SP_value, by = "siteID")
 
 ## Calculating average seedlings size overall, and across water potentials
 seedlings_SP %>% 
@@ -1690,11 +2435,11 @@ ggplot(aes(x = as.factor(WP_MPa), y = root_shoot_ratio, fill = as.factor(WP_MPa)
 
 #### Root:shoot ratio Sibbaldia procumbens ####
 
-seedlings_SP %>% 
-  #filter(water_potential < 7) %>% 
-  ggplot(aes(x = as.factor(water_potential), y = root_shoot_ratio, fill = as.factor(water_potential))) +
-  geom_violin()+
-  geom_jitter()
+# seedlings_SP %>% 
+#   #filter(water_potential < 7) %>% 
+#   ggplot(aes(x = as.factor(water_potential), y = root_shoot_ratio, fill = as.factor(water_potential))) +
+#   geom_violin()+
+#   geom_jitter()
 
 dat_root_shoot <- seedlings_SP %>% filter(!is.na(root_shoot_ratio)) %>% filter(water_potential < 6)
 # group level effects
@@ -1707,17 +2452,22 @@ WP <- as.numeric(standard(as.numeric(dat_root_shoot$water_potential)))
 WP_MPa <- as.numeric(standard(dat_root_shoot$WP_MPa))
 #Precip <- as.numeric(standard(dat_root_shoot$precip))
 Precip <- as.factor(dat_root_shoot$precip)
+seed_mass <- standard(as.numeric(dat_root_shoot$seed_mass))
 
 # dependent variables
 traits <- as.numeric(log(dat_root_shoot$root_shoot_ratio))
 N <- as.numeric(length(traits))
-
-treatmat <- model.matrix(~Precip*WP_MPa)
-n_parm <- as.numeric(ncol(treatmat))
-
 # look at the data before the analysis
 ggplot(dat_root_shoot, aes(x=water_potential, y = log(root_shoot_ratio)), adjust = 0.01)+
   geom_point()+facet_wrap(~siteID)
+
+
+#------------------ Chose to run the model with precipitation (keep running the next lines of code) or seed mass (jump to the next code section)
+
+##### Model with precipitation #####
+treatmat <- model.matrix(~Precip*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
+
 
 jags.data <- list("treatmat", "traits", "N", "petridish", "n_petri", "n_parm")
 jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
@@ -1881,20 +2631,151 @@ Root_shoot_plot <- VA_root_shoot /
   plot_layout(guides = "collect") + 
   theme(legend.position='bottom', text = element_text(size = 15))
 
-ggsave(filename = "Root_shoot_ratio.pdf", plot = Root_shoot_plot, width = 20, height = 26, units = "cm", dpi = 300)
-ggsave(filename = "Root_shoot_ratio.png", plot = Root_shoot_plot, width = 20, height = 26, units = "cm", dpi = 300)
+# ggsave(filename = "Root_shoot_ratio.pdf", plot = Root_shoot_plot, width = 20, height = 26, units = "cm", dpi = 300)
+# ggsave(filename = "Root_shoot_ratio.png", plot = Root_shoot_plot, width = 20, height = 26, units = "cm", dpi = 300)
+
+
+
+##### Model with seed mass#####
+treatmat <- model.matrix(~seed_mass*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
+
+
+jags.data <- list("treatmat", "traits", "N", "petridish", "n_petri", "n_parm")
+jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
+
+results_root_shoot_SP_seed_mass <- jags.parallel(data = jags.data,
+                                                 #inits = inits.fn,
+                                                 parameters.to.save = jags.param,
+                                                 n.iter = 50000,
+                                                 model.file = model_traits,
+                                                 n.thin = 5,
+                                                 n.chains = 3,
+                                                 n.burnin = 15000)
+results_root_shoot_SP_seed_mass
+
+# root_shoot_Sib_pro_table <- mcmcTab(results_root_shoot_SP)
+# 
+# root_shoot_Sib_pro_table$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+# 
+# root_shoot_Sib_pro_table_ft <- flextable(root_shoot_Sib_pro_table)
+# root_shoot_Sib_pro_table_doc <- read_docx()
+# root_shoot_Sib_pro_table_doc <- body_add_flextable(root_shoot_Sib_pro_table_doc, value = root_shoot_Sib_pro_table_ft)
+# print(root_shoot_Sib_pro_table_doc, target = "root_shoot_Sib_pro_table.docx")
+
+# traceplots
+s <- ggs(as.mcmc(results_root_shoot_SP_seed_mass))
+ggs_traceplot(s, family="b") 
+
+# check Gelman Rubin Statistics
+gelman.diag(as.mcmc(results_root_shoot_SP_seed_mass))
+
+# Posterior predictive check
+plot(results_root_shoot_SP_seed_mass$BUGSoutput$sims.list$rss_new, results_root_shoot_SP_seed_mass$BUGSoutput$sims.list$rss,
+     main = "",)
+abline(0,1, lwd = 2, col = "black")
+
+mean(results_root_shoot_SP_seed_mass$BUGSoutput$sims.list$rss_new > results_root_shoot_SP_seed_mass$BUGSoutput$sims.list$rss)
+
+## put together for figure  and r^2
+mcmc <- results_root_shoot_SP_seed_mass$BUGSoutput$sims.matrix
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
+fit = coefs %*% t(treatmat)
+resid = sweep(fit, 2, traits, "-")
+var_f = apply(fit, 1, var)
+var_e = apply(resid, 1, var)
+R2 = var_f/(var_f + var_e)
+tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
+
+#residuals
+coefs2 = apply(coefs, 2, median)
+fit2 = as.vector(coefs2 %*% t(treatmat))
+resid2 <- traits - fit2
+sresid2 <- resid2/sd(resid2)
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = fit2))
+hist(resid2)
+
+# check predicted versus observed
+yRep = sapply(1:nrow(mcmc), function(i) rnorm(nrow(dat_root_shoot), fit[i,]))
+ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
+                                         fill = "Model"), alpha = 0.5) + 
+  geom_density(data = dat_root_shoot, aes(x = (traits), fill = "Obs"), alpha = 0.5)
+
+
+# generate plots
+newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
+                      seed_mass = unique(standard(as.numeric(dat_root_shoot$seed_mass))))
+
+xmat <- model.matrix(~seed_mass*WP_MPa, newdat)
+fit = coefs %*% t(xmat)
+newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
+
+graphdat <- dat_root_shoot 
+graphdat$WP_MPa <- standard(graphdat$WP_MPa)
+graphdat$seed_mass <- standard(as.numeric(dat_root_shoot$seed_mass))
+
+root_shoot_SP_full_plot_seed_mass <- ggplot()+ 
+  geom_point(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(seed_mass)))+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, fill = factor(seed_mass), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(seed_mass)))+
+  scale_colour_manual(values = seed_mass_palette, labels = c("-1.19" = "0.0632", "-0.73" = "0.0644", "0.96" = "0.0688", "1.11" = "0.0692"))+
+  scale_fill_manual(values = seed_mass_palette, labels = c("-1.19" = "0.0632", "-0.73" = "0.0644", "0.96" = "0.0688", "1.11" = "0.0692")) +
+  scale_x_continuous(name = "Water potential (MPa)",
+                     breaks = c(-1.57, -0.96, -0.27, 0.52, 1.21), 
+                     labels = c(-0.57, -0.50, -0.42, -0.33, -0.25)) +
+  scale_y_continuous("Root:shoot ratio (g/g)")+ 
+  guides(colour = guide_legend(title = "Seed mass (mg)"),
+         fill = guide_legend(title = "Seed mass (mg)"),
+         alpha = "none") +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+
+root_shoot_SP_zoomed_in_seed_mass <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=root_shoot_ratio, colour = factor(seed_mass)), width = 0.1)+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, fill = factor(seed_mass), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(seed_mass)))+
+  scale_colour_manual(values = seed_mass_palette, labels = c("-1.19" = "0.0632", "-0.73" = "0.0644", "0.96" = "0.0688", "1.11" = "0.0692"))+
+  scale_fill_manual(values = seed_mass_palette, labels = c("-1.19" = "0.0632", "-0.73" = "0.0644", "0.96" = "0.0688", "1.11" = "0.0692")) +
+  scale_x_continuous(name = "Water potential (MPa)",
+                     breaks = c(-1.57, -0.96, -0.27, 0.52, 1.21), 
+                     labels = c(-0.57, -0.50, -0.42, -0.33, -0.25)) +
+  scale_y_continuous("Root:shoot ratio (g/g)",
+                     limits = c(0, 1.2))+ 
+  guides(colour = guide_legend(title = "Seed mass (mg)"),
+         fill = guide_legend(title = "Seed mass (mg)")) +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+
+SP_root_shoot_seed_mass <- (root_shoot_SP_zoomed_in_seed_mass + inset_element(
+  root_shoot_SP_full_plot_seed_mass, 
+  left = 0.7, 
+  bottom = 0.5, 
+  right = 0.98, 
+  top = 0.98
+)) +
+  plot_layout(guides = "collect") & 
+  theme(legend.position='bottom', text = element_text(size = 15))
+
+Root_shoot_plot_seed_mass <- VA_root_shoot_seed_mass_plot /
+  SP_root_shoot_seed_mass  +
+  plot_layout(guides = "collect") + 
+  theme(legend.position='bottom', text = element_text(size = 15)) +
+  guides(alpha = "none")
+
+# ggsave(filename = "Root_shoot_ratio.pdf", plot = Root_shoot_plot, width = 20, height = 26, units = "cm", dpi = 300)
+# ggsave(filename = "Root_shoot_ratio.png", plot = Root_shoot_plot, width = 20, height = 26, units = "cm", dpi = 300)
 
 
 #### Root biomass Sibbaldia procumbens ####
 
 ## Looking at seedlings
-seedlings_SP %>% 
-  #filter(!siteID == "LAV") %>% 
-  filter(water_potential < 7) %>% 
-  ggplot(aes(x = as.factor(water_potential), y = dry_mass_g_root, fill = as.factor(water_potential))) +
-  geom_violin()+
-  geom_jitter(aes(alpha = 0.3)) #+
-  #facet_wrap(~siteID)
+# seedlings_SP %>% 
+#   #filter(!siteID == "LAV") %>% 
+#   filter(water_potential < 7) %>% 
+#   ggplot(aes(x = as.factor(water_potential), y = dry_mass_g_root, fill = as.factor(water_potential))) +
+#   geom_violin()+
+#   geom_jitter(aes(alpha = 0.3)) #+
+#   #facet_wrap(~siteID)
 
 dat_root <- seedlings_SP %>% filter(!is.na(dry_mass_g_root)) %>% filter(water_potential < 7)
 
@@ -1906,19 +2787,24 @@ n_petri <- length(levels(petridish))
 # independent variables
 WP <- as.numeric(standard(as.numeric(dat_root$water_potential)))
 WP_MPa <- as.numeric(standard(dat_root$WP_MPa))
-#Precip <- as.numeric(standard(dat_root$precip))
 Precip <- as.factor(dat_root$precip)
+seed_mass <- standard(as.numeric(dat_root$seed_mass))
 
 # dependent variables
 traits <- as.numeric(log(dat_root$dry_mass_g_root))
 N <- as.numeric(length(traits))
 
-treatmat <- model.matrix(~Precip*WP_MPa)
-n_parm <- as.numeric(ncol(treatmat))
-
 # look at the data before the analysis
 ggplot(dat_root, aes(x=water_potential, y = log(dry_mass_g_root)), adjust = 0.01)+
   geom_jitter()+facet_wrap(~siteID)
+
+
+#------------------ Chose to run the model with precipitation (keep running the next lines of code) or seed mass (jump to the next code section)
+
+##### Model with precipitation #####
+
+treatmat <- model.matrix(~Precip*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
 
 jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
 jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
@@ -1982,7 +2868,7 @@ ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
 
 # generate plots
 newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
-                      Precip = c(unique(as.factor(dat$precip))))
+                      Precip = c(unique(as.factor(dat_root$precip))))
 
 xmat <- model.matrix(~Precip*WP_MPa, newdat)
 fit = coefs %*% t(xmat)
@@ -2024,14 +2910,111 @@ root_SP_plot_panels <- ggplot()+
   theme(legend.position='bottom', text = element_text(size = 15))
 
 
+##### Model with seed mass #####
+
+treatmat <- model.matrix(~seed_mass*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
+
+jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
+jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
+
+results_root_SP_seed_mass <- jags.parallel(data = jags.data,
+                                           #inits = inits.fn,
+                                           parameters.to.save = jags.param,
+                                           n.iter = 50000,
+                                           model.file = model_traits,
+                                           n.thin = 5,
+                                           n.chains = 3,
+                                           n.burnin = 15000)
+results_root_SP_seed_mass
+
+root_Sib_pro_table_seed_mass <- mcmcTab(results_root_SP_seed_mass)
+
+#root_Sib_pro_table_seed_mass$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+
+root_Sib_pro_table_ft_seed_mass <- flextable(root_Sib_pro_table_seed_mass)
+root_Sib_pro_table_doc_seed_mass <- read_docx()
+root_Sib_pro_table_doc_seed_mass <- body_add_flextable(root_Sib_pro_table_doc_seed_mass, value = root_Sib_pro_table_ft_seed_mass)
+print(root_Sib_pro_table_doc_seed_mass, target = "root_Sib_pro_table_seed_mass.docx")
+
+# traceplots
+s <- ggs(as.mcmc(results_root_SP_seed_mass))
+ggs_traceplot(s, family="b") 
+
+# check Gelman Rubin Statistics
+gelman.diag(as.mcmc(results_root_SP_seed_mass))
+
+# Posterior predictive check
+plot(results_root_SP_seed_mass$BUGSoutput$sims.list$rss_new, results_root_SP_seed_mass$BUGSoutput$sims.list$rss,
+     main = "",)
+abline(0,1, lwd = 2, col = "black") 
+
+mean(results_root_SP_seed_mass$BUGSoutput$sims.list$rss_new > results_root_SP_seed_mass$BUGSoutput$sims.list$rss)
+
+## put together for figure  and r^2
+mcmc <- results_root_SP_seed_mass$BUGSoutput$sims.matrix
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
+fit = coefs %*% t(treatmat)
+resid = sweep(fit, 2, traits, "-")
+var_f = apply(fit, 1, var)
+var_e = apply(resid, 1, var)
+R2 = var_f/(var_f + var_e)
+tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
+
+#residuals
+coefs2 = apply(coefs, 2, median)
+fit2 = as.vector(coefs2 %*% t(treatmat))
+resid2 <- traits - fit2
+sresid2 <- resid2/sd(resid2)
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = fit2))
+hist(resid2)
+
+# check predicted versus observed
+yRep = sapply(1:nrow(mcmc), function(i) rnorm(nrow(dat_root), fit[i,]))
+ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
+                                         fill = "Model"), alpha = 0.5) + 
+  geom_density(data = dat_root, aes(x = (traits), fill = "Obs"), alpha = 0.5)
+
+# generate plots
+newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
+                      seed_mass = c(unique(standard(as.numeric((dat_root$seed_mass))))))
+
+xmat <- model.matrix(~seed_mass*WP_MPa, newdat)
+fit = coefs %*% t(xmat)
+newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
+
+graphdat <- dat_root 
+graphdat$WP_MPa <- standard(graphdat$WP_MPa) 
+graphdat$seed_mass <- standard(as.numeric(dat_root$seed_mass))
+
+root_SP_plot_seed_mass <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_root, colour = factor(seed_mass)))+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(seed_mass), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(seed_mass)))+
+  scale_colour_manual(values = seed_mass_palette, labels = c("-1.21" = "0.461", "-0.84" = "0.478", "0.4" = "0.534", "1.17" = "0.569"))+
+  scale_fill_manual(values = seed_mass_palette, labels = c("-1.21" = "0.461", "-0.84" = "0.478", "0.4" = "0.534", "1.17" = "0.569")) +
+  scale_x_continuous(name = "Water potential (MPa)") +
+  #Wrong translatoins of standardized water potentials back to actual water potentials, need to figure that out if I need this figure in the paper
+                     # breaks = c(-2.96, -2.26, -1.55, -0.85, -0.15, 0.21, 0.63, 1.11), 
+                     # labels = c(-1.70, -1.45, -1.20, -0.95, -0.70, -0.57, -0.42, -0.25),
+                     # limits = c(-2.96, 1.11)) +
+  scale_y_continuous(name = "Root biomass (g)") +
+  guides(colour = guide_legend(title = "Seed mass (mg)"),
+         fill = guide_legend(title = "Seed mass (mg)")) +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+
+
+
 #### Above ground biomass Sibbaldia procumbens ####
-seedlings_SP %>% 
-  #filter(!siteID == "LAV") %>% 
-  filter(water_potential < 7) %>% 
-  ggplot(aes(x = as.factor(water_potential), y = dry_mass_g_above_ground, fill = as.factor(water_potential))) +
-  geom_violin()+
-  geom_jitter(aes(alpha = 0.3)) #+
-#facet_wrap(~siteID)
+# seedlings_SP %>% 
+#   #filter(!siteID == "LAV") %>% 
+#   filter(water_potential < 7) %>% 
+#   ggplot(aes(x = as.factor(water_potential), y = dry_mass_g_above_ground, fill = as.factor(water_potential))) +
+#   geom_violin()+
+#   geom_jitter(aes(alpha = 0.3)) #+
+# #facet_wrap(~siteID)
 
 dat_above_ground <- seedlings_SP %>%  filter(!is.na(dry_mass_g_above_ground)) %>% filter(water_potential < 7)
 # group level effects
@@ -2044,17 +3027,23 @@ WP <- as.numeric(standard(as.numeric(dat_above_ground$water_potential)))
 WP_MPa <- as.numeric(standard(dat_above_ground$WP_MPa))
 #Precip <- as.numeric(standard(dat_above_ground$precip))
 Precip <- as.factor(dat_above_ground$precip)
+seed_mass <- standard(as.numeric(dat_above_ground$seed_mass))
 
 # dependent variables
 traits <- as.numeric(log(dat_above_ground$dry_mass_g_above_ground))
 N <- as.numeric(length(traits))
 
-treatmat <- model.matrix(~Precip*WP_MPa)
-n_parm <- as.numeric(ncol(treatmat))
-
 # look at the data before the analysis
 ggplot(dat_above_ground, aes(x=water_potential, y = log(dry_mass_g_above_ground)), adjust = 0.01)+
   geom_jitter()+facet_wrap(~siteID)
+
+
+#------------------ Chose to run the model with precipitation (keep running the next lines of code) or seed mass (jump to the next code section)
+
+##### Model with precipitation #####
+
+treatmat <- model.matrix(~Precip*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
 
 jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
 jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
@@ -2158,3 +3147,100 @@ abg_plot_SP_panels <- ggplot()+
     abg_plot_SP_panels)  +
   plot_layout(heights = c(4, 1), guides = "collect") & 
   theme(legend.position='bottom', text = element_text(size = 15))
+
+
+
+##### Model with seed mass #####
+
+treatmat <- model.matrix(~seed_mass*WP_MPa)
+n_parm <- as.numeric(ncol(treatmat))
+
+jags.data <- list("treatmat", "traits", "N",  "petridish", "n_petri", "n_parm")
+jags.param <- c("b", "rss", "rss_new", "sig1", "sig_t") 
+
+results_above_ground_SP_seed_mass <- jags.parallel(data = jags.data,
+                                                   #inits = inits.fn,
+                                                   parameters.to.save = jags.param,
+                                                   n.iter = 50000,
+                                                   model.file = model_traits,
+                                                   n.thin = 5,
+                                                   n.chains = 3,
+                                                   n.burnin = 15000)
+results_above_ground_SP_seed_mass
+
+above_ground_Sib_pro_table_seed_mass <- mcmcTab(results_above_ground_SP_seed_mass)
+
+#above_ground_Sib_pro_table_seed_mass$Variable <- c("Driest", "Dry", "Wet", "Wettest", "Water potential", "Water potential:Dry", "Water potential:Wet", "Water potential:Wettest", "Deviance",  "RSS", "RSS_new",  "Variance of trait","Variance random effect")
+
+above_ground_Sib_pro_table_ft_seed_mass <- flextable(above_ground_Sib_pro_table_seed_mass)
+above_ground_Sib_pro_table_doc_seed_mass <- read_docx()
+above_ground_Sib_pro_table_doc_seed_mass <- body_add_flextable(above_ground_Sib_pro_table_doc_seed_mass, value = above_ground_Sib_pro_table_ft_seed_mass)
+print(above_ground_Sib_pro_table_doc_seed_mass, target = "above_ground_Sib_pro_table_seed_mass.docx")
+
+# traceplots
+s <- ggs(as.mcmc(results_above_ground_SP_seed_mass))
+ggs_traceplot(s, family="b") 
+
+# check Gelman Rubin Statistics
+gelman.diag(as.mcmc(results_above_ground_SP_seed_mass))
+
+# Posterior predictive check
+plot(results_above_ground_SP_seed_mass$BUGSoutput$sims.list$rss_new, results_above_ground_SP_seed_mass$BUGSoutput$sims.list$rss,
+     main = "",)
+abline(0,1, lwd = 2, col = "black") 
+
+mean(results_above_ground_SP_seed_mass$BUGSoutput$sims.list$rss_new > results_above_ground_SP_seed_mass$BUGSoutput$sims.list$rss)
+
+## put together for figure  and r^2
+mcmc <- results_above_ground_SP_seed_mass$BUGSoutput$sims.matrix
+coefs = mcmc[, c("b[1]", "b[2]", "b[3]", "b[4]")]
+fit = coefs %*% t(treatmat)
+resid = sweep(fit, 2, traits, "-")
+var_f = apply(fit, 1, var)
+var_e = apply(resid, 1, var)
+R2 = var_f/(var_f + var_e)
+tidyMCMC(as.mcmc(R2), conf.int = TRUE, conf.method = "HPDinterval")
+
+#residuals
+coefs2 = apply(coefs, 2, median)
+fit2 = as.vector(coefs2 %*% t(treatmat))
+resid2 <- traits - fit2
+sresid2 <- resid2/sd(resid2)
+ggplot() + geom_point(data = NULL, aes(y = resid2, x = fit2))
+hist(resid2)
+
+# check predicted versus observed
+yRep = sapply(1:nrow(mcmc), function(i) rnorm(nrow(dat_above_ground), fit[i,]))
+ggplot() + geom_density(data = NULL, aes(x = (as.vector(yRep)),
+                                         fill = "Model"), alpha = 0.5) + 
+  geom_density(data = dat_above_ground, aes(x = (traits), fill = "Obs"), alpha = 0.5)
+
+# generate plots
+newdat <- expand.grid(WP_MPa = seq(min(WP_MPa), max(WP_MPa), length = 50),
+                      seed_mass = c(unique(standard(as.numeric(dat_above_ground$seed_mass)))))
+
+xmat <- model.matrix(~seed_mass*WP_MPa, newdat)
+fit = coefs %*% t(xmat)
+newdat <- newdat %>% cbind(tidyMCMC(fit, conf.int = TRUE))
+
+graphdat <- dat_above_ground 
+graphdat$WP_MPa <- standard(graphdat$WP_MPa)                   
+graphdat$seed_mass <- standard(as.numeric(dat_above_ground$seed_mass))
+
+abg_plot_SP_seed_mass <- ggplot()+ 
+  geom_jitter(data=graphdat, aes(x=WP_MPa, y=dry_mass_g_above_ground, colour = factor(seed_mass)))+
+  geom_ribbon(data=newdat, aes(ymin=exp(conf.low), ymax=exp(conf.high), x=WP_MPa, 
+                               fill = factor(seed_mass), alpha=0.35))+
+  geom_line(data=newdat, aes(y = exp(estimate), x = WP_MPa, colour = factor(seed_mass)))+
+  scale_colour_manual(values = seed_mass_palette, labels = c("-1.21" = "0.461", "-0.84" = "0.478", "0.4" = "0.534", "1.17" = "0.569"))+
+  scale_fill_manual(values = seed_mass_palette, labels = c("-1.21" = "0.461", "-0.84" = "0.478", "0.4" = "0.534", "1.17" = "0.569")) +
+  scale_x_continuous(name = "Water potential (MPa)") +
+  #Wrong translatoins of standardized water potentials back to actual water potentials, need to figure that out if I need this figure in the paper
+  # breaks = c(-2.96, -2.26, -1.55, -0.85, -0.15, 0.21, 0.63, 1.11), 
+  # labels = c(-1.70, -1.45, -1.20, -0.95, -0.70, -0.57, -0.42, -0.25),
+  # limits = c(-2.96, 1.11)) +
+  scale_y_continuous(name = "Root biomass (g)") +
+  guides(colour = guide_legend(title = "Seed mass (mg)"),
+         fill = guide_legend(title = "Seed mass (mg)")) +
+  theme(panel.background = element_rect(fill='white', colour='black'),
+        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
