@@ -69,11 +69,11 @@ dish_comment_dict_VA <- read_delim("data/Germination/dish_comment_dictionary_VA.
 comment_dict_SP <- read_delim("data/Germination/comment_dictionary_SP.csv", delim = ";")
 harvest_comment_dict_SP <- read_delim("data/Germination/harvest_comment_dictionary_SP.csv", delim = ";")
 weighing_comment_dict_SP <- read_delim("data/Germination/weighing_comment_dictionary_SP.csv", delim = ";")
-seed_mass <- read.delim("data/Germination/Seed_weight.csv", sep = ",", dec = ".")
+seed_mass_df <- read.delim("data/Germination/Seed_weight.csv", sep = ",", dec = ".")
 
 #### Clean seed mass data ####
 
-seed_mass <- seed_mass %>% 
+seed_mass_df <- seed_mass_df %>% 
   mutate(weight_per_seed = total_weight/number_of_seeds) %>% 
   mutate(siteID = as.factor(siteID),
          species = as.factor(species)) %>% 
@@ -440,7 +440,7 @@ Ver_alp_germination_traits <- Ver_alp_germination_traits %>%
 
 ## Add seed mass
 
-seed_mass_VA <- seed_mass %>% filter(species == "Ver_alp")
+seed_mass_VA <- seed_mass_df %>% filter(species == "Ver_alp")
 
 seed_mass_VA_value <- seed_mass_VA %>% 
   group_by(siteID) %>% 
@@ -453,7 +453,8 @@ seed_mass_VA_value <- seed_mass_VA %>%
                             siteID == "Skjellingahaugen" ~ "SKJ"))
 
 Ver_alp_germination_traits <- Ver_alp_germination_traits %>% 
-  left_join(seed_mass_SP_value, by = "siteID")
+  left_join(seed_mass_VA_value, by = "siteID") %>% 
+  mutate(water_potential = as.numeric(water_potential))
 
 #### Make plot of germination ####
 
@@ -583,7 +584,7 @@ Sib_pro_germination_traits <- Sib_pro_germination_traits %>%
 
 ## Add seed mass
 
-seed_mass_SP <- seed_mass %>% filter(species == "Sib_pro")
+seed_mass_SP <- seed_mass_df %>% filter(species == "Sib_pro")
 
 seed_mass_SP_value <- seed_mass_SP %>% 
   group_by(siteID) %>% 
@@ -596,7 +597,8 @@ seed_mass_SP_value <- seed_mass_SP %>%
                             siteID == "Skjellingahaugen" ~ "SKJ"))
 
 Sib_pro_germination_traits <- Sib_pro_germination_traits %>% 
-  left_join(seed_mass_SP_value, by = "siteID")
+  left_join(seed_mass_SP_value, by = "siteID") %>% 
+  mutate(water_potential = as.numeric(water_potential))
 
 
 # seed_mass_SP_value <- seed_mass_Sib_pro %>% 
