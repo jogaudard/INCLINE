@@ -87,6 +87,44 @@ SeedScoring <- SeedScoring[!duplicated(SeedScoring$PlotSpecies),]
 # Making long dataframe
 SeedScoring <- gather(SeedScoring, Date, present, "Date1":"Date7", factor_key = TRUE)
 
+# Adding correct dates at each site
+SeedScoring <- SeedScoring %>% 
+  mutate(date = if_else(SiteID == "Skj" &  Date == "Date1", "2021-06-07",
+              if_else(SiteID == "Skj" &  Date == "Date2", "2021-06-22",
+              if_else(SiteID == "Skj" &  Date == "Date3", "2021-07-05",
+              if_else(SiteID == "Skj" &  Date == "Date4", "2021-07-18",
+              if_else(SiteID == "Skj" &  Date == "Date5", "2021-08-02",
+              if_else(SiteID == "Skj" &  Date == "Date6", "2021-08-16",
+              if_else(SiteID == "Skj" &  Date == "Date7", "2021-08-28",
+              if_else(SiteID == "Ulv" &  Date == "Date1", "2021-06-08",
+              if_else(SiteID == "Ulv" &  Date == "Date2", "2021-06-23",
+              if_else(SiteID == "Ulv" &  Date == "Date3", "2021-07-06",
+              if_else(SiteID == "Ulv" &  Date == "Date4", "2021-07-19",
+              if_else(SiteID == "Ulv" &  Date == "Date5", "2021-08-03",
+              if_else(SiteID == "Ulv" &  Date == "Date6", "2021-08-16",
+              if_else(SiteID == "Ulv" &  Date == "Date7", "2021-08-29",
+              if_else(SiteID == "Gud" &  Date == "Date1", "2021-06-09",
+              if_else(SiteID == "Gud" &  Date == "Date2", "2021-06-22",
+              if_else(SiteID == "Gud" &  Date == "Date3", "2021-07-05",
+              if_else(SiteID == "Gud" &  Date == "Date4", "2021-07-18",
+              if_else(SiteID == "Gud" &  Date == "Date5", "2021-08-02",
+              if_else(SiteID == "Gud" &  Date == "Date6", "2021-08-16",
+              if_else(SiteID == "Gud" &  Date == "Date7", "2021-08-28",
+              if_else(SiteID == "Lav" &  Date == "Date1", "2021-06-10",
+              if_else(SiteID == "Lav" &  Date == "Date2", "2021-06-23",
+              if_else(SiteID == "Lav" &  Date == "Date3", "2021-07-06",
+              if_else(SiteID == "Lav" &  Date == "Date4", "2021-07-19",
+              if_else(SiteID == "Lav" &  Date == "Date5", "2021-08-03",
+              if_else(SiteID == "Lav" &  Date == "Date6", "2021-08-16",
+              if_else(SiteID == "Lav" &  Date == "Date7", "2021-08-29",
+                    "error"))))))))))))))))))))))))))))) %>% 
+  mutate(date = as.Date(date, format = "%Y-%m-%d"))
+
+# Fixing present from 0 and 1 to yes and no
+SeedScoring <- SeedScoring %>% 
+  mutate(present = if_else(present == 0, "no",
+                            "yes"))
+
 # Renaming and selecting relevant columns
 SeedScoring <- SeedScoring %>% 
   rename(species = Species,
@@ -97,11 +135,11 @@ SeedScoring <- SeedScoring %>%
          total_seedlings_emerged = TotEmerged,
          total_seedlings_survived = SurvivedPlot,
          strategy = Strategy,
-         species = Species) %>% 
+         species = Species,
+         plotID = plot_seedling_ID) %>% 
   mutate(registrator = "IJD") %>%
-  select(species, siteID, blockID, OTC, vegetation, plot_seedling_ID, uniqueID, 
-         strategy, X, Y, total_seeds_sown, germinated, total_seedlings_emerged, 
-         total_seedlings_survived, Date, present)
+  select(species, siteID, blockID, OTC, vegetation, plot_seedling_ID, uniqueID, strategy, X, Y, total_seeds_sown, germinated, total_seedlings_emerged, total_seedlings_survived, date, present)
          
-         
+# Saving the cleaned dataset
+write.csv(SeedScoring, "C:/Users/ingri/OneDrive/Skrivebord/Master/Kode/INCLINE/Data/INCLINE_seedling_data_subalpine.csv")
          
