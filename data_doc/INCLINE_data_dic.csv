@@ -2,7 +2,7 @@ TableID, Variable name, Unit, Description, How measured
 ,fluxID,,Unique ID for each flux,defined
 ,type,,Type of flux measurements,defined
 ,replicate,,Replicate measurement of same turf,defined
-,PARavg,micromol/s/sqm,PAR value measured every 15 seconds during flux measurement and averaged,measured
+,PARavg,micromol/s/sqm,PAR value measured every 15 seconds (2020) / 10 seconds (2022) during flux measurement and averaged,measured
 ,temp_airavg,Kelvin,Air temperature measured inside the flux chamber every 10 seconds and averaged,measured
 ,r.squared,,R squared of the linear relation between CO2 concentration and time,calculated
 ,p.value,,p value of the linear relation between CO2 concentration and time,calculated
@@ -19,10 +19,10 @@ TableID, Variable name, Unit, Description, How measured
 ,ground_temperature,°C,Ground temperature,measured
 ,soil_moisture,percentage,Soil moisture,measured
 ,air_temperature,°C,Air temperature 15 cm above ground,measured
-,NDVI,°C,NDVI measurement for each plot,measured
+,NDVI,,NDVI measurement for each plot,measured
 ,date,yyyy-mm-dd,Date of sampling or observation,recorded
-,tomst,yyyy-mm-dd,Presence of TMS microclimate logger in the plot when measuing,defined
-,OTC,,Presence of TMS microclimate logger in the plot when measuing,defined
+,tomst,,Presence of TMS microclimate logger in the plot when measuing,defined
+,OTC,,Control (C) and Warmed via OTC (W),defined
 ,date_comment,,Comments specifically about date issue,defined
 ,siteID,,"Unique site ID (3 letters, first letter capital)",defined
 ,blockID,,"Unique ID of each block. A combination of the siteID (Gud, Lav, Skj or Ulv) and the number for the block (1-7) (Ex: Gud_1, Lav_7)",defined
@@ -42,7 +42,7 @@ TableID, Variable name, Unit, Description, How measured
 ,vegetation_cover,%,Cover of vascular plant ,recorded
 ,bryophyte_cover,%,Cover of bryophytes,recorded
 ,vegetation_height,mm,Height of vegetation,measured
-,bryophyte_depth,mm,Height of bryophytes,measurred
+,bryophyte_depth,mm,Height of bryophytes,measured
 ,litter,%,Cover of litter,recorded
 ,lichen,%,Cover of lichen,recorded
 ,fungus,%,Cover of fungus,recorded
@@ -72,4 +72,15 @@ TableID, Variable name, Unit, Description, How measured
 ,date_community,yyyy-mm-dd,Date when number of flowers were counted/measured for the flowering community (apart from Sibbaldia procumbens and Veronica alpina),recorded
 ,date_Sib_pro,yyyy-mm-dd,Date when number of flowers were counted for Sibbaldia procumbens,recorded
 ,date_Ver_alp,yyyy-mm-dd,Date when number of flowers were counted for Veronica alpina,recorded
-,flower_measurement,,,
+,flowering_measurement_type,,"The means by which flower production was measured for the flowering community. Either number of flowers, number of flower heads, number of flowering individuals, length of inflorescence, number of inflorescence units or percent cover of inflorescence.",defined
+,flowering_value,"counts, mm or %",Number of flowers. Either counted directly or approximated.,measured
+,experiment,,"Whether the seedlings were in the main INCLINE experiment (background 'B'), or in the experimental plots ('E')",defined
+,vegetation,,Whether the seedlings were in the vegetated (Veg) or vegetation removed (NoVeg) plots,defined
+,campaign_number,,"For seedling_survival experiment campaigns 0-7 (zero, first, second...seventh)",defined
+,present,,If a seedling was marked as alive (yes) or not (no) during a campaign visit,recorded
+,strategy,,If a seedling was defined as resource acquisitive (Acq) or conservative (Con),defined
+,total_seeds_sown,,"Per species, per plot",measured
+,germinated,,If an individual seedling emerged or not during the course of the experiment,recorded
+,total_seedlings_emerged,,Total seedlings emerged from each species in each plot during the course of the experiment,recorded
+,total_seedlings_survived,,Total seedlings survived as of the last recorded visit of the total seedlings emerged,recorded
+,plot_seedling_ID,,"Concatenation of blockID, OTC, Veg",defined

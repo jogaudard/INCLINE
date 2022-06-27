@@ -69,9 +69,37 @@ Where:
 
 ## Data dictionnaries
 
+### Biomass removal
+```{r, echo=FALSE}
+knitr::kable(biomass_removal_dic)
+```
+
 ### Carbon fluxes
 ```{r cfluxdic, echo=FALSE}
 knitr::kable(cflux_dic)
+```
+
+### Climate
+```{r, echo=FALSE}
+knitr::kable(microclimate_dic)
+```
+
+### Demography
+```{r, echo=FALSE}
+knitr::kable(demography_Sib_pro_dic)
+knitr::kable(demography_Ver_alp_dic)
+```
+
+### Flowering
+```{r, echo=FALSE}
+knitr::kable(flowering_dic)
+```
+
+### Germination
+```{r, echo=FALSE}
+knitr::kable(seedling_traits_alpine_dic)
+knitr::kable(seedling_data_alpine_dic)
+knitr::kable(seedling_data_subalpine_dic)
 ```
 
 ### NDVI
@@ -79,30 +107,12 @@ knitr::kable(cflux_dic)
 knitr::kable(ndvi_dic)
 ```
 
-### Microclimate
-```{r, echo=FALSE}
-knitr::kable(microclimate_dic)
-```
-
-### Biomass removal
-```{r, echo=FALSE}
-knitr::kable(biomass_removal_dic)
-```
-
-### Demography
-```{r, echo=FALSE}
-knitr::kable(demography_dic)
-```
-
-### Germination alpine
-```{r, echo=FALSE}
-knitr::kable(seedling_traits_alpine_dic)
-```
-
 ### Seedbank
 ```{r, echo=FALSE}
 knitr::kable(seedbank_survival_dic)
 ```
+
+
 
 ### Seeds per capsule
 ```{r, echo=FALSE}
@@ -113,7 +123,6 @@ knitr::kable(seeds_per_capsule_dic)
 ```{r, echo=FALSE}
 knitr::kable(species_level_biomass_allocation_dic)
 ```
-
 
 
 <!-- ### -->

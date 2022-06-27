@@ -48,6 +48,15 @@ get_file(node = "zhk3m",
          path = "data_cleaned",
          remote_path = "Germination_alpine")
 
+get_file(node = "zhk3m",
+         file = "INCLINE_seedling_data_alpine.csv",
+         path = "data_cleaned",
+         remote_path = "Germination_alpine")
+
+get_file(node = "zhk3m",
+         file = "INCLINE_seedling_data_subalpine.csv",
+         path = "data_cleaned",
+         remote_path = "Germination_subalpine")
 
 # Seedbank ----------------------------------------------------------------
 get_file(node = "zhk3m",
@@ -69,6 +78,12 @@ get_file(node = "zhk3m",
          file = "INCLINE_species_level_biomass_allocation.csv",
          path = "data_cleaned",
          remote_path = "Species_level_biomass_allocation")
+
+# Flowering ----------------------------------------
+get_file(node = "zhk3m",
+         file = "INCLINE_flowering.csv",
+         path = "data_cleaned",
+         remote_path = "Flowering")
 
 
 

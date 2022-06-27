@@ -29,7 +29,7 @@
                     .id = "Variable name") %>%
      select(-name) %>%
      # give sensible names
-     mutate(`Variable type` = case_when(`Variable type` %in% c("character", "logical") ~ "categorical",
+     mutate(`Variable type` = case_when(`Variable type` %in% c("character", "logical", "factor") ~ "categorical",
                                         `Variable type` %in% c("integer", "numeric") ~ "numeric",
                                         `Variable type` %in% c("Date") ~ "date",
                                         `Variable type` %in% c("POSIXct") ~ "date_time")) %>%
@@ -67,7 +67,7 @@
    mutate(TableID = as.character(TableID)) 
  
   # c-flux ------------------------------------------------------------------
- cflux <- read_csv("data_cleaned/INCLINE_c-flux_2020.csv")
+ cflux <- read_csv("data_cleaned/INCLINE_c-flux_2020.csv", col_types = "fddddddfffcTfd")
  cflux_dic <- make_data_dictionary(data = cflux,
                                    description_table = description,
                                    table_ID = NA_character_
@@ -127,13 +127,25 @@
      table_ID = NA_character_
    )
  
- demography_dic <- full_join(demography_Sib_pro_dic, demography_Ver_alp_dic)
- # Germination_alpine ------------------------------------------------------
+ # demography_dic <- full_join(demography_Sib_pro_dic, demography_Ver_alp_dic)
+ # Germination ------------------------------------------------------
  seedling_traits_alpine_dic <- read_csv("data_cleaned/INCLINE_seedling_traits_alpine.csv", col_types = "ffffffffDDDfffffcfd") %>%
    make_data_dictionary(
      description_table = description,
      table_ID = NA_character_
    )
+ seedling_data_alpine_dic <- read_csv("data_cleaned/INCLINE_seedling_data_alpine.csv", col_types = "fffffffffDfddfdddddc") %>%
+   make_data_dictionary(
+     description_table = description,
+     table_ID = NA_character_
+   )
+ seedling_data_subalpine_dic <- read_csv("data_cleaned/INCLINE_seedling_data_subalpine.csv", col_types = "ffffffffdddfddDf") %>%
+   make_data_dictionary(
+     description_table = description,
+     table_ID = NA_character_
+   )
+ # germination_dic <- full_join(seedling_traits_alpine_dic, seedling_data_alpine_dic) %>% 
+   # full_join(seedling_data_subalpine_dic)
  # Seedbank ----------------------------------------------------------------
  seedbank_survival_dic <- read_csv("data_cleaned/INCLINE_seedbank_survival.csv", col_types = "ffffffDDdcc") %>%
    make_data_dictionary(
@@ -153,6 +165,13 @@
      table_ID = NA_character_
    )
 
+ # Flowering ----------------------------------------
+ flowering_dic <- read_csv("data_cleaned/INCLINE_flowering.csv", col_types = "fffffffDDDffcffd") %>%
+   make_data_dictionary(
+     description_table = description,
+     table_ID = NA_character_
+   )
+ 
 
 
  
