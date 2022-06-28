@@ -135,12 +135,12 @@
      description_table = description,
      table_ID = NA_character_
    )
- seedling_data_alpine_dic <- read_csv("data_cleaned/INCLINE_seedling_data_alpine.csv", col_types = "cffffffcfDfddfdddddf") %>%
+ seedling_data_alpine_dic <- read_csv("data_cleaned/INCLINE_seedling_data_alpine.csv", col_types = "cffffffffDfddfdddddc") %>%
    make_data_dictionary(
      description_table = description,
      table_ID = NA_character_
    )
- seedling_data_subalpine_dic <- read_csv("data_cleaned/INCLINE_seedling_data_subalpine.csv", col_types = "ffffffffdddfddDf") %>%
+ seedling_data_subalpine_dic <- read_csv("data_cleaned/INCLINE_seedling_data_subalpine.csv", col_types = "ffffffcfdddfddDf") %>%
    make_data_dictionary(
      description_table = description,
      table_ID = NA_character_
