@@ -1,86 +1,103 @@
-TableID, Variable name, Unit, Description, How measured
-,fluxID,,Unique ID for each flux,defined
-,type,,Type of flux measurements,defined
-,replicate,,Replicate measurement of same turf,defined
-,PARavg,micromol/s/sqm,PAR value measured every 15 seconds (2020) / 10 seconds (2022) during flux measurement and averaged,measured
-,temp_airavg,Kelvin,Air temperature measured inside the flux chamber every 10 seconds and averaged,measured
-,r.squared,,R squared of the linear relation between CO2 concentration and time,calculated
-,p.value,,p value of the linear relation between CO2 concentration and time,calculated
-,nobs,,Number of CO2 concentration measurements for each flux,measured
-,flux,mmol/sqm/h,CO2 flux (postive when emitting to atmosphere negative when vegetation uptake),calculated
-,adj.r.squared,,adjusted R squared of the linear relation between CO2 concentration and time,calculated
-,turfID,,Unique ID of each turfs,defined
-,campaign,,field measurement campaign,defined
-,comments,,additional information on the data,defined
-,datetime,yyyy-mm-dd_hh:mm:ss,Date and time of sampling or observation,recorded
-,loggerID,,Unique ID for each microclimate loggers,defined
-,plotID,,Unique ID for each plot,defined
-,soil_temperature,°C,Soil temperature at 5 cm below ground,measured
-,ground_temperature,°C,Ground temperature,measured
-,soil_moisture,percentage,Soil moisture,measured
-,air_temperature,°C,Air temperature 15 cm above ground,measured
-,NDVI,,NDVI measurement for each plot,measured
-,date,yyyy-mm-dd,Date of sampling or observation,recorded
-,tomst,,Presence of TMS microclimate logger in the plot when measuing,defined
-,OTC,,Control (C) and Warmed via OTC (W),defined
-,date_comment,,Comments specifically about date issue,defined
-,siteID,,"Unique site ID (3 letters, first letter capital)",defined
-,blockID,,"Unique ID of each block. A combination of the siteID (Gud, Lav, Skj or Ulv) and the number for the block (1-7) (Ex: Gud_1, Lav_7)",defined
-,treatment,,"Treatments in the experiment (C = control, R = removal, E = transplants with extant traits, N = transplants with novel traits)",defined
-,year,yyyy,Year of data collection,recorded
-,registrator,,Initials or full name of the registror,recorder
-,species,,"Species abbreviations, three leters of the genus and three leters of the species. Example: Sib_pro",defined
-,uniqueID,,Unique ID for each individual.,defined
-,X,mm,X coordinates of the individual in the plot measured from the left side of the plot.,measured
-,Y,mm,Y coordinates of the individual int he plot measured from the lower side of the plot,measured
-,genetID,,Unique ID for genetically similar species. Those we know are clones.,defined
-,mother_shoot,,Unique ID for when we know the mother of the individual (MS = mother shoot),defined
-,demographic_trait,,Name of trait measured,defined
-,demographic_value,mm or counts,"Length/width/height of leaves, leaf stalkes or stems. Or number of leaves/flowers/buds/capsules/aborted capsules/flower stems.",measured
-,functional_group,,"Functional group removed in the removal experiment: graminoid, forb, bryophyte, woody, fern, lichen, litter",defined
-,biomass_removed,g,Weighed dried biomass,measured
-,vegetation_cover,%,Cover of vascular plant ,recorded
-,bryophyte_cover,%,Cover of bryophytes,recorded
-,vegetation_height,mm,Height of vegetation,measured
-,bryophyte_depth,mm,Height of bryophytes,measured
-,litter,%,Cover of litter,recorded
-,lichen,%,Cover of lichen,recorded
-,fungus,%,Cover of fungus,recorded
-,soil,%,Cover of soil,recorded
-,logger,%,Cover of logger (microclimate logger in the plots) ,recorded
-,rock,%,Cover of rock,recorded
-,poo,%,Cover of poo,recorded
-,cover,%,individuals species cover,recorded
-,weather,,Oberservers impression of weather during analysis,recorded
-,writer,,Scribe/writer/second observer during data collection,defined
-,warming,,"Wether the plot has an open top chamber or not. C = control, W = warming with open top chamber.",defined
-,date_in,yyyy-mm-dd,Date when seeds were burried to test for survival in the seed bank,recorded
-,date_out,yyyy-mm-dd,Date when seeds were taken out to test for survival in the seed bank,recorded
-,survival_in_seedbank,,Wether a seed survived in the seed bank or not.,recorded
-,comment_survival,,Comments about how we tested if the seeds were viable or not,recorded
-,capsuleID,,unique ID of capsules ,defined
-,number_of_seeds,counts,Number of seeds per capsule,recorded
-,species_group,,Grouping of species in the biomass allocation dataset,defined
-,individual,,"Number of the individual,unique within the site and plot",defined
-,plot,,"Number of the plot, not permanent experimental plot",defined
-,sub_plot,,"Subplot witin the plot, not permanent experimental plot",defined
-,comments_field,,comments registered during the field work,defined
-,comments_lab,,commentes registered during the lab work,defined
-,trait,,"trait measured on the individual, either counts og leaves/flowers etc. size measurements, or biomass measurements",defined
-,value,,registered value of the corresponding trait,measured
-,subplot,,"Subplot within the plot, permanent experimental plot",defined
-,date_community,yyyy-mm-dd,Date when number of flowers were counted/measured for the flowering community (apart from Sibbaldia procumbens and Veronica alpina),recorded
-,date_Sib_pro,yyyy-mm-dd,Date when number of flowers were counted for Sibbaldia procumbens,recorded
-,date_Ver_alp,yyyy-mm-dd,Date when number of flowers were counted for Veronica alpina,recorded
-,flowering_measurement_type,,"The means by which flower production was measured for the flowering community. Either number of flowers, number of flower heads, number of flowering individuals, length of inflorescence, number of inflorescence units or percent cover of inflorescence.",defined
-,flowering_value,"counts, mm or %",Number of flowers. Either counted directly or approximated.,measured
-,experiment,,"Whether the seedlings were in the main INCLINE experiment (background 'B'), or in the experimental plots ('E')",defined
-,vegetation,,Whether the seedlings were in the vegetated (Veg) or vegetation removed (NoVeg) plots,defined
-,campaign_number,,"For seedling_survival experiment campaigns 0-7 (zero, first, second...seventh)",defined
-,present,,If a seedling was marked as alive (yes) or not (no) during a campaign visit,recorded
-,strategy,,If a seedling was defined as resource acquisitive (Acq) or conservative (Con),defined
-,total_seeds_sown,,"Per species, per plot",measured
-,germinated,,If an individual seedling emerged or not during the course of the experiment,recorded
-,total_seedlings_emerged,,Total seedlings emerged from each species in each plot during the course of the experiment,recorded
-,total_seedlings_survived,,Total seedlings survived as of the last recorded visit of the total seedlings emerged,recorded
-,plot_seedling_ID,,"Concatenation of blockID, OTC, Veg",defined
+TableID,Variable name,Unit,Description,How measured,dataset
+,fluxID,,Unique ID for each flux,defined,cflux
+,type,,Type of flux measurements,defined,cflux
+,replicate,,Replicate measurement of same turf,defined,cflux
+,PARavg,micromol/s/sqm,PAR value measured every 15 seconds during flux measurement and averaged,measured,cflux
+,temp_airavg,Kelvin,Air temperature measured inside the flux chamber every 10 seconds and averaged,measured,cflux
+,r.squared,,R squared of the linear relation between CO2 concentration and time,calculated,cflux
+,p.value,,p value of the linear relation between CO2 concentration and time,calculated,cflux
+,nobs,,Number of CO2 concentration measurements for each flux,measured,cflux
+,flux,mmol/sqm/h,CO2 flux (postive when emitting to atmosphere negative when vegetation uptake),calculated,cflux
+,adj.r.squared,,adjusted R squared of the linear relation between CO2 concentration and time,calculated,cflux
+,turfID,,Unique ID of each turfs,defined,cflux
+,campaign,,field measurement campaign,defined,cflux
+,comments,,additional information on the data,defined,"cflux, demography, community, biomass_removal, seedbank, seeds_per_capsule"
+,datetime,yyyy-mm-dd_hh:mm:ss,Date and time of sampling or observation,recorded,cflux
+,loggerID,,Unique ID for each microclimate loggers,defined,microclimate
+,plotID,,Unique ID for each plot,defined,"microclimate, ndvi, demography, community, biomass_removal, seedbank_survival, flowering, seedling_survival_alpine"
+,soil_temperature,°C,Soil temperature at 5 cm below ground,measured,microclimate
+,ground_temperature,°C,Ground temperature,measured,microclimate
+,soilmoisture,percentage,Soil moisture,measured,microclimate
+,air_temperature,°C,Air temperature 15 cm above ground,measured,microclimate
+,NDVI,,NDVI measurement for each plot,measured,ndvi
+,date,yyyy-mm-dd,Date of sampling or observation,recorded,"ndvi, demography, community, biomass_removal, seeds_per_capsule, seedling_survival_alpine ,seedling_survival_subalpine"
+,tomst_presence,,Presence of TMS microclimate logger in the plot when measuing,defined,ndvi
+,OTC,,Control (C) and Warmed via OTC (W),defined,"ndvi, demography, community, biomass_removal, flowering; seedling_survival_alpine, seedling_survival_subalpine"
+,date_comment,,Comments specifically about date issue,defined,ndvi
+,siteID,,"Unique site ID (3 letters, first letter capital)",defined,"demography, community, biomass_removal, seedbank, seeds_per_capsule, flowering, seedling_survival_alpine, seedling_survival_subalpine"
+,blockID,,"Unique ID of each block. A combination of the siteID (Gud, Lav, Skj or Ulv) and the number for the block (1-7) (Ex: Gud_1, Lav_7)",defined,"demography, community, biomass_removal, flowering, seedling_survival_alpine, seedling_survival_subalpine"
+,treatment,,"Treatments in the experiment (C = control, R = removal, E = transplants with extant traits, N = transplants with novel traits)",defined,"demography, community, biomass_removal, flowering"
+,year,yyyy,Year of data collection,recorded,"demography, community, biomass_removal, flowering"
+,registrator,,Initials or full name of the registror,recorder,"demography, community, biomass_removal, flowering, seedling_survival_alpine"
+,species,,"Species abbreviations, three leters of the genus and three leters of the species. Example: Sib_pro",defined,"demography, community, seedbank, seeds_per_capsule, flowering, seedling_survival_alpine, seedling_survival_subalpine"
+,uniqueID,,Unique ID for each individual.,defined,"demography, seedbank, seeds_per_capsule, seedling_survival_alpine,seedling_survival_subalpine"
+,X,mm,X coordinates of the individual in the plot measured from the left side of the plot.,measured,"demography, seedling_survival_alpine, seedling_survival_subalpine"
+,Y,mm,Y coordinates of the individual int he plot measured from the lower side of the plot,measured,"demography, seedling_survival_alpine, seedling_survival_subalpine"
+,genetID,,Unique ID for genetically similar species. Those we know are clones.,defined,"demography, biomass_allocation"
+,mother_shoot,,Unique ID for when we know the mother of the individual (MS = mother shoot),defined,demography
+,demographic_trait,,Name of trait measured,defined,"demography, seeds_per_capsule"
+,demographic_value,mm or counts,"Length/width/height of leaves, leaf stalkes or stems. Or number of leaves/flowers/buds/capsules/aborted capsules/flower stems.",measured,"demography, seeds_per_capsule"
+,functional_group,,"Functional group removed in the removal experiment: graminoid, forb, bryophyte, woody, fern, lichen, litter",defined,biomass_removal
+,biomass_removed,g,Weighed dried biomass,measured,biomass_removal
+,vegetation_cover,%,Cover of vascular plant ,recorded,"community, seedling_survival_alpine"
+,bryophyte_cover,%,Cover of bryophytes,recorded,"community, seedling_survival_alpine"
+,vegetation_height,mm,Height of vegetation,measured,"community, seedling_survival_alpine"
+,bryophyte_depth,mm,Height of bryophytes,measured,"community, seedling_survival_alpine"
+,litter,%,Cover of litter,recorded,community
+,lichen,%,Cover of lichen,recorded,"community, seedling_survival_alpine"
+,fungus,%,Cover of fungus,recorded,community
+,soil,%,Cover of soil,recorded,community
+,logger,%,Cover of logger (microclimate logger in the plots) ,recorded,community
+,rock,%,Cover of rock,recorded,community
+,poo,%,Cover of poo,recorded,community
+,cover,%,individuals species cover,recorded,community
+,weather,,Oberservers impression of weather during analysis,recorded,"community, flowering"
+,writer,,Scribe/writer/second observer during data collection,defined,"community, flowering"
+,warming,,"Wether the plot has an open top chamber or not. C = control, W = warming with open top chamber.",defined,seedbank
+,date_in,yyyy-mm-dd,Date when seeds were burried to test for survival in the seed bank,recorded,seedbank
+,date_out,yyyy-mm-dd,Date when seeds were taken out to test for survival in the seed bank,recorded,seedbank
+,survival_in_seedbank,,Wether a seed survived in the seed bank or not.,recorded,seedbank
+,comment_survival,,Comments about how we tested if the seeds were viable or not,recorded,seedbank
+,capsuleID,,unique ID of capsules ,defined,seeds_per_capsule
+,number_of_seeds,counts,Number of seeds per capsule,recorded,seeds_per_capsule
+,species_group,,Grouping of species in the biomass allocation dataset,defined,biomass_allocation
+,individual,,"Number of the individual,unique within the site and plot",defined,biomass_allocation
+,plot,,"Number of the plot, not permanent experimental plot",defined,biomass_allocation
+,sub_plot,,"Subplot witin the plot, not permanent experimental plot",defined,biomass_allocation
+,comments_field,,comments registered during the field work,defined,biomass_allocation
+,comments_lab,,commentes registered during the lab work,defined,biomass_allocation
+,trait,,"trait measured on the individual, either counts og leaves/flowers etc. size measurements, or biomass measurements",defined,biomass_allocation
+,value,,registered value of the corresponding trait,measured,biomass_allocation
+,subplot,,"Subplot within the plot, permanent experimental plot",defined,flowering
+,date_community,yyyy-mm-dd,Date when number of flowers were counted/measured for the flowering community (apart from Sibbaldia procumbens and Veronica alpina),recorded,flowering
+,date_Sib_pro,yyyy-mm-dd,Date when number of flowers were counted for Sibbaldia procumbens,recorded,flowering
+,date_Ver_alp,yyyy-mm-dd,Date when number of flowers were counted for Veronica alpina,recorded,flowering
+,flowering_measurement_type,,"The means by which flower production was measured for the flowering community. Either number of flowers, number of flower heads, number of flowering individuals, length of inflorescence, number of inflorescence units or percent cover of inflorescence.",defined,flowering
+,flowering_value,"counts, mm or %",Number of flowers. Either counted directly or approximated.,measured,flowering
+,experiment,,"Whether the seedlings were in the main INCLINE experiment (background 'B'), or in the experimental plots ('E')",defined,"seedling_survival_alpine, seedling_traits"
+,vegetation,,Whether the seedlings were in the vegetated (Veg) or vegetation removed (NoVeg) plots,defined,"seedling_survival_alpine, seedling_traits, seedling_survival_subalpine"
+,campaign_number,,"For seedling_survival experiment campaigns 0-7 (zero, first, second...seventh)",defined,seedling_survival_alpine
+,present,,If a seedling was marked as alive (yes) or not (no) during a campaign visit,recorded,"seedling_survival_alpine, seedling_survival_subalpine"
+,strategy,,If a seedling was defined as resource acquisitive (Acq) or conservative (Con),defined,seedling_survival_subalpine
+,total_seeds_sown,,"Per species, per plot",measured,seedling_survival_subalpine
+,germinated,,If an individual seedling emerged or not during the course of the experiment,recorded,seedling_survival_subalpine
+,total_seedlings_emerged,,Total seedlings emerged from each species in each plot during the course of the experiment,recorded,seedling_survival_subalpine
+,total_seedlings_survived,,Total seedlings survived as of the last recorded visit of the total seedlings emerged,recorded,seedling_survival_subalpine
+,plot_seedling_ID,,"Concatenation of blockID, OTC, Veg",defined,seedling_survival_subalpine
+,harvest_date,,,,
+,fresh_weighing_date,,,,
+,leaf_scanned_Y_N,,,,
+,balance_used,,,,
+,speciesID_check,,,,
+,seed_check,,,,
+,flagged_errors,,,,
+,values,,,,
+,date_removal,,,,
+,recorder_removal,,,,
+,date_sorting,,,,
+,recorder_sorting,,,,
+,date_weighing,,,,
+,recorder_weighing,,,,
+,seedling,,,,
+,juvenile,,,,
+,OTC_removed,,,,

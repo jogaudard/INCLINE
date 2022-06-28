@@ -116,13 +116,13 @@
                         table_ID = NA_character_
  )
  # Demography --------------------------------------------------------------
- demography_Sib_pro_dic <- read_csv("data_cleaned/INCLINE_demography_Sib_pro.csv", col_types = "fffdDffcfffddfffd") %>%
+ demography_Sib_pro_dic <- read_csv("data_cleaned/INCLINE_demography_Sib_pro.csv", col_types = "fffdDfffcffddfffd") %>%
    make_data_dictionary(
      description_table = description,
      table_ID = NA_character_
    )
  
- demography_Ver_alp_dic <- read_csv("data_cleaned/INCLINE_demography_Ver_alp.csv", col_types = "fffdDffcfffddfffd") %>%
+ demography_Ver_alp_dic <- read_csv("data_cleaned/INCLINE_demography_Ver_alp.csv", col_types = "fffdDfffcffddfffd") %>%
    make_data_dictionary(
      description_table = description,
      table_ID = NA_character_
@@ -130,12 +130,12 @@
  
  # demography_dic <- full_join(demography_Sib_pro_dic, demography_Ver_alp_dic)
  # Germination ------------------------------------------------------
- seedling_traits_alpine_dic <- read_csv("data_cleaned/INCLINE_seedling_traits_alpine.csv", col_types = "ffffffffDDDfffffcfd") %>%
+ seedling_traits_alpine_dic <- read_csv("data_cleaned/INCLINE_seedling_traits_alpine.csv", col_types = "ffffffcfDDcffffcfd") %>%
    make_data_dictionary(
      description_table = description,
      table_ID = NA_character_
    )
- seedling_data_alpine_dic <- read_csv("data_cleaned/INCLINE_seedling_data_alpine.csv", col_types = "fffffffffDfddfdddddc") %>%
+ seedling_data_alpine_dic <- read_csv("data_cleaned/INCLINE_seedling_data_alpine.csv", col_types = "cffffffcfDfddfdddddf") %>%
    make_data_dictionary(
      description_table = description,
      table_ID = NA_character_
@@ -148,19 +148,19 @@
  # germination_dic <- full_join(seedling_traits_alpine_dic, seedling_data_alpine_dic) %>% 
    # full_join(seedling_data_subalpine_dic)
  # Seedbank ----------------------------------------------------------------
- seedbank_survival_dic <- read_csv("data_cleaned/INCLINE_seedbank_survival.csv", col_types = "ffffffDDdcc") %>%
+ seedbank_survival_dic <- read_csv("data_cleaned/INCLINE_seedbank_survival.csv", col_types = "fffffcDDfcc") %>%
    make_data_dictionary(
      description_table = description,
      table_ID = NA_character_
    )
  # Seeds_per_capsule -------------------------------------------------------
- seeds_per_capsule_dic <- read_csv("data_cleaned/INCLINE_seeds_per_capsule.csv", col_types = "ffDfcfdfd") %>%
+ seeds_per_capsule_dic <- read_csv("data_cleaned/INCLINE_seeds_per_capsule.csv", col_types = "ffDccfdcd") %>%
    make_data_dictionary(
      description_table = description,
      table_ID = NA_character_
    )
  # Species_level_biomass_allocation ----------------------------------------
- species_level_biomass_allocation_dic <- read_csv("data_cleaned/INCLINE_species_level_biomass_allocation.csv", col_types = "fffDcfffffccffd") %>%
+ species_level_biomass_allocation_dic <- read_csv("data_cleaned/INCLINE_species_level_biomass_allocation.csv", col_types = "fffDcfffffcccfd") %>%
    make_data_dictionary(
      description_table = description,
      table_ID = NA_character_
