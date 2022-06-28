@@ -17,7 +17,8 @@
    range <- data %>%
      as_tibble() %>%
      summarise(
-       across(where(is.character), ~ paste(min(., na.rm = TRUE), max(., na.rm = TRUE), sep = " - ")),
+       # across(where(is.character), ~ paste(min(., na.rm = TRUE), max(., na.rm = TRUE), sep = " - ")),
+       across(where(is.factor), ~ paste0(levels(.), collapse = ", ")),
        across(where(is.numeric), ~paste(round(min(., na.rm = TRUE), 3),round(max(., na.rm = TRUE), 3), sep = " - ")),
        across(where(is.Date), ~paste(min(., na.rm = TRUE), max(., na.rm = TRUE), sep = " - ")),
        across(where(is.POSIXct), ~paste(min(., na.rm = TRUE), max(., na.rm = TRUE), sep = " - "))
@@ -67,16 +68,16 @@
    mutate(TableID = as.character(TableID)) 
  
   # c-flux ------------------------------------------------------------------
- cflux <- read_csv("data_cleaned/INCLINE_c-flux_2020.csv", col_types = "fddddddfffcTfd")
+ cflux <- read_csv("data_cleaned/INCLINE_c-flux_2020.csv", col_types = "cddddddfffcTfd")
  cflux_dic <- make_data_dictionary(data = cflux,
                                    description_table = description,
                                    table_ID = NA_character_
  )
  # Climate -----------------------------------------------------------------
- microclimate_air_temperature <- read_csv("data_cleaned/INCLINE_microclimate_air_temperature.csv", col_types = "Tfffffcfd")
- microclimate_soil_temperature <- read_csv("data_cleaned/INCLINE_microclimate_soil_temperature.csv", col_types = "Tfffffcfd")
- microclimate_ground_temperature <- read_csv("data_cleaned/INCLINE_microclimate_ground_temperature.csv", col_types = "Tfffffcfd")
- microclimate_soil_moisture <- read_csv("data_cleaned/INCLINE_microclimate_soil_moisture.csv", col_types = "Tfffffcfd")
+ microclimate_air_temperature <- read_csv("data_cleaned/INCLINE_microclimate_air_temperature.csv", col_types = "Tcffffcfd")
+ microclimate_soil_temperature <- read_csv("data_cleaned/INCLINE_microclimate_soil_temperature.csv", col_types = "Tcffffcfd")
+ microclimate_ground_temperature <- read_csv("data_cleaned/INCLINE_microclimate_ground_temperature.csv", col_types = "Tcffffcfd")
+ microclimate_soil_moisture <- read_csv("data_cleaned/INCLINE_microclimate_soil_moisture.csv", col_types = "Tcffffcfd")
  
  microclimate_air_temperature_dic <- make_data_dictionary(data = microclimate_air_temperature,
                                                           description_table = description,
@@ -115,13 +116,13 @@
                         table_ID = NA_character_
  )
  # Demography --------------------------------------------------------------
- demography_Sib_pro_dic <- read_csv("data_cleaned/INCLINE_demography_Sib_pro.csv", col_types = "fffdDffffffddfffd") %>%
+ demography_Sib_pro_dic <- read_csv("data_cleaned/INCLINE_demography_Sib_pro.csv", col_types = "fffdDffcfffddfffd") %>%
    make_data_dictionary(
      description_table = description,
      table_ID = NA_character_
    )
  
- demography_Ver_alp_dic <- read_csv("data_cleaned/INCLINE_demography_Ver_alp.csv", col_types = "fffdDffffffddfffd") %>%
+ demography_Ver_alp_dic <- read_csv("data_cleaned/INCLINE_demography_Ver_alp.csv", col_types = "fffdDffcfffddfffd") %>%
    make_data_dictionary(
      description_table = description,
      table_ID = NA_character_
