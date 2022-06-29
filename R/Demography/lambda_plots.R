@@ -371,14 +371,14 @@ lambda_diff_SP_WC_CC_lolliplot <- lambda_df_differences2 %>%
   ylim(-0.1, 0.1)
 
 P0_VA_plot <- ((lambda_diff_VA_WR_CR_lolliplot + lambda_diff_VA_WC_CC_lolliplot)) + 
-  plot_annotation( title = "Direct and indirect effects of warming in the current alpine community",
-                   subtitle = 'Veronica alpina') +
+  #plot_annotation( title = "Direct and indirect effects of warming in the current alpine community",
+  #                 subtitle = 'Veronica alpina') +
   plot_layout(widths = c(1,1), guides = 'collect') &
   theme(legend.position = "bottom", text = element_text(size = 14))
 
 P0_SP_plot <- ((lambda_diff_SP_WR_CR_lolliplot + lambda_diff_SP_WC_CC_lolliplot)) + 
-  plot_annotation( title = "Direct and indirect effects of warming in the current alpine community",
-                   subtitle = 'Sibbaldia procumbens') +
+  #plot_annotation( title = "Direct and indirect effects of warming in the current alpine community",
+  #                 subtitle = 'Sibbaldia procumbens') +
   plot_layout(widths = c(1,1), guides = 'collect') &
   theme(legend.position = "bottom", text = element_text(size = 14))
 
@@ -454,14 +454,14 @@ lambda_diff_SP_CR_CC_lolliplot <- lambda_df_differences2 %>%
 
 
 P1_VA_plot <- ((lambda_diff_VA_CR_CC_lolliplot + lambda_diff_VA_WR_WC_lolliplot)) + 
-  plot_annotation( title = "Changes in interactions within current plant communities",
-                   subtitle = 'Veronica alpina') +
+  #plot_annotation( title = "Changes in interactions within current plant communities",
+  #                 subtitle = 'Veronica alpina') +
   plot_layout(widths = c(1,1), guides = 'collect') &
   theme(legend.position = "bottom", text = element_text(size = 14))
 
 P1_SP_plot <- ((lambda_diff_SP_CR_CC_lolliplot + lambda_diff_SP_WR_WC_lolliplot)) + 
-  plot_annotation( title = "Changes in interactions within current plant communities",
-                   subtitle = 'Sibbaldia procumbens') +
+  #plot_annotation( title = "Changes in interactions within current plant communities",
+  #                 subtitle = 'Sibbaldia procumbens') +
   plot_layout(widths = c(1,1), guides = 'collect') &
   theme(legend.position = "bottom", text = element_text(size = 14))
 
@@ -537,16 +537,26 @@ lambda_diff_SP_WEN_WC_lolliplot <- lambda_df_differences2 %>%
   ylim(-0.1, 0.1)
 
 P2_VA_plot <- ((lambda_diff_VA_CEN_CC_lolliplot + lambda_diff_VA_WEN_WC_lolliplot)) + 
-  plot_annotation( title = "Indirect effects via. novel interactions (extant vs. novel traits)",
-                   subtitle = 'Veronica alpina') +
+  #plot_annotation( title = "Indirect effects via. novel interactions (extant vs. novel traits)",
+  #                 subtitle = 'Veronica alpina') +
   plot_layout(widths = c(1,1), guides = 'collect') &
   theme(legend.position = "bottom", text = element_text(size = 14))
 
 P2_SP_plot <- ((lambda_diff_SP_CEN_CC_lolliplot + lambda_diff_SP_WEN_WC_lolliplot)) + 
-  plot_annotation( title = "Indirect effects via. novel interactions (extant vs. novel traits)",
-                   subtitle = 'Sibbaldia procumbens') +
+  #plot_annotation( title = "Indirect effects via. novel interactions (extant vs. novel traits)",
+  #                 subtitle = 'Sibbaldia procumbens') +
   plot_layout(widths = c(1,1), guides = 'collect') &
   theme(legend.position = "bottom", text = element_text(size = 14))
+
+#### Saving the prediction plots
+
+ggsave(plot = P0_VA_plot, filename = "P0_VA_plot.pdf", width = 13, height = 11, units = "cm")
+ggsave(plot = P1_VA_plot, filename = "P1_VA_plot.pdf", width = 13, height = 11, units = "cm")
+ggsave(plot = P2_VA_plot, filename = "P2_VA_plot.pdf", width = 23, height = 11, units = "cm")
+
+ggsave(plot = P0_SP_plot, filename = "P0_SP_plot.pdf", width = 13, height = 11, units = "cm")
+ggsave(plot = P1_SP_plot, filename = "P1_SP_plot.pdf", width = 13, height = 11, units = "cm")
+ggsave(plot = P2_SP_plot, filename = "P2_SP_plot.pdf", width = 23, height = 11, units = "cm")
 
 
 #### Final plots with everything together
