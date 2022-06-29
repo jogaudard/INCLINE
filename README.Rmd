@@ -83,15 +83,28 @@ Where:
 
 ## Data dictionnaries
 
-### Biomass removal
+### Biomass removal (dataset i)
 
 This dataset contains the biomass removed per experimental plot and functional group per year (the cleaned dataset can be accessed from here: link). From  40 experimental plots across four sites we removed a total of `r sum(biomass_removal$value, na.rm = TRUE)` g biomass over the project period; `r sum((biomass_removal %>% filter(functional_group == "Graminoid") %>% select(value)), na.rm = TRUE)` g graminoids, `r sum((biomass_removal %>% filter(functional_group == "Bryophyte") %>% select(value)), na.rm = TRUE)` g bryophytes, `r sum((biomass_removal %>% filter(functional_group == "Forb") %>% select(value)), na.rm = TRUE)` g forbs, but the most biomass came from litter with as much as `r sum((biomass_removal %>% filter(functional_group == "Litter") %>% select(value)), na.rm = TRUE)` g. Biomass removed decreased over time, `r sum((biomass_removal %>% filter(year == 2019) %>% select(value)), na.rm = TRUE)` g in 2019, `r sum((biomass_removal %>% filter(year == 2020) %>% select(value)), na.rm = TRUE)` g in 2020, and `r sum((biomass_removal %>% filter(year == 2021) %>% select(value)), na.rm = TRUE)` g in 2021, suggesting that the removal treatment did cause a decline in returning biomass every year.
 
-For details on the clean dataset and the code to clean and extract these data from the raw data, see Table 2. The raw data is 554 provided on the FunCaB OSF23, the code to download and clean the data can be 555 found in the FunCaB GitHub repository24 in the file R/biomass/read_biomass.R. The 556 final cleaned data together with a data dictionary is provided on the FunCaB OSF23, 557 and the code to download the final cleaned data can be found in the FunCaB GitHub 558 repository24 in the file R/data_dic/download_clean_data.R.
 
 ```{r, echo=FALSE}
 knitr::kable(biomass_removal_dic)
 ```
+
+### Plant community composition (dataset ii)
+
+These data will be finished over the summer of 2022, and will be added to this data descriptor once the dataset is complete.
+
+### Population dynamics of alpine focal species (dataset iii)
+
+These datasets contains demographic data on two species. Over the period from 2018-2021 we followed `r length(unique(demography_Sib_pro$uniqueID))` individuals of Sibbaldia procumbens, and `r length(unique(demography_Ver_alp$uniqueID))` individuals of Veronica alpina. The cleaned data can be accessed ... To build population models this dataset needs to be combined with dataset iv) species-level biomass allocation to calculate an estimate of the link between the size traits measured non distructively in the field in this dataset (iii) with the actual biomass (dataset iv). 
+
+```{r, echo=FALSE}
+knitr::kable(demography_Sib_pro_dic)
+knitr::kable(demography_Ver_alp_dic)
+```
+
 
 ### Carbon fluxes
 ```{r cfluxdic, echo=FALSE}
@@ -101,12 +114,6 @@ knitr::kable(cflux_dic)
 ### Climate
 ```{r, echo=FALSE}
 knitr::kable(microclimate_dic)
-```
-
-### Demography
-```{r, echo=FALSE}
-knitr::kable(demography_Sib_pro_dic)
-knitr::kable(demography_Ver_alp_dic)
 ```
 
 ### Flowering
