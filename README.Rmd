@@ -8,6 +8,20 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 source("data_doc/INCLINE_data-dictionnary.R")
+
+cflux <- read_csv("data_cleaned/INCLINE_c-flux_2020.csv", col_types = "cddddddfffcTfd")
+ndvi <- read_csv("data_cleaned/INCLINE_NDVI_2019_2020_2021.csv", col_types = "fdDffffcc")
+biomass_removal <- read_csv("data_cleaned/INCLINE_biomass_removal.csv", col_types = "dDfDfDfffcffd")
+demography_Sib_pro <- read_csv("data_cleaned/INCLINE_demography_Sib_pro.csv", col_types = "fffdDfffcffddfffd")
+demography_Ver_alp <- read_csv("data_cleaned/INCLINE_demography_Ver_alp.csv", col_types = "fffdDfffcffddfffd")
+seedling_traits_alpine <- read_csv("data_cleaned/INCLINE_seedling_traits_alpine.csv", col_types = "ffffffcfDDcfffcfd")
+seedling_data_alpine <- read_csv("data_cleaned/INCLINE_seedling_data_alpine.csv", col_types = "cffffffffDfddfdddddc")
+seedling_data_subalpine <- read_csv("data_cleaned/INCLINE_seedling_data_subalpine.csv", col_types = "ffffffcfdddfddDf")
+seedbank_survival <- read_csv("data_cleaned/INCLINE_seedbank_survival.csv", col_types = "fffffcDDfcc")
+seeds_per_capsule <- read_csv("data_cleaned/INCLINE_seeds_per_capsule.csv", col_types = "ffDccfdcd")
+species_level_biomass_allocation <- read_csv("data_cleaned/INCLINE_species_level_biomass_allocation.csv", col_types = "fffDcfffffcccfd")
+flowering <- read_csv("data_cleaned/INCLINE_flowering.csv", col_types = "fffffffDDDffcffd")
+
 ```
 
 # Introduction
@@ -70,6 +84,11 @@ Where:
 ## Data dictionnaries
 
 ### Biomass removal
+
+This dataset contains the biomass removed per experimental plot and functional group per year (the cleaned dataset can be accessed from here: link). From  40 experimental plots across four sites we removed a total of `r sum(biomass_removal$value, na.rm = TRUE)` g biomass over the project period; `r sum((biomass_removal %>% filter(functional_group == "Graminoid") %>% select(value)), na.rm = TRUE)` g graminoids, `r sum((biomass_removal %>% filter(functional_group == "Bryophyte") %>% select(value)), na.rm = TRUE)` g bryophytes, `r sum((biomass_removal %>% filter(functional_group == "Forb") %>% select(value)), na.rm = TRUE)` g forbs, but the most biomass came from litter with as much as `r sum((biomass_removal %>% filter(functional_group == "Litter") %>% select(value)), na.rm = TRUE)` g. Biomass removed decreased over time, `r sum((biomass_removal %>% filter(year == 2019) %>% select(value)), na.rm = TRUE)` g in 2019, `r sum((biomass_removal %>% filter(year == 2020) %>% select(value)), na.rm = TRUE)` g in 2020, and `r sum((biomass_removal %>% filter(year == 2021) %>% select(value)), na.rm = TRUE)` g in 2021, suggesting that the removal treatment did cause a decline in returning biomass every year.
+
+For details on the clean dataset and the code to clean and extract these data from the raw data, see Table 2. The raw data is 554 provided on the FunCaB OSF23, the code to download and clean the data can be 555 found in the FunCaB GitHub repository24 in the file R/biomass/read_biomass.R. The 556 final cleaned data together with a data dictionary is provided on the FunCaB OSF23, 557 and the code to download the final cleaned data can be found in the FunCaB GitHub 558 repository24 in the file R/data_dic/download_clean_data.R.
+
 ```{r, echo=FALSE}
 knitr::kable(biomass_removal_dic)
 ```
