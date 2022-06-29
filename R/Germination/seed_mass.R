@@ -28,7 +28,7 @@ seed_mass <- seed_mass %>%
   mutate(weight_per_seed = total_weight/number_of_seeds) %>% 
   mutate(siteID = as.factor(siteID),
          species = as.factor(species)) %>% 
-  mutate(siteID = factor(siteID, levels = c("Skjellingahaugen", "Lavisdalen", "Ulvehaugen", "Gudmedalen"))) %>% 
+  mutate(siteID = factor(siteID, levels = c("Lavisdalen", "Skjellingahaugen","Gudmedalen", "Ulvehaugen"))) %>% 
   mutate(species = factor(species, levels = c("Sib_pro", "Ver_alp")))
   
 
@@ -38,8 +38,13 @@ seed_mass %>% group_by(species) %>% mutate(mean = mean(weight_per_seed) * 1000) 
 
 #### Testing for difference between species and populations ####
 
-test <- glm(weight_per_seed ~ species*siteID, data = seed_mass)
+test <- glm(weight_per_seed ~ species*siteID, data = seed_mass, family = "Gamma")
 summary(test)
+
+
+TukeyHSD(aov(weight_per_seed ~ siteID, data = seed_mass_VA))
+TukeyHSD(aov(weight_per_seed ~ siteID, data = seed_mass_SP))
+TukeyHSD(aov(weight_per_seed ~ siteID, data = seed_mass_SP))
 
 # Tukey's Honestly Significant Difference test
 letters.df <- data.frame(multcompLetters())
