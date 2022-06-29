@@ -515,7 +515,8 @@ microclimate_clean <- microclimate %>%
     n = n()
   ) %>% 
   filter(n == 1) %>%  # we keep only the row that are unique
-  select(!n)
+  select(!n) %>% 
+  ungroup()
 
 gc()
 
@@ -523,28 +524,32 @@ gc()
 
 microclimate_air_temperature <- microclimate_clean %>% 
   filter(sensor == "air_temperature") %>% 
-  rename(air_temperature = "value")
+  rename(air_temperature = "value") %>% 
+  select(!sensor)
 gc()
 write_csv(microclimate_air_temperature, "data_cleaned/INCLINE_microclimate_air_temperature.csv")
 
 
 microclimate_soil_temperature <- microclimate_clean %>% 
   filter(sensor == "soil_temperature") %>% 
-  rename(soil_temperature = "value")
+  rename(soil_temperature = "value") %>% 
+  select(!sensor)
 gc()
 write_csv(microclimate_soil_temperature, "data_cleaned/INCLINE_microclimate_soil_temperature.csv")
 
 
 microclimate_ground_temperature <- microclimate_clean %>% 
   filter(sensor == "ground_temperature") %>% 
-  rename(ground_temperature = "value")
+  rename(ground_temperature = "value") %>% 
+  select(!sensor)
 gc()
 write_csv(microclimate_ground_temperature, "data_cleaned/INCLINE_microclimate_ground_temperature.csv")
 
 
 microclimate_soil_moisture <- microclimate_clean %>% 
   filter(sensor == "soil_moisture") %>% 
-  rename(soil_moisture = "value")
+  rename(soil_moisture = "value") %>% 
+  select(!sensor)
 gc()
 write_csv(microclimate_soil_moisture, "data_cleaned/INCLINE_microclimate_soil_moisture.csv")
 
