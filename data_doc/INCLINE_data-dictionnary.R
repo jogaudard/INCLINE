@@ -74,10 +74,10 @@
                                    table_ID = NA_character_
  )
  # Climate -----------------------------------------------------------------
- microclimate_air_temperature <- read_csv("data_cleaned/INCLINE_microclimate_air_temperature.csv", col_types = "Tcffffcfd")
- microclimate_soil_temperature <- read_csv("data_cleaned/INCLINE_microclimate_soil_temperature.csv", col_types = "Tcffffcfd")
- microclimate_ground_temperature <- read_csv("data_cleaned/INCLINE_microclimate_ground_temperature.csv", col_types = "Tcffffcfd")
- microclimate_soil_moisture <- read_csv("data_cleaned/INCLINE_microclimate_soil_moisture.csv", col_types = "Tcffffcfd")
+ microclimate_air_temperature <- read_csv("data_cleaned/INCLINE_microclimate_air_temperature.csv", col_types = "Tcffffcd")
+ microclimate_soil_temperature <- read_csv("data_cleaned/INCLINE_microclimate_soil_temperature.csv", col_types = "Tcffffcd")
+ microclimate_ground_temperature <- read_csv("data_cleaned/INCLINE_microclimate_ground_temperature.csv", col_types = "Tcffffcd")
+ microclimate_soil_moisture <- read_csv("data_cleaned/INCLINE_microclimate_soil_moisture.csv", col_types = "Tcffffcd")
  
  microclimate_air_temperature_dic <- make_data_dictionary(data = microclimate_air_temperature,
                                                           description_table = description,
@@ -130,7 +130,7 @@
  
  # demography_dic <- full_join(demography_Sib_pro_dic, demography_Ver_alp_dic)
  # Germination ------------------------------------------------------
- seedling_traits_alpine_dic <- read_csv("data_cleaned/INCLINE_seedling_traits_alpine.csv", col_types = "ffffffcfDDcffffcfd") %>%
+ seedling_traits_alpine_dic <- read_csv("data_cleaned/INCLINE_seedling_traits_alpine.csv", col_types = "ffffffcfDDcfffcfd") %>%
    make_data_dictionary(
      description_table = description,
      table_ID = NA_character_

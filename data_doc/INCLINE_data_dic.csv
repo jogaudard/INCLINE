@@ -17,11 +17,11 @@ TableID,Variable name,Unit,Description,How measured,dataset
 ,plotID,,Unique ID for each plot,defined,"microclimate, ndvi, demography, community, biomass_removal, seedbank_survival, flowering, seedling_survival_alpine"
 ,soil_temperature,°C,Soil temperature at 5 cm below ground,measured,microclimate
 ,ground_temperature,°C,Ground temperature,measured,microclimate
-,soilmoisture,percentage,Soil moisture,measured,microclimate
+,soil_moisture,percentage,Soil moisture,measured,microclimate
 ,air_temperature,°C,Air temperature 15 cm above ground,measured,microclimate
 ,NDVI,,NDVI measurement for each plot,measured,ndvi
 ,date,yyyy-mm-dd,Date of sampling or observation,recorded,"ndvi, demography, community, biomass_removal, seeds_per_capsule, seedling_survival_alpine ,seedling_survival_subalpine"
-,tomst_presence,,Presence of TMS microclimate logger in the plot when measuing,defined,ndvi
+,tomst_presence,,Presence of TMS microclimate logger in the plot when measuring,defined,ndvi
 ,OTC,,Control (C) and Warmed via OTC (W),defined,"ndvi, demography, community, biomass_removal, flowering; seedling_survival_alpine, seedling_survival_subalpine"
 ,date_comment,,Comments specifically about date issue,defined,ndvi
 ,siteID,,"Unique site ID (3 letters, first letter capital)",defined,"demography, community, biomass_removal, seedbank, seeds_per_capsule, flowering, seedling_survival_alpine, seedling_survival_subalpine"
@@ -76,7 +76,7 @@ TableID,Variable name,Unit,Description,How measured,dataset
 ,flowering_value,"counts, mm or %",Number of flowers. Either counted directly or approximated.,measured,flowering
 ,experiment,,"Whether the seedlings were in the main INCLINE experiment (background 'B'), or in the experimental plots ('E')",defined,"seedling_survival_alpine, seedling_traits"
 ,vegetation,,Whether the seedlings were in the vegetated (Veg) or vegetation removed (NoVeg) plots,defined,"seedling_survival_alpine, seedling_traits, seedling_survival_subalpine"
-,campaign_number,,"For seedling_survival experiment campaigns 0-7 (zero, first, second...seventh)",defined,seedling_survival_alpine
+,campaign_number,,"For seedling_survival experiment campaigns (zero, first, second...seventh)",defined,seedling_survival_alpine
 ,present,,If a seedling was marked as alive (yes) or not (no) during a campaign visit,recorded,"seedling_survival_alpine, seedling_survival_subalpine"
 ,strategy,,If a seedling was defined as resource acquisitive (Acq) or conservative (Con),defined,seedling_survival_subalpine
 ,total_seeds_sown,,"Per species, per plot",measured,seedling_survival_subalpine
@@ -84,14 +84,13 @@ TableID,Variable name,Unit,Description,How measured,dataset
 ,total_seedlings_emerged,,Total seedlings emerged from each species in each plot during the course of the experiment,recorded,seedling_survival_subalpine
 ,total_seedlings_survived,,Total seedlings survived as of the last recorded visit of the total seedlings emerged,recorded,seedling_survival_subalpine
 ,plot_seedling_ID,,"Concatenation of blockID, OTC, Veg",defined,seedling_survival_subalpine
-,harvest_date,,,,
-,fresh_weighing_date,,,,
-,leaf_scanned_Y_N,,,,
-,balance_used,,,,
-,speciesID_check,,,,
-,seed_check,,,,
-,flagged_errors,,,,
-,values,,,,
+,harvest_date,yyyy-mm-dd,Date seedlings were harvested from germination experiment,recorded,
+,fresh_weighing_date,yyyy-mm-dd,Date seedlings were from germinaton experiment were weighed for fresh mass,recorded,
+,leaf_scanned_Y_N,,"Was a leaf scanned for a given seedling (yes, no)",recorded,
+,balance_used,,Identifies which balance was used,recorded,
+,speciesID_check,,"For seedling traits, comments regarding if the species was correctly identifed",defined,
+,flagged_errors,,Issues noted by registrator that may mean data values should be removed for future use,defined,
+,values,,Trait values,measured,
 ,date_removal,,,,
 ,recorder_removal,,,,
 ,date_sorting,,,,
@@ -100,4 +99,4 @@ TableID,Variable name,Unit,Description,How measured,dataset
 ,recorder_weighing,,,,
 ,seedling,,,,
 ,juvenile,,,,
-,OTC_removed,,,,
+,OTC_removed,,TRUE when OTC was removed to measure NDVI (only applies to warming plots),,
