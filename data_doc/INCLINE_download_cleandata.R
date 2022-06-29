@@ -12,7 +12,7 @@ get_file(node = "zhk3m",
          file = "INCLINE_microclimate.zip",
          path = "data_cleaned",
          remote_path = "Climate")
-unzip("data_cleaned/INCLINE_microclimate.zip", exdir = "data_cleaned")
+unzip("data_cleaned/INCLINE_microclimate.zip")
 file.remove("data_cleaned/INCLINE_microclimate.zip")
 
 # NDVI --------------------------------------------------------------------
