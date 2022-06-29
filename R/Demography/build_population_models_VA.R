@@ -2531,7 +2531,7 @@ co_VA_WN <- makeClonalObj(VA_WN, fecConstants=data.frame(correctionForOrphans= 1
                           Family = c("binomial","poisson"), Transform=c("none","none"),offspringSplitter=data.frame(seedbank=0,continuous=1))
 
 
-co_VA_WN@fitFec[[1]]$coefficients <- as.numeric(fixef(mod_clo_VA_WN)) 
+co_VA_WN@fitFec[[1]]$coefficients <- as.numeric(coef(mod_clo_VA_WN)) 
 co_VA_WN@fitFec[[2]]$coefficients <- as.numeric(coef(mod_clo_no_VA_WN)) #not really needed as this is a linear model
 co_VA_WN@sdOffspringSize <- sigma.hat(mod_clone_growth_VA_WN)$sigma$data
 
