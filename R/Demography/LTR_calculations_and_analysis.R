@@ -1498,7 +1498,10 @@ Ver_alp_LTRE_predictions <- LTRE_treatments %>%
   #scale_color_manual(values = "#B50E00") +
   ggtitle("Vital rate contribution to lambda difference in Veronica alpina") +
   ylab("Change in population growth rate (λ)") +
-  xlab("Annual precipitation (m/year)")
+  xlab("Annual precipitation (m/year)") +
+  theme(legend.position="bottom")
+
+ggsave(Ver_alp_LTRE_predictions, filename = "Ver_alp_LTRE_predictions.pdf", width = 20, height = 17, units = "cm")
 
 Sib_pro_LTRE_predictions <- LTRE_treatments %>% 
   filter(species == "Sib_pro") %>% 
@@ -1516,7 +1519,11 @@ Sib_pro_LTRE_predictions <- LTRE_treatments %>%
   #scale_color_manual(values = "#B50E00") +
   ggtitle("Vital rate contribution to lambda difference in Sibbaldia procumbens") +
   ylab("Change in population growth rate (λ)") +
-  xlab("Annual precipitation (m/year)")
+  xlab("Annual precipitation (m/year)")+
+  theme(legend.position="bottom")
+
+
+ggsave(Sib_pro_LTRE_predictions, filename = "Sib_pro_LTRE_predictions.pdf", width = 20, height = 17, units = "cm")
 
 
 Ver_alp_LTRE_all_treatments <- LTRE_treatments %>% 
