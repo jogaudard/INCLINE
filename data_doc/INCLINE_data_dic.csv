@@ -22,7 +22,7 @@ TableID,Variable name,Unit,Description,How measured,dataset
 ,air_temperature,°C,Air temperature 15 cm above ground,measured,ndvi
 ,NDVI,,NDVI measurement for each plot,measured,"ndvi, demography, community, biomass_removal, seeds_per_capsule, seedling_survival_alpine ,seedling_survival_subalpine"
 ,date,yyyy-mm-dd,Date of sampling or observation,recorded,ndvi
-,tomst_presence,,Presence of TMS microclimate logger in the plot when measuing,defined,"ndvi, demography, community, biomass_removal, flowering; seedling_survival_alpine, seedling_survival_subalpine"
+,tomst_presence,,Presence of TMS microclimate logger in the plot when measuring,defined,"ndvi, demography, community, biomass_removal, flowering; seedling_survival_alpine, seedling_survival_subalpine"
 ,OTC,,Control (C) and Warmed via OTC (W),defined,ndvi
 ,date_comment,,Comments specifically about date issue,defined,"demography, community, biomass_removal, seedbank, seeds_per_capsule, flowering, seedling_survival_alpine, seedling_survival_subalpine"
 ,siteID,,"Unique site ID (3 letters, first letter capital)",defined,"demography, community, biomass_removal, flowering, seedling_survival_alpine, seedling_survival_subalpine"
@@ -45,7 +45,7 @@ TableID,Variable name,Unit,Description,How measured,dataset
 ,vegetation_height,mm,Height of vegetation,measured,"community, seedling_survival_alpine"
 ,bryophyte_depth,mm,Height of bryophytes,measured,community
 ,litter,%,Cover of litter,recorded,"community, seedling_survival_alpine"
-,lichen,%,Cover of lichen,recorded,community
+,lichen_cover,%,Cover of lichen,recorded,community
 ,fungus,%,Cover of fungus,recorded,community
 ,soil,%,Cover of soil,recorded,community
 ,logger,%,Cover of logger (microclimate logger in the plots) ,recorded,community
