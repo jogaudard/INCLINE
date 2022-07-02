@@ -85,6 +85,9 @@ get_file(node = "zhk3m",
          path = "data_cleaned",
          remote_path = "Flowering")
 
-
-
+# Meta data ----------------------------------------
+get_file(node = "zhk3m",
+          file = "INCLINE_metadata.csv",
+          path = "data_cleaned",
+          remote_path = "RawData")
 
