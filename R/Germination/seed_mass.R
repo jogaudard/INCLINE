@@ -8,6 +8,7 @@ library(dataDownloader)
 library(osfr)
 library(lubridate)
 library(multcompView)
+library(multcomp)
 library(patchwork)
 library(lmerTest)
 
@@ -42,14 +43,19 @@ test <- glm(weight_per_seed ~ species*siteID, data = seed_mass, family = "Gamma"
 summary(test)
 
 
-TukeyHSD(aov(weight_per_seed ~ siteID, data = seed_mass_VA))
-TukeyHSD(aov(weight_per_seed ~ siteID, data = seed_mass_SP))
-TukeyHSD(aov(weight_per_seed ~ siteID, data = seed_mass_SP))
-
 # Tukey's Honestly Significant Difference test
+seed_mass_VA <- seed_mass %>% filter(species == "Ver_alp")
+seed_mass_SP <- seed_mass %>% filter(species == "Sib_pro")
+test_SP <- glm(weight_per_seed ~ siteID, data = seed_mass_SP, family = "Gamma")
+test_VA <- glm(weight_per_seed ~ siteID, data = seed_mass_VA, family = "Gamma")
+summary(glht(test_SP, linfct = mcp(siteID = "Tukey")))
+summary(glht(test_VA, linfct = mcp(siteID = "Tukey")))
+
+
+#Making letters for plots - this is not the actual Tukey test I use to assess the data (see the Tukey test above), but it gave the right letters on the box plot, and I do not have time to recode the figure now, will do it later.
 letters.df <- data.frame(multcompLetters())
 
-seed_mass_VA <- seed_mass %>% filter(species == "Ver_alp")
+
 TukeyHSD(aov(weight_per_seed ~ siteID, data = seed_mass_VA))
 letters.df_VA <- data.frame(multcompLetters(TukeyHSD(aov(weight_per_seed ~ siteID, data = seed_mass_VA))$siteID[,4])$Letters)
 colnames(letters.df_VA)[1] <- "Letter"
@@ -62,7 +68,7 @@ placement_VA <- seed_mass_VA %>% #We want to create a dataframe to assign the le
 colnames(placement_VA)[2] <- "Placement.Value"
 letters.df_VA <- left_join(letters.df_VA, placement_VA) #Merge dataframes
 
-seed_mass_SP <- seed_mass %>% filter(species == "Sib_pro")
+
 TukeyHSD(aov(weight_per_seed ~ siteID, data = seed_mass_SP))
 letters.df_SP <- data.frame(multcompLetters(TukeyHSD(aov(weight_per_seed ~ siteID, data = seed_mass_SP))$siteID[,4])$Letters)
 colnames(letters.df_SP)[1] <- "Letter" 
@@ -93,8 +99,8 @@ ggplot(aes(x = siteID, y = (weight_per_seed*1000), fill = siteID)) +
                             "Gudmedalen" = "2130 mm/year", "Skjellingahaugen" = "3402 mm/year")) +
   #scale_fill_manual(values = c("#6D64E4", "#FFC300"))
   scale_fill_manual(values = c("#BAD8F7", "#89B7E1", "#2E75B6", "#213964")) +
-  guides(fill = "none") +
-  stat_compare_means(method = "anova")
+  guides(fill = "none") #+
+  #stat_compare_means(method = "anova")
 
 seed_mass_VA_plot <- seed_mass_VA %>% 
   mutate(siteID = factor(siteID, levels = c("Ulvehaugen","Lavisdalen",  "Gudmedalen", "Skjellingahaugen"))) %>% 
