@@ -200,7 +200,8 @@ ggplot(flux_incline, aes(nobs)) +
   scale_x_binned()
 
 #look at how many measurements were in each ranges of length
-range <- data.frame(a = c(1, 60, 90), b = c(60, 90, 200)) %>% 
+range <- data.frame(a = c(1, 60, 90), b = c(60, 90, 200))
+range <- range %>% 
   mutate(
     freq = pmap(range, ~ flux_incline %>% summarise(sum(between(nobs, .x, .y)))) %>% 
       unlist,
