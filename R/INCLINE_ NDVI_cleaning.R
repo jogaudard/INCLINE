@@ -25,9 +25,10 @@ NDVI_2020 <- read_csv("data/INCLINE_NDVI_2020.csv") %>%
     site = str_replace_all(plotID, c(
         "LAV...." = "Lavisdalen",
         "GUD...." = "Gudmedalen",
-        "SKJ...." = "Skjelingahaugen",
-        "ULV...." = "Ulvhaugen"
-    ))
+        "SKJ...." = "Skjellingahaugen",
+        "ULV...." = "Ulvehaugen"
+    )),
+    plotID = paste(substring(plotID, 1, 1), tolower(substring(plotID, 2, 7)), sep = "")
   )
 
 NDVI_2019_2021 <- read_csv2("data/NDVI_2019_2021.csv") %>% 
@@ -35,7 +36,7 @@ NDVI_2019_2021 <- read_csv2("data/NDVI_2019_2021.csv") %>%
   pivot_longer(c(NDVI_1, NDVI_2, NDVI_3), names_to = "replicate", values_to = "NDVI") %>% 
   mutate(
     date = dmy(date),
-    plot = toupper(plot),
+    # plot = toupper(plot),
     replicate = factor(str_extract(replicate, "(?<=.{5}).")),
     tomst = case_when(
       comment == "tomst" ~ TRUE
@@ -59,7 +60,8 @@ NDVI <- full_join(NDVI_2020, NDVI_2019_2021) %>%
   mutate(
     OTC_removed = case_when(
       OTC_removed == "ON" ~ TRUE
-    )
+    ),
+    year = year(date)
   )
 
 #visually checking values
