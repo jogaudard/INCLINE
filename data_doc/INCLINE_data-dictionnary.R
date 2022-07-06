@@ -68,17 +68,17 @@
    mutate(TableID = as.character(TableID)) 
  
   # c-flux ------------------------------------------------------------------
- cflux <- read_csv("data_cleaned/INCLINE_c-flux_2020.csv", col_types = "cddddddfffcTfd")
+ # cflux <- read_csv("data_cleaned/INCLINE_c-flux_2020.csv", col_types = "cddddddfffcTfd")
  cflux_dic <- make_data_dictionary(data = cflux,
                                    description_table = description,
                                    table_ID = NA_character_
  )
  # Climate -----------------------------------------------------------------
- microclimate_air_temperature <- read_csv("data_cleaned/INCLINE_microclimate_air_temperature.csv", col_types = "Tcffffcd")
- microclimate_soil_temperature <- read_csv("data_cleaned/INCLINE_microclimate_soil_temperature.csv", col_types = "Tcffffcd")
- microclimate_ground_temperature <- read_csv("data_cleaned/INCLINE_microclimate_ground_temperature.csv", col_types = "Tcffffcd")
- microclimate_soil_moisture <- read_csv("data_cleaned/INCLINE_microclimate_soil_moisture.csv", col_types = "Tcffffcd")
- 
+ # microclimate_air_temperature <- read_csv("data_cleaned/INCLINE_microclimate_air_temperature.csv", col_types = "Tcffffcd")
+ # microclimate_soil_temperature <- read_csv("data_cleaned/INCLINE_microclimate_soil_temperature.csv", col_types = "Tcffffcd")
+ # microclimate_ground_temperature <- read_csv("data_cleaned/INCLINE_microclimate_ground_temperature.csv", col_types = "Tcffffcd")
+ # microclimate_soil_moisture <- read_csv("data_cleaned/INCLINE_microclimate_soil_moisture.csv", col_types = "Tcffffcd")
+ # 
  microclimate_air_temperature_dic <- make_data_dictionary(data = microclimate_air_temperature,
                                                           description_table = description,
                                                           table_ID = NA_character_
@@ -103,7 +103,7 @@
    full_join(microclimate_soil_temperature_dic) %>% 
    full_join(microclimate_air_temperature_dic)
  # NDVI --------------------------------------------------------------------
- ndvi <- read_csv("data_cleaned/INCLINE_NDVI_2019_2020_2021.csv", col_types = "fdDffffcc")
+ # ndvi <- read_csv("data_cleaned/INCLINE_NDVI_2019_2020_2021.csv", col_types = "fdDffffcc")
  
  ndvi_dic <- make_data_dictionary(data = ndvi,
                                   description_table = description,
@@ -111,64 +111,55 @@
  )
  # biomass removal ---------------------------------------------------------
  
- biomass_removal_dic <- read_csv("data_cleaned/INCLINE_biomass_removal.csv", col_types = "dDfDfDfffcffd") %>% 
-   make_data_dictionary(description_table = description,
-                        table_ID = NA_character_
+ biomass_removal_dic <- make_data_dictionary(data = biomass_removal,
+                                             description_table = description,
+                                             table_ID = NA_character_
  )
  # Demography --------------------------------------------------------------
- demography_Sib_pro_dic <- read_csv("data_cleaned/INCLINE_demography_Sib_pro.csv", col_types = "fffdDfffcffddfffd") %>%
-   make_data_dictionary(
-     description_table = description,
-     table_ID = NA_character_
+ demography_Sib_pro_dic <- make_data_dictionary(data = demography_Sib_pro,
+                                                description_table = description,
+                                                table_ID = NA_character_
    )
  
- demography_Ver_alp_dic <- read_csv("data_cleaned/INCLINE_demography_Ver_alp.csv", col_types = "fffdDfffcffddfffd") %>%
-   make_data_dictionary(
-     description_table = description,
-     table_ID = NA_character_
+ demography_Ver_alp_dic <- make_data_dictionary(data = demography_Ver_alp,
+                                                description_table = description,
+                                                table_ID = NA_character_
    )
  
  # demography_dic <- full_join(demography_Sib_pro_dic, demography_Ver_alp_dic)
  # Germination ------------------------------------------------------
- seedling_traits_alpine_dic <- read_csv("data_cleaned/INCLINE_seedling_traits_alpine.csv", col_types = "ffffffcfDDcfffcfd") %>%
-   make_data_dictionary(
+ seedling_traits_alpine_dic <- make_data_dictionary(data = seedling_traits_alpine,
      description_table = description,
      table_ID = NA_character_
    )
- seedling_data_alpine_dic <- read_csv("data_cleaned/INCLINE_seedling_data_alpine.csv", col_types = "cffffffffDfddfdddddc") %>%
-   make_data_dictionary(
+ seedling_data_alpine_dic <- make_data_dictionary(data = seedling_data_alpine,
      description_table = description,
      table_ID = NA_character_
    )
- seedling_data_subalpine_dic <- read_csv("data_cleaned/INCLINE_seedling_data_subalpine.csv", col_types = "ffffffcfdddfddDf") %>%
-   make_data_dictionary(
+ seedling_data_subalpine_dic <- make_data_dictionary(data = seedling_data_subalpine,
      description_table = description,
      table_ID = NA_character_
    )
  # germination_dic <- full_join(seedling_traits_alpine_dic, seedling_data_alpine_dic) %>% 
    # full_join(seedling_data_subalpine_dic)
  # Seedbank ----------------------------------------------------------------
- seedbank_survival_dic <- read_csv("data_cleaned/INCLINE_seedbank_survival.csv", col_types = "fffffcDDfcc") %>%
-   make_data_dictionary(
+ seedbank_survival_dic <- make_data_dictionary(data = seedbank_survival,
      description_table = description,
      table_ID = NA_character_
    )
  # Seeds_per_capsule -------------------------------------------------------
- seeds_per_capsule_dic <- read_csv("data_cleaned/INCLINE_seeds_per_capsule.csv", col_types = "ffDccfdcd") %>%
-   make_data_dictionary(
+ seeds_per_capsule_dic <- make_data_dictionary(data = seeds_per_capsule,
      description_table = description,
      table_ID = NA_character_
    )
  # Species_level_biomass_allocation ----------------------------------------
- species_level_biomass_allocation_dic <- read_csv("data_cleaned/INCLINE_species_level_biomass_allocation.csv", col_types = "fffDcfffffcccfd") %>%
-   make_data_dictionary(
+ species_level_biomass_allocation_dic <- make_data_dictionary(data = species_level_biomass_allocation,
      description_table = description,
      table_ID = NA_character_
    )
 
  # Flowering ----------------------------------------
- flowering_dic <- read_csv("data_cleaned/INCLINE_flowering.csv", col_types = "fffffffDDDffcffd") %>%
-   make_data_dictionary(
+ flowering_dic <- make_data_dictionary(data = flowering,
      description_table = description,
      table_ID = NA_character_
    )
