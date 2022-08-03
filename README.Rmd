@@ -189,8 +189,8 @@ knitr::kable(seeds_per_capsule_dic)
 This dataset contains two parts, one with the germination and survival of S. procumbens and V. alpina in the field (Table 10), and one with the functional traits of the seedlings after two summers (Table 11).
 We registered germination and survival of `r n_seedlings_SP` individuals of S. procumbens, and `r n_seedlings_VA` individuals of V. alpina over three campaigns in the summer of 2020, and four campaigns in the summer of 2021.
 For some blocks the snow had not melted out in the first campaign in the summer of 2020.
-This campaign was called capmaign zero, and these plot were revisited a couple of weeks later in the season, this date was then recorded as the first campaign for these blocks.
-The seedlings that survived all the way to the end of the two field season were harvested in September 2021, that was `r n_sampled_seedlings_SP` individuals of S. procumbens, and `r n_sampled_seedlings_VA` for V. alpina.
+This campaign was called campaign zero, and these plot were revisited a couple of weeks later in the season, this date was then recorded as the first campaign for these blocks.
+The seedlings that survived all the way to the end of the two field seasons were harvested in September 2021, that was `r n_sampled_seedlings_SP` individuals of S. procumbens, and `r n_sampled_seedlings_VA` for V. alpina.
 The average above ground biomass of the seedlings were `r mean_abg_biomass_seedling_SP` ± `r sd_abg_biomass_seedling_SP` mg for S. procumbens, and `r mean_abg_biomass_seedling_VA` ± `r sd_abg_biomass_seedling_VA` mg for V. alpina.
 
 This dataset is needed to build a population model in combination with dataset iii, iv, v and viii.
@@ -246,7 +246,7 @@ knitr::kable(seedbank_survival_dic)
 ```
 
 ### Flowering of alpine plant community (dataset ix)
-This dataset consists of a quantification of flowering of the alpine community in the mabient temperature control, warmed control, and the novel trait transplant in the ambient and warmed climate treatments in the INCLINE experiments.
+This dataset consists of a quantification of flowering of the alpine community in the ambient temperature control, warmed control, and the novel trait transplant in the ambient and warmed climate treatments in the INCLINE experiments.
 The data set with measurements of flower production of the flowering alpine plant community was combined with two separate data sets with measurements of number of buds, flowers and capsules for S. procumbens and V. alpina, respectively.
 Data on the number of reproductive organs of these two species was collected as part of the demographic monitoring of S. procumbens and V. alpina (dataset iii), and was therefore not collected in the flowering community data campaign.
 Hence, the date of data collection on flower production was not always the same for S. procumbens and V. alpina and the remaining flowering community.
