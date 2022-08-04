@@ -106,7 +106,8 @@ The dataset is available from the INCLINE OSF as the raw data (insert footnote w
 The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
 For an overview over the clean dataset see Table 5.
 
-Table 5: 
+Table 5: Data dictionary for the biomass removed during the removal treatment in the INCLINE experiment (dataset i).
+Data dictionary with column descriptions for dataset i – biomass removal from `r biomass_r_plots` 25 × 35 cm experimental plant functional group removal plots from 2018-2021 at four sites in the Vestland Climate Grid, Vestland county, Norway.
 ```{r, echo=FALSE}
 knitr::kable(biomass_removal_dic)
 ```
@@ -134,11 +135,14 @@ For an overview over the clean datasets see Table 6 (S. procumbens) and Table 7 
 To build population models this dataset needs to be combined with dataset iv) species-level biomass allocation to calculate an estimate of the link between the size traits measured non destructively in the field in this dataset (dataset iii) with the actual biomass (dataset iv).
 For further information about how to combine the dataset to make build a population model see the data usage section.
 
-Table 6: Data dictionaries for the INCLINE demographic dataset for S. procumbens (dataset iii). 
+Table 6: Data dictionary for the INCLINE demographic dataset for Sibbaldia procumbens (dataset iii).
+Data dictionary with column descriptions for dataset iii – Population dynamics of S. procumbens from `r demo_SP_plots` 25 × 35 cm experimental plots for the INCLINE experiment from 2018-2021 at four sites in the Vestland Climate Grid, Vestland county, Norway.
 ```{r, echo=FALSE}
 knitr::kable(demography_Sib_pro_dic)
 ```
-Table 7: Data dictionaries for the INCLINE demographic dataset for V. alpina (dataset iii). 
+
+Table 7: Data dictionary for the INCLINE demographic dataset for Veronica alpina (dataset iii). 
+Data dictionary with column descriptions for dataset iii – Population dynamics of S. procumbens from `r demo_VA_plots` 25 × 35 cm experimental plots for the INCLINE experiment from 2018-2021 at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r, echo=FALSE}
 knitr::kable(demography_Ver_alp_dic)
 ```
@@ -160,7 +164,8 @@ The code to clean and download the data is available on GitHub, with the script 
 For an overview over the clean dataset see Table 8.
 
 
-Table 8: Data dictionary for the INCLINE species level biomass allocation (dataset iv).
+Table 8: Data dictionary for the INCLINE species level biomass allocation (dataset iv). 
+Data dictionary with column descriptions for dataset iv - Species-level biomass allocation with above and belowground biomass allocation for Sibbaldia procumbens, Veronica alpina, Veronica officinalis, Viola canina, Succisa pratensis and Hypericum maculatum from 2019 across the four alpine sites, the four sub-alpine sites in the Vestland Climate Grid, Vestland county, Norway, and two additional sites in the same area.
 ```{r, echo=FALSE}
 knitr::kable(species_level_biomass_allocation_dic)
 ```
@@ -179,7 +184,8 @@ The dataset is available from the INCLINE OSF as the raw data (insert footnote w
 The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
 For an overview over the clean dataset see Table 9.
 
-Table 9: Data dictionary for the dataset containing information about number of seed per capsule for the INCLINE alpine species (dataset v)
+Table 9: Data dictionary for the seeds per capsule of the INCLINE alpine focal species (dataset v).
+Data dictionary with column descriptions for dataset v – Seeds per capsule for Sibbaldia procumbens and Veronica alpina from 40 individual of each species collected in 2020 across the four alpine sites of the Vestland Climate Grid, Vestland county, Norway.
 ```{r, echo=FALSE}
 knitr::kable(seeds_per_capsule_dic)
 ```
@@ -200,18 +206,20 @@ The dataset is available from the INCLINE OSF as the raw data (insert footnote w
 The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
 For an overview over the clean datasets see Table 10 for the germination and survival data, and Table 11 for the seedling trait data.
 
-Table 10: Data dictionary for the germination and survival of the alpine focal species (dataset v).
+Table 10: Data dictionary for the germination of the alpine focal species in the INCLINE experiment (dataset vi).
+Data dictionary with column descriptions for dataset vi – germination and survival of Sibbaldia procumbens and Veronica alpina from `r germ_alpine_plots` 5 x 5 cm experimental plots with or without warming, and in vegetation or gaps, from 2020-2021 at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r, echo=FALSE}
 knitr::kable(seedling_data_alpine_dic)
 ```
 
-Table 11: Data dictionary for the seedling traits of the alpine focal species
+Table 11: Data dictionary for the traits of seedlings of the alpine focal species in the INCLINE experiment (dataset vi).
+Data dictionary with column descriptions for dataset vi – seedling traits of `r n_sampled_seedlings_SP` Sibbaldia procumbens and `r n_sampled_seedlings_VA` Veronica alpina seedlings sampled in 2021 at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r, echo=FALSE}
 knitr::kable(seedling_traits_alpine_dic)
 ```
 
 
-### Germination of sub-alpine focal species (dataset vi)
+### Germination of sub-alpine focal species (dataset vii)
 
 This dataset consists of the germination and survival of seedlings of the sub-alpine species in the INCLINE experiment.
 In total there were `r n_seedlings_Ver_off` V. officinalis, `r n_seedlings_Vio_can` V. canina, `r n_seedlings_Car_pil` C. pilulifera, `r n_seedlings_Suc_pra` S. pratensis, `r n_seedlings_Hyp_mac` H. maculatum, and `r n_seedlings_Car_pal` C. pallescens that germinated.
@@ -221,7 +229,8 @@ The dataset is available from the INCLINE OSF as the raw data (insert footnote w
 The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
 For an overview over the clean dataset see Table 12. 
 
-Table 12: Data dictionary for the germination and survival of the sub-alpine species of the INCLINE experiment (dataset v).
+Table 12: Data dictionary for the germination of the sub-alpine focal species in the INCLINE experiment (dataset vii).
+Data dictionary with column descriptions for dataset vii – germination and survival of Veronica officinalis, Viola canina, Carex pilulifera, Succisa pratensis, Hypericum maculatum, and Carex pallescens from `r germ_sub_alpine_plots` 5 x 5 cm experimental plots with or without warming, and in vegetation or gaps, in 2021 at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r, echo=FALSE}
 knitr::kable(seedling_data_subalpine_dic)
 ```
@@ -240,7 +249,9 @@ The dataset is available from the INCLINE OSF as the raw data (insert footnote w
 The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
 For an overview over the clean dataset see Table 13. 
 
-Table 13: Data dictionary for the seed survival in the seed bank over one year in the soil (dataset viii).
+Table 13: Data dictionary for the seed bank survival of alpine focal species in the INCLINE experiment (dataset viii)
+Data dictionary with column descriptions for dataset viii – seed bank survival over one year for Sibbaldia procumbens and Veronica alpina.
+Seeds were buried from 2019-2020 in five replicates with and without warming at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r, echo=FALSE}
 knitr::kable(seedbank_survival_dic)
 ```
@@ -261,7 +272,8 @@ The dataset is available from the INCLINE OSF as the raw data (insert footnote w
 The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
 For an overview over the clean dataset see Table 14. 
 
-Table 14: Data dictionary for the dataset of flowering in the alpine plant community (dataset ix)
+Table 14: Data dictionary for the dataset with flowering of the alpine plant community (dataset ix).
+Data dictionary with column descriptions for dataset ix – Flowering of the alpine plant community from `r flowering_plots` 25 × 35 cm experimental plots with control and novel transplant treatments in the ambient and warmed climate from the INCLINE experiment from 2021 at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r, echo=FALSE}
 knitr::kable(flowering_dic)
 ```
@@ -276,7 +288,8 @@ The dataset is available from the INCLINE OSF as the raw data (insert footnote w
 The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
 For an overview over the clean dataset see Table 15. 
 
-Table 15: Data dictionary for the dataset of the Normalized Difference Vegeation Index (NDVI) (dataset x)
+Table 15: Data dictionary for the dataset of the Normalized Difference Vegeation Index (NDVI) (dataset x).
+Data dictionary with column descriptions for dataset x – Reflectance (NDVI) from `r ndvi_plots` 25 × 35 cm experimental plots from the INCLINE experiment from 2019-2021 at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r, echo=FALSE}
 knitr::kable(ndvi_dic)
 ```
@@ -294,7 +307,8 @@ The dataset is available from the INCLINE OSF as the raw data (insert footnote w
 The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
 For an overview over the clean dataset see Table 16. 
 
-Table 16: Data dictionary for the dataset of the Carbon flux in (dataset xi). 
+Table 16: Data dictionary for the dataset of the ecosystem carbon flux (dataset xi). 
+Data dictionary with column descriptions for dataset xi – ecosystem carbon flux from all the `r cflux_2020_plots` 25 × 35 cm control plots in both the ambient and warmed climate from the INCLINE experiment at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r cfluxdic, echo=FALSE}
 knitr::kable(cflux_dic)
 ```
@@ -306,8 +320,7 @@ The soil moisture data has been transformed to the closest soil properties in th
 The microclimate data consists of `r n_data_soil_moisture` data points of soil moisture, `r n_data_soil_temp` data points of soil temperature, `r n_data_ground_temp` data points of ground temperature,  and `r n_data_air_temp` data points of air temperature from `r n_microclimate_loggers` loggers.
 
 The soil moisture ranges from  `r min_soil_moisture` to `r max_soil_moisture`, with a mean that varies with the precipitation of the sites from the wettest sites Skjellingahaugen with a mean of `r mean_soil_moisture_SKJ` ± `r sd_soil_moisture_SKJ` and following along the precipitation gradient with `r mean_soil_moisture_GUD` ± `r sd_soil_moisture_GUD`, `r mean_soil_moisture_LAV` ± `r sd_soil_moisture_LAV` , and `r mean_soil_moisture_ULV` ± `r sd_soil_moisture_ULV` for Gudmedalen, Låvisdalen and Ulvehaugen respectively.
-As for temperature, the variation in temperature between day and night increases from the soil temperature via the ground temperature to the air temperature, while the mean stays relatively similar.
-The mean soil temperature is `r mean_soil_temperature` ± `r sd_soil_temperature` °C while the mean ground temperature is `r mean_ground_temperature` ± `r sd_ground_temperature` °C, and the mean air temperature is `r mean_air_temperature` ± `r sd_air_temperature` °C. The average difference between the ambient climate and the warmed climate by open top chambers was 0.37 °C in soil temperature, 0.77 °C in the ground temperature, and 0.75 °C in the air temperature, this however varied between day and night (Table 17).
+As for temperature, the mean soil temperature is `r mean_soil_temperature` ± `r sd_soil_temperature` °C while the mean ground temperature is `r mean_ground_temperature` ± `r sd_ground_temperature` °C, and the mean air temperature is `r mean_air_temperature` ± `r sd_air_temperature` °C. The average difference between the ambient climate and the warmed climate by open top chambers was 0.37 °C in soil temperature, 0.77 °C in the ground temperature, and 0.75 °C in the air temperature, this however varied between day and night (Table 17).
 
 The dataset is available from the INCLINE OSF as the raw data (insert footnote with link) and the cleaned data (insert footnote with link).
 The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
@@ -316,7 +329,8 @@ For an overview over the clean datasets see Table 18.
 Table 17: In the data paper google doc
 
 
-Table 18: 
+Table 18: Data dictionary for the microclimate data from the INCLINE experiment (dataset xii). 
+Data dictionary with column descriptions for dataset xii – microclimate (soil moisture, soile temperature, ground temperature and air temperature at 15 cm above the ground) from three of the five replicates of each treatment in the INCLINE experiment, giving microclimate data from a total of `r microclimate_plots` 25 × 35 cm experimental plots from 2019-2021 in the INCLINE experiment at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r, echo=FALSE}
 knitr::kable(microclimate_dic)
 ```
