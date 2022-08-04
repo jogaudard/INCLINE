@@ -1,5 +1,8 @@
+library("tidyverse")
 library("dataDownloader")
+library("osfr")
 
+#osf_auth(token = "insert personal token") 
 # Meta data ----------------------------------------
 get_file(node = "zhk3m",
          file = "INCLINE_metadata.csv",
