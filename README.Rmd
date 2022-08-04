@@ -100,7 +100,7 @@ Where:
 ### Biomass removal (dataset i)
 
 The data is available as dataset i, consisting of the removed biomass per experimental plot, date, and functional group for all removal treatment plots. 
-From 40 experimental plots across four sites we removed a total of `total_biomass_removes` g biomass over the project period; `r graminoid_total` g graminoids, `r bryophyte_total` g bryophytes, `r forb_total` g forbs, but the most biomass came from litter with as much as `r litter_total` g. Biomass removed decreased over time, `r biomass_2019` g in 2019, `r biomass_2020` g in 2020, and `r biomass_2021` g in 2021, suggesting that the removal treatment did cause a decline in returning biomass every year.
+From `r biomass_r_plots` experimental plots across four sites we removed a total of `total_biomass_removes` g biomass over the project period; `r graminoid_total` g graminoids, `r bryophyte_total` g bryophytes, `r forb_total` g forbs, but the most biomass came from litter with as much as `r litter_total` g. Biomass removed decreased over time, `r biomass_2019` g in 2019, `r biomass_2020` g in 2020, and `r biomass_2021` g in 2021, suggesting that the removal treatment did cause a decline in returning biomass every year.
 
 The dataset is available from the INCLINE OSF as the raw data (insert footnote with link) and the cleaned data (insert footnote with link).
 The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
@@ -118,7 +118,7 @@ These data will be completed with a final data collection over the summer of 202
 
 ### Population dynamics of alpine focal species (dataset iii)
 
-Dataset iii contains two dataset with demographic data S. procumbens and V. alpina.
+Dataset iii contains two dataset with demographic data of S. procumbens and V. alpina.
 The data contains values for each demographic trait per individual across treatments, plots and sites.
 Over the period from 2018-2021 we followed `r SP_n` individuals of S. procumbens, and `r VA_n` individuals of V. alpina.
 For S. procumbens we counted the number of leaves, and measured the leaf stalk length and the length of the middle leaflet of the largest leaf.
@@ -133,7 +133,7 @@ The code to clean and download the data is available on GitHub, with the script 
 For an overview over the clean datasets see Table 6 (S. procumbens) and Table 7 (V. alpina).
 
 To build population models this dataset needs to be combined with dataset iv) species-level biomass allocation to calculate an estimate of the link between the size traits measured non destructively in the field in this dataset (dataset iii) with the actual biomass (dataset iv).
-For further information about how to combine the dataset to make build a population model see the data usage section.
+For further information about how to combine the dataset to build a population model see the data usage section.
 
 Table 6: Data dictionary for the INCLINE demographic dataset for Sibbaldia procumbens (dataset iii).
 Data dictionary with column descriptions for dataset iii – Population dynamics of S. procumbens from `r demo_SP_plots` 25 × 35 cm experimental plots for the INCLINE experiment from 2018-2021 at four sites in the Vestland Climate Grid, Vestland county, Norway.
@@ -150,7 +150,7 @@ knitr::kable(demography_Ver_alp_dic)
 
 ### Species-level biomass allocation (dataset iv)
 
-The species level biomass allocation dataset consist of destructively harvested biomass from the six forb species in the INCLINE experiments.
+The species level biomass allocation dataset consists of destructively harvested biomass from the six forb species in the INCLINE experiments.
 Of the two alpine species we sampled `r sp_biomass_n_SP` S. procumbens individuals, and `r sp_biomass_n_VA` V. alpina individuals, of the extant traits sub-alpine species we sampled `r sp_biomass_n_VO` V. officinalis individuals, and `r sp_biomass_n_VC` V. canina individuals, and of the novel traits sub-alpine species we sampled `r sp_biomass_n_SucP` S. pratensis individuals, and `r sp_biomass_n_HM` H. maculatum individuals.
 
 The average aboveground biomass for each species was `r mean_abg_biomass_SP ` ± `r sd_abg_biomass_SP ` g for S. procumbens, `r mean_abg_biomass_VA ` ± `r sd_abg_biomass_VA ` g for V. alpina, `r mean_abg_biomass_VO` ± `r sd_abg_biomass_VO` g for V. officinalis, `r mean_abg_biomass_VC` ± `r sd_abg_biomass_VC ` g for V. canina, `r mean_abg_biomass_SucP` ± `r sd_abg_biomass_SucP ` g for S. pratensis, and `r mean_abg_biomass_HM` ± `r sd_abg_biomass_HM` g for H. maculatum. The average belowground biomass for each species was `r mean_bg_biomass_SP ` ± `r sd_bg_biomass_SP ` g for S. procumbens, `r mean_bg_biomass_VA` ± `r sd_bg_biomass_VA` g for V. alpina, `r mean_bg_biomass_VO` ± `r sd_bg_biomass_VO` g for V. officinalis, `r mean_bg_biomass_VC` ± `r sd_bg_biomass_VC` g for V. canina, `r mean_bg_biomass_SucP` ± `r sd_bg_biomass_SucP` g for S. pratensis, and `r mean_bg_biomass_HM` ± `r sd_bg_biomass_HM` g for H. maculatum.
@@ -173,12 +173,12 @@ knitr::kable(species_level_biomass_allocation_dic)
 
 ### Seeds per capsule for the alpine focal species (dataset v)
 
-The seeds per capsule dataset consist of counted number of seed per reproductive unit for S. procumbens and V. alpina.
+The seeds per capsule dataset consist of the counted number of seeds per reproductive unit for S. procumbens and V. alpina.
 We collected in total 40 individuals of S. procumbens and V.alpina respectively.
 On average S. procumbens had `r seeds_per_capsule_SP` seeds per capsule, while V. alpina had `r seeds_per_capsule_VA` seeds per capsule.
 
 This dataset is needed to build a population model in combination with dataset iii, iv, vi and viii.
-See data usage notes for further details on how to build a population model base on these datasets.
+See data usage notes for further details on how to build a population model based on these datasets.
 
 The dataset is available from the INCLINE OSF as the raw data (insert footnote with link) and the cleaned data (insert footnote with link).
 The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
@@ -196,11 +196,11 @@ This dataset contains two parts, one with the germination and survival of S. pro
 We registered germination and survival of `r n_seedlings_SP` individuals of S. procumbens, and `r n_seedlings_VA` individuals of V. alpina over three campaigns in the summer of 2020, and four campaigns in the summer of 2021.
 For some blocks the snow had not melted out in the first campaign in the summer of 2020.
 This campaign was called campaign zero, and these plot were revisited a couple of weeks later in the season, this date was then recorded as the first campaign for these blocks.
-The seedlings that survived all the way to the end of the two field seasons were harvested in September 2021, that was `r n_sampled_seedlings_SP` individuals of S. procumbens, and `r n_sampled_seedlings_VA` for V. alpina.
+The seedlings that survived all the way to the end of the two field seasons were harvested in September 2021 - we sampled `r n_sampled_seedlings_SP` individuals of S. procumbens, and `r n_sampled_seedlings_VA` for V. alpina.
 The average above ground biomass of the seedlings were `r mean_abg_biomass_seedling_SP` ± `r sd_abg_biomass_seedling_SP` mg for S. procumbens, and `r mean_abg_biomass_seedling_VA` ± `r sd_abg_biomass_seedling_VA` mg for V. alpina.
 
 This dataset is needed to build a population model in combination with dataset iii, iv, v and viii.
-See data usage notes for further details on how to build a population model base on these datasets.
+See data usage notes for further details on how to build a population model based on these datasets.
 
 The dataset is available from the INCLINE OSF as the raw data (insert footnote with link) and the cleaned data (insert footnote with link).
 The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
@@ -221,7 +221,7 @@ knitr::kable(seedling_traits_alpine_dic)
 
 ### Germination of sub-alpine focal species (dataset vii)
 
-This dataset consists of the germination and survival of seedlings of the sub-alpine species in the INCLINE experiment.
+This dataset consists of the germination and survival of seedlings of the sub-alpine species in the INCLINE experiment across seven campaigns in 2021.
 In total there were `r n_seedlings_Ver_off` V. officinalis, `r n_seedlings_Vio_can` V. canina, `r n_seedlings_Car_pil` C. pilulifera, `r n_seedlings_Suc_pra` S. pratensis, `r n_seedlings_Hyp_mac` H. maculatum, and `r n_seedlings_Car_pal` C. pallescens that germinated.
 Out of these seedlings `r seedling_survived_Ver_off` V. officinalis, `r seedling_survived_Vio_can` V. canina, `r seedling_survived_Car_pil` C. pilulifera, `r seedling_survived_Suc_pra` S. pratensis, `r seedling_survived_Hyp_mac` H. maculatum, and `r seedling_survived_Car_pal` C. pallescens survived through the whole growing season.
 
@@ -258,7 +258,7 @@ knitr::kable(seedbank_survival_dic)
 
 ### Flowering of alpine plant community (dataset ix)
 This dataset consists of a quantification of flowering of the alpine community in the ambient temperature control, warmed control, and the novel trait transplant in the ambient and warmed climate treatments in the INCLINE experiments.
-The data set with measurements of flower production of the flowering alpine plant community was combined with two separate data sets with measurements of number of buds, flowers and capsules for S. procumbens and V. alpina, respectively.
+The dataset with measurements of flower production of the flowering alpine plant community was combined with two separate data sets with measurements of number of buds, flowers and capsules for S. procumbens and V. alpina, respectively.
 Data on the number of reproductive organs of these two species was collected as part of the demographic monitoring of S. procumbens and V. alpina (dataset iii), and was therefore not collected in the flowering community data campaign.
 Hence, the date of data collection on flower production was not always the same for S. procumbens and V. alpina and the remaining flowering community.
 Thus, three different date columns are included in the flowering data set: date_community, date_Sib_pro and date_Ver_alp. Similarly, the registrator varied between the three data-groups. However, in this case all the registrators were combined into one column, separated by “&” for each of the data-groups.
@@ -315,8 +315,8 @@ knitr::kable(cflux_dic)
 
 ### Microclimate data (dataset xii)
 
-This dataset consists of four separate datasets of i) soil moisture, ii) soil temperature at 6 cm below ground level, iii) temperature in the vegetation at ground level, and iv) air temperature 15 cm above the ground level recorded every 15 minutes by Tomst-loggers (Wild et al. 2019).
-The soil moisture data has been transformed to the closest soil properties in the soil categories following the method by Wild et al. (2019).
+This dataset consists of four separate datasets of i) soil moisture, ii) soil temperature at 6 cm below ground level, iii) temperature in the vegetation at ground level, and iv) air temperature 15 cm above the ground level - all recorded every 15 minutes by Tomst-loggers (Wild et al. 2019).
+The soil moisture data has been transformed according to the closest soil properties of our sites in the soil categories following the method by Wild et al. (2019).
 The microclimate data consists of `r n_data_soil_moisture` data points of soil moisture, `r n_data_soil_temp` data points of soil temperature, `r n_data_ground_temp` data points of ground temperature,  and `r n_data_air_temp` data points of air temperature from `r n_microclimate_loggers` loggers.
 
 The soil moisture ranges from  `r min_soil_moisture` to `r max_soil_moisture`, with a mean that varies with the precipitation of the sites from the wettest sites Skjellingahaugen with a mean of `r mean_soil_moisture_SKJ` ± `r sd_soil_moisture_SKJ` and following along the precipitation gradient with `r mean_soil_moisture_GUD` ± `r sd_soil_moisture_GUD`, `r mean_soil_moisture_LAV` ± `r sd_soil_moisture_LAV` , and `r mean_soil_moisture_ULV` ± `r sd_soil_moisture_ULV` for Gudmedalen, Låvisdalen and Ulvehaugen respectively.
