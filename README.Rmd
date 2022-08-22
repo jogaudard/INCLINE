@@ -1,13 +1,15 @@
 ---
 title: "INCLINE Readme"
-# author: "Joseph Gaudard"
+# author: "Joseph Gaudard" & "Ragnhild Gya"
 # date: "1/14/2022"
 output: github_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 source("data_doc/INCLINE_data-dictionnary.R")
+source("data_doc/INCLINE_calculate_value_for_data_doc.R")
 
 # cflux <- read_csv("data_cleaned/INCLINE_c-flux_2020.csv", col_types = "cddddddfffcTfd")
 # ndvi <- read_csv("data_cleaned/INCLINE_NDVI_2019_2020_2021.csv", col_types = "fdDffffcc")
@@ -93,14 +95,19 @@ Where:
 - T: chamber air temperature (K)
 - A: area of chamber frame base (m^2^)
 
-## Data dictionnaries
+## Data dictionaries
 
 ### Biomass removal (dataset i)
 
-This dataset contains the biomass removed per experimental plot and functional group per year (the cleaned dataset can be accessed from here: link).
-From  40 experimental plots across four sites we removed a total of `r sum(biomass_removal$value, na.rm = TRUE)` g biomass over the project period; `r sum((biomass_removal %>% filter(functional_group == "Graminoid") %>% select(value)), na.rm = TRUE)` g graminoids, `r sum((biomass_removal %>% filter(functional_group == "Bryophyte") %>% select(value)), na.rm = TRUE)` g bryophytes, `r sum((biomass_removal %>% filter(functional_group == "Forb") %>% select(value)), na.rm = TRUE)` g forbs, but the most biomass came from litter with as much as `r sum((biomass_removal %>% filter(functional_group == "Litter") %>% select(value)), na.rm = TRUE)` g. Biomass removed decreased over time, `r sum((biomass_removal %>% filter(year == 2019) %>% select(value)), na.rm = TRUE)` g in 2019, `r sum((biomass_removal %>% filter(year == 2020) %>% select(value)), na.rm = TRUE)` g in 2020, and `r sum((biomass_removal %>% filter(year == 2021) %>% select(value)), na.rm = TRUE)` g in 2021, suggesting that the removal treatment did cause a decline in returning biomass every year.
+The data is available as dataset i, consisting of the removed biomass per experimental plot, date, and functional group for all removal treatment plots. 
+From `r biomass_r_plots` experimental plots across four sites we removed a total of `total_biomass_removes` g biomass over the project period; `r graminoid_total` g graminoids, `r bryophyte_total` g bryophytes, `r forb_total` g forbs, but the most biomass came from litter with as much as `r litter_total` g. Biomass removed decreased over time, `r biomass_2019` g in 2019, `r biomass_2020` g in 2020, and `r biomass_2021` g in 2021, suggesting that the removal treatment did cause a decline in returning biomass every year.
 
-Table 5: 
+The dataset is available from the INCLINE OSF as the raw data (insert footnote with link) and the cleaned data (insert footnote with link).
+The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
+For an overview over the clean dataset see Table 5.
+
+Table 5: Data dictionary for the biomass removed during the removal treatment in the INCLINE experiment (dataset i).
+Data dictionary with column descriptions for dataset i – biomass removal from `r biomass_r_plots` 25 × 35 cm experimental plant functional group removal plots from 2018-2021 at four sites in the Vestland Climate Grid, Vestland county, Norway.
 ```{r, echo=FALSE}
 knitr::kable(biomass_removal_dic)
 ```
@@ -111,25 +118,31 @@ These data will be completed with a final data collection over the summer of 202
 
 ### Population dynamics of alpine focal species (dataset iii)
 
-These datasets contains demographic data on two species.
-Over the period from 2018-2021 we followed `r length(unique(demography_Sib_pro$uniqueID))` individuals of Sibbaldia procumbens, and `r length(unique(demography_Ver_alp$uniqueID))` individuals of Veronica alpina.
-For Sibbaldia procumbens we counted the number of leaves, and measured the leaf stalk length and the length of the largest leafs middle leaflet.
-The average individual had `r demography_Sib_pro %>% filter(demographic_trait == "number_of_leaves") %>% mutate(mean = mean(demographic_value)) %>% select(mean) %>% unique() %>% as.numeric() %>% round(digits = 0)` leaves, with a `r demography_Sib_pro %>% filter(demographic_trait == "leaf_stalk_length") %>% mutate(mean = mean(demographic_value)) %>% select(mean) %>% unique() %>% as.numeric() %>% round(digits = 0)` mm long leaf stalk, and a `r demography_Sib_pro %>% filter(demographic_trait == "leaf_length") %>% mutate(mean = mean(demographic_value)) %>% select(mean) %>% unique() %>% as.numeric() %>% round(digits = 0)` mm long middle leaflet.
-If an individual produced flowers it produced on average `r demography_Sib_pro %>% filter(demographic_trait %in% c("number_of_flowers", "number_of_buds", "number of capsules")) %>% group_by(uniqueID) %>% mutate(total_reproductive = sum(demographic_value)) %>% ungroup() %>%  mutate(mean = mean(total_reproductive)) %>% select(mean) %>% unique() %>% as.numeric() %>% round(digits = 0)` flowers.
-For Veronica alpina we counted the number of leaves, and measured the shoot height of from the groud to the top of the individual, and the length and width of the largest leaf.
-The average individual was `r demography_Ver_alp %>% filter(demographic_trait == "shoot_height") %>% mutate(mean = mean(demographic_value)) %>% select(mean) %>% unique() %>% as.numeric() %>% round(digits = 0)` mm tall, and had `r demography_Ver_alp %>% filter(demographic_trait == "number_of_leaves") %>% mutate(mean = mean(demographic_value)) %>% select(mean) %>% unique() %>% as.numeric() %>% round(digits = 0)` leaves,  and the leaves were on average `r demography_Ver_alp %>% filter(demographic_trait == "leaf_length") %>% mutate(mean = mean(demographic_value)) %>% select(mean) %>% unique() %>% as.numeric() %>% round(digits = 0)` mm long and `r demography_Ver_alp %>% filter(demographic_trait == "leaf_width") %>% mutate(mean = mean(demographic_value)) %>% select(mean) %>% unique() %>% as.numeric() %>% round(digits = 0)` mm wide.
-If an individual produced flowers it produced on average `r demography_Ver_alp %>% filter(demographic_trait %in% c("number_of_flowers", "number_of_buds", "number of capsules")) %>% group_by(uniqueID) %>% mutate(total_reproductive = sum(demographic_value)) %>% ungroup() %>%  mutate(mean = mean(total_reproductive)) %>% select(mean) %>% unique() %>% as.numeric() %>% round(digits = 0)` flowers.
+Dataset iii contains two dataset with demographic data of S. procumbens and V. alpina.
+The data contains values for each demographic trait per individual across treatments, plots and sites.
+Over the period from 2018-2021 we followed `r SP_n` individuals of S. procumbens, and `r VA_n` individuals of V. alpina.
+For S. procumbens we counted the number of leaves, and measured the leaf stalk length and the length of the middle leaflet of the largest leaf.
+The average individual had `SP_n_leaves` leaves, with a `r SP_LSL` mm long leaf stalk, and a `r SP_leaf_length` mm long middle leaflet.
+If an individual produced flowers it produced on average `r SP_n_flowers` flowers.
+For V. alpina we counted the number of leaves, and measured the shoot height from the ground to the top of the individual, and the length and width of the largest leaf.
+The average individual was `r VA_SH` mm tall, and had `r VA_n_leaves` leaves,  and the leaves were on average `r VA_leaf_length` mm long and `r VA_leaf_width` mm wide.
+If an individual produced flowers it produced on average `r VA_n_flowers` flowers.
 
-For an overview over the clean datasets see Table 6 (Sibbaldia procumbens) and Table 7 (Veronica alpina).
-The final cleaned data is provided on the INCLINE OSF, and the code to download the final cleaned data can be found in the INCLINE GitHub repository in the file https://github.com/jogaudard/INCLINE/blob/datadoc/data_doc/INCLINE_download_read_cleandata.R.
-To build population models this dataset needs to be combined with dataset iv) species-level biomass allocation to calculate an estimate of the link between the size traits measured non destructively in the field in this dataset (iii) with the actual biomass (dataset iv).
-For further information about how to combine the dataset to make build a population model see the data usage section.
+The dataset is available from the INCLINE OSF as the raw data (insert footnote with link) and the cleaned data (insert footnote with link).
+The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
+For an overview over the clean datasets see Table 6 (S. procumbens) and Table 7 (V. alpina).
 
-Table 6: Data dictionaries for the INCLINE demographic dataset for Sibbaldia procumbens (dataset iii). 
+To build population models this dataset needs to be combined with dataset iv) species-level biomass allocation to calculate an estimate of the link between the size traits measured non destructively in the field in this dataset (dataset iii) with the actual biomass (dataset iv).
+For further information about how to combine the dataset to build a population model see the data usage section.
+
+Table 6: Data dictionary for the INCLINE demographic dataset for Sibbaldia procumbens (dataset iii).
+Data dictionary with column descriptions for dataset iii – Population dynamics of S. procumbens from `r demo_SP_plots` 25 × 35 cm experimental plots for the INCLINE experiment from 2018-2021 at four sites in the Vestland Climate Grid, Vestland county, Norway.
 ```{r, echo=FALSE}
 knitr::kable(demography_Sib_pro_dic)
 ```
-Table 7: Data dictionaries for the INCLINE demographic dataset for Veronica alpina (dataset iii). 
+
+Table 7: Data dictionary for the INCLINE demographic dataset for Veronica alpina (dataset iii). 
+Data dictionary with column descriptions for dataset iii – Population dynamics of S. procumbens from `r demo_VA_plots` 25 × 35 cm experimental plots for the INCLINE experiment from 2018-2021 at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r, echo=FALSE}
 knitr::kable(demography_Ver_alp_dic)
 ```
@@ -137,20 +150,22 @@ knitr::kable(demography_Ver_alp_dic)
 
 ### Species-level biomass allocation (dataset iv)
 
-The species level biomass allocation dataset consist of destructively harvested biomass from the six forb species in the INCLINE experiments.
-Of the two alpine species we sampled `r species_level_biomass_allocation %>% select(species, uniqueID) %>% unique() %>% count(species) %>% filter(species == "Sib_pro") %>% select(n) %>% as.numeric()` Sibbaldia procumbens individuals, and `r species_level_biomass_allocation %>% select(species, uniqueID) %>% unique() %>% count(species) %>% filter(species == "Ver_alp") %>% select(n) %>% as.numeric()` Veronica alpina individuals, of the extant traits sub-alpine species we sampled `r species_level_biomass_allocation %>% select(species, uniqueID) %>% unique() %>% count(species) %>% filter(species == "Ver_off") %>% select(n) %>% as.numeric()` Veronica officinalis individuals, and `r species_level_biomass_allocation %>% select(species, uniqueID) %>% unique() %>% count(species) %>% filter(species == "Vio_can") %>% select(n) %>% as.numeric()` Viola canina individuals, and of the novel traits sub-alpine species we sampled `r species_level_biomass_allocation %>% select(species, uniqueID) %>% unique() %>% count(species) %>% filter(species == "Suc_pra") %>% select(n) %>% as.numeric()` Succisa pratensis individuals, and `r species_level_biomass_allocation %>% select(species, uniqueID) %>% unique() %>% count(species) %>% filter(species == "Hyp_mac") %>% select(n) %>% as.numeric()` Hypericum maculatum individuals.
+The species level biomass allocation dataset consists of destructively harvested biomass from the six forb species in the INCLINE experiments.
+Of the two alpine species we sampled `r sp_biomass_n_SP` S. procumbens individuals, and `r sp_biomass_n_VA` V. alpina individuals, of the extant traits sub-alpine species we sampled `r sp_biomass_n_VO` V. officinalis individuals, and `r sp_biomass_n_VC` V. canina individuals, and of the novel traits sub-alpine species we sampled `r sp_biomass_n_SucP` S. pratensis individuals, and `r sp_biomass_n_HM` H. maculatum individuals.
 
-The average aboveground biomass for each species was `r species_level_biomass_allocation %>% filter(trait == "aboveground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(mean = round(mean(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, mean) %>% unique() %>% filter(species == "Sib_pro") %>% select(mean) %>% as.numeric()` ± `r species_level_biomass_allocation %>% filter(trait == "aboveground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(sd = round(sd(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, sd) %>% unique() %>% filter(species == "Sib_pro") %>% select(sd) %>% as.numeric()` g for Sibbaldia procumbens, `r species_level_biomass_allocation %>% filter(trait == "aboveground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(mean = round(mean(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, mean) %>% unique() %>% filter(species == "Ver_alp") %>% select(mean) %>% as.numeric()` ± `r species_level_biomass_allocation %>% filter(trait == "aboveground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(sd = round(sd(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, sd) %>% unique() %>% filter(species == "Ver_alp") %>% select(sd) %>% as.numeric()` g for Veronica alpina, `r species_level_biomass_allocation %>% filter(trait == "aboveground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(mean = round(mean(value, na.rm = TRUE), digits = 2)) %>% ungroup() %>%  select(species, mean) %>% unique() %>% filter(species == "Ver_off") %>% select(mean) %>% as.numeric()` ± `r species_level_biomass_allocation %>% filter(trait == "aboveground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(sd = round(sd(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, sd) %>% unique() %>% filter(species == "Ver_off") %>% select(sd) %>% as.numeric()` g for Veronica officinalis, `r species_level_biomass_allocation %>% filter(trait == "aboveground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(mean = round(mean(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, mean) %>% unique() %>% filter(species == "Vio_can") %>% select(mean) %>% as.numeric()` ± `r species_level_biomass_allocation %>% filter(trait == "aboveground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(sd = round(sd(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, sd) %>% unique() %>% filter(species == "Vio_can") %>% select(sd) %>% as.numeric()` g for Viola canina, `r species_level_biomass_allocation %>% filter(trait == "aboveground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(mean = round(mean(value, na.rm = TRUE), digits = 2)) %>% ungroup() %>%  select(species, mean) %>% unique() %>% filter(species == "Suc_pra") %>% select(mean) %>% as.numeric()` ± `r species_level_biomass_allocation %>% filter(trait == "aboveground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(sd = round(sd(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, sd) %>% unique() %>% filter(species == "Suc_pra") %>% select(sd) %>% as.numeric()` g for Succisa pratensis, and `r species_level_biomass_allocation %>% filter(trait == "aboveground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(mean = round(mean(value, na.rm = TRUE), digits = 2)) %>% ungroup() %>%  select(species, mean) %>% unique() %>% filter(species == "Hypericum maculatum") %>% select(mean) %>% as.numeric()` ± `r species_level_biomass_allocation %>% filter(trait == "aboveground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(sd = round(sd(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, sd) %>% unique() %>% filter(species == "Hyp_mac") %>% select(sd) %>% as.numeric()` g for Hypericum maculatum. The average belowground biomass for each species was `r species_level_biomass_allocation %>% filter(trait == "belowground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(mean = round(mean(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, mean) %>% unique() %>% filter(species == "Sib_pro") %>% select(mean) %>% as.numeric()` ± `r species_level_biomass_allocation %>% filter(trait == "belowground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(sd = round(sd(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, sd) %>% unique() %>% filter(species == "Sib_pro") %>% select(sd) %>% as.numeric()` g for Sibbaldia procumbens, `r species_level_biomass_allocation %>% filter(trait == "belowground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(mean = round(mean(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, mean) %>% unique() %>% filter(species == "Ver_alp") %>% select(mean) %>% as.numeric()` ± `r species_level_biomass_allocation %>% filter(trait == "belowground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(sd = round(sd(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, sd) %>% unique() %>% filter(species == "Ver_alp") %>% select(sd) %>% as.numeric()` g for Veronica alpina, `r species_level_biomass_allocation %>% filter(trait == "belowground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(mean = round(mean(value, na.rm = TRUE), digits = 2)) %>% ungroup() %>%  select(species, mean) %>% unique() %>% filter(species == "Ver_off") %>% select(mean) %>% as.numeric()` ± `r species_level_biomass_allocation %>% filter(trait == "belowground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(sd = round(sd(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, sd) %>% unique() %>% filter(species == "Ver_off") %>% select(sd) %>% as.numeric()` g for Veronica officinalis, `r species_level_biomass_allocation %>% filter(trait == "belowground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(mean = round(mean(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, mean) %>% unique() %>% filter(species == "Vio_can") %>% select(mean) %>% as.numeric()` ± `r species_level_biomass_allocation %>% filter(trait == "belowground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(sd = round(sd(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, sd) %>% unique() %>% filter(species == "Vio_can") %>% select(sd) %>% as.numeric()` g for Viola canina, `r species_level_biomass_allocation %>% filter(trait == "belowground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(mean = round(mean(value, na.rm = TRUE), digits = 2)) %>% ungroup() %>%  select(species, mean) %>% unique() %>% filter(species == "Suc_pra") %>% select(mean) %>% as.numeric()` ± `r species_level_biomass_allocation %>% filter(trait == "belowground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(sd = round(sd(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, sd) %>% unique() %>% filter(species == "Suc_pra") %>% select(sd) %>% as.numeric()` g for Succisa pratensis, and `r species_level_biomass_allocation %>% filter(trait == "belowground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(mean = round(mean(value, na.rm = TRUE), digits = 2)) %>% ungroup() %>%  select(species, mean) %>% unique() %>% filter(species == "Hypericum maculatum") %>% select(mean) %>% as.numeric()` ± `r species_level_biomass_allocation %>% filter(trait == "belowground_biomass") %>% select(species, value) %>% group_by(species) %>%  mutate(sd = round(sd(value, na.rm = TRUE), digits = 3)) %>% ungroup() %>%  select(species, sd) %>% unique() %>% filter(species == "Hyp_mac") %>% select(sd) %>% as.numeric()` g for Hypericum maculatum.
+The average aboveground biomass for each species was `r mean_abg_biomass_SP ` ± `r sd_abg_biomass_SP ` g for S. procumbens, `r mean_abg_biomass_VA ` ± `r sd_abg_biomass_VA ` g for V. alpina, `r mean_abg_biomass_VO` ± `r sd_abg_biomass_VO` g for V. officinalis, `r mean_abg_biomass_VC` ± `r sd_abg_biomass_VC ` g for V. canina, `r mean_abg_biomass_SucP` ± `r sd_abg_biomass_SucP ` g for S. pratensis, and `r mean_abg_biomass_HM` ± `r sd_abg_biomass_HM` g for H. maculatum. The average belowground biomass for each species was `r mean_bg_biomass_SP ` ± `r sd_bg_biomass_SP ` g for S. procumbens, `r mean_bg_biomass_VA` ± `r sd_bg_biomass_VA` g for V. alpina, `r mean_bg_biomass_VO` ± `r sd_bg_biomass_VO` g for V. officinalis, `r mean_bg_biomass_VC` ± `r sd_bg_biomass_VC` g for V. canina, `r mean_bg_biomass_SucP` ± `r sd_bg_biomass_SucP` g for S. pratensis, and `r mean_bg_biomass_HM` ± `r sd_bg_biomass_HM` g for H. maculatum.
 
-Additionally, this dataset contains the same traits as measured in the demography dataset (dataset iii).
-This can be used to estimate the biomass based on these size traits through a biomass regression.
+Additionally, this dataset contains the same traits as measured in the demography dataset (dataset iii), which can be used to estimate the biomass based on these size traits through a biomass regression.
 This is how this dataset is linked to dataset iii to build a population model.
 See data usage notes for further details on how to build a population model based on dataset iii, iv, v, vi and viii.
-For an overview over the clean datasets see Table 8.
-The final cleaned data is provided on the INCLINE OSF, and the code to download the final cleaned data can be found in the INCLINE GitHub repository in the file https://github.com/jogaudard/INCLINE/blob/datadoc/data_doc/INCLINE_download_cleandata.R.
+
+The dataset is available from the INCLINE OSF as the raw data (insert footnote with link) and the cleaned data (insert footnote with link).
+The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
+For an overview over the clean dataset see Table 8.
 
 
-Table 8: Data dictionary for the INCLINE species level biomass allocation (dataset iv).
+Table 8: Data dictionary for the INCLINE species level biomass allocation (dataset iv). 
+Data dictionary with column descriptions for dataset iv - Species-level biomass allocation with above and belowground biomass allocation for Sibbaldia procumbens, Veronica alpina, Veronica officinalis, Viola canina, Succisa pratensis and Hypericum maculatum from 2019 across the four alpine sites, the four sub-alpine sites in the Vestland Climate Grid, Vestland county, Norway, and two additional sites in the same area.
 ```{r, echo=FALSE}
 knitr::kable(species_level_biomass_allocation_dic)
 ```
@@ -158,55 +173,64 @@ knitr::kable(species_level_biomass_allocation_dic)
 
 ### Seeds per capsule for the alpine focal species (dataset v)
 
-The seeds per capsule dataset consist of counted number of seed per reproductive unit for S. procumbens and V. alpina.
+The seeds per capsule dataset consist of the counted number of seeds per reproductive unit for S. procumbens and V. alpina.
 We collected in total 40 individuals of S. procumbens and V.alpina respectively.
-On average Sibbaldia procumbens had `r seeds_per_capsule %>% mutate(species = case_when(species == "SIb_pro" ~ "Sib_pro", species == "Sib_pro" ~ "Sib_pro", species == "Ver_alp" ~ "Ver_alp")) %>% select(species, capsuleID, number_of_seeds) %>% unique() %>% group_by(species) %>% mutate(mean = mean(number_of_seeds, na.rm = TRUE)) %>% select(species, mean) %>% unique() %>% ungroup() %>% filter(species == "Sib_pro") %>% select(mean) %>% as.numeric()` seeds per capsule, while Veronica alpina had `r seeds_per_capsule %>% mutate(species = case_when(species == "SIb_pro" ~ "Sib_pro", species == "Sib_pro" ~ "Sib_pro", species == "Ver_alp" ~ "Ver_alp")) %>% select(species, capsuleID, number_of_seeds) %>% unique() %>% group_by(species) %>% mutate(mean = mean(number_of_seeds, na.rm = TRUE)) %>% select(species, mean) %>% unique() %>% ungroup() %>% filter(species == "Ver_alp") %>% select(mean) %>% as.numeric()` seeds per capsule.
-This dataset is needed to build a population model in combination with dataset iii, iv, vi and viii.
-See data usage notes for further details on how to build a population model base on these datasets.
-For an overview over the clean datasets see Table 9.
-The final cleaned data is provided on the INCLINE OSF, and the code to download the final cleaned data can be found in the INCLINE GitHub repository in the file https://github.com/jogaudard/INCLINE/blob/datadoc/data_doc/INCLINE_download_cleandata.R.
+On average S. procumbens had `r seeds_per_capsule_SP` seeds per capsule, while V. alpina had `r seeds_per_capsule_VA` seeds per capsule.
 
-Table 9: Data dictionary for the dataset containing information about number of seed per capsule for the INCLINE alpine species (dataset v)
+This dataset is needed to build a population model in combination with dataset iii, iv, vi and viii.
+See data usage notes for further details on how to build a population model based on these datasets.
+
+The dataset is available from the INCLINE OSF as the raw data (insert footnote with link) and the cleaned data (insert footnote with link).
+The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
+For an overview over the clean dataset see Table 9.
+
+Table 9: Data dictionary for the seeds per capsule of the INCLINE alpine focal species (dataset v).
+Data dictionary with column descriptions for dataset v – Seeds per capsule for Sibbaldia procumbens and Veronica alpina from 40 individual of each species collected in 2020 across the four alpine sites of the Vestland Climate Grid, Vestland county, Norway.
 ```{r, echo=FALSE}
 knitr::kable(seeds_per_capsule_dic)
 ```
 
 ### Germination of alpine focal species (dataset vi)
 
-This dataset contains two parts, one with the germination and survival of Sibbaldia procumbens and Veronica alpina in the field (Table 10), and one with the functional traits of the seedlings after two summers (Table 11).
-We registered germination and survival of `r seedling_data_alpine %>% select(species, uniqueID) %>% unique() %>% group_by(species) %>% count() %>% ungroup() %>% filter(species == "Sib_pro") %>%  select(n) %>% as.numeric()` individuals of Sibbaldia procumbens, and `r seedling_data_alpine %>% select(species, uniqueID) %>% unique() %>% group_by(species) %>% count() %>% ungroup() %>% filter(species == "Ver_alp") %>%  select(n) %>% as.numeric()` individuals of Veronica alpina over three campaigns in the summer of 2020, and four campaigns in the summer of 2021.
+This dataset contains two parts, one with the germination and survival of S. procumbens and V. alpina in the field (Table 10), and one with the functional traits of the seedlings after two summers (Table 11).
+We registered germination and survival of `r n_seedlings_SP` individuals of S. procumbens, and `r n_seedlings_VA` individuals of V. alpina over three campaigns in the summer of 2020, and four campaigns in the summer of 2021.
 For some blocks the snow had not melted out in the first campaign in the summer of 2020.
-This campaign was called capmaign zero, and these plot were revisited a couple of weeks later in the season, this date was then recorded as the first campaign for these blocks.
-The seedlings that survived all the way to the end of the two field season were harvested in September 2021, that was `r seedling_traits_alpine %>% filter(species == "Sib_pro") %>% select(uniqueID) %>% unique() %>% count() %>% as.numeric()` individuals of Sibbaldia procumbens, and `r seedling_traits_alpine %>% filter(species == "Ver_alp") %>% select(uniqueID) %>% unique() %>% count() %>% as.numeric()` for Veronica alpina.
-The average above ground biomass of the seedlings were `r seedling_traits_alpine %>% filter(trait == "weight_dry_whole") %>% select(species, values) %>% group_by(species) %>% mutate(mean = mean(values, na.rm = TRUE)) %>% ungroup() %>% filter(species == "Sib_pro") %>%  select(species, mean) %>% unique() %>% select(mean) %>% as.numeric()*1000` ± `r seedling_traits_alpine %>% filter(trait == "weight_dry_whole") %>% select(species, values) %>% group_by(species) %>% mutate(sd = sd(values, na.rm = TRUE)) %>% ungroup() %>% filter(species == "Sib_pro") %>%  select(species, sd) %>% unique() %>% select(sd) %>% as.numeric()*1000` mg for Sibbaldia procumbens, and `r seedling_traits_alpine %>% filter(trait == "weight_dry_whole") %>% select(species, values) %>% group_by(species) %>% mutate(mean = mean(values, na.rm = TRUE)) %>% ungroup() %>% filter(species == "Ver_alp") %>%  select(species, mean) %>% unique() %>% select(mean) %>% as.numeric()*1000` ± `r seedling_traits_alpine %>% filter(trait == "weight_dry_whole") %>% select(species, values) %>% group_by(species) %>% mutate(sd = sd(values, na.rm = TRUE)) %>% ungroup() %>% filter(species == "Ver_alp") %>%  select(species, sd) %>% unique() %>% select(sd) %>% as.numeric()*1000` mg for Veronica alpina.
+This campaign was called campaign zero, and these plot were revisited a couple of weeks later in the season, this date was then recorded as the first campaign for these blocks.
+The seedlings that survived all the way to the end of the two field seasons were harvested in September 2021 - we sampled `r n_sampled_seedlings_SP` individuals of S. procumbens, and `r n_sampled_seedlings_VA` for V. alpina.
+The average above ground biomass of the seedlings were `r mean_abg_biomass_seedling_SP` ± `r sd_abg_biomass_seedling_SP` mg for S. procumbens, and `r mean_abg_biomass_seedling_VA` ± `r sd_abg_biomass_seedling_VA` mg for V. alpina.
 
 This dataset is needed to build a population model in combination with dataset iii, iv, v and viii.
-See data usage notes for further details on how to build a population model base on these datasets.
+See data usage notes for further details on how to build a population model based on these datasets.
 
+The dataset is available from the INCLINE OSF as the raw data (insert footnote with link) and the cleaned data (insert footnote with link).
+The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
 For an overview over the clean datasets see Table 10 for the germination and survival data, and Table 11 for the seedling trait data.
-The final cleaned data is provided on the INCLINE OSF, and the code to download the final cleaned data can be found in the INCLINE GitHub repository in the file https://github.com/jogaudard/INCLINE/blob/datadoc/data_doc/INCLINE_download_cleandata.R.
 
-Table 10: Data dictionary for the germination and survival of the alpine focal species (dataset v).
+Table 10: Data dictionary for the germination of the alpine focal species in the INCLINE experiment (dataset vi).
+Data dictionary with column descriptions for dataset vi – germination and survival of Sibbaldia procumbens and Veronica alpina from `r germ_alpine_plots` 5 x 5 cm experimental plots with or without warming, and in vegetation or gaps, from 2020-2021 at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r, echo=FALSE}
 knitr::kable(seedling_data_alpine_dic)
 ```
 
-Table 11: Data dictionary for the seedling traits of the alpine focal species
+Table 11: Data dictionary for the traits of seedlings of the alpine focal species in the INCLINE experiment (dataset vi).
+Data dictionary with column descriptions for dataset vi – seedling traits of `r n_sampled_seedlings_SP` Sibbaldia procumbens and `r n_sampled_seedlings_VA` Veronica alpina seedlings sampled in 2021 at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r, echo=FALSE}
 knitr::kable(seedling_traits_alpine_dic)
 ```
 
 
-### Germination of sub-alpine focal species (dataset vi)
+### Germination of sub-alpine focal species (dataset vii)
 
-This dataset consist of the germination and survival of seedlings of the sub-alpine species in the INCLINE experiment.
-In total there were `rseedling_data_subalpine %>% select(species, uniqueID, total_seedlings_emerged) %>% unique() %>% group_by(species) %>% mutate(sum = sum(total_seedlings_emerged, na.rm = TRUE)) %>% select(species, sum) %>% unique() %>% ungroup() %>% filter(species == "Ver_off") %>% select(sum) %>% as.numeric()` Veronica officinalis, `rseedling_data_subalpine %>% select(species, uniqueID, total_seedlings_emerged) %>% unique() %>% group_by(species) %>% mutate(sum = sum(total_seedlings_emerged, na.rm = TRUE)) %>% select(species, sum) %>% unique() %>% ungroup() %>% filter(species == "Vio_can") %>% select(sum) %>% as.numeric()` Viola canina, `rseedling_data_subalpine %>% select(species, uniqueID, total_seedlings_emerged) %>% unique() %>% group_by(species) %>% mutate(sum = sum(total_seedlings_emerged, na.rm = TRUE)) %>% select(species, sum) %>% unique() %>% ungroup() %>% filter(species == "Car_pil") %>% select(sum) %>% as.numeric()` Carex pilulifera, `rseedling_data_subalpine %>% select(species, uniqueID, total_seedlings_emerged) %>% unique() %>% group_by(species) %>% mutate(sum = sum(total_seedlings_emerged, na.rm = TRUE)) %>% select(species, sum) %>% unique() %>% ungroup() %>% filter(species == "Suc_pra") %>% select(sum) %>% as.numeric()` Succisa pratensis, `rseedling_data_subalpine %>% select(species, uniqueID, total_seedlings_emerged) %>% unique() %>% group_by(species) %>% mutate(sum = sum(total_seedlings_emerged, na.rm = TRUE)) %>% select(species, sum) %>% unique() %>% ungroup() %>% filter(species == "Hyp_mac") %>% select(sum) %>% as.numeric()` Hypericum maculatum, and `rseedling_data_subalpine %>% select(species, uniqueID, total_seedlings_emerged) %>% unique() %>% group_by(species) %>% mutate(sum = sum(total_seedlings_emerged, na.rm = TRUE)) %>% select(species, sum) %>% unique() %>% ungroup() %>% filter(species == "Car_pal") %>% select(sum) %>% as.numeric()` Carex pallescens that germinated.
-Out of these seedlings `r seedling_data_subalpine %>% select(species, uniqueID, total_seedlings_survived) %>% unique() %>% group_by(species) %>% mutate(sum = sum(total_seedlings_survived, na.rm = TRUE)) %>% select(species, sum) %>% unique() %>% ungroup() %>% filter(species == "Ver_off") %>% select(sum) %>% as.numeric()` Veronica officinalis, `r seedling_data_subalpine %>% select(species, uniqueID, total_seedlings_survived) %>% unique() %>% group_by(species) %>% mutate(sum = sum(total_seedlings_survived, na.rm = TRUE)) %>% select(species, sum) %>% unique() %>% ungroup() %>% filter(species == "Vio_can") %>% select(sum) %>% as.numeric()` Viola canina, `r seedling_data_subalpine %>% select(species, uniqueID, total_seedlings_survived) %>% unique() %>% group_by(species) %>% mutate(sum = sum(total_seedlings_survived, na.rm = TRUE)) %>% select(species, sum) %>% unique() %>% ungroup() %>% filter(species == "Car_pil") %>% select(sum) %>% as.numeric()` Carex pilulifera, `r seedling_data_subalpine %>% select(species, uniqueID, total_seedlings_survived) %>% unique() %>% group_by(species) %>% mutate(sum = sum(total_seedlings_survived, na.rm = TRUE)) %>% select(species, sum) %>% unique() %>% ungroup() %>% filter(species == "Suc_pra") %>% select(sum) %>% as.numeric()` Succisa pratensis, `r seedling_data_subalpine %>% select(species, uniqueID, total_seedlings_survived) %>% unique() %>% group_by(species) %>% mutate(sum = sum(total_seedlings_survived, na.rm = TRUE)) %>% select(species, sum) %>% unique() %>% ungroup() %>% filter(species == "Hyp_mac") %>% select(sum) %>% as.numeric()` Hypericum maculatum, and `r seedling_data_subalpine %>% select(species, uniqueID, total_seedlings_survived) %>% unique() %>% group_by(species) %>% mutate(sum = sum(total_seedlings_survived, na.rm = TRUE)) %>% select(species, sum) %>% unique() %>% ungroup() %>% filter(species == "Car_pal") %>% select(sum) %>% as.numeric()` Carex pallescens survived through the whole growing season.
+This dataset consists of the germination and survival of seedlings of the sub-alpine species in the INCLINE experiment across seven campaigns in 2021.
+In total there were `r n_seedlings_Ver_off` V. officinalis, `r n_seedlings_Vio_can` V. canina, `r n_seedlings_Car_pil` C. pilulifera, `r n_seedlings_Suc_pra` S. pratensis, `r n_seedlings_Hyp_mac` H. maculatum, and `r n_seedlings_Car_pal` C. pallescens that germinated.
+Out of these seedlings `r seedling_survived_Ver_off` V. officinalis, `r seedling_survived_Vio_can` V. canina, `r seedling_survived_Car_pil` C. pilulifera, `r seedling_survived_Suc_pra` S. pratensis, `r seedling_survived_Hyp_mac` H. maculatum, and `r seedling_survived_Car_pal` C. pallescens survived through the whole growing season.
 
-For an overview over the clean datasets see Table 12.
-The final cleaned data is provided on the INCLINE OSF, and the code to download the final cleaned data can be found in the INCLINE GitHub repository in the file https://github.com/jogaudard/INCLINE/blob/datadoc/data_doc/INCLINE_download_cleandata.R.
+The dataset is available from the INCLINE OSF as the raw data (insert footnote with link) and the cleaned data (insert footnote with link).
+The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
+For an overview over the clean dataset see Table 12. 
 
-Table 12: Data dictionary for the germination and survival of the sub-alpine species of the INCLINE experiment (dataset v).
+Table 12: Data dictionary for the germination of the sub-alpine focal species in the INCLINE experiment (dataset vii).
+Data dictionary with column descriptions for dataset vii – germination and survival of Veronica officinalis, Viola canina, Carex pilulifera, Succisa pratensis, Hypericum maculatum, and Carex pallescens from `r germ_sub_alpine_plots` 5 x 5 cm experimental plots with or without warming, and in vegetation or gaps, in 2021 at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r, echo=FALSE}
 knitr::kable(seedling_data_subalpine_dic)
 ```
@@ -214,46 +238,58 @@ knitr::kable(seedling_data_subalpine_dic)
 
 ### Seed bank survival of alpine focal species (dataset viii)
 This dataset consists of survival after one year in the soil seed bank for S. procumbens and V. alpina.
-For S. procumbens the average survival rate after one year in the soil seed bank under the ambient alpine climate was `r seedbank_survival %>% group_by(species, warming, plotID) %>% mutate(total = n()) %>% mutate(survival_in_seedbank = case_when(survival_in_seedbank == "1" ~1, survival_in_seedbank == "0" ~ 0)) %>% mutate(bla = sum(survival_in_seedbank)) %>% mutate(prop = bla/total *100) %>% select(species, warming, prop, plotID) %>% unique() %>% group_by(species, warming) %>% mutate(mean = mean(prop)) %>% ungroup() %>%  filter(species == "Sib_pro") %>% filter(warming == "C") %>% select(mean) %>%  unique() %>% as.numeric()` %, and in the warmed climate it was `r seedbank_survival %>% group_by(species, warming, plotID) %>% mutate(total = n()) %>% mutate(survival_in_seedbank = case_when(survival_in_seedbank == "1" ~1, survival_in_seedbank == "0" ~ 0)) %>% mutate(bla = sum(survival_in_seedbank)) %>% mutate(prop = bla/total *100) %>% select(species, warming, prop, plotID) %>% unique() %>% group_by(species, warming) %>% mutate(mean = mean(prop)) %>% ungroup() %>%  filter(species == "Sib_pro") %>% filter(warming == "OTC") %>% select(mean) %>%  unique() %>% as.numeric()` %. For V.alpina the average survival rate after one year in the soil seed bank under the ambient alpine climate was `r seedbank_survival %>% group_by(species, warming, plotID) %>% mutate(total = n()) %>% mutate(survival_in_seedbank = case_when(survival_in_seedbank == "1" ~1, survival_in_seedbank == "0" ~ 0)) %>% mutate(bla = sum(survival_in_seedbank)) %>% mutate(prop = bla/total *100) %>% select(species, warming, prop, plotID) %>% unique() %>% group_by(species, warming) %>% mutate(mean = mean(prop)) %>% ungroup() %>%  filter(species == "Ver_alp") %>% filter(warming == "C") %>% select(mean) %>%  unique() %>% as.numeric()` %, and in the warmed climate it was `r seedbank_survival %>% group_by(species, warming, plotID) %>% mutate(total = n()) %>% mutate(survival_in_seedbank = case_when(survival_in_seedbank == "1" ~1, survival_in_seedbank == "0" ~ 0)) %>% mutate(bla = sum(survival_in_seedbank)) %>% mutate(prop = bla/total *100) %>% select(species, warming, prop, plotID) %>% unique() %>% group_by(species, warming) %>% mutate(mean = mean(prop)) %>% ungroup() %>%  filter(species == "Ver_alp") %>% filter(warming == "OTC") %>% select(mean) %>%  unique() %>% as.numeric()` %.
+We buried `r n_seeds_SP` and `r n_seeds_VA` seeds of S. procumbens and V. alpina respectively.
+One year later `r n_survived_seeds_SP` and `r n_survived_seeds_VA` seeds had survived of each species.
+For S. procumbens the average survival rate after one year in the soil seed bank under the ambient alpine climate was `r seed_bank_survival_rate_C_SP` %, and in the warmed climate it was `r seed_bank_survival_rate_W_SP` %. For V. alpina the average survival rate after one year in the soil seed bank under the ambient alpine climate was `r seed_bank_survival_rate_C_VA` %, and in the warmed climate it was `r seed_bank_survival_rate_W_VA` %.
 
 This dataset is needed to build a population model in combination with dataset iii, iv, v and vi.
 See data usage notes for further details on how to build a population model base on these datasets.
-For an overview over the clean datasets see Table 13.
-The final cleaned data is provided on the INCLINE OSF, and the code to download the final cleaned data can be found in the INCLINE GitHub repository in the file https://github.com/jogaudard/INCLINE/blob/datadoc/data_doc/INCLINE_download_cleandata.R.
 
-Table 13: Data dictionary for the seed survival in the seed bank over one year in the soil (dataset viii).
+The dataset is available from the INCLINE OSF as the raw data (insert footnote with link) and the cleaned data (insert footnote with link).
+The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
+For an overview over the clean dataset see Table 13. 
+
+Table 13: Data dictionary for the seed bank survival of alpine focal species in the INCLINE experiment (dataset viii)
+Data dictionary with column descriptions for dataset viii – seed bank survival over one year for Sibbaldia procumbens and Veronica alpina.
+Seeds were buried from 2019-2020 in five replicates with and without warming at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r, echo=FALSE}
 knitr::kable(seedbank_survival_dic)
 ```
 
 ### Flowering of alpine plant community (dataset ix)
-This dataset consists of a quantification of flowering of the alpine community in the mabient temperature control, warmed control, and the novel trait transplant in the ambient and warmed climate treatments in the INCLINE experiments.
-The data set with measurements of flower production of the flowering alpine plant community was combined with two separate data sets with measurements of number of buds, flowers and capsules for Sibbaldia procumbens and Veronica alpina, respectively.
+This dataset consists of a quantification of flowering of the alpine community in the ambient temperature control, warmed control, and the novel trait transplant in the ambient and warmed climate treatments in the INCLINE experiments.
+The dataset with measurements of flower production of the flowering alpine plant community was combined with two separate data sets with measurements of number of buds, flowers and capsules for S. procumbens and V. alpina, respectively.
 Data on the number of reproductive organs of these two species was collected as part of the demographic monitoring of S. procumbens and V. alpina (dataset iii), and was therefore not collected in the flowering community data campaign.
 Hence, the date of data collection on flower production was not always the same for S. procumbens and V. alpina and the remaining flowering community.
 Thus, three different date columns are included in the flowering data set: date_community, date_Sib_pro and date_Ver_alp. Similarly, the registrator varied between the three data-groups. However, in this case all the registrators were combined into one column, separated by “&” for each of the data-groups.
-We collected flowering information of `r length(unique(flowering$species))` different species.
-We registered the flowers in six different categories; length of inflorescence (`r length(unique((flowering %>% filter(flowering_measurement_type == "Length of inflorescence"))$species))` species) , number of inflorescence units (`r length(unique((flowering %>% filter(flowering_measurement_type == "Number of inflorescence units"))$species))` species), flower counts (`r length(unique((flowering %>% filter(flowering_measurement_type == "Flower count"))$species))` species), number of flowering individuals (`r length(unique((flowering %>% filter(flowering_measurement_type == "Number of flowering individuals"))$species))` species), percent cover (`r length(unique((flowering %>% filter(flowering_measurement_type == "Percent cover"))$species))` species), and finally flower head count (`r length(unique((flowering %>% filter(flowering_measurement_type == "Flower head count"))$species))` species) (see description above in the data collection method section).
+
+We collected flowering information of `r n_species_flowering` different species.
+We registered the flowers in six different categories; length of inflorescence (`r n_species_length_of_inflorescence` species) , number of inflorescence units (`r n_species_n_inflorescence_units` species), flower counts (`r n_species_n_flower` species), number of flowering individuals (`r n_species_n_flowering_individuals` species), percent cover (`r n_species_cover` species), and finally flower head count (`r n_species_n_flower_head` species) (see description above in the data collection method section).
 The data was collected at the subplot level (see experimental design section).
-In each subplot where we recorded flowering the average length of inflorescence was `r round(mean((flowering %>% filter(flowering_measurement_type == "Length of inflorescence"))$flowering_value), digits = 0)` mm, the average number of inflorescence units was `r round(mean((flowering %>% filter(flowering_measurement_type == "Number of inflorescence units"))$flowering_value), digits = 0)`, the average flower count was `r round(mean((flowering %>% filter(flowering_measurement_type == "Flower count"))$flowering_value), digits = 0)`, the average number of flowering individuals was `r round(mean((flowering %>% filter(flowering_measurement_type == "Number of flowering individuals"))$flowering_value), digits = 0)`, the average percent cover of flowers was `r round(mean((flowering %>% filter(flowering_measurement_type == "Percent cover"))$flowering_value), digits = 0)`, and finally the average flower head count was `r round(mean((flowering %>% filter(flowering_measurement_type == "Flower head count"))$flowering_value), digits = 0)`.
+In each subplot where we recorded flowering the average length of inflorescence was `r mean_length_of_inflorescence` mm, the average number of inflorescence units was `r mean_n_inflorescence_units`, the average flower count was `r mean_n_flower`, the average number of flowering individuals was `r mean_n_flowering_individuals`, the average percent cover of flowers was `r mean_cover`, and finally the average flower head count was `r mean_n_flower_head`.
 
-For an overview over the clean datasets see Table 14.
-The final cleaned data is provided on the INCLINE OSF, and the code to download the final cleaned data can be found in the INCLINE GitHub repository in the file https://github.com/jogaudard/INCLINE/blob/datadoc/data_doc/INCLINE_download_cleandata.R.
+The dataset is available from the INCLINE OSF as the raw data (insert footnote with link) and the cleaned data (insert footnote with link).
+The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
+For an overview over the clean dataset see Table 14. 
 
-Table 14: Data dictionary for the dataset of flowering in the alpine plant community (dataset ix)
+Table 14: Data dictionary for the dataset with flowering of the alpine plant community (dataset ix).
+Data dictionary with column descriptions for dataset ix – Flowering of the alpine plant community from `r flowering_plots` 25 × 35 cm experimental plots with control and novel transplant treatments in the ambient and warmed climate from the INCLINE experiment from 2021 at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r, echo=FALSE}
 knitr::kable(flowering_dic)
 ```
 
 
 ### Reflectance (NDVI) (dataset x)
-This dataset consists of `r length(ndvi$NDVI)` measurements of Normalized Difference Vegetation Index (NDVI) over the growing season of 2019, 2020 and 2021.
-The average NDVI for the different sites from the wettest to the driest are: `r mean((ndvi %>% filter(siteID == "Skjelingahaugen"))$NDVI, na.rm = TRUE)`, `r mean((ndvi %>% filter(siteID == "Gudmedalen"))$NDVI, na.rm = TRUE)`, `r mean((ndvi %>% filter(siteID == "Lavisdalen"))$NDVI, na.rm = TRUE)`, and `r mean((ndvi %>% filter(siteID == "Ulvhaugen"))$NDVI, na.rm = TRUE)` for Skjellingahaugen, Gudemedalen, Låvisdalen, Ulvehaugen respectively.
-Across sites the ambient climate control plots had an NDVI of `r mean((ndvi %>% filter(treatment == "C") %>% filter(OTC == "C"))$NDVI, na.rm = TRUE)` ± `r sd((ndvi %>% filter(treatment == "C") %>% filter(OTC == "C"))$NDVI, na.rm = TRUE)`, while the warmed control plots had an NDVI of `r mean((ndvi %>% filter(treatment == "C") %>% filter(OTC == "W"))$NDVI, na.rm = TRUE)` ± `r sd((ndvi %>% filter(treatment == "C") %>% filter(OTC == "W"))$NDVI, na.rm = TRUE)`.
-For an overview over the clean datasets see Table 15.
-The final cleaned data is provided on the INCLINE OSF, and the code to download the final cleaned data can be found in the INCLINE GitHub repository in the file https://github.com/jogaudard/INCLINE/blob/datadoc/data_doc/INCLINE_download_cleandata.R.
+This dataset consists of `r n_NDVI` measurements of Normalized Difference Vegetation Index (NDVI) over the growing season of 2019, 2020 and 2021.
+The average NDVI for the different sites from the wettest to the driest are: `r mean_NDVI_SKJ`, `r mean_NDVI_GUD`, `r mean_NDVI_LAV`, and `r mean_NDVI_ULV` for Skjellingahaugen, Gudemedalen, Låvisdalen, Ulvehaugen respectively.
+Across sites the ambient climate control plots had an NDVI of `r mean_NDVI_C` ± `r sd_NDVI_C`, while the warmed control plots had an NDVI of `r mean_NDVI_W` ± `r sd_NDVI_W`.
 
-Table 15: Data dictionary for the dataset of the Normalized Difference Vegeation Index (NDVI) (dataset x)
+The dataset is available from the INCLINE OSF as the raw data (insert footnote with link) and the cleaned data (insert footnote with link).
+The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
+For an overview over the clean dataset see Table 15. 
+
+Table 15: Data dictionary for the dataset of the Normalized Difference Vegeation Index (NDVI) (dataset x).
+Data dictionary with column descriptions for dataset x – Reflectance (NDVI) from `r ndvi_plots` 25 × 35 cm experimental plots from the INCLINE experiment from 2019-2021 at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r, echo=FALSE}
 knitr::kable(ndvi_dic)
 ```
@@ -266,30 +302,35 @@ In addition, the dataset also contains data for light response curves (marked as
 The ecosystem respiration values ranged from `r min((cflux %>% filter(type == "ER"))$flux)` to `r max((cflux %>% filter(type == "ER"))$flux)` µmol mol-1 s-1 CO2, with a mean of `r mean((cflux %>% filter(type == "ER"))$flux)` and a median of  `r median((cflux %>% filter(type == "ER"))$flux)` µmol mol-1 s-1 CO2.
 The net ecosystem exchange values ranged from `r min((cflux %>% filter(type == "NEE"))$flux)` to `r max((cflux %>% filter(type == "NEE"))$flux)` µmol mol-1 s-1 CO2 with a mean of `r mean((cflux %>% filter(type == "NEE"))$flux)` and a median of `r median((cflux %>% filter(type == "NEE"))$flux)` µmol mol-1 s-1 CO2. We measured the fluxes within the PAR range of
 `r min(cflux$PARavg)` to `r max(cflux$PARavg)` and a mean of `r mean(cflux$PARavg)` and median of `r median(cflux$PARavg)`.
-For an overview over the clean datasets see Table 16.
-The final cleaned data is provided on the INCLINE OSF, and the code to download the final cleaned data can be found in the INCLINE GitHub repository in the file https://github.com/jogaudard/INCLINE/blob/datadoc/data_doc/INCLINE_download_cleandata.R.
 
-Table 16: Data dictionary for the dataset of the Carbon flux in (dataset xi). 
+The dataset is available from the INCLINE OSF as the raw data (insert footnote with link) and the cleaned data (insert footnote with link).
+The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
+For an overview over the clean dataset see Table 16. 
+
+Table 16: Data dictionary for the dataset of the ecosystem carbon flux (dataset xi). 
+Data dictionary with column descriptions for dataset xi – ecosystem carbon flux from all the `r cflux_2020_plots` 25 × 35 cm control plots in both the ambient and warmed climate from the INCLINE experiment at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r cfluxdic, echo=FALSE}
 knitr::kable(cflux_dic)
 ```
 
 ### Microclimate data (dataset xii)
 
-This dataset consists of four seperate datasets of i) soil moisture, ii) soil temperature at 6 cm below ground level, iii) temperature in the vegetation at ground level, and iv) air temperature 15 cm above the ground level recorded every 15 minutes by Tomst-loggers (Wild et al. 2019).
-The soil moisture data has been transformed to the closest soil properties in the soil categories following the method by Wild et al. (2019).
-The microclimate data consists of `r length((microclimate_soil_moisture %>%  filter(!is.na(soil_moisture)))$soil_moisture)` datapoints of soil moisture, `r length((microclimate_soil_temperature %>%  filter(!is.na(soil_temperature)))$soil_temperature)` datapoints of soil temperature, `r length((microclimate_ground_temperature %>% filter(!is.na(ground_temperature)))$ground_temperature)` datapoints of ground temperature,  and `r length((microclimate_air_temperature %>% filter(!is.na(air_temperature)))$air_temperature)` datapoints of air temperature from `r length(unique(microclimate_soil_moisture$loggerID))` loggers.
-The soil moisture ranges from  `r min(microclimate_soil_moisture$soil_moisture, na.rm = TRUE)` to `r max(microclimate_soil_moisture$soil_moisture, na.rm = TRUE)`, with a mean that varies with the precipitation of the sites from the wettest sites Skjellingahaugen with a mean of `r mean((microclimate_soil_moisture %>% filter(siteID == "Skjellingahaugen"))$soil_moisture, na.rm = TRUE)` ± `r sd((microclimate_soil_moisture %>% filter(siteID == "Skjellingahaugen"))$soil_moisture, na.rm = TRUE)` and following along the precipitation gradient with `r mean((microclimate_soil_moisture %>% filter(siteID == "Gudmedalen"))$soil_moisture, na.rm = TRUE)` ± `r sd((microclimate_soil_moisture %>% filter(siteID == "Gudmedalen"))$soil_moisture, na.rm = TRUE)`, `r mean((microclimate_soil_moisture %>% filter(siteID == "Lavisdalen"))$soil_moisture, na.rm = TRUE)` ± `r sd((microclimate_soil_moisture %>% filter(siteID == "Lavisdalen"))$soil_moisture, na.rm = TRUE)` , and `r mean((microclimate_soil_moisture %>% filter(siteID == "Ulvehaugen"))$soil_moisture, na.rm = TRUE)` ± `r sd((microclimate_soil_moisture %>% filter(siteID == "Ulvehaugen"))$soil_moisture, na.rm = TRUE)` for Gudmedalen, Låvisdalen and Ulvehaugen respectively.
-As for temperature the variation in temperature between day and night increases from the soil temperature via the ground temperature to the air temperature, while the mean stays relatively similar.
-The mean soil temperature is `r mean(microclimate_soil_temperature$soil_temperature, na.rm = TRUE)` ± `r sd(microclimate_soil_temperature$soil_temperature, na.rm = TRUE)` °C while the mean ground temperature is `r mean(microclimate_ground_temperature$ground_temperature, na.rm = TRUE)` ± `r sd(microclimate_ground_temperature$ground_temperature, na.rm = TRUE)` °C, and the mean air temperature is `r mean(microclimate_air_temperature$air_temperature, na.rm = TRUE)` °C ± `r sd(microclimate_air_temperature$air_temperature, na.rm = TRUE)` °C. The average difference between the ambient climate and the warmed climate by open top chambers was 0.37 °C in soil temperature, 0.77 °C in the ground temperature, and 0.75 °C in the air temperature, this however varied between day and night (Table 17).
+This dataset consists of four separate datasets of i) soil moisture, ii) soil temperature at 6 cm below ground level, iii) temperature in the vegetation at ground level, and iv) air temperature 15 cm above the ground level - all recorded every 15 minutes by Tomst-loggers (Wild et al. 2019).
+The soil moisture data has been transformed according to the closest soil properties of our sites in the soil categories following the method by Wild et al. (2019).
+The microclimate data consists of `r n_data_soil_moisture` data points of soil moisture, `r n_data_soil_temp` data points of soil temperature, `r n_data_ground_temp` data points of ground temperature,  and `r n_data_air_temp` data points of air temperature from `r n_microclimate_loggers` loggers.
 
-For an overview over the clean datasets see Table 18.
-The final cleaned data is provided on the INCLINE OSF, and the code to download the final cleaned data can be found in the INCLINE GitHub repository in the file https://github.com/jogaudard/INCLINE/blob/datadoc/data_doc/INCLINE_download_cleandata.R.
+The soil moisture ranges from  `r min_soil_moisture` to `r max_soil_moisture`, with a mean that varies with the precipitation of the sites from the wettest sites Skjellingahaugen with a mean of `r mean_soil_moisture_SKJ` ± `r sd_soil_moisture_SKJ` and following along the precipitation gradient with `r mean_soil_moisture_GUD` ± `r sd_soil_moisture_GUD`, `r mean_soil_moisture_LAV` ± `r sd_soil_moisture_LAV` , and `r mean_soil_moisture_ULV` ± `r sd_soil_moisture_ULV` for Gudmedalen, Låvisdalen and Ulvehaugen respectively.
+As for temperature, the mean soil temperature is `r mean_soil_temperature` ± `r sd_soil_temperature` °C while the mean ground temperature is `r mean_ground_temperature` ± `r sd_ground_temperature` °C, and the mean air temperature is `r mean_air_temperature` ± `r sd_air_temperature` °C. The average difference between the ambient climate and the warmed climate by open top chambers was 0.37 °C in soil temperature, 0.77 °C in the ground temperature, and 0.75 °C in the air temperature, this however varied between day and night (Table 17).
+
+The dataset is available from the INCLINE OSF as the raw data (insert footnote with link) and the cleaned data (insert footnote with link).
+The code to clean and download the data is available on GitHub, with the script to clean the raw data here (insert footnote with link), and the script to directly download the cleaned data from OSF here (insert footnote with link).
+For an overview over the clean datasets see Table 18. 
 
 Table 17: In the data paper google doc
 
 
-Table 18: 
+Table 18: Data dictionary for the microclimate data from the INCLINE experiment (dataset xii). 
+Data dictionary with column descriptions for dataset xii – microclimate (soil moisture, soile temperature, ground temperature and air temperature at 15 cm above the ground) from three of the five replicates of each treatment in the INCLINE experiment, giving microclimate data from a total of `r microclimate_plots` 25 × 35 cm experimental plots from 2019-2021 in the INCLINE experiment at four sites in the Vestland Climate Grid, Vestland county, Norway. 
 ```{r, echo=FALSE}
 knitr::kable(microclimate_dic)
 ```
