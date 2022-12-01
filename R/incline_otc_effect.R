@@ -193,25 +193,6 @@ Skj1ddiff <- Skj1d %>%
 
 write.csv(rbind(Ulv1ddiff,Lav1ddiff,Gud1ddiff,Skj1ddiff),'plot_day_differences.csv')
 
-
-
-######################## additional unfinished code snippets ##########################
-
-# # add weather data from seklima.met.no
-# {
-# weather <- read.csv('Data/climate/weather_obs_seklima.csv', sep = ';') # downloaded from seklima.met.no 12.05.2022 
-# weather <- weather %>%	select(station,datetime,wind_1h,precipitation_12h)
-# weather$datetime <- ymd_hms(weather$datetime)
-# weather$wind_1h <- gsub(',','.',weather$wind_1h)
-# weather$wind_1h <- as.numeric(weather$wind_1h)
-# weather$precipitation_12h <- gsub(',','.',weather$precipitation_12h)
-# weather$precipitation_12h <- as.numeric(weather$precipitation_12h)
-# weather <- weather[weather$station=='SN53680',] # station SN53680 (Flåm) has the most data
-# }
-# 
-# # join weather data into main data
-# data <- left_join(data,weather) # left join keeps all rows in data but only matching from weather
-
 # air temperature
 #-----------------------------
 at <- subset(data_wide, data$sensor == 'air_temperature')
