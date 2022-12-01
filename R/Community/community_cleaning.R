@@ -4,6 +4,8 @@
 
 # Script by Eva Lieungh
 
+# last updated: April 2022
+
 # Download INCLINE community data from OSF
 # (requires OSF user profile and access to INCLINE OSF repository)
 
