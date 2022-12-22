@@ -492,13 +492,30 @@ WP_names2 <- c(
   "ULV" = "ULV"
 )
 
-Germination_Ver_alp %>% 
+WP_names3 <- c(
+  "1" = "-0.25",
+  "2" = "-0.33",
+  "3" = "-0.42",
+  "4" = "-0.50",
+  "5" = "-0.57",
+  "6" = "-0.70",
+  "7" = "-0.95",
+  "8" = "-1.20",
+  "9" = "-1.45",
+  "10" = "-1.70",
+  "SKJ" = "3402 mm/year",
+  "LAV" = "2130 mm/year",
+  "GUD" = "1556 mm/year",
+  "ULV" = "1226 mm/year"
+)
+
+synchrony_plot_VA <- Germination_Ver_alp %>% 
   #filter(water_potential %in% c(1:5)) %>% 
   mutate(siteID = factor(siteID, levels = c("ULV", "LAV", "GUD", "SKJ"))) %>% 
   ggplot(aes(x = sort(as.integer(days_to_germination)), y = cum_germ_percent, group = replicate, color = T50)) +
   geom_line() +
   geom_point(aes(x = T50, y = half_percent)) +
-  facet_grid(water_potential ~ siteID, labeller = as_labeller(WP_names2), drop = FALSE) +
+  facet_grid(water_potential ~ siteID, labeller = as_labeller(WP_names3), drop = FALSE) +
   xlab("Days to germination") +
   ylab("Germination %") +
   # ggtitle(paste(species, "from", site)) +
@@ -510,8 +527,10 @@ Germination_Ver_alp %>%
         panel.grid.major = element_line(size = 0.25,
                                         linetype = 'solid',
                                         colour = "lightgrey"),
-        text = element_text(size = 18)) +
+        text = element_text(size = 11)) +
   scale_color_viridis_c()
+
+ggsave(filename = "synchrony_plot_VA.pdf", synchrony_plot_VA, width = 17, height = 20, units = "cm")
 
 #### Make germination metrics Sib pro ####
 
@@ -616,13 +635,13 @@ Sib_pro_germination_traits <- Sib_pro_germination_traits %>%
 
 
 #### Make plot of germination ####
-Germination_Sib_pro %>% 
+synchrony_plot_SP <- Germination_Sib_pro %>% 
   #filter(siteID == "LAV") %>% 
   mutate(siteID = factor(siteID, levels = c("ULV", "LAV", "GUD", "SKJ"))) %>% 
 ggplot(aes(x = sort(as.integer(days_to_germination)), y = cum_germ_percent, group = replicate, color = T50)) +
     geom_line() +
     geom_point(aes(x = T50, y = half_percent)) +
-  facet_grid(water_potential ~ siteID, labeller = as_labeller(WP_names2), drop = FALSE) +
+  facet_grid(water_potential ~ siteID, labeller = as_labeller(WP_names3), drop = FALSE) +
     xlab("Days to germination") +
     ylab("Germination %") +
    # ggtitle(paste(species, "from", site)) +
@@ -634,7 +653,7 @@ ggplot(aes(x = sort(as.integer(days_to_germination)), y = cum_germ_percent, grou
           panel.grid.major = element_line(size = 0.25,
                                           linetype = 'solid',
                                           colour = "lightgrey"),
-          text = element_text(size = 18)) +
+          text = element_text(size = 11)) +
   scale_color_viridis_c()
 
-
+ggsave(filename = "synchrony_plot_SP.pdf", synchrony_plot_SP, width = 17, height = 20, units = "cm")
