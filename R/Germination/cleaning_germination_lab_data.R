@@ -530,7 +530,7 @@ synchrony_plot_VA <- Germination_Ver_alp %>%
         text = element_text(size = 11)) +
   scale_color_viridis_c()
 
-ggsave(filename = "synchrony_plot_VA.pdf", synchrony_plot_VA, width = 17, height = 20, units = "cm")
+#ggsave(filename = "synchrony_plot_VA.pdf", synchrony_plot_VA, width = 17, height = 20, units = "cm")
 
 #### Make germination metrics Sib pro ####
 
@@ -656,4 +656,4 @@ ggplot(aes(x = sort(as.integer(days_to_germination)), y = cum_germ_percent, grou
           text = element_text(size = 11)) +
   scale_color_viridis_c()
 
-ggsave(filename = "synchrony_plot_SP.pdf", synchrony_plot_SP, width = 17, height = 20, units = "cm")
+#ggsave(filename = "synchrony_plot_SP.pdf", synchrony_plot_SP, width = 17, height = 20, units = "cm")
