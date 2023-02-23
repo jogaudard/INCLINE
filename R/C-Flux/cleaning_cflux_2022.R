@@ -17,6 +17,11 @@ get_file(node = "zhk3m",
          path = "data/C-Flux/summer_2022/raw_data",
          remote_path = "RawData/C-Flux")
 
+get_file(node = "zhk3m",
+         file = "INCLINE_metadata.csv",
+         path = "data/C-Flux/summer_2022/raw_data",
+         remote_path = "RawData")
+
 # Unzip files
 zipfile <- "data/C-Flux/summer_2022/raw_data/INCLINE_CO2_2022.zip"
 if(file.exists(zipfile)){
@@ -65,23 +70,23 @@ CO2_INCLINE_2022 <- match.flux4(raw_CO2_INCLINE_2022,
 
 # detecting transcript mistakes by checking the length of each measurement
 
-mistakes <- CO2_INCLINE_2022 %>% 
-  group_by(fluxID, turfID, start, type) %>% 
-  # nest() %>% 
-  summarise(
-    length = length(datetime)
-  ) %>% 
-  ungroup() %>% 
-  arrange(start) %>% 
-  mutate(
-    flag = case_when(
-      lag(length) < 181 ~ "flag",
-      length < 181 ~ "flag"
-    )
-  ) %>% 
-  filter(
-    flag == "flag"
-  )
+# mistakes <- CO2_INCLINE_2022 %>% 
+#   group_by(fluxID, turfID, start, type) %>% 
+#   # nest() %>% 
+#   summarise(
+#     length = length(datetime)
+#   ) %>% 
+#   ungroup() %>% 
+#   arrange(start) %>% 
+#   mutate(
+#     flag = case_when(
+#       lag(length) < 181 ~ "flag",
+#       length < 181 ~ "flag"
+#     )
+#   ) %>% 
+#   filter(
+#     flag == "flag"
+#   )
 
 # get slopes --------------------------------------------------------------
 
@@ -90,10 +95,25 @@ slopes_INCLINE_2022 <- CO2_INCLINE_2022 %>%
     datetime > start_window &
       datetime < end_window
   ) %>% 
-  fitting.flux()
+  fitting.flux(
+    weird_fluxesID = c(
+      355, # second half was detected for window, but it should be the first one
+      386, # tz is at the wrong end, it does not reflect the reality of the flux (negative ER)
+      549, # slope_fit is too far from real points and window is too short
+      640, # wrong direction of slope
+      696, # dip in the flux
+      719, # slope in wrong direction
+      743, # window mismatch
+      751, # slope in wrong direction
+      762, # dip in flux
+      775, # mess at the beginning of the flux
+      791, # slope in the wrong direction
+      876 # flux is quite weird
+      )
+  )
 
 slopes_INCLINE_2022_metrics <- slopes_INCLINE_2022%>% 
-  select(fluxID, b, b_est, RMSE, r.squared_slope, flag, cor_coef) %>% 
+  select(fluxID, Cm, b, b_est, RMSE, r.squared_slope, flag, cor_coef) %>% 
   distinct()
 
 # graph CO2 concentration ------------------------------------------------------------
@@ -121,9 +141,220 @@ slopes_INCLINE_2022 %>%
 
 ggsave("campaign1.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
 
+gc()
+
+slopes_INCLINE_2022 %>% 
+  filter(
+    campaign == 2
+  ) %>%
+  ggplot(aes(datetime)) +
+  geom_point(aes(y = CO2, color = cut), size = 0.2) +
+  geom_line(aes(y = fit), linetype = "longdash") +
+  geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
+  scale_color_manual(values = c(
+    "keep" = "green",
+    "cut" = "red",
+    "ok" = "black",
+    "discard" = "red",
+    "zero" = "grey",
+    "start_error" = "red"
+  )) +
+  scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
+  # ylim(400,800) +
+  facet_wrap(~fluxID, scales = "free")
+
+ggsave("campaign2.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
+
+gc()
+
+slopes_INCLINE_2022 %>% 
+  filter(
+    campaign == 3
+  ) %>%
+  ggplot(aes(datetime)) +
+  geom_point(aes(y = CO2, color = cut), size = 0.2) +
+  geom_line(aes(y = fit), linetype = "longdash") +
+  geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
+  scale_color_manual(values = c(
+    "keep" = "green",
+    "cut" = "red",
+    "ok" = "black",
+    "discard" = "red",
+    "zero" = "grey",
+    "start_error" = "red"
+  )) +
+  scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
+  # ylim(400,800) +
+  facet_wrap(~fluxID, scales = "free")
+
+ggsave("campaign3.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
+
+gc()
+
+slopes_INCLINE_2022 %>% 
+  filter(
+    campaign == 4
+  ) %>%
+  ggplot(aes(datetime)) +
+  geom_point(aes(y = CO2, color = cut), size = 0.2) +
+  geom_line(aes(y = fit), linetype = "longdash") +
+  geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
+  scale_color_manual(values = c(
+    "keep" = "green",
+    "cut" = "red",
+    "ok" = "black",
+    "discard" = "red",
+    "zero" = "grey",
+    "start_error" = "red"
+  )) +
+  scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
+  # ylim(400,800) +
+  facet_wrap(~fluxID, scales = "free")
+
+ggsave("campaign4.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
+
+gc()
+
+
+# clean cut ---------------------------------------------------------------
+
+slopes_INCLINE_2022_cut <- slopes_INCLINE_2022 %>% 
+  filter(
+    cut == "keep"
+  )
+
+
+# PAR cleaning ------------------------------------------------------------
+
+slopes_INCLINE_2022_cut <- slopes_INCLINE_2022_cut %>% 
+  mutate(
+    PAR =
+      case_when(
+        type == "ER" & PAR <= 0 ~ 0, 
+        TRUE ~ PAR
+      )
+  )
+
+filter(slopes_INCLINE_2022_cut, type == "NEE") %>% #faster than looking at the graph!
+  summarise(
+    rangePAR = range(PAR, na.rm = TRUE)
+  )
+
+slopes_INCLINE_2022_cut <- slopes_INCLINE_2022_cut %>% 
+  mutate(
+    PAR = case_when(
+      # fluxID %in% c(
+      #   691,
+      #   697,
+      #   695,
+      #   873,
+      #   137,
+      #   51,
+      #   273,
+      #   183,
+      #   585,
+      #   629,
+      #   475,
+      #   257,
+      #   583,
+      #   53,
+      #   275,
+      #   821,
+      #   627,
+      #   469,
+      #   285,
+      #   751,
+      #   749,
+      #   
+      #   ) & 
+        PAR < 60 ~ NA_real_, # PAR sensor had a faulty contact
+      TRUE ~ PAR
+      
+    )
+  )
+
+slopes_INCLINE_2022_cut %>% 
+  filter(
+    type == "NEE"
+    & fluxID == 379
+    # & PAR < 10
+  ) %>% 
+  mutate(
+    datetime = ymd_hms(datetime),
+    time = hms::as_hms(datetime)
+  ) %>% 
+  ggplot(aes(x = time, y = PAR)) +
+  geom_point() +
+  geom_text(aes(label = fluxID), hjust=-1,vjust=1)
+
+slopes_INCLINE_2022_cut %>% 
+  filter(
+    type == "NEE"
+    # & fluxID == 697
+    & PAR < 100
+  ) %>% 
+  mutate(
+    datetime = ymd_hms(datetime),
+    time = hms::as_hms(datetime)
+  ) %>% 
+  ggplot(aes(x = time, y = PAR)) +
+  geom_point() +
+  geom_text(aes(label = fluxID), hjust=-1,vjust=1) +
+  facet_wrap(~campaign)
+
+
+
 # calculate fluxes --------------------------------------------------------
 
+fluxes_INCLINE_2022 <- slopes_INCLINE_2022 %>% 
+  mutate(
+    slope = case_when(
+      flag == "ok" ~ slope_tz,
+      flag == "zero" ~ 0,
+      flag %in% c("discard", "start_error", "weird_flux") ~ NA_real_
+    )
+  ) %>%
+  flux.calc.zhao18(
+    chamber_volume = 34.3, plot_area = 0.08575
+  ) # need to change dimension of chamber
+  
 
-# graph fluxes over the season --------------------------------------------
+# adding metadata
+
+INCLINE_metadata <- read_csv2("data/C-Flux/summer_2022/raw_data/INCLINE_metadata.csv")
+
+fluxes_INCLINE_2022 <- fluxes_INCLINE_2022 %>% 
+  select(fluxID, PARavg, temp_soilavg, turfID, type, datetime, campaign, flux) %>% 
+  left_join(INCLINE_metadata)
+
+# graph ER and NEE to detect outliers --------------------------------------------
+
+fluxes_INCLINE_2022 %>% 
+  mutate(
+    datetime = ymd_hms(datetime),
+    time = hms::as_hms(datetime)
+  ) %>% 
+  ggplot(aes(time, flux, color = type)) +
+  geom_point() +
+  facet_wrap(~campaign)
+
+# light response curves and NEE correction --------------------------------
+
+lrc_INCLINE_2022 <- fluxes_INCLINE_2022 %>% 
+  filter(
+    type == "LRC"
+  )
+
+lrc_INCLINE_2022 %>% 
+  ggplot(aes(PARavg, flux, color = OTC)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +
+  # facet_grid(siteID ~ campaign, scales = "free")
+  facet_grid(~siteID, scales = "free")
+
+
+
+# calculate GPP -----------------------------------------------------------
+
 
 
