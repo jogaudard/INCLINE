@@ -309,6 +309,7 @@ slopes_INCLINE_2022_cut %>%
 fluxes_INCLINE_2022 <- slopes_INCLINE_2022 %>% 
   mutate(
     slope = case_when(
+      type == "ER" & slope_tz < 0 ~ 0, # maybe this should be NA
       flag == "ok" ~ slope_tz,
       flag == "zero" ~ 0,
       flag %in% c("discard", "start_error", "weird_flux") ~ NA_real_
@@ -345,12 +346,12 @@ lrc_INCLINE_2022 <- fluxes_INCLINE_2022 %>%
     type == "LRC"
   )
 
-lrc_INCLINE_2022 %>% 
-  ggplot(aes(PARavg, flux, color = OTC)) +
-  geom_point() +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +
-  # facet_grid(siteID ~ campaign, scales = "free")
-  facet_grid(~siteID, scales = "free")
+# lrc_INCLINE_2022 %>% 
+#   ggplot(aes(PARavg, flux, color = OTC)) +
+#   geom_point() +
+#   geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +
+#   # facet_grid(siteID ~ campaign, scales = "free")
+#   facet_grid(~siteID, scales = "free")
 
 fluxes_INCLINE_2022 <- LRC.calc(
   lrc_INCLINE_2022,
@@ -364,6 +365,56 @@ fluxes_INCLINE_2022 <- LRC.calc(
 
 fluxes_INCLINE_2022_gep <- GEP.calc(fluxes_INCLINE_2022) %>% 
   left_join(INCLINE_metadata) #we loose the metadata when calculating GEP
+
+
+# graph fluxes ------------------------------------------------------------
+
+fluxes_INCLINE_2022_gep %>% 
+  filter(
+    type %in% c("ER", "GEP")
+  ) %>% 
+  ggplot(aes(datetime, PAR_corrected_flux, color = siteID, linetype = OTC)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE) +
+  geom_hline(yintercept=0, size = 0.3) +
+  facet_grid(type ~ ., scales = "free")
+
+fluxes_INCLINE_2022_gep %>% 
+  filter(
+    type %in% c("ER", "GEP")
+  ) %>% 
+  ggplot(aes(`precipitation_2009-2019`, PAR_corrected_flux, linetype = OTC)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +
+  geom_hline(yintercept=0, size = 0.3) +
+  facet_grid(type ~ ., scales = "free")
+
+fluxes_INCLINE_2022_gep %>% 
+  filter(
+    type %in% c("ER", "GEP")
+  ) %>% 
+  ggplot(aes(datetime, flux, color = siteID, linetype = OTC)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE) +
+  geom_hline(yintercept=0, size = 0.3) +
+  facet_grid(type ~ ., scales = "free")
+
+fluxes_INCLINE_2022_gep %>% 
+  filter(
+    type %in% c("ER", "GEP")
+  ) %>% 
+  ggplot(aes(`precipitation_2009-2019`, flux, linetype = OTC)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +
+  geom_hline(yintercept=0, size = 0.3) +
+  facet_grid(type ~ ., scales = "free")
+
+
+
+
+
+
+
 
 
 
