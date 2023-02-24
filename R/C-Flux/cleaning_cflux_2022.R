@@ -352,9 +352,18 @@ lrc_INCLINE_2022 %>%
   # facet_grid(siteID ~ campaign, scales = "free")
   facet_grid(~siteID, scales = "free")
 
-
+fluxes_INCLINE_2022 <- LRC.calc(
+  lrc_INCLINE_2022,
+  fluxes_INCLINE_2022,
+  group = c("siteID", "OTC"),
+  PARfix = 300,
+  PARnull = 0
+)
 
 # calculate GPP -----------------------------------------------------------
+
+fluxes_INCLINE_2022_gep <- GEP.calc(fluxes_INCLINE_2022) %>% 
+  left_join(INCLINE_metadata) #we loose the metadata when calculating GEP
 
 
 
