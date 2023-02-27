@@ -363,13 +363,15 @@ fluxes_INCLINE_2022 <- LRC.calc(
 
 # calculate GPP -----------------------------------------------------------
 
-fluxes_INCLINE_2022_gep <- GEP.calc(fluxes_INCLINE_2022) %>% 
+fluxes_INCLINE_2022_gep <- GEP.calc(fluxes_INCLINE_2022)
+
+fluxes_INCLINE_2022_gep_meta <- fluxes_INCLINE_2022_gep %>% 
   left_join(INCLINE_metadata) #we loose the metadata when calculating GEP
 
 
 # graph fluxes ------------------------------------------------------------
 
-fluxes_INCLINE_2022_gep %>% 
+fluxes_INCLINE_2022_gep_meta %>% 
   filter(
     type %in% c("ER", "GEP")
   ) %>% 
@@ -379,7 +381,7 @@ fluxes_INCLINE_2022_gep %>%
   geom_hline(yintercept=0, size = 0.3) +
   facet_grid(type ~ ., scales = "free")
 
-fluxes_INCLINE_2022_gep %>% 
+fluxes_INCLINE_2022_gep_meta %>% 
   filter(
     type %in% c("ER", "GEP")
   ) %>% 
@@ -389,7 +391,7 @@ fluxes_INCLINE_2022_gep %>%
   geom_hline(yintercept=0, size = 0.3) +
   facet_grid(type ~ ., scales = "free")
 
-fluxes_INCLINE_2022_gep %>% 
+fluxes_INCLINE_2022_gep_meta %>% 
   filter(
     type %in% c("ER", "GEP")
   ) %>% 
@@ -399,7 +401,7 @@ fluxes_INCLINE_2022_gep %>%
   geom_hline(yintercept=0, size = 0.3) +
   facet_grid(type ~ ., scales = "free")
 
-fluxes_INCLINE_2022_gep %>% 
+fluxes_INCLINE_2022_gep_meta %>% 
   filter(
     type %in% c("ER", "GEP")
   ) %>% 
@@ -408,6 +410,13 @@ fluxes_INCLINE_2022_gep %>%
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +
   geom_hline(yintercept=0, size = 0.3) +
   facet_grid(type ~ ., scales = "free")
+
+
+
+# writing csv -------------------------------------------------------------
+
+write_csv(fluxes_INCLINE_2022_gep, "data_cleaned/INCLINE_c-flux_2022.csv")
+
 
 
 
