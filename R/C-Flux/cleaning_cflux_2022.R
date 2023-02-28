@@ -88,6 +88,21 @@ CO2_INCLINE_2022 <- match.flux4(raw_CO2_INCLINE_2022,
 #     flag == "flag"
 #   )
 
+
+# comments and temperature cleaning ---------------------------------------
+
+CO2_INCLINE_2022 %>%
+  select(comments) %>% 
+  distinct()
+
+CO2_INCLINE_2022 <- CO2_INCLINE_2022 %>% 
+  mutate(
+    temp_soil = case_when(
+      comments %in% c("soilT logger not plugged in", "no soil T") ~ NA_real_,
+      TRUE ~ temp_soil
+    )
+  )
+
 # get slopes --------------------------------------------------------------
 
 slopes_INCLINE_2022 <- CO2_INCLINE_2022 %>% 
@@ -316,7 +331,7 @@ fluxes_INCLINE_2022 <- slopes_INCLINE_2022 %>%
     )
   ) %>%
   flux.calc.zhao18(
-    chamber_volume = 34.3, plot_area = 0.08575
+    chamber_volume = 35, plot_area = 0.0875
   ) # need to change dimension of chamber
   
 
@@ -325,7 +340,7 @@ fluxes_INCLINE_2022 <- slopes_INCLINE_2022 %>%
 INCLINE_metadata <- read_csv2("data/C-Flux/summer_2022/raw_data/INCLINE_metadata.csv")
 
 fluxes_INCLINE_2022 <- fluxes_INCLINE_2022 %>% 
-  select(fluxID, PARavg, temp_soilavg, turfID, type, datetime, campaign, flux) %>% 
+  select(fluxID, PARavg, temp_soilavg, turfID, type, datetime, campaign, flux, temp_airavg) %>% 
   left_join(INCLINE_metadata)
 
 # graph ER and NEE to detect outliers --------------------------------------------
