@@ -340,7 +340,7 @@ fluxes_INCLINE_2022 <- slopes_INCLINE_2022 %>%
 INCLINE_metadata <- read_csv2("data/C-Flux/summer_2022/raw_data/INCLINE_metadata.csv")
 
 fluxes_INCLINE_2022 <- fluxes_INCLINE_2022 %>% 
-  select(fluxID, PARavg, temp_soilavg, turfID, type, datetime, campaign, flux, temp_airavg) %>% 
+  select(fluxID, PARavg, temp_soilavg, turfID, type, datetime, campaign, flux, temp_airavg, RMSE) %>% 
   left_join(INCLINE_metadata)
 
 # graph ER and NEE to detect outliers --------------------------------------------
@@ -378,10 +378,10 @@ fluxes_INCLINE_2022 <- LRC.calc(
 
 # calculate GPP -----------------------------------------------------------
 
-fluxes_INCLINE_2022_gep <- GEP.calc(fluxes_INCLINE_2022)
+fluxes_INCLINE_2022_gep_meta <- GEP.calc2(fluxes_INCLINE_2022)
 
-fluxes_INCLINE_2022_gep_meta <- fluxes_INCLINE_2022_gep %>% 
-  left_join(INCLINE_metadata) #we loose the metadata when calculating GEP
+# fluxes_INCLINE_2022_gep_meta <- fluxes_INCLINE_2022_gep %>% 
+#   left_join(INCLINE_metadata) #we loose the metadata when calculating GEP
 
 
 # graph fluxes ------------------------------------------------------------
@@ -429,6 +429,10 @@ fluxes_INCLINE_2022_gep_meta %>%
 
 
 # writing csv -------------------------------------------------------------
+# getting rid of meta data
+
+fluxes_INCLINE_2022_gep <- fluxes_INCLINE_2022_gep_meta %>% 
+  select(datetime, campaign, plotID, PARavg, type, flux, PAR_corrected_flux, temp_soilavg, temp_airavg, RMSE)
 
 write_csv(fluxes_INCLINE_2022_gep, "data_cleaned/INCLINE_c-flux_2022.csv")
 
