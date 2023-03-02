@@ -50,12 +50,13 @@ fluxes_itex <- fluxes %>%
     ),
     flux = flux * 44 * 24 # they want mg CO2 / m2 / day
   ) %>% 
-  select(plotID, siteID, date, OTC, temp_soil, flux, temp_air, ITEX_ID, soil_moisture, comments) %>% 
+  select(plotID, siteID, date, OTC, temp_soilavg, flux, temp_airavg, ITEX_ID, soil_moisture, comments, RMSE) %>% 
   rename(
     treatment = "OTC"
   ) %>% 
-  drop_na(date) %>% 
-  arrange(siteID)
+  drop_na(date, flux) %>% 
+  arrange(ITEX_ID) %>% 
+  relocate(ITEX_ID, date, treatment, plotID, flux, RMSE, temp_airavg, temp_soilavg, soil_moisture, siteID, comments)
 
 write_csv(fluxes_itex, "ITEX/ITEX_fluxes_2022.csv")
 

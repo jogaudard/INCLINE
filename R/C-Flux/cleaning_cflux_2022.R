@@ -245,53 +245,57 @@ slopes_INCLINE_2022_cut <- slopes_INCLINE_2022_cut %>%
   mutate(
     PAR =
       case_when(
-        type == "ER" & PAR <= 0 ~ 0, 
+        type == "ER" & PAR < 0 ~ 0,
+        type == "LRC" & PAR < 0 ~ 0,
+        type == "NEE" & PAR < 60 ~ NA_real_, # PAR sensor had faulty contact
         TRUE ~ PAR
       )
   )
 
-filter(slopes_INCLINE_2022_cut, type == "NEE") %>% #faster than looking at the graph!
+filter(slopes_INCLINE_2022_cut
+       # type == "NEE"
+       ) %>% #faster than looking at the graph!
   summarise(
     rangePAR = range(PAR, na.rm = TRUE)
   )
 
-slopes_INCLINE_2022_cut <- slopes_INCLINE_2022_cut %>% 
-  mutate(
-    PAR = case_when(
-      # fluxID %in% c(
-      #   691,
-      #   697,
-      #   695,
-      #   873,
-      #   137,
-      #   51,
-      #   273,
-      #   183,
-      #   585,
-      #   629,
-      #   475,
-      #   257,
-      #   583,
-      #   53,
-      #   275,
-      #   821,
-      #   627,
-      #   469,
-      #   285,
-      #   751,
-      #   749,
-      #   
-      #   ) & 
-        PAR < 60 ~ NA_real_, # PAR sensor had a faulty contact
-      TRUE ~ PAR
-      
-    )
-  )
+# slopes_INCLINE_2022_cut <- slopes_INCLINE_2022_cut %>% 
+#   mutate(
+#     PAR = case_when(
+#       # fluxID %in% c(
+#       #   691,
+#       #   697,
+#       #   695,
+#       #   873,
+#       #   137,
+#       #   51,
+#       #   273,
+#       #   183,
+#       #   585,
+#       #   629,
+#       #   475,
+#       #   257,
+#       #   583,
+#       #   53,
+#       #   275,
+#       #   821,
+#       #   627,
+#       #   469,
+#       #   285,
+#       #   751,
+#       #   749,
+#       #   
+#       #   ) & 
+#         PAR < 60 ~ NA_real_, # PAR sensor had a faulty contact
+#       TRUE ~ PAR
+#       
+#     )
+#   )
 
 slopes_INCLINE_2022_cut %>% 
   filter(
-    type == "NEE"
-    & fluxID == 379
+    # type == "NEE"
+     fluxID == 772
     # & PAR < 10
   ) %>% 
   mutate(
@@ -321,10 +325,10 @@ slopes_INCLINE_2022_cut %>%
 
 # calculate fluxes --------------------------------------------------------
 
-fluxes_INCLINE_2022 <- slopes_INCLINE_2022 %>% 
+fluxes_INCLINE_2022 <- slopes_INCLINE_2022_cut %>% 
   mutate(
     slope = case_when(
-      type == "ER" & slope_tz < 0 ~ 0, # maybe this should be NA
+      flag == "ok" & type == "ER" & slope_tz < 0 ~ NA_real_, # maybe this should be NA or 0, not sure
       flag == "ok" ~ slope_tz,
       flag == "zero" ~ 0,
       flag %in% c("discard", "start_error", "weird_flux") ~ NA_real_
