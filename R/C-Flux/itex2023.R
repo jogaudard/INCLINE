@@ -90,6 +90,16 @@ get_file(node = "zhk3m",
          path = "data_cleaned",
          remote_path = "Community")
 
+get_file(node = "zhk3m",
+         file = "INCLINE_community_plotlevel_info.csv",
+         path = "data_cleaned",
+         remote_path = "Community")
+
+get_file(node = "zhk3m",
+         file = "INCLINE_community_species_cover.csv",
+         path = "data_cleaned",
+         remote_path = "Community")
+
 # get_file(node = "zhk3m",
 #          file = "INCLINE_biomass_removal.csv",
 #          path = "data_cleaned",
@@ -97,26 +107,38 @@ get_file(node = "zhk3m",
 
 # community <- read_csv2("data_cleaned/community_clean_med_NA.csv")
 
-community <- read_csv2("data_cleaned/community_clean_done_without_NA.csv")
+# community <- read_csv2("data_cleaned/community_clean_done_without_NA.csv")
+
+height <- read_csv("data_cleaned/INCLINE_community_plotlevel_info.csv")
+
+height <- height %>% 
+  filter(
+    year == 2022
+    # & treatment == "C"
+  ) %>% 
+  select(plotID, total_bryophyte_cover, total_lichen_cover, vegetation_height_mean)
+
+community <- read_csv("data_cleaned/INCLINE_community_species_cover.csv")
 
 # biomass <- read_csv("data_cleaned/INCLINE_biomass_removal.csv") # biomass cannot be used because it is different plots than the ones with c-fluxes measurements
 
 
+
 plot_data <- community %>% 
-  left_join(INCLINE_metadata) %>% 
+  # left_join(INCLINE_metadata) %>% 
   filter(
     year == 2022,
-    subPlot != "whole_plot",
+    # subPlot != "whole_plot",
     treatment == "C"
   ) %>% 
   mutate(
-    lichen = replace_na(lichen, 0),
-    moss = replace_na(moss, 0),
-    forbs = Lot_cor + Aco_sep + Eri_sp + Eri_uni + Equ_sci + Equ_arv + Pin_vul + Tof_pus + Sau_alp + Leu_vul + Ant_odo + Eup_wet + Sib_pro + Alc_alp + Alc_sp + Oma_sup + Ver_alp + Vio_pal + Cam_rot + Sag_sag + Leo_aut + Sel_sel + Pyr_sp + Luz_mul + Tar_sp + Pot_cra + Dip_alp + Tha_alp + Lys_eur + Hie_alp + Rum_ace + Cer_cer + Epi_ana + Equ_arv + Epi_sp + Tof_pus + Nid_seedling + Bar_alp + Sil_aca + Par_pal + Hie_alp + Cer_fon + Pot_ere + Vio_bif + Coel_vir + Ran_acr + Gen_niv + Pin_vul + Eri_sp + Ach_mil + Pyr_min + Bis_viv + Ast_alp + Rum_acl + Bot_lun + Gen_ama + Ran_sp + Oxy_dig + Fern + Ger_syl + Geu_riv + Rhi_min + Hie_sp + Tri_ces + Hyp_sel + Sol_vir + Vio_can + Ort_sec + Pru_vul + Ver_off + Suc_pra + Hyp_mac + Ran_pyg + Dry_oct + Luz_spi + Tri_rep + Hyp_sp + Ste_gra + Sel_sp + Vio_tri + Ver_cha + Nid_juvenile + Gen_sp + Tri_sp + Oma_sp + Cer_alp + Tri_pra + Sil_vul + Sag_sp + Phe_con + Gym_dry + Oma_nor + Gal_sp + Gen_cam + Oxa_ace + Lot_cor + Aco_sep + Eri_uni + Equ_sci + Sau_alp + Leu_vul,
-    graminoids = Nar_str + Agr_mer + Agr_cap + Car_big + Car_nor + Car_cap + Car_pal + Car_pil + Poa_pra + Car_vag + Ave_fle + Des_ces + Poa_alp + Jun_tri + Phl_alp + Fes_ovi + Fes_rub + Sau_alp + Fes_sp + Car_sp + Ant_dio + Fes_viv + Des_alp + Car_fla + Car_sax + Ant_sp + Car_atr,
-    evergreens = Emp_nig + Vac_vit + Cal_vul,
-    deciduous = Sal_her + Vac_myr + Vac_uli + Sal_sp + Bet_nan + Bet_pub + Sal_lan,
-    OTC = str_replace_all(OTC, c("C" = "CTL", "W" = "OTC")),
+    # lichen = replace_na(lichen, 0),
+    # moss = replace_na(moss, 0),
+    # forbs = Lot_cor + Aco_sep + Eri_sp + Eri_uni + Equ_sci + Equ_arv + Pin_vul + Tof_pus + Sau_alp + Leu_vul + Ant_odo + Eup_wet + Sib_pro + Alc_alp + Alc_sp + Oma_sup + Ver_alp + Vio_pal + Cam_rot + Sag_sag + Leo_aut + Sel_sel + Pyr_sp + Luz_mul + Tar_sp + Pot_cra + Dip_alp + Tha_alp + Lys_eur + Hie_alp + Rum_ace + Cer_cer + Epi_ana + Equ_arv + Epi_sp + Tof_pus + Nid_seedling + Bar_alp + Sil_aca + Par_pal + Hie_alp + Cer_fon + Pot_ere + Vio_bif + Coel_vir + Ran_acr + Gen_niv + Pin_vul + Eri_sp + Ach_mil + Pyr_min + Bis_viv + Ast_alp + Rum_acl + Bot_lun + Gen_ama + Ran_sp + Oxy_dig + Fern + Ger_syl + Geu_riv + Rhi_min + Hie_sp + Tri_ces + Hyp_sel + Sol_vir + Vio_can + Ort_sec + Pru_vul + Ver_off + Suc_pra + Hyp_mac + Ran_pyg + Dry_oct + Luz_spi + Tri_rep + Hyp_sp + Ste_gra + Sel_sp + Vio_tri + Ver_cha + Nid_juvenile + Gen_sp + Tri_sp + Oma_sp + Cer_alp + Tri_pra + Sil_vul + Sag_sp + Phe_con + Gym_dry + Oma_nor + Gal_sp + Gen_cam + Oxa_ace + Lot_cor + Aco_sep + Eri_uni + Equ_sci + Sau_alp + Leu_vul,
+    # graminoids = Nar_str + Agr_mer + Agr_cap + Car_big + Car_nor + Car_cap + Car_pal + Car_pil + Poa_pra + Car_vag + Ave_fle + Des_ces + Poa_alp + Jun_tri + Phl_alp + Fes_ovi + Fes_rub + Sau_alp + Fes_sp + Car_sp + Ant_dio + Fes_viv + Des_alp + Car_fla + Car_sax + Ant_sp + Car_atr,
+    # evergreens = Emp_nig + Vac_vit + Cal_vul,
+    # deciduous = Sal_her + Vac_myr + Vac_uli + Sal_sp + Bet_nan + Bet_pub + Sal_lan,
+    OTC = str_replace_all(warming, c("C" = "CTL", "W" = "OTC")),
     ITEX_ID = case_when(
       site == "Lavisdalen" ~ "NOR_9",
       site == "Gudmedalen" ~ "NOR_11",
@@ -124,19 +146,24 @@ plot_data <- community %>%
       site == "Skjellingahaugen" ~ "NOR_12"
     )
   ) %>% 
-  select(subPlot, year, moss, lichen, Veg_height_mm, plotID, site, forbs, graminoids, evergreens, deciduous, OTC, ITEX_ID, coordinate_N, coordinate_E) %>% 
-  distinct() %>% 
-  group_by(year, plotID, site, OTC, ITEX_ID, coordinate_N, coordinate_E) %>% 
-    summarise(
-      moss_mean = mean(moss, na.rm = FALSE),
-      lichen_mean = mean(lichen, na.rm = FALSE),
-      veg_height_mean_cm = mean(Veg_height_mm, na.rm = TRUE) / 10,
-      forbs_mean = mean(forbs, na.rm = FALSE),
-      graminoids_mean = mean(graminoids, na.rm = FALSE),
-      evergreens_mean = mean(evergreens, na.rm = FALSE),
-      deciduous_mean = mean(deciduous, na.rm = FALSE)
-    ) %>% 
-  ungroup() %>% 
+  select(site, plotID, OTC, functional_group, cover) %>% 
+  group_by(site, plotID, OTC, functional_group) %>% 
+  summarise(
+    group_cover = sum(cover)
+  ) %>% 
+  # select(year, moss, lichen, Veg_height_mm, plotID, site, forbs, graminoids, evergreens, deciduous, OTC, ITEX_ID, coordinate_N, coordinate_E) %>% 
+  # distinct() %>% 
+  # group_by(year, plotID, site, OTC, ITEX_ID, coordinate_N, coordinate_E) %>% 
+  #   summarise(
+  #     moss_mean = mean(moss, na.rm = FALSE),
+  #     lichen_mean = mean(lichen, na.rm = FALSE),
+  #     veg_height_mean_cm = mean(Veg_height_mm, na.rm = TRUE) / 10,
+  #     forbs_mean = mean(forbs, na.rm = FALSE),
+  #     graminoids_mean = mean(graminoids, na.rm = FALSE),
+  #     evergreens_mean = mean(evergreens, na.rm = FALSE),
+  #     deciduous_mean = mean(deciduous, na.rm = FALSE)
+  #   ) %>% 
+  # ungroup() %>% 
   # select(year, plotID, site, OTC, moss_mean, lichen_mean, veg_height_mean_cm, forbs_mean, graminoids_mean, evergreens_mean, deciduous_mean, coordinate_N, coordinate_E) %>% 
   mutate(
     N_Coord = gsub("(\\d{2})(?=\\d{2})", "\\1 ", (coordinate_N/10), perl = TRUE),
