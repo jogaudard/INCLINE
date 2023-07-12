@@ -153,7 +153,7 @@ slopes_INCLINE_2022 %>%
   scale_color_manual(values = c(
     # "keep" = "green",
     # "cut" = "red",
-    "ok" = "black",
+    "ok" = "green",
     "discard" = "red",
     "zero" = "grey",
     "start_error" = "red"
@@ -178,7 +178,7 @@ slopes_INCLINE_2022 %>%
   scale_color_manual(values = c(
     # "keep" = "green",
     # "cut" = "red",
-    "ok" = "black",
+    "ok" = "green",
     "discard" = "red",
     "zero" = "grey",
     "start_error" = "red"
@@ -203,7 +203,7 @@ slopes_INCLINE_2022 %>%
   scale_color_manual(values = c(
     # "keep" = "green",
     # "cut" = "red",
-    "ok" = "black",
+    "ok" = "green",
     "discard" = "red",
     "zero" = "grey",
     "start_error" = "red"
@@ -228,7 +228,7 @@ slopes_INCLINE_2022 %>%
   scale_color_manual(values = c(
     # "keep" = "green",
     # "cut" = "red",
-    "ok" = "black",
+    "ok" = "green",
     "discard" = "red",
     "zero" = "grey",
     "start_error" = "red"
