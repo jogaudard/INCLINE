@@ -135,8 +135,27 @@ slopes_INCLINE_2022 <- CO2_INCLINE_2022 %>%
 #   distinct()
 
 slopes_INCLINE_2022_metrics <- slopes_INCLINE_2022%>%
-  select(fluxID, Cm, b, b_est, RMSE, flag, cor_coef) %>%
+  select(fluxID, Cm, b, b_est, RMSE, NRMSE, flag, cor_coef, meanCO2, sdCO2, rangeCO2) %>%
   distinct()
+
+# trying some flagging ----------------------------------------------------
+
+# problem when b > 1
+# problem when tz is too far in the flux
+
+# compare NRMSE and RMSE
+
+slopes_INCLINE_2022_metrics %>% 
+  mutate(
+    NRMSE = RMSE / meanCO2
+  ) %>% 
+  filter(
+    fluxID != 570
+  ) %>%
+  ggplot(aes(NRMSE, RMSE, color = flag)) +
+  geom_point() 
+  # ylim(0,100) +
+  # xlim(0,1)
 
 # graph CO2 concentration ------------------------------------------------------------
 theme_set(theme_grey(base_size = 5))
@@ -148,7 +167,7 @@ slopes_INCLINE_2022 %>%
   ggplot(aes(datetime)) +
   # geom_point(aes(y = CO2, color = cut), size = 0.2) +
   geom_point(aes(y = CO2), size = 0.2) +
-  geom_line(aes(y = fit), linetype = "longdash") +
+  geom_line(aes(y = fit, color = flag), linetype = "longdash") +
   geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
   scale_color_manual(values = c(
     # "keep" = "green",
@@ -173,7 +192,7 @@ slopes_INCLINE_2022 %>%
   ggplot(aes(datetime)) +
   # geom_point(aes(y = CO2, color = cut), size = 0.2) +
   geom_point(aes(y = CO2), size = 0.2) +
-  geom_line(aes(y = fit), linetype = "longdash") +
+  geom_line(aes(y = fit, color = flag), linetype = "longdash") +
   geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
   scale_color_manual(values = c(
     # "keep" = "green",
@@ -198,7 +217,7 @@ slopes_INCLINE_2022 %>%
   ggplot(aes(datetime)) +
   # geom_point(aes(y = CO2, color = cut), size = 0.2) +
   geom_point(aes(y = CO2), size = 0.2) +
-  geom_line(aes(y = fit), linetype = "longdash") +
+  geom_line(aes(y = fit, color = flag), linetype = "longdash") +
   geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
   scale_color_manual(values = c(
     # "keep" = "green",
@@ -223,7 +242,7 @@ slopes_INCLINE_2022 %>%
   ggplot(aes(datetime)) +
   # geom_point(aes(y = CO2, color = cut), size = 0.2) +
   geom_point(aes(y = CO2), size = 0.2) +
-  geom_line(aes(y = fit), linetype = "longdash") +
+  geom_line(aes(y = fit, color = flag), linetype = "longdash") +
   geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
   scale_color_manual(values = c(
     # "keep" = "green",
@@ -240,6 +259,8 @@ slopes_INCLINE_2022 %>%
 ggsave("campaign4b.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
 
 gc()
+
+
 
 
 # clean cut ---------------------------------------------------------------
