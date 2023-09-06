@@ -16,39 +16,39 @@ conflict_prefer("select", "dplyr")
 conflict_prefer("filter", "dplyr")
 
 #### Downloading data from OSF ####
-
+#setwd("C:/Users/rgy042/OneDrive - University of Bergen/O-DISK-rgy042/PhD/R_stats/INCLINE_2.0/")
 #osf_auth(token = "get from my document every time you run the code") 
 
-# get_file(node = "zhk3m",
-#          file = "Sib_pro_2018-2021.csv",
-#          path = "data/Demography",
-#          remote_path = "RawData/Demography")
-# 
-# get_file(node = "zhk3m",
-#          file = "Ver_alp_2018-2021.csv",
-#          path = "data/Demography",
-#          remote_path = "RawData/Demography")
-# 
-# get_file(node = "zhk3m",
-#          file = "INCLINE_metadata.csv",
-#          path = "data",
-#          remote_path = "RawData")
-#
-# get_file(node = "zhk3m",
-#          file = "VA_comments.csv",
-#          path = "data/Demography",
-#          remote_path = "RawData/Demography")
-# 
-# get_file(node = "zhk3m",
-#          file = "SP_comments.csv",
-#          path = "data/Demography",
-#          remote_path = "RawData/Demography")
+ # get_file(node = "zhk3m",
+ #          file = "Sib_pro_2018-2022.csv",
+ #          path = "data/Demography",
+ #          remote_path = "RawData/Demography")
+ # 
+ # get_file(node = "zhk3m",
+ #          file = "Ver_alp_2018-2022.csv",
+ #          path = "data/Demography",
+ #          remote_path = "RawData/Demography")
+ # 
+ # get_file(node = "zhk3m",
+ #          file = "INCLINE_metadata.csv",
+ #          path = "data",
+ #          remote_path = "RawData")
+ # 
+ # get_file(node = "zhk3m",
+ #          file = "VA_comments.csv",
+ #          path = "data/Demography",
+ #          remote_path = "RawData/Demography")
+ # 
+ # get_file(node = "zhk3m",
+ #          file = "SP_comments.csv",
+ #          path = "data/Demography",
+ #          remote_path = "RawData/Demography")
 
 
 #### Load data ####
 
-Sib_pro <- read.csv2("data/Demography/Sib_pro_2018-2021.csv")
-Ver_alp <- read.csv2("data/Demography/Ver_alp_2018-2021.csv")
+Sib_pro <- read.csv2("data/Demography/Sib_pro_2018-2022.csv")
+Ver_alp <- read.csv2("data/Demography/Ver_alp_2018-2022.csv")
 INCLINE_metadata <- read_delim("data/INCLINE_metadata.csv", delim = ";")
 VA_comment_dict <- read.csv2("data/Demography/VA_comments.csv")
 SP_comment_dict <- read.csv2("data/Demography/SP_comments.csv")
