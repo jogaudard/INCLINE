@@ -48,9 +48,9 @@ name_dictionary <- read_delim("data\\INCLINE_community_name_dictionary.csv")
 
 #community data
 community_data <- community_data_download |>
-  rename(Cer_sag_cf = "Cer/sag_cf", Cer_sp = "Cer _sp", Fes_sp = Fes.sp., Vac_myr_cf = Var_myr_cf, Nid_seedling = "Nid seedling", block = Block, measure = Measure, site = Site, treatment = Treatment, weather = Weather, vegetation_cover = Veg_cover, vegetation_height_mm = Veg_height_mm, moss_depth_mm = Moss_depth_mm)|> #Changed wrong types and capital letters to small letters. 
-  mutate(plotID = paste0(substr(site, 1,3), "_", block, "_", plot))|> #Making a new column called plotID
-  select(-treatment,-...226)|> #Removing unnecessary columns
+  rename(Cer_sag_cf = "Cer/sag_cf", Cer_sp = "Cer _sp", Nid_seedling = "Nid seedling", block = Block, measure = Measure, site = Site, treatment = Treatment, weather = Weather, vegetation_cover = Veg_cover, vegetation_height_mm = Veg_height_mm, moss_depth_mm = Moss_depth_mm)|> #Changed wrong types and capital letters to small letters. 
+  mutate(plotID = paste0(str_sub(site, 1,3), "_", block, "_", plot))|> #Making a new column called plotID
+  select(-treatment,-...209)|> #Removing unnecessary columns
   mutate(block = as.numeric(block, na.rm = TRUE))|>
   mutate(plot = as.numeric(plot, na.rm = TRUE))|>
   mutate(year = as.numeric(year, na.rm = TRUE))|>
@@ -128,6 +128,9 @@ cover_column <- community_data_longer|>
   mutate(cover = ifelse(cover == 0.1, 1, cover))|>
   mutate(cover = ifelse(cover == 0.5, 1, cover))|>
   mutate(cover = ifelse(cover == 0 & species == "Hyp_mac" & site == "Ulvehaugen" & year == 2019 & block == 7 & plot == 3, 1, cover)) |>
+  mutate(cover = ifelse(cover == "5, 7", NA_real_, cover)) |> #Changing non numeric values to NA, needs to be checked when proofreading later
+  mutate(cover = ifelse(cover == "?", NA_real_, cover)) |> #Changing non numeric values to NA, needs to be checked when proofreading later
+  mutate(cover = ifelse(cover == "1+1*", NA_real_, cover)) |> #Changing non numeric values to NA, needs to be checked when proofreading later
   mutate(cover = as.integer(cover))
 
 vegetation_cover_column <-community_data_longer|> 
