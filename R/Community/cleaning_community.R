@@ -948,3 +948,25 @@ write.csv(community_clean_species_cover, file = "C:\\Users\\cam-d\\OneDrive\\Doc
 write.csv(community_clean_subplot, file = "C:\\Users\\cam-d\\OneDrive\\Documents\\UIB\\Master\\Master_oppgave\\R\\INCLINE\\INCLINE_community_subplot.csv",row.names= FALSE)
 
 write.csv(community_clean_plotlevel_info, file = "C:\\Users\\cam-d\\OneDrive\\Documents\\UIB\\Master\\Master_oppgave\\R\\INCLINE\\INCLINE_community_plotlevel_info.csv",row.names= FALSE)
+
+### Making dataset for ITEX data paper ##
+# Only controls (warmed and not warmed)
+# They only wanted the cover data on the plot level, no subplot presense/absense data
+# Change species name to be full names, and update/check with the taxonomy ITEX is using
+
+ITEX_community_data <- community_clean_species_cover |> 
+  filter(treatment == "C") |> 
+  rename(SITE = site, PLOT = plotID, YEAR = year, SPECIES_NAME = species, ABUNDANCE = cover, TREATMENT = warming) |> 
+  mutate(SUBSITE = NA,
+         X = NA,
+         Y = NA,
+         STATUS = "Live",
+         TISSUE = NA,
+         HIT = NA,
+         ) |> 
+  select(-date, -recorder, -writer, -functional_group, -treatment) |> 
+  mutate(SITE = str_to_upper(str_sub(SITE, 1, 3)),
+         PLOT = str_sub(PLOT, 5,7),
+         TREATMENT = ifelse(TREATMENT == "W", "OTC", "CTL"))
+  
+
