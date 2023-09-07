@@ -170,7 +170,7 @@ community_clean <- community_clean |>
   mutate(species = ifelse(species == "Hup_sel", "Hyp_sel", species))|>
   mutate(species = ifelse(species == "Gen_ana", "Gen_ama", species))|>
   mutate(species = ifelse(species == "Lyc_lyc", "Sel_sel", species))
-#A couple of reason for renaming here. 1) misspellings or several names in the dataset that we combine to the name we want to use (Ant_sp, Epi_sp, Jun_sp, Ran_sp, Hyp_sel, Gen_ama), 2) species that some recorders missidentify (Eup_wet, Vio_can, Emp_nig, Sel_sel), 3) Old taxnomoix names that not everyone has caught up on (Lys_eur).
+#A couple of reason for renaming here. 1) misspellings or several names in the dataset that we combine to the name we want to use (Ant_sp, Epi_sp, Jun_sp, Ran_sp, Hyp_sel, Gen_ama), 2) species that some recorders missidentify (Eup_wet, Vio_can, Emp_nig, Sel_sel), 3) Old taxonomic names that not everyone has caught up on (Lys_eur).
 
 #Plot and year specific changes based on evaluation from turfmapper#
 #Following are changes to the dataset that can be grouped into two main ways of changing the data. 
