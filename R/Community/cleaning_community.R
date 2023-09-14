@@ -954,6 +954,14 @@ write.csv(community_clean_plotlevel_info, file = "C:\\Users\\cam-d\\OneDrive\\Do
 # They only wanted the cover data on the plot level, no subplot presense/absense data
 # Change species name to be full names, and update/check with the taxonomy ITEX is using
 
+#First make the list of species so that we can make a dictionary
+INCLINE_species <- community_clean_subplot |> #Using this dataset since it has the most species
+  ungroup() |> 
+  select(species) |> 
+  unique()
+
+write.csv(INCLINE_species, file = "INCLINE_species.csv")
+
 ITEX_community_data <- community_clean_species_cover |> 
   filter(treatment == "C") |> 
   rename(SITE = site, PLOT = plotID, YEAR = year, SPECIES_NAME = species, ABUNDANCE = cover, TREATMENT = warming) |> 
