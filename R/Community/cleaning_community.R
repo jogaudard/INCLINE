@@ -6,27 +6,33 @@
 library(tidyverse)
 library(lubridate)
 library(dataDownloader)
-library(osfr) #To download the data from OSF we need this library to get the function osf_auth
+library(osfr) #To download the data from OSF we need this package to get the function osf_auth
 
 
 #Use your OSF token to get excess to osf. From here you can download neccesary files
 #osf_auth(token = "")#Your personal OSF token
 
-#Community_data
+#Community data
 get_file(node = "zhk3m",
          file = "INCLINE_community_2018_2019_2021_2022_2023.csv",
          path = "data",
          remote_path = "RawData/Community")
 
-#Meta_data
+#Meta data
 get_file(node = "zhk3m",
          file = "INCLINE_metadata.csv",
          path = "data",
          remote_path = "RawData")
 
-#Name_dictionary
+#Name dictionary
 get_file(node = "zhk3m",
          file = "INCLINE_community_name_dictionary.csv",
+         path = "data",
+         remote_path = "RawData/Community")
+
+#Species name dictionary
+get_file(node = "zhk3m",
+         file = "INCLINE_species_taxonomic_name.csv",
          path = "data",
          remote_path = "RawData/Community")
 
@@ -40,6 +46,9 @@ meta_data_download <- read_delim("data\\INCLINE_metadata.csv") #Need the meta da
 
 #Name dictionary
 name_dictionary <- read_delim("data\\INCLINE_community_name_dictionary.csv")
+
+#Species name dictionary
+species_dictionary <- read_delim("data\\INCLINE_species_taxonomic_name.csv")
 
 
 ####___________Fixing general mistakes in the dataset___________####
@@ -139,7 +148,7 @@ vegetation_cover_column <-community_data_longer|>
   unique()
 
 #Combining the new column "cover" and the elongated community data. Dataset with presence absence data.
-community_clean <-  community_data_longer |>
+community_clean <- community_data_longer |>
   left_join(cover_column, by = c("plot", "block", "site", "plotID", "year", "species"))|>
   select(-vegetation_cover)|>
   left_join(vegetation_cover_column, by = c("plotID", "year"))|>
@@ -943,28 +952,22 @@ community_clean_plotlevel_info <- community_clean |>
   pivot_longer(cols = vegetation_cover:moss_depth_mean, names_to = "name", values_to = "value")
 
 
-write.csv(community_clean_species_cover, file = "C:\\Users\\cam-d\\OneDrive\\Documents\\UIB\\Master\\Master_oppgave\\R\\INCLINE\\INCLINE_community_species_cover.csv",row.names= FALSE)
+write.csv(community_clean_species_cover, file = "data_cleaned/INCLINE_community_species_cover.csv", row.names= FALSE)
 
-write.csv(community_clean_subplot, file = "C:\\Users\\cam-d\\OneDrive\\Documents\\UIB\\Master\\Master_oppgave\\R\\INCLINE\\INCLINE_community_subplot.csv",row.names= FALSE)
+write.csv(community_clean_subplot, file = "data_cleaned/INCLINE_community_subplot.csv", row.names= FALSE)
 
-write.csv(community_clean_plotlevel_info, file = "C:\\Users\\cam-d\\OneDrive\\Documents\\UIB\\Master\\Master_oppgave\\R\\INCLINE\\INCLINE_community_plotlevel_info.csv",row.names= FALSE)
+write.csv(community_clean_plotlevel_info, file = "data_cleaned/INCLINE_community_plotlevel_info.csv", row.names= FALSE)
 
 ### Making dataset for ITEX data paper ##
 # Only controls (warmed and not warmed)
 # They only wanted the cover data on the plot level, no subplot presense/absense data
 # Change species name to be full names, and update/check with the taxonomy ITEX is using
 
-#First make the list of species so that we can make a dictionary
-INCLINE_species <- community_clean_subplot |> #Using this dataset since it has the most species
-  ungroup() |> 
-  select(species) |> 
-  unique()
-
-write.csv(INCLINE_species, file = "INCLINE_species.csv")
-
 ITEX_community_data <- community_clean_species_cover |> 
-  filter(treatment == "C") |> 
-  rename(SITE = site, PLOT = plotID, YEAR = year, SPECIES_NAME = species, ABUNDANCE = cover, TREATMENT = warming) |> 
+  bind_rows(community_clean_plotlevel_info) |> 
+  filter(treatment == "C") |>
+  filter(year != "2022") |> #Removing 2022 because we have seen that we don't trust the method we used that year, so we don't want to include that year
+  rename(SITE = site, PLOT = plotID, YEAR = year, ABUNDANCE = cover, TREATMENT = warming) |> 
   mutate(SUBSITE = NA,
          X = NA,
          Y = NA,
@@ -972,9 +975,14 @@ ITEX_community_data <- community_clean_species_cover |>
          TISSUE = NA,
          HIT = NA,
          ) |> 
+  mutate(ABUNDANCE = ifelse(is.na(ABUNDANCE), value, ABUNDANCE)) |> 
   select(-date, -recorder, -writer, -functional_group, -treatment) |> 
   mutate(SITE = str_to_upper(str_sub(SITE, 1, 3)),
          PLOT = str_sub(PLOT, 5,7),
-         TREATMENT = ifelse(TREATMENT == "W", "OTC", "CTL"))
+         TREATMENT = ifelse(TREATMENT == "W", "OTC", "CTL")) |>
+  left_join(species_dictionary, by = "species") |> 
+  mutate(SPECIES_NAME = ifelse(is.na(taxonomic_name), name, taxonomic_name)) |> 
+  select(SITE, SUBSITE, PLOT, YEAR,  X, Y, STATUS, TISSUE, HIT, SPECIES_NAME, ABUNDANCE, TREATMENT)
   
 
+write.csv(ITEX_community_data , file = "data_cleaned/ITEX_data_INCLINE.csv", row.names= FALSE)
