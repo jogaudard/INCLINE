@@ -985,4 +985,4 @@ ITEX_community_data <- community_clean_species_cover |>
   select(SITE, SUBSITE, PLOT, YEAR,  X, Y, STATUS, TISSUE, HIT, SPECIES_NAME, ABUNDANCE, TREATMENT)
   
 
-write.csv(ITEX_community_data , file = "data_cleaned/ITEX_data_INCLINE.csv", row.names= FALSE)
+#write.csv(ITEX_community_data , file = "data_cleaned/ITEX_data_INCLINE.csv", row.names= FALSE)
