@@ -19,6 +19,17 @@ conflict_prefer("filter", "dplyr")
 #setwd("C:/Users/rgy042/OneDrive - University of Bergen/O-DISK-rgy042/PhD/R_stats/INCLINE_2.0/")
 #osf_auth(token = "get from my document every time you run the code") 
 
+
+get_file(node = "zhk3m",
+          file = "Sib_pro_2018-2023.csv",
+          path = "data/Demography",
+          remote_path = "RawData/Demography")
+
+get_file(node = "zhk3m",
+          file = "Ver_alp_2018-2023.csv",
+          path = "data/Demography",
+          remote_path = "RawData/Demography")
+
  # get_file(node = "zhk3m",
  #          file = "Sib_pro_2018-2022.csv",
  #          path = "data/Demography",
@@ -47,8 +58,8 @@ conflict_prefer("filter", "dplyr")
 
 #### Load data ####
 
-Sib_pro <- read.csv2("data/Demography/Sib_pro_2018-2022.csv")
-Ver_alp <- read.csv2("data/Demography/Ver_alp_2018-2022.csv")
+Sib_pro <- read.csv2("data/Demography/Sib_pro_2018-2023.csv")
+Ver_alp <- read.csv2("data/Demography/Ver_alp_2018-2023.csv")
 INCLINE_metadata <- read_delim("data/INCLINE_metadata.csv", delim = ";")
 VA_comment_dict <- read.csv2("data/Demography/VA_comments.csv")
 SP_comment_dict <- read.csv2("data/Demography/SP_comments.csv")
@@ -244,3 +255,40 @@ INCLINE_demography_Ver_alp <- Ver_alp %>%
 
 #write.csv(INCLINE_demography_Sib_pro, file = "data/cleaned_data/INCLINE_demography_Sib_pro.csv", row.names = FALSE)
 #write.csv(INCLINE_demography_Ver_alp, file = "data/cleaned_data/INCLINE_demography_Ver_alp.csv", row.names = FALSE)
+
+## Plots for checking ##
+
+ggplot(aes(x = LSL, y = NL), data = Sib_pro) + 
+  geom_point(aes(color = as.factor(year))) 
+
+ggplot(aes(x = LSL), data = Sib_pro) + 
+  geom_density() +
+  facet_wrap(~year)
+
+ggplot(aes(x = LSL, y = NB), data = Sib_pro) + #Very few capsules in 2022 and 2023. In 2023: maybe mistaken for buds?
+  geom_point() +
+  facet_wrap(~year)
+
+ggplot(aes(x = LSL, y = LL), data = Sib_pro) +
+  geom_point() +
+  facet_wrap(~year)
+
+ggplot(aes(x = SH, y = NL), data = Ver_alp) + 
+  geom_point() +
+  facet_wrap(~year)
+
+ggplot(aes(x = SH, y = LL, color = year), data = Ver_alp) + #Check some of the outliers in 2023 here
+  geom_point() +
+  facet_wrap(~year)
+
+ggplot(aes(x = LL, y = WL, color = year), data = Ver_alp) + #Check some of the outliers in 2023 here
+  geom_point() +
+  facet_wrap(~year)
+
+ggplot(aes(x = NL, y = LL, color = year), data = Ver_alp) + #Check some of the outliers in 2023 here (also check the outlier in 2020)
+  geom_point() +
+  facet_wrap(~year)
+
+ggplot(aes(x = SH, y = NAC, color = year), data = Ver_alp) + #Looks ok
+  geom_point() +
+  facet_wrap(~year)
