@@ -983,26 +983,29 @@ Growth_fec_Ver_alp <- Ver_alp %>%
   filter(treatment == "C") |> 
   add_column(Ver_alp_coef) %>% 
   add_column(Seeds_per_capsule_VA_null) %>% 
-  mutate(size = Intercept + (SH * SH_coef) + (NL * NL_coef) + (LL * LL_coef) + (WL * WL_coef), 
+  mutate(size = round(Intercept + (SH * SH_coef) + (NL * NL_coef) + (LL * LL_coef) + (WL * WL_coef), digits = 1), 
          NB = as.numeric(NB),
          NFL = as.numeric(NFL),
          NC= as.numeric(NC)) %>% 
   rowwise() %>% 
   mutate(flo.no = sum(NB, NFL, NC, na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
-         flo.no = case_when(flo.no == 0 ~ NA_real_,
-                            TRUE ~ flo.no),
-         fec = Seeds_per_capsule_VA_null * flo.no) %>%
+         # flo.no = case_when(flo.no == 0 ~ NA_real_,
+         #                    TRUE ~ flo.no),
+         fec = round(Seeds_per_capsule_VA_null * flo.no), digits = 1) %>%
   select(siteID, blockID, plotID, unique_IDS, OTC, treatment, year, size, fec, flo.no, flo.if, seedling, juvenile, MS) 
 
 filtering_IDS_VA <- Growth_fec_Ver_alp |> 
-  filter(year == 2022) |> 
+  filter(year == 2023) |> 
   filter(!is.na(size)) |> 
   select(unique_IDS) |> 
   unique()
 
 Growth_fec_Ver_alp <- filtering_IDS_VA |> 
-  left_join(Growth_fec_Ver_alp, join_by(unique_IDS))
+  left_join(Growth_fec_Ver_alp, join_by(unique_IDS) , multiple = "all") |> 
+  group_by(unique_IDS) |> 
+  mutate(total_fec_2018_2023 = round(sum(fec, na.rm = TRUE), digits = 1),
+         average_fec_2018_2023 = round(mean(fec), digits = 1))
   
 
 Growth_fec_Ver_alp |>
@@ -1018,13 +1021,15 @@ Growth_fec_Ver_alp |>
   facet_wrap(~siteID)
 
 Growth_fec_Ver_alp |>
-  filter(!is.na(fec)) |> 
+  filter(fec > 0) |> 
   ggplot(aes(x = unique_IDS, y = fec, fill = as.factor(year))) +
   geom_bar(position = "stack", stat = "identity") +
   facet_wrap(~siteID, scales = "free_x") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90)) +
   scale_fill_ordinal()
+
+#write.csv(Growth_fec_Ver_alp, file = "data/data_for_RagnhildSS/INCLINE_Ver_alp_growth_fec_2018_2023.csv", row.names = FALSE)
 
 
 #Sibbaldia procumbens
@@ -1033,44 +1038,49 @@ Growth_fec_Sib_pro <- Sib_pro %>%
   filter(treatment == "C") |> 
   left_join(Sib_pro_coef, by = "siteID") |>  
   add_column(Seeds_per_capsule_SP) %>% 
-  mutate(size = Intercept + (LSL * LSL_coef) + (NL * NL_coef) + (LL * LL_coef), 
+  mutate(size = round(Intercept + (LSL * LSL_coef) + (NL * NL_coef) + (LL * LL_coef), digits = 1), 
          NB = as.numeric(NB),
          NFL = as.numeric(NFL),
          NC= as.numeric(NC)) %>% 
   rowwise() %>% 
   mutate(flo.no = sum(NB, NFL, NC, na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
-         flo.no = case_when(flo.no == 0 ~ NA_real_,
-                            TRUE ~ flo.no),
-         fec = Seeds_per_capsule_SP * flo.no) %>%
+         # flo.no = case_when(flo.no == 0 ~ NA_real_,
+         #                    TRUE ~ flo.no),
+         fec = round(Seeds_per_capsule_SP * flo.no, digits = 1)) %>%
   select(siteID, blockID, plotID, unique_IDS, OTC, treatment, year, size, fec, flo.no, flo.if, seedling, juvenile, MS) 
 
 filtering_IDS_SP <- Growth_fec_Sib_pro |> 
-  filter(year == 2022) |> 
+  filter(year == 2023) |> 
   filter(!is.na(size)) |> 
   select(unique_IDS) |> 
   unique()
 
 Growth_fec_Sib_pro <- filtering_IDS_SP |> 
-  left_join(Growth_fec_Sib_pro, join_by(unique_IDS), multiple = "all")
+  left_join(Growth_fec_Sib_pro, join_by(unique_IDS), multiple = "all") |> 
+  group_by(unique_IDS) |> 
+  mutate(total_fec_2018_2023 = round(sum(fec, na.rm = TRUE), digits = 1),
+         average_fec_2018_2023 = round(mean(fec), digits = 1))
 
 
 Growth_fec_Sib_pro |>
   ggplot(aes(x = year, y = size, group = unique_IDS)) +
   geom_point() +
-  #geom_smooth(method = "lm", se = FALSE) +
-  geom_line(aes(y = predict(Sib_pro_growth_model)), size = 1) +
+  geom_smooth(method = "lm", se = FALSE) +
+  #geom_line(aes(y = predict(Sib_pro_growth_model)), size = 1) +
   facet_wrap(~siteID)
 
 
 Growth_fec_Sib_pro |>
-  filter(!is.na(fec)) |> 
+  filter(fec > 0) |> 
   ggplot(aes(x = unique_IDS, y = fec, fill = as.factor(year))) +
   geom_bar(position = "stack", stat = "identity") +
   facet_wrap(~siteID, scales = "free_x") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90)) +
   scale_fill_ordinal()
+
+#write.csv(Growth_fec_Sib_pro, file = "data/data_for_RagnhildSS/INCLINE_Sib_pro_growth_fec_2018_2023.csv", row.names = FALSE)
 
 ### Make growth model for Sibbaldia and extrapolate intercept (relative size) and slope (growth rate)
 Sib_pro_growth_model <- lmer(size ~ year + (1 +  year|unique_IDS), data = Growth_fec_Sib_pro)
