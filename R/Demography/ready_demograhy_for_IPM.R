@@ -7,11 +7,8 @@ rm(INCLINE_demography_Sib_pro)
 rm(INCLINE_demography_Ver_alp)
 
 #### Libraries ####
-#library(tidyverse)
 library(lme4)
 library(lmerTest)
-#library(lubridate)
-#library(conflicted)
 
 #### Select preferences for conflicts ####
 
