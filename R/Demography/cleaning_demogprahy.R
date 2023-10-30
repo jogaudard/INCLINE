@@ -30,30 +30,20 @@ get_file(node = "zhk3m",
           path = "data/Demography",
           remote_path = "RawData/Demography")
 
- # get_file(node = "zhk3m",
- #          file = "Sib_pro_2018-2022.csv",
- #          path = "data/Demography",
- #          remote_path = "RawData/Demography")
- # 
- # get_file(node = "zhk3m",
- #          file = "Ver_alp_2018-2022.csv",
- #          path = "data/Demography",
- #          remote_path = "RawData/Demography")
- # 
- # get_file(node = "zhk3m",
- #          file = "INCLINE_metadata.csv",
- #          path = "data",
- #          remote_path = "RawData")
- # 
- # get_file(node = "zhk3m",
- #          file = "VA_comments.csv",
- #          path = "data/Demography",
- #          remote_path = "RawData/Demography")
- # 
- # get_file(node = "zhk3m",
- #          file = "SP_comments.csv",
- #          path = "data/Demography",
- #          remote_path = "RawData/Demography")
+get_file(node = "zhk3m",
+         file = "INCLINE_metadata.csv",
+         path = "data",
+         remote_path = "RawData")
+
+get_file(node = "zhk3m",
+        file = "VA_comments.csv",
+        path = "data/Demography",
+        remote_path = "RawData/Demography")
+
+get_file(node = "zhk3m",
+        file = "SP_comments.csv",
+        path = "data/Demography",
+        remote_path = "RawData/Demography")
 
 
 #### Load data ####
@@ -135,6 +125,7 @@ Sib_pro <- Sib_pro %>%
   mutate(LSL = round(LSL + 0.01, digits = 0),
          LL = round(LL + 0.01, digits = 0)) %>% 
   mutate(NFS = if_else(NFS == "?", NA_integer_, as.integer(NFS)),
+         #This gives a warning message about coercing NAs, I checked - it workes the way it is supposed to
          LL = as.integer(LL)) 
 
 Ver_alp <- Ver_alp %>%  
