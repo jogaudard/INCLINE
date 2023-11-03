@@ -9,6 +9,8 @@ rm(INCLINE_demography_Ver_alp)
 #### Libraries ####
 library(lme4)
 library(lmerTest)
+library(broom)
+library(purrr)
 
 #### Select preferences for conflicts ####
 
@@ -604,30 +606,19 @@ Growth_fec_Sib_pro |>
 #write.csv(Growth_fec_Sib_pro, file = "data/data_for_RagnhildSS/INCLINE_Sib_pro_growth_fec_2018_2023.csv", row.names = FALSE)
 
 ### Make growth model for each individual, and extrapolate the slope (growth rate)
-library(broom)
-
-data <- Growth_fec_Sib_pro |> filter(unique_IDS == "Gud_2_1_2")
-data <- Growth_fec_Sib_pro |> filter(unique_IDS == "Ulv_1_1_1")
-
 
 growth_rate_calculations <- function(data){
   #Fit the linear regression model
   model <- lm(size ~ year, data = data)
   
   #Extract the slope coefficient from the model summary
-  slope <- tidy(model) #|> 
-    # filter(term == "year") |> 
-    # select(estimate) |> 
-    # as.numeric()
+  slope <- tidy(model)
   
   return(slope)
 }
 
 
-
 ### Use map to get slope of the growth rate for each individual
-
-library(purrr)
 
 nested_Growth_fec_Sib_pro <- Growth_fec_Sib_pro |> 
   ungroup() |> 
