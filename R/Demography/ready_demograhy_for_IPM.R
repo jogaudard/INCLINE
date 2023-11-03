@@ -552,9 +552,6 @@ Growth_fec_Ver_alp |>
   theme(axis.text.x = element_text(angle = 90)) +
   scale_fill_ordinal()
 
-#write.csv(Growth_fec_Ver_alp, file = "data/data_for_RagnhildSS/INCLINE_Ver_alp_growth_fec_2018_2023.csv", row.names = FALSE)
-
-
 #Sibbaldia procumbens
 
 Growth_fec_Sib_pro <- Sib_pro %>% 
@@ -603,8 +600,6 @@ Growth_fec_Sib_pro |>
   theme(axis.text.x = element_text(angle = 90)) +
   scale_fill_ordinal()
 
-#write.csv(Growth_fec_Sib_pro, file = "data/data_for_RagnhildSS/INCLINE_Sib_pro_growth_fec_2018_2023.csv", row.names = FALSE)
-
 ### Make growth model for each individual, and extrapolate the slope (growth rate)
 
 growth_rate_calculations <- function(data){
@@ -620,14 +615,29 @@ growth_rate_calculations <- function(data){
 
 ### Use map to get slope of the growth rate for each individual
 
-nested_Growth_fec_Sib_pro <- Growth_fec_Sib_pro |> 
+Growth_fec_Sib_pro <- Growth_fec_Sib_pro |> 
   ungroup() |> 
   nest(.by = unique_IDS) |> 
   mutate(mod = map(data, growth_rate_calculations)) |> 
   unnest(mod) |> 
   filter(term == "year") |> 
-  unnest(data)
+  unnest(data) |> 
+  rename(RGR = estimate, RGR_std_error = std.error, RGR_statistic = statistic, RGR_pvalue = p.value) |> 
+  select(-term)
 
+Growth_fec_Ver_alp <- Growth_fec_Ver_alp |> 
+  ungroup() |> 
+  nest(.by = unique_IDS) |> 
+  mutate(mod = map(data, growth_rate_calculations)) |> 
+  unnest(mod) |> 
+  filter(term == "year") |> 
+  unnest(data) |> 
+  rename(RGR = estimate, RGR_std_error = std.error, RGR_statistic = statistic, RGR_pvalue = p.value) |> 
+  select(-term)
+
+#write.csv(Growth_fec_Sib_pro, file = "data/data_for_RagnhildSS/INCLINE_Sib_pro_growth_fec_2018_2023.csv", row.names = FALSE)
+
+#write.csv(Growth_fec_Ver_alp, file = "data/data_for_RagnhildSS/INCLINE_Ver_alp_growth_fec_2018_2023.csv", row.names = FALSE)
 
 ### Add fecundity information to dataset
 
