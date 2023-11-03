@@ -638,50 +638,6 @@ nested_Growth_fec_Sib_pro <- Growth_fec_Sib_pro |>
   unnest(data)
 
 
-### Make growth model for Sibbaldia and extrapolate intercept (relative size) and slope (growth rate)
-Sib_pro_growth_model <- lmer(size ~ year + (1 +  year|unique_IDS), data = Growth_fec_Sib_pro)
-
-summary(Sib_pro_growth_model)
-
-Sib_pro_growth_coef <- coef(Sib_pro_growth_model)$unique_IDS
-
-Sib_pro_growth_fec <- Sib_pro_growth_coef %>% 
-  rownames_to_column() %>% 
-  rename(unique_IDS = rowname, growth_intercept = "(Intercept)", growth_rate = year) |> 
-  mutate(siteID = substr(unique_IDS, 1, 3),
-         block_ID = substr(unique_IDS, 5, 5),
-         plot_ID = substr(unique_IDS, 7, 7),
-         plot = substr(unique_IDS, 1, 7))
-
-### Check model visually
-
-unique_IDS_SP <- unique(pull(Growth_fec_Sib_pro, unique_IDS))
-
-newdata <- expand.grid(year = seq(2018,2022, length = 100),
-                       unique_IDS = unique_IDS_SP)
-
-newdata$predicted <- predict(object = Sib_pro_growth_model, newdata = newdata)
-
-newdata <- newdata |> 
-  mutate(siteID = substr(unique_IDS, 1, 3),
-         block_ID = substr(unique_IDS, 5, 5))
-
-Growth_fec_Sib_pro <- Growth_fec_Sib_pro |> 
-  mutate(block_ID = substr(blockID, 5, 5))
-
-newdata_Ulv <- newdata |> filter(siteID == "Ulv") |> filter(block_ID %in% c(1, 2, 6))
-
-
-Growth_fec_Sib_pro |>
-  filter(siteID == "Ulv") |> 
-  filter(block_ID %in% c(1, 2, 6)) |> 
-  ggplot(aes(x = year, y = size, group = unique_IDS, color = unique_IDS)) +
-  geom_point() +
-  geom_line(aes(x = year, y = predicted, color = unique_IDS), data = newdata_Ulv, size = 0.5) +
-  facet_wrap(~block_ID) +
-  theme(legend.position = "bottom")
-
-
 ### Add fecundity information to dataset
 
 Sib_pro_fec <- Growth_fec_Sib_pro |> 
