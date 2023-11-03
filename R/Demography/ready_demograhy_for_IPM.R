@@ -604,31 +604,38 @@ Growth_fec_Sib_pro |>
 #write.csv(Growth_fec_Sib_pro, file = "data/data_for_RagnhildSS/INCLINE_Sib_pro_growth_fec_2018_2023.csv", row.names = FALSE)
 
 ### Make growth model for each individual, and extrapolate the slope (growth rate)
+library(broom)
 
 data <- Growth_fec_Sib_pro |> filter(unique_IDS == "Gud_2_1_2")
+data <- Growth_fec_Sib_pro |> filter(unique_IDS == "Ulv_1_1_1")
+
 
 growth_rate_calculations <- function(data){
   #Fit the linear regression model
   model <- lm(size ~ year, data = data)
   
   #Extract the slope coefficient from the model summary
-  summary_info <- summary(model)
-  slope <- summary_info$coefficients["year", "Estimate"]
+  slope <- tidy(model) #|> 
+    # filter(term == "year") |> 
+    # select(estimate) |> 
+    # as.numeric()
   
   return(slope)
 }
 
-### Use map to make this for every dataset
+
+
+### Use map to get slope of the growth rate for each individual
 
 library(purrr)
 
 nested_Growth_fec_Sib_pro <- Growth_fec_Sib_pro |> 
   ungroup() |> 
-  nest_by(unique_IDS)
-
-### Get slopes for each individual
-
-slopes <- map(nested_Growth_fec_Sib_pro, growth_rate_calculations)
+  nest(.by = unique_IDS) |> 
+  mutate(mod = map(data, growth_rate_calculations)) |> 
+  unnest(mod) |> 
+  filter(term == "year") |> 
+  unnest(data)
 
 
 ### Make growth model for Sibbaldia and extrapolate intercept (relative size) and slope (growth rate)
