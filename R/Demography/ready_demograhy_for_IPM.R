@@ -506,7 +506,7 @@ Growth_fec_Ver_alp <- Ver_alp %>%
   filter(treatment == "C") |> 
   add_column(Ver_alp_coef) %>% 
   add_column(Seeds_per_capsule_VA_null) %>% 
-  mutate(size = round(Intercept + (SH * SH_coef) + (NL * NL_coef) + (LL * LL_coef) + (WL * WL_coef), digits = 1), 
+  mutate(size = Intercept + (SH * SH_coef) + (NL * NL_coef) + (LL * LL_coef) + (WL * WL_coef), 
          NB = as.numeric(NB),
          NFL = as.numeric(NFL),
          NC= as.numeric(NC)) %>% 
@@ -530,35 +530,13 @@ Growth_fec_Ver_alp <- filtering_IDS_VA |>
   mutate(total_fec_2018_2023 = round(sum(fec, na.rm = TRUE), digits = 1),
          average_fec_2018_2023 = round(mean(fec), digits = 1))
 
-
-Growth_fec_Ver_alp |>
-  ggplot(aes(x = year, y = size, group = unique_IDS)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
-  facet_wrap(~siteID)
-
-Growth_fec_Ver_alp |>
-  ggplot(aes(x = year, y = fec, group = unique_IDS)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
-  facet_wrap(~siteID)
-
-Growth_fec_Ver_alp |>
-  filter(fec > 0) |> 
-  ggplot(aes(x = unique_IDS, y = fec, fill = as.factor(year))) +
-  geom_bar(position = "stack", stat = "identity") +
-  facet_wrap(~siteID, scales = "free_x") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90)) +
-  scale_fill_ordinal()
-
 #Sibbaldia procumbens
 
 Growth_fec_Sib_pro <- Sib_pro %>% 
   filter(treatment == "C") |> 
   left_join(Sib_pro_coef, by = "siteID") |>  
   add_column(Seeds_per_capsule_SP) %>% 
-  mutate(size = round(Intercept + (LSL * LSL_coef) + (NL * NL_coef) + (LL * LL_coef), digits = 1), 
+  mutate(size = Intercept + (LSL * LSL_coef) + (NL * NL_coef) + (LL * LL_coef), 
          NB = as.numeric(NB),
          NFL = as.numeric(NFL),
          NC= as.numeric(NC)) %>% 
@@ -568,6 +546,7 @@ Growth_fec_Sib_pro <- Sib_pro %>%
          # flo.no = case_when(flo.no == 0 ~ NA_real_,
          #                    TRUE ~ flo.no),
          fec = round(Seeds_per_capsule_SP * flo.no, digits = 1)) %>%
+  mutate(size = 2^size) |> #Transforming back to mg
   select(siteID, blockID, plotID, unique_IDS, OTC, treatment, year, size, fec, flo.no, flo.if, seedling, juvenile, MS) 
 
 filtering_IDS_SP <- Growth_fec_Sib_pro |> 
@@ -582,23 +561,16 @@ Growth_fec_Sib_pro <- filtering_IDS_SP |>
   mutate(total_fec_2018_2023 = round(sum(fec, na.rm = TRUE), digits = 1),
          average_fec_2018_2023 = round(mean(fec), digits = 1))
 
-
-Growth_fec_Sib_pro |>
-  ggplot(aes(x = year, y = size, group = unique_IDS)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
-  #geom_line(aes(y = predict(Sib_pro_growth_model)), size = 1) +
-  facet_wrap(~siteID)
-
-
-Growth_fec_Sib_pro |>
-  filter(fec > 0) |> 
-  ggplot(aes(x = unique_IDS, y = fec, fill = as.factor(year))) +
-  geom_bar(position = "stack", stat = "identity") +
-  facet_wrap(~siteID, scales = "free_x") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90)) +
-  scale_fill_ordinal()
+Growth_fec_Sib_pro |> 
+  select(-seedling, -juvenile) |> 
+  mutate(year = paste0("a", year, "_")) |> 
+  pivot_wider(names_from = year, values_from = size) |> 
+  mutate(growth_2018_2019 = log((a2019_ - a2018_)/a2018_),
+         growth_2019_2020 = log((a2020_ - a2019_)/a2019_),
+         growth_2020_2021 = log((a2021_ - a2020_)/a2020_),
+         growth_2021_2022 = log((a2022_ - a2021_)/a2021_),
+         growth_2022_2023 = log((a2023_ - a2022_)/a2022_),
+         growth_2018_2023 = log((a2023_ - a2018_)/a2018_))
 
 ### Make growth model for each individual, and extrapolate the slope (growth rate)
 
@@ -611,6 +583,20 @@ growth_rate_calculations <- function(data){
   
   return(slope)
 }
+
+# ### Calculate log response ratio growth between each year - and over the five year periode
+# 
+# log_response_ratio_growth_calculations <- function(data){
+#   #Calculate individual year growth
+#   data |> 
+#     
+#   log response ratio: log((vekt år 2 - vekt år 1)/vekt år ?? )
+#   
+#   #Extract the slope coefficient from the model summary
+#   slope <- tidy(model)
+#   
+#   return(slope)
+# }
 
 
 ### Use map to get slope of the growth rate for each individual
