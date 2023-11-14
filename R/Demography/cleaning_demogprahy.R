@@ -16,7 +16,6 @@ conflict_prefer("select", "dplyr")
 conflict_prefer("filter", "dplyr")
 
 #### Downloading data from OSF ####
-#setwd("C:/Users/rgy042/OneDrive - University of Bergen/O-DISK-rgy042/PhD/R_stats/INCLINE_2.0/")
 #osf_auth(token = "get from my document every time you run the code") 
 
 
