@@ -611,7 +611,7 @@ Growth_fec_Sib_pro <- Growth_fec_Sib_pro |>
   rowwise() |> 
   mutate(mean_growth_2018_2023 = mean(c_across(c(growth_2018_2019, growth_2019_2020, growth_2020_2021, growth_2021_2022, growth_2022_2023)), na.rm = TRUE)) |> 
   pivot_longer(cols = starts_with("a20"), names_to = "year", values_to = "size") |> 
-  mutate(year = as.numeric(substr(year, 2, 5))) |> 
+  mutate(year = as.numeric(substr(year, 2, 5))) |>
   select(siteID, blockID, plotID, OTC, treatment, unique_IDS, MS, year, size, fec, flo.no, flo.if, total_fec_2018_2023, average_fec_2018_2023, RGR, RGR_std_error, RGR_statistic, RGR_pvalue, growth_2018_2019, growth_2019_2020, growth_2020_2021, growth_2021_2022, growth_2022_2023, growth_2018_2023, mean_growth_2018_2023)
 
 Growth_fec_Ver_alp <- Growth_fec_Ver_alp |> 
