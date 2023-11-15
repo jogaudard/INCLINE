@@ -562,37 +562,6 @@ Growth_fec_Sib_pro <- filtering_IDS_SP |>
   mutate(total_fec_2018_2023 = round(sum(fec, na.rm = TRUE), digits = 1),
          average_fec_2018_2023 = round(mean(fec), digits = 1))
 
-#Calculate a standardized growth for each year, and the overall from 2018 to 2023, and the average of the years
-Growth_fec_Sib_pro <- Growth_fec_Sib_pro |> 
-  select(-seedling, -juvenile) |> 
-  mutate(year = paste0("a", year, "_")) |> 
-  pivot_wider(names_from = year, values_from = size) |> 
-  mutate(growth_2018_2019 = (a2019_ - a2018_)/a2018_,
-         growth_2019_2020 = (a2020_ - a2019_)/a2019_,
-         growth_2020_2021 = (a2021_ - a2020_)/a2020_,
-         growth_2021_2022 = (a2022_ - a2021_)/a2021_,
-         growth_2022_2023 = (a2023_ - a2022_)/a2022_,
-         growth_2018_2023 = (a2023_ - a2018_)/a2018_) |> 
-  rowwise() |> 
-  mutate(mean_growth_2018_2023 = mean(c_across(c(growth_2018_2019, growth_2019_2020, growth_2020_2021, growth_2021_2022, growth_2022_2023)), na.rm = TRUE)) |> 
-  pivot_longer(cols = starts_with("a20"), names_to = "year", values_to = "size") |> 
-  mutate(year = as.numeric(substr(year, 2, 5)))
-
-Growth_fec_Ver_alp <- Growth_fec_Ver_alp |> 
-  select(-seedling, -juvenile) |> 
-  mutate(year = paste0("a", year, "_")) |> 
-  pivot_wider(names_from = year, values_from = size) |> 
-  mutate(growth_2018_2019 = (a2019_ - a2018_)/a2018_,
-         growth_2019_2020 = (a2020_ - a2019_)/a2019_,
-         growth_2020_2021 = (a2021_ - a2020_)/a2020_,
-         growth_2021_2022 = (a2022_ - a2021_)/a2021_,
-         growth_2022_2023 = (a2023_ - a2022_)/a2022_,
-         growth_2018_2023 = (a2023_ - a2018_)/a2018_) |> 
-  rowwise() |> 
-  mutate(mean_growth_2018_2023 = mean(c_across(c(growth_2018_2019, growth_2019_2020, growth_2020_2021, growth_2021_2022, growth_2022_2023)), na.rm = TRUE)) |> 
-  pivot_longer(cols = starts_with("a20"), names_to = "year", values_to = "size") |> 
-  mutate(year = as.numeric(substr(year, 2, 5)))
-
 ### Make growth model for each individual, and extrapolate the slope (growth rate)
 
 growth_rate_calculations <- function(data){
@@ -626,6 +595,37 @@ Growth_fec_Ver_alp <- Growth_fec_Ver_alp |>
   unnest(data) |> 
   rename(RGR = estimate, RGR_std_error = std.error, RGR_statistic = statistic, RGR_pvalue = p.value) |> 
   select(-term)
+
+#Calculate a standardized growth for each year, and the overall from 2018 to 2023, and the average of the years
+Growth_fec_Sib_pro1 <- Growth_fec_Sib_pro |> 
+  select(-seedling, -juvenile) |> 
+  mutate(year = paste0("a", year, "_")) |> 
+  pivot_wider(names_from = year, values_from = size) |> 
+  mutate(growth_2018_2019 = (a2019_ - a2018_)/a2018_,
+         growth_2019_2020 = (a2020_ - a2019_)/a2019_,
+         growth_2020_2021 = (a2021_ - a2020_)/a2020_,
+         growth_2021_2022 = (a2022_ - a2021_)/a2021_,
+         growth_2022_2023 = (a2023_ - a2022_)/a2022_,
+         growth_2018_2023 = (a2023_ - a2018_)/a2018_) |> 
+  rowwise() |> 
+  mutate(mean_growth_2018_2023 = mean(c_across(c(growth_2018_2019, growth_2019_2020, growth_2020_2021, growth_2021_2022, growth_2022_2023)), na.rm = TRUE)) |> 
+  pivot_longer(cols = starts_with("a20"), names_to = "year", values_to = "size") |> 
+  mutate(year = as.numeric(substr(year, 2, 5)))
+
+Growth_fec_Ver_alp1 <- Growth_fec_Ver_alp |> 
+  select(-seedling, -juvenile) |> 
+  mutate(year = paste0("a", year, "_")) |> 
+  pivot_wider(names_from = year, values_from = size) |> 
+  mutate(growth_2018_2019 = (a2019_ - a2018_)/a2018_,
+         growth_2019_2020 = (a2020_ - a2019_)/a2019_,
+         growth_2020_2021 = (a2021_ - a2020_)/a2020_,
+         growth_2021_2022 = (a2022_ - a2021_)/a2021_,
+         growth_2022_2023 = (a2023_ - a2022_)/a2022_,
+         growth_2018_2023 = (a2023_ - a2018_)/a2018_) |> 
+  rowwise() |> 
+  mutate(mean_growth_2018_2023 = mean(c_across(c(growth_2018_2019, growth_2019_2020, growth_2020_2021, growth_2021_2022, growth_2022_2023)), na.rm = TRUE)) |> 
+  pivot_longer(cols = starts_with("a20"), names_to = "year", values_to = "size") |> 
+  mutate(year = as.numeric(substr(year, 2, 5)))
 
 #write.csv(Growth_fec_Sib_pro, file = "data/data_for_RagnhildSS/INCLINE_Sib_pro_growth_fec_2018_2023.csv", row.names = FALSE)
 
