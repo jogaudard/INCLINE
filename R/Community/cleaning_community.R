@@ -53,13 +53,13 @@ species_dictionary <- read_delim("data\\INCLINE_species_taxonomic_name.csv")
 
 ####___________Fixing general mistakes in the dataset___________####
 ###### Cleaning variables in dataset ######
-#For it to be easier to work with the data, all the names will be standardized after the same rules.The general rule will be capital letter on the specie name with an underscore to the surname and an underscore to cf if they have a cf at the end. All columns that have a name with space, gets a underscore instead for space. All other names that arent species gets small letters instead of capital letters. I recently learned that it is a code you can use that will fix all these problems automatic. By renaming the columns we dont need to think of their unique names when working with the data. Also fixed general mistakes like making the columns numeric, og to data after what it should be.
+#For it to be easier to work with the data, all the names will be standardized after the same rules.The general rule will be capital letter on the specie name with an underscore to the surname and an underscore to cf if they have a cf at the end. All columns that have a name with space, gets a underscore instead for space. All other names that aren't species gets small letters instead of capital letters. By renaming the columns we don't need to think of their unique names when working with the data. Also fixed general mistakes like making the columns numeric, or to data after what it should be.
 
 #community data
 community_data <- community_data_download |>
-  rename(Cer_sag_cf = "Cer/sag_cf", Cer_sp = "Cer _sp", Nid_seedling = "Nid seedling", block = Block, measure = Measure, site = Site, treatment = Treatment, weather = Weather, vegetation_cover = Veg_cover, vegetation_height_mm = Veg_height_mm, moss_depth_mm = Moss_depth_mm)|> #Changed wrong types and capital letters to small letters. 
+  rename(Cer_Sag_cf = "Cer/sag_cf", Cer_sp = "Cer _sp", Nid_seedling = "Nid seedling", block = Block, measure = Measure, site = Site, treatment = Treatment, weather = Weather, vegetation_cover = Veg_cover, vegetation_height_mm = Veg_height_mm, moss_depth_mm = Moss_depth_mm)|> #Changed wrong types and capital letters to small letters. 
   mutate(plotID = paste0(str_sub(site, 1,3), "_", block, "_", plot))|> #Making a new column called plotID
-  select(-treatment,-...209)|> #Removing unnecessary columns
+  select(-treatment)|> #Removing unnecessary columns
   mutate(block = as.numeric(block, na.rm = TRUE))|>
   mutate(plot = as.numeric(plot, na.rm = TRUE))|>
   mutate(year = as.numeric(year, na.rm = TRUE))|>
@@ -87,12 +87,13 @@ community_data <- community_data_download |>
   mutate(date = ifelse(date == "30.07.2021/02.08.2021", "30.07.2021", date)) |>
   mutate(date = dmy(date))
 
+#There is a warming message that fungus does not only have numerics in them. I checked it, it has an "O", I checked the data, it is not supposed to have anything. So that the code changes this to NA is fine.
+
 #meta data
 meta_data <- meta_data_download|>
   select(plotID, OTC, treatment) #selecting relevant variables from the meta data
 
 #__________Combining community data and meta data and translating names__________#
-# The first year the data was collected, we didn't register the treatment. Therefor by combining the community data and meta data, we will get the missing information. We are also putting in plotID as a new variable that is easier to work with than separated block and plot information. 
 
 community_data <- community_data |>
   left_join(meta_data, by = "plotID") |>
@@ -106,7 +107,7 @@ community_data <- community_data |>
 
 
 #__________ Turfmapper __________#
-# To continuing cleaning the large dataset, one of our group members have made a turfmap where we can analyse the yearly changes for each specie in each plot. All the colored subplots represent the observations, and the green color changes based on the species cover for each year. The turfmapper plotting code can be found in the community_turfmapper.R script
+# To continuing cleaning the large dataset, we do a visuall inspection first using the turfmapper package made by Richard Telfors available on github. The turfmapper plotting code can be found in the community_turfmapper.R script
 
 #Making data ready for turfmapper by widening the data
 community_data_longer <- community_data |>
@@ -123,7 +124,7 @@ community_data_longer <- community_data_longer |>
     juvenile = str_detect(value, "(?i)[j]"),
     seedling = str_detect(value, "(?i)[s]")
   )|>
-  mutate(dominance = case_when(dominance == "TRUE" ~ value)) |> #In theory Sibbaldia procumbens (Sib_pro) and Veronica alpina (Ver_alp) should have registered dominance in all plots at Skjellingahaugen every year. Which means that 1 = 0-25% cover in the subplot, 2 = 25-50%, 3 = 50-75% and 4 = 75-100%. So with this coding we are missing out on the 0-25% information for those species. However, the problem is that I can't be sure if people usde 1 as a dominance or a cover value. For plots where there are 2, 3 and 4s we know that 1s means dominance. Could be coded in somehow.
+  mutate(dominance = case_when(dominance == "TRUE" ~ value)) |> #In theory Sibbaldia procumbens (Sib_pro) and Veronica alpina (Ver_alp) should have registered dominance in all plots at Skjellingahaugen every year. Which means that 1 = 0-25% cover in the subplot, 2 = 25-50%, 3 = 50-75% and 4 = 75-100%. So with this coding we are missing out on the 0-25% information for those species. However, the problem is that I can't be sure if people used 1 as a dominance or a cover value. For plots where there are 2, 3 and 4s we know that 1s means dominance. Could be coded in somehow.
   mutate(presence = case_when(presence == "TRUE" ~ 1)) 
 
 #_______ Making columns that needs to be merged in to the dataset _______#
@@ -133,13 +134,13 @@ cover_column <- community_data_longer|>
   select(block, plot, site, plotID, year, species, value) |>
   rename(cover = value)|>
   filter(!cover == "")|>
-  filter(!cover == " ")|>
+  filter(!cover == " ")|> #Checked this one, and it should not have anything in it, so it is correct to filter out
   mutate(cover = ifelse(cover == 0.1, 1, cover))|>
   mutate(cover = ifelse(cover == 0.5, 1, cover))|>
   mutate(cover = ifelse(cover == 0 & species == "Hyp_mac" & site == "Ulvehaugen" & year == 2019 & block == 7 & plot == 3, 1, cover)) |>
   mutate(cover = ifelse(cover == "5, 7", NA_real_, cover)) |> #Changing non numeric values to NA, needs to be checked when proofreading later
-  mutate(cover = ifelse(cover == "?", NA_real_, cover)) |> #Changing non numeric values to NA, needs to be checked when proofreading later
-  mutate(cover = ifelse(cover == "1+1*", NA_real_, cover)) |> #Changing non numeric values to NA, needs to be checked when proofreading later
+  mutate(cover = ifelse(cover == "?", NA_real_, cover)) |> #Check all the insidences of this, and they should all be NA.
+  mutate(cover = ifelse(cover == "1+1*", 1, cover)) |> #Two Car_sp in this plot. Should be 1 for each of them
   mutate(cover = as.integer(cover))
 
 vegetation_cover_column <-community_data_longer|> 
@@ -167,6 +168,7 @@ community_clean <- community_data_longer |>
 ####__________Cleaning mistakes from dataset based on turfmapper evaluation__________####
 #Several typing mistakes occurred when making the dataset. Therefor, we standardise again the rest of typing mistakes for the different species so its easier to work on when cleaning the data.
 #General coding for all plots
+#A couple of reason for renaming here. 1) misspellings or several names in the dataset that we combine to the name we want to use (Ant_sp, Epi_sp, Jun_sp, Ran_sp, Hyp_sel, Gen_ama), 2) species that some recorders missidentify (Eup_wet, Vio_can, Emp_nig, Sel_sel), 3) Old taxonomic names that not everyone has caught up on (Lys_eur).
 community_clean <- community_clean |>
   mutate(species = ifelse(species == "Tri_eur", "Lys_eur", species))|>
   mutate(species = ifelse (species == "Antennaria_sp", "Ant_sp", species))|>
@@ -179,7 +181,7 @@ community_clean <- community_clean |>
   mutate(species = ifelse(species == "Hup_sel", "Hyp_sel", species))|>
   mutate(species = ifelse(species == "Gen_ana", "Gen_ama", species))|>
   mutate(species = ifelse(species == "Lyc_lyc", "Sel_sel", species))
-#A couple of reason for renaming here. 1) misspellings or several names in the dataset that we combine to the name we want to use (Ant_sp, Epi_sp, Jun_sp, Ran_sp, Hyp_sel, Gen_ama), 2) species that some recorders missidentify (Eup_wet, Vio_can, Emp_nig, Sel_sel), 3) Old taxonomic names that not everyone has caught up on (Lys_eur).
+
 
 #Plot and year specific changes based on evaluation from turfmapper#
 #Following are changes to the dataset that can be grouped into two main ways of changing the data. 
@@ -693,7 +695,7 @@ community_clean <- community_clean |>
   mutate(cover = ifelse(species == "Vac_vit" & plotID == "Ulv_1_3" & year == 2021, 1, cover))|>
   mutate(species = ifelse(species == "Alc_sp_cf" & plotID == "Ulv_1_4", "Alc_sp", species))|>
   mutate(cover = ifelse(species == "Alc_sp" & plotID == "Ulv_1_4" & year == 2019,4,cover))|>
-  mutate(species = ifelse(species == "Cer_sag_cf" & plotID == "Ulv_1_4", "Cer_cer", species))|>
+  mutate(species = ifelse(species == "Cer_Sag_cf" & plotID == "Ulv_1_4", "Cer_cer", species))|>
   mutate(cover = ifelse(species == "Cer_cer" & plotID == "Ulv_1_4" & year == 2019,4,cover))|>
   mutate(species = ifelse(species == "Oma_nor" & plotID == "Ulv_1_4", "Oma_sup", species))|>
   mutate(species = ifelse(species == "Poa_pra" & plotID == "Ulv_1_4", "Poa_alp", species))|>
