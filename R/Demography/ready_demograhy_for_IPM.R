@@ -89,7 +89,10 @@ Sib_pro_coef <- Sib_pro_coef %>%
 biomass_Ver_alp <- biomass_Ver_alp %>% 
   select(siteID, IDS, SH, NL, LL, WL, ag) %>% 
   filter(!ag == 0) %>% 
-  mutate(ag = log2(ag))
+  mutate(ag = log2(ag)) |> 
+   mutate(SH = SH*10,
+          LL = LL*10,
+          WL = WL*10)
 
  # Ver_alp_biomass_regression <- lmer(ag ~ SH + NL + LL + WL + (1|siteID), data = biomass_Ver_alp)  #Not using this as it came with a singularity warning. Mixed effect model and linear model gives the same intercept and slopes for each variable.
  # summary(Ver_alp_biomass_regression)
@@ -506,6 +509,8 @@ Growth_fec_Ver_alp <- Ver_alp %>%
   filter(treatment == "C") |> 
   add_column(Ver_alp_coef) %>% 
   add_column(Seeds_per_capsule_VA_null) %>% 
+  mutate(NL = ifelse(unique_IDS == "Gud_5_4_16" & year == "2020", 10, NL)) |> 
+  mutate(WL = ifelse(unique_IDS == "Gud_5_4_29" & year == "2023", 8, WL)) |> 
   mutate(size = Intercept + (SH * SH_coef) + (NL * NL_coef) + (LL * LL_coef) + (WL * WL_coef), 
          NB = as.numeric(NB),
          NFL = as.numeric(NFL),
@@ -516,7 +521,7 @@ Growth_fec_Ver_alp <- Ver_alp %>%
          # flo.no = case_when(flo.no == 0 ~ NA_real_,
          #                    TRUE ~ flo.no),
          fec = round(Seeds_per_capsule_VA_null * flo.no), digits = 1) %>%
-  mutate(size = 2^size) |> #Transforming back to mg
+  #mutate(size = 2^size) |> #Transforming back to mg
   select(siteID, blockID, plotID, unique_IDS, OTC, treatment, year, size, fec, flo.no, flo.if, seedling, juvenile, MS) 
 
 filtering_IDS_VA <- Growth_fec_Ver_alp |> 
@@ -547,7 +552,7 @@ Growth_fec_Sib_pro <- Sib_pro %>%
          # flo.no = case_when(flo.no == 0 ~ NA_real_,
          #                    TRUE ~ flo.no),
          fec = round(Seeds_per_capsule_SP * flo.no, digits = 1)) %>%
-  mutate(size = 2^size) |> #Transforming back to mg
+  #mutate(size = 2^size) |> #Transforming back to mg
   select(siteID, blockID, plotID, unique_IDS, OTC, treatment, year, size, fec, flo.no, flo.if, seedling, juvenile, MS) 
 
 filtering_IDS_SP <- Growth_fec_Sib_pro |> 
