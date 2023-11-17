@@ -331,7 +331,7 @@ seedling_est_SP_Veg <- expit(seedling_est_VA$Intercept + seedling_est_VA$Veg)
 
 #This section calculates the average seedlings size of each species, and adding in the seedling establishment rate in the same dataset to have all seedling data together
 
-###### Sibaldia procumbens ######
+###### Sibbaldia procumbens ######
 
 Seedling_info_SP_dat <- Sib_pro %>% 
   filter(seedling == "yes") %>% 
@@ -516,10 +516,7 @@ Growth_fec_Ver_alp <- Ver_alp %>%
   rowwise() %>% 
   mutate(flo.no = sum(NB, NFL, NC, na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
-         # flo.no = case_when(flo.no == 0 ~ NA_real_,
-         #                    TRUE ~ flo.no),
          fec = round(Seeds_per_capsule_VA_null * flo.no), digits = 1) %>%
-  #mutate(size = 2^size) |> #Transforming back to mg
   select(siteID, blockID, plotID, unique_IDS, OTC, treatment, year, size, fec, flo.no, flo.if, seedling, juvenile, MS) 
 
 filtering_IDS_VA <- Growth_fec_Ver_alp |> 
@@ -547,10 +544,7 @@ Growth_fec_Sib_pro <- Sib_pro %>%
   rowwise() %>% 
   mutate(flo.no = sum(NB, NFL, NC, na.rm=TRUE),
          flo.if = ifelse(flo.no > 0, 1, 0),
-         # flo.no = case_when(flo.no == 0 ~ NA_real_,
-         #                    TRUE ~ flo.no),
          fec = round(Seeds_per_capsule_SP * flo.no, digits = 1)) %>%
-  #mutate(size = 2^size) |> #Transforming back to mg
   select(siteID, blockID, plotID, unique_IDS, OTC, treatment, year, size, fec, flo.no, flo.if, seedling, juvenile, MS) 
 
 filtering_IDS_SP <- Growth_fec_Sib_pro |> 
