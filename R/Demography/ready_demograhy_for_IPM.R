@@ -509,8 +509,6 @@ Growth_fec_Ver_alp <- Ver_alp %>%
   filter(treatment == "C") |> 
   add_column(Ver_alp_coef) %>% 
   add_column(Seeds_per_capsule_VA_null) %>% 
-  mutate(NL = ifelse(unique_IDS == "Gud_5_4_16" & year == "2020", 10, NL)) |> 
-  mutate(WL = ifelse(unique_IDS == "Gud_5_4_29" & year == "2023", 8, WL)) |> 
   mutate(size = Intercept + (SH * SH_coef) + (NL * NL_coef) + (LL * LL_coef) + (WL * WL_coef), 
          NB = as.numeric(NB),
          NFL = as.numeric(NFL),
