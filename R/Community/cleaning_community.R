@@ -199,58 +199,59 @@ community_clean <- community_clean |>
 
 ###### Skjellingahaugen ######
 
-community_clean <- community_clean |> #Doubble check agr_mer and agr_cap in field 2023.
-  mutate(species = ifelse(species == "Agr_mer" & plotID == "Skj_1_1" & year %in% c(2018, 2021), "Agr_cap", species))|>
+community_clean <- community_clean |> 
+  #We checked in the field 2023 and there is both Agr_mer and Agr_cap in this plot. It was not registered in 2019 or 2022. What to do?
+  mutate(species = ifelse(species == "Agr_mer" & plotID == "Skj_1_1" & year %in% c(2018, 2021), "Agr_cap", species))|> 
   mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_1" & year == 2018, 4, cover))|>
   mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_1" & year == 2021, 5, cover ))|>
   mutate(species = ifelse(species %in% c("Car_big_cf", "Car_sp") & plotID == "Skj_1_1" & year %in% c(2021, 2022), "Car_big", species))|>
   mutate(cover = ifelse(species == "Car_big" & plotID == "Skj_1_1" & year == 2021, 2, cover), cover = ifelse(species == "Car_big" & plotID == "Skj_1_1" & year == 2022,6, cover ))|>
-  mutate(species = ifelse(species == "Fes_rub_cf_kanskje_Ave_fle" & plotID == "Skj_1_1", "Fes_rub", species))|>
-  mutate(species = ifelse(species == "Pyr_sp" & plotID == "Skj_1_1", "Pin_vul", species)) |>
+  mutate(species = ifelse(species == "Fes_rub_cf_kanskje_Ave_fle" & plotID == "Skj_1_1", "Fes_rub", species))|> #Checked in 2023, none of either species, so stikking to Fes_rub as that was what the registrator was most convinved about.
+  mutate(species = ifelse(species == "Pyr_sp" & plotID == "Skj_1_1", "Pin_vul", species)) |> #Best option based on turfmapper, Pin_vul was there in 2023.
   mutate(species = ifelse(species == "Ran_acr_cf" & plotID == "Skj_1_1", "Ran_acr", species)) |>
   mutate(species = ifelse(species == "Sib_pro_cf" & plotID == "Skj_1_1", "Sib_pro", species))|>
-  mutate(cover = ifelse(species == "Sib_pro" & plotID == "Skj_1_1" & year == 2018, 4, cover)) |> #Check turfmapper
-  mutate(species = ifelse(species %in% c("Car_big_cf", "Car_nor") & plotID == "Skj_1_3" & year == 2018, "Car_big", species)) |> 
+  mutate(cover = ifelse(species == "Sib_pro" & plotID == "Skj_1_1" & year == 2018, 4, cover)) |> 
+  mutate(species = ifelse(species %in% c("Car_big_cf", "Car_nor") & plotID == "Skj_1_3" & year == 2018, "Car_big", species)) |> #Checked in the field 2023, and we agreed on this decision there
   mutate(cover = ifelse(species == "Car_big" & plotID == "Skj_1_3" & year == 2018, 3, cover))|>
-  mutate(species = ifelse(species %in% c("Agr_mer","Phl_alp") & plotID == "Skj_1_3", "Agr_cap", species))|>
-  mutate(cover = ifelse(species =="Agr_cap" & plotID == "Skj_1_3" & year == 2022, 5, cover))|>
-  mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_3" & year == 2018, 4, cover)) |>
-  mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_3" & year == 2019, 3, cover))|>
-  mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_3" & year == 2021,6,cover))|>
+  #mutate(species = ifelse(species %in% c("Agr_mer","Phl_alp") & plotID == "Skj_1_3", "Agr_cap", species))|> #Agr_mer was confirmed in the field in 2023. What to do? Phl alp was only found in 2022, I saw we keep it, it was only one insidence.
+  #mutate(cover = ifelse(species =="Agr_cap" & plotID == "Skj_1_3" & year == 2022, 5, cover))|>
+  #mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_3" & year == 2018, 4, cover)) |>
+  #mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_3" & year == 2019, 3, cover))|>
+  #mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_3" & year == 2021,6,cover))|>
   mutate(species = ifelse(species %in% c("Agr_cap_cf","Agr_mer") & plotID == "Skj_1_4", "Agr_cap", species))|>
   mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_4" & year == 2021, 25, cover))|>
-  mutate(species = ifelse(species == "Car_vag" & plotID == "Skj_1_4", "Car_fla", species)) |> 
-  mutate(species = ifelse(species == "Leu_aut_cf" & plotID == "Skj_1_4" & year == 2021, "Leo_aut", species)) |>
-  mutate(species = ifelse(species == "Fes_rub_cf_kanskje_Ave_fle" & plotID == "Skj_1_4" & year == 2022, "Fes_rub", species))|>
-  mutate(species = ifelse(species == "Agr_mer" & plotID == "Skj_1_5", "Agr_cap", species))|>
-  mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_5" & year == 2018, 12, cover))|>
-  mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_5" & year == 2021, 13, cover))|>
-  mutate(species = ifelse(species == "Pot_ere" & plotID == "Skj_1_5" & year == 2022, "Pot_cra", species))|>
-  mutate(species = ifelse(species == "Car_atr" & plotID == "Skj_2_1" & year == 2018, "Car_big", species))|> 
+  mutate(species = ifelse(species == "Car_vag" & plotID == "Skj_1_4", "Car_fla", species)) |>  #No comment in the field 2023, so maybe keep it?
+  mutate(species = ifelse(species == "Leu_aut_cf" & plotID == "Skj_1_4" & year == 2021, "Leo_aut", species)) |> 
+  mutate(species = ifelse(species == "Fes_rub_cf_kanskje_Ave_fle" & plotID == "Skj_1_4" & year == 2022, "Fes_rub", species))|> #ok
+  #mutate(species = ifelse(species == "Agr_mer" & plotID == "Skj_1_5", "Agr_cap", species))|> #Agr_mer was confirmed in the field in 2023. What to do? 
+  #mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_5" & year == 2018, 12, cover))|>
+  #mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_5" & year == 2021, 13, cover))|>
+  mutate(species = ifelse(species == "Pot_cra" & plotID == "Skj_1_5" & year == 2022, "Pot_ere", species))|> #Checked in the field, it is Pot_ere.
+  mutate(species = ifelse(species == "Car_atr" & plotID == "Skj_2_1" & year == 2018, "Car_big", species))|> #ok
   mutate(cover = ifelse(species == "Car_big" & plotID == "Skj_2_1" & year == 2018, 7, cover))|>
   mutate(species = ifelse(species == "Epi_ana_cf" & plotID == "Skj_2_1" & year == 2018, "Epi_ana", species))|>
-  mutate(cover = ifelse(species == "Epi_ana" & plotID == "Skj_2_1" & year == 2018, 1, cover))|> #Was a proposal on if the Tar_sp is Hie_pil, however, non Hie_pil have been found earlier.
-  mutate(species = ifelse(species == "Agr_mer" & plotID == "Skj_2_2", "Agr_cap", species))|>
+  mutate(cover = ifelse(species == "Epi_ana" & plotID == "Skj_2_1" & year == 2018, 1, cover))|> 
+  mutate(species = ifelse(species == "Agr_mer" & plotID == "Skj_2_2", "Agr_cap", species))|> #OK, as Agr_mer was only found one year, not in 2023, and there was no comment on turfmapper
   mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_2_2" & year == 2021, 5, cover))|>
-  mutate(species = ifelse(species == "Car_nor_cf" & plotID == "Skj_2_2" & year == 2018, "Car_big", species)) |>
-  mutate(cover = ifelse(species == "Car_big" & plotID == "Skj_2_2" & year == 2018, 6, cover))|>
-  mutate(species = ifelse(species == "Gen_sp" & plotID == "Skj_2_2" & year == 2018, "Gen_niv", species)) |>
+  mutate(species = ifelse(species == "Car_nor_cf" & plotID == "Skj_2_2" & year == 2018, "Car_big", species)) |> #ok
+  mutate(cover = ifelse(species == "Car_big" & plotID == "Skj_2_2" & year == 2018, 6, cover))|> 
+  mutate(species = ifelse(species == "Gen_sp" & plotID == "Skj_2_2" & year == 2018, "Gen_niv", species)) |> #ok
   mutate(species = ifelse(species == "Ran_acr_cf" & plotID == "Skj_2_2" & year == 2022, "Ran_acr", species))|>
   mutate(species = ifelse(species == "Epi_ana_cf" & plotID == "Skj_2_3", "Epi_ana", species))|> 
   mutate(cover = ifelse(species == "Epi_ana" & plotID == "Skj_2_3" & year == 2018,1,cover))|>
-  mutate(species = ifelse(species == "Alc_sp_cf" & plotID == "Skj_2_5" & year == 2022, "Alc_sp", species)) |>
-  mutate(species = ifelse(species == "Cer_cer_cf" & plotID == "Skj_2_5" & year == 2018, "Cer_cer", species)) |>
-  mutate(species = ifelse(species %in% c("Epi_ana_cf", "Epilobium_sp") & plotID == "Skj_2_5" & year %in% c(2018,2022), "Epi_ana", species)) |>
-  mutate(species = ifelse(species == "Equ_sp" & plotID == "Skj_2_5" & year %in% c(2019, 2021), "Equ_arv", species)) |> 
+  mutate(species = ifelse(species == "Alc_sp_cf" & plotID == "Skj_2_5" & year == 2022, "Alc_sp", species)) |> #ok
+  mutate(species = ifelse(species == "Cer_cer_cf" & plotID == "Skj_2_5" & year == 2018, "Cer_cer", species)) |> #ok
+  mutate(species = ifelse(species %in% c("Epi_ana_cf", "Epilobium_sp") & plotID == "Skj_2_5" & year %in% c(2018,2022), "Epi_ana", species)) |> #ok
+  mutate(species = ifelse(species == "Equ_sp" & plotID == "Skj_2_5" & year %in% c(2019, 2021), "Equ_arv", species)) |> #ok
   mutate(cover = ifelse(species == "Equ_arv" & plotID == "Skj_2_5" & year == 2021, 3, cover)) |>
-  mutate(species = ifelse(species %in% c("Agr_cap_cf", "Agr_mer") & plotID == "Skj_2_6" & year == 2021, "Agr_cap", species))|> 
-  mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_2_6" & year == 2021, 3, cover))|>
-  mutate(species = ifelse(species == "Alc_sp_cf" & plotID == "Skj_2_6" & year == 2022, "Alc_sp", species)) |>
-  mutate(species = ifelse(species == "Car_vag_CF" & plotID == "Skj_2_6" & year == 2022, "Car_vag", species)) |>
-  mutate(species = ifelse(species == "Poa_pra" & plotID == "Skj_2_6" & year == 2022, "Poa_alp", species)) |>
-  mutate(species = ifelse(species == "Ran_acr_cf" & plotID == "Skj_2_6" & year == 2021, "Ran_acr", species)) |> 
+  #mutate(species = ifelse(species %in% c("Agr_cap_cf", "Agr_mer") & plotID == "Skj_2_6" & year == 2021, "Agr_cap", species))|> #Agr_mer was confirmed in the field in 2023. What to do?
+  #mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_2_6" & year == 2021, 3, cover))|>
+  mutate(species = ifelse(species == "Alc_sp_cf" & plotID == "Skj_2_6" & year == 2022, "Alc_sp", species)) |> #ok
+  mutate(species = ifelse(species == "Car_vag_CF" & plotID == "Skj_2_6" & year == 2022, "Car_vag", species)) |> #ok
+  mutate(species = ifelse(species == "Poa_pra" & plotID == "Skj_2_6" & year == 2022, "Poa_alp", species)) |> #ok
+  mutate(species = ifelse(species == "Ran_acr_cf" & plotID == "Skj_2_6" & year == 2021, "Ran_acr", species)) |> #ok
   mutate(cover = ifelse(species == "Ran_acr" & plotID == "Skj_2_6" & year == 2021, 1, cover))|>
-  mutate(species = ifelse(species == "Ver_off_cf" & plotID == "Skj_2_6" & year == 2021, "Ver_off", species)) |>
+  mutate(species = ifelse(species == "Ver_off_cf" & plotID == "Skj_2_6" & year == 2021, "Ver_off", species)) |> #ok
   mutate(cover = ifelse(species == "Ver_off" & plotID == "Skj_2_6" & year == 2021, 2, cover)) |>
   mutate(species = ifelse(species == "Ach_mil" & plotID == "Skj_3_1", "Agr_cap", species))|>
   mutate(species = ifelse(species == "Car_pil_cf" & plotID == "Skj_3_1" & year == 2021, "Car_pal", species))|>
