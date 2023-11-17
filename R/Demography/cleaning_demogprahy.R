@@ -135,6 +135,11 @@ Ver_alp <- Ver_alp %>%
          LL = as.integer(LL),
          WL = as.integer(WL))
 
+#### Fixing some mistakes in the dataset ####
+
+Ver_alp <- Ver_alp %>% 
+  mutate(NL = ifelse(unique_IDS == "Gud_5_4_16" & year == "2020", 10, NL)) |>
+  mutate(WL = ifelse(unique_IDS == "Gud_5_4_29" & year == "2023", 8, WL))
 
 #### Imputing missing data for seedlings  ####
 
@@ -245,40 +250,3 @@ INCLINE_demography_Ver_alp <- Ver_alp %>%
 
 #write.csv(INCLINE_demography_Sib_pro, file = "data/cleaned_data/INCLINE_demography_Sib_pro.csv", row.names = FALSE)
 #write.csv(INCLINE_demography_Ver_alp, file = "data/cleaned_data/INCLINE_demography_Ver_alp.csv", row.names = FALSE)
-
-## Plots for checking ##
-
-ggplot(aes(x = LSL, y = NL), data = Sib_pro) + 
-  geom_point(aes(color = as.factor(year))) 
-
-ggplot(aes(x = LSL), data = Sib_pro) + 
-  geom_density() +
-  facet_wrap(~year)
-
-ggplot(aes(x = LSL, y = NB), data = Sib_pro) + #Very few capsules in 2022 and 2023. In 2023: maybe mistaken for buds?
-  geom_point() +
-  facet_wrap(~year)
-
-ggplot(aes(x = LSL, y = LL), data = Sib_pro) +
-  geom_point() +
-  facet_wrap(~year)
-
-ggplot(aes(x = SH, y = NL), data = Ver_alp) + 
-  geom_point() +
-  facet_wrap(~year)
-
-ggplot(aes(x = SH, y = LL, color = year), data = Ver_alp) + #Check some of the outliers in 2023 here
-  geom_point() +
-  facet_wrap(~year)
-
-ggplot(aes(x = LL, y = WL, color = year), data = Ver_alp) + #Check some of the outliers in 2023 here
-  geom_point() +
-  facet_wrap(~year)
-
-ggplot(aes(x = NL, y = LL, color = year), data = Ver_alp) + #Check some of the outliers in 2023 here (also check the outlier in 2020)
-  geom_point() +
-  facet_wrap(~year)
-
-ggplot(aes(x = SH, y = NAC, color = year), data = Ver_alp) + #Looks ok
-  geom_point() +
-  facet_wrap(~year)
