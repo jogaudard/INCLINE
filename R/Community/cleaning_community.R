@@ -207,9 +207,11 @@ Skj_1_1_Agr_mer_2019_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -217,18 +219,7 @@ Skj_1_1_Agr_mer_2019_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 Skj_1_1_Agr_mer_2022_fix <- community_clean |> 
   filter(plotID == "Skj_1_1", species == "Agr_mer", year == "2021") |> 
@@ -239,9 +230,11 @@ Skj_1_1_Agr_mer_2022_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -250,17 +243,7 @@ Skj_1_1_Agr_mer_2022_fix <- community_clean |>
          recorder = NA,
          writer = NA,
          vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         functional_group = NA)
 
 Skj_1_3_Agr_mer_2019_fix <- community_clean |> 
   filter(plotID == "Skj_1_3", species == "Agr_mer", year == "2018") |> 
@@ -270,9 +253,11 @@ Skj_1_3_Agr_mer_2019_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -280,18 +265,7 @@ Skj_1_3_Agr_mer_2019_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 Skj_1_3_Agr_mer_2022_fix <- community_clean |> 
   filter(plotID == "Skj_1_3", species == "Agr_mer", year == "2021") |> 
@@ -302,9 +276,11 @@ Skj_1_3_Agr_mer_2022_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -312,18 +288,7 @@ Skj_1_3_Agr_mer_2022_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 Skj_1_5_Agr_mer_2019_fix <- community_clean |> 
   filter(plotID == "Skj_1_5", species == "Agr_mer", year == "2018") |> 
@@ -333,9 +298,11 @@ Skj_1_5_Agr_mer_2019_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -343,18 +310,7 @@ Skj_1_5_Agr_mer_2019_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 Skj_1_5_Agr_mer_2022_fix <- community_clean |> 
   filter(plotID == "Skj_1_5", species == "Agr_mer", year == "2021") |> 
@@ -365,9 +321,11 @@ Skj_1_5_Agr_mer_2022_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -375,18 +333,7 @@ Skj_1_5_Agr_mer_2022_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 Skj_5_1_Agr_mer_2019_fix <- community_clean |> 
   filter(plotID == "Skj_5_1", species == "Agr_mer", year == "2018") |> 
@@ -396,9 +343,11 @@ Skj_5_1_Agr_mer_2019_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -406,18 +355,7 @@ Skj_5_1_Agr_mer_2019_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 Skj_5_1_Agr_mer_2022_fix <- community_clean |> 
   filter(plotID == "Skj_5_1", species == "Agr_mer", year == "2021") |> 
@@ -428,9 +366,11 @@ Skj_5_1_Agr_mer_2022_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -438,18 +378,7 @@ Skj_5_1_Agr_mer_2022_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 Skj_5_2_Agr_mer_2019_fix <- community_clean |> 
   filter(plotID == "Skj_5_2", species == "Agr_mer", year == "2018") |> 
@@ -459,9 +388,11 @@ Skj_5_2_Agr_mer_2019_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -469,18 +400,7 @@ Skj_5_2_Agr_mer_2019_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 Skj_5_2_Agr_mer_2022_fix <- community_clean |> 
   filter(plotID == "Skj_5_2", species == "Agr_mer", year == "2021") |> 
@@ -491,9 +411,11 @@ Skj_5_2_Agr_mer_2022_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -501,18 +423,7 @@ Skj_5_2_Agr_mer_2022_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 Skj_5_3_Agr_mer_2019_fix <- community_clean |> 
   filter(plotID == "Skj_5_3", species == "Agr_mer", year == "2018") |> 
@@ -522,9 +433,11 @@ Skj_5_3_Agr_mer_2019_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -532,18 +445,7 @@ Skj_5_3_Agr_mer_2019_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 Skj_5_3_Agr_mer_2022_fix <- community_clean |> 
   filter(plotID == "Skj_5_3", species == "Agr_mer", year == "2021") |> 
@@ -554,9 +456,11 @@ Skj_5_3_Agr_mer_2022_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -564,18 +468,7 @@ Skj_5_3_Agr_mer_2022_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 Skj_5_4_Agr_mer_2019_fix <- community_clean |> 
   filter(plotID == "Skj_5_4", species == "Agr_mer", year == "2018") |> 
@@ -585,9 +478,11 @@ Skj_5_4_Agr_mer_2019_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -595,18 +490,7 @@ Skj_5_4_Agr_mer_2019_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 Skj_5_4_Agr_mer_2022_fix <- community_clean |> 
   filter(plotID == "Skj_5_4", species == "Agr_mer", year == "2021") |> 
@@ -617,9 +501,11 @@ Skj_5_4_Agr_mer_2022_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -627,18 +513,7 @@ Skj_5_4_Agr_mer_2022_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 Skj_5_5_Agr_mer_2019_fix <- community_clean |> 
   filter(plotID == "Skj_5_5", species == "Agr_mer", year == "2018") |> 
@@ -648,9 +523,11 @@ Skj_5_5_Agr_mer_2019_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -658,18 +535,7 @@ Skj_5_5_Agr_mer_2019_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 
 Skj_5_6_Agr_mer_2019_fix <- community_clean |> 
@@ -680,9 +546,11 @@ Skj_5_6_Agr_mer_2019_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -690,18 +558,7 @@ Skj_5_6_Agr_mer_2019_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 Skj_5_6_Agr_mer_2022_fix <- community_clean |> 
   filter(plotID == "Skj_5_6", species == "Agr_mer", year == "2021") |> 
@@ -712,9 +569,11 @@ Skj_5_6_Agr_mer_2022_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -722,18 +581,7 @@ Skj_5_6_Agr_mer_2022_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 community_clean <- community_clean |> 
   bind_rows(Skj_1_1_Agr_mer_2019_fix) |> #Add information of Agr_mer from previous year to 2019
@@ -912,9 +760,11 @@ Gud_4_1_Car_fla_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -922,18 +772,7 @@ Gud_4_1_Car_fla_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 Gud_4_1_Car_vag_fix <- community_clean |> 
   filter(plotID == "Gud_4_1", species == "Car_vag", year == "2021") |> 
@@ -943,9 +782,11 @@ Gud_4_1_Car_vag_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -953,18 +794,7 @@ Gud_4_1_Car_vag_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 community_clean <- community_clean|>
   #mutate(species = ifelse(species == "Car_sp" & plotID == "Gud_1_2" & year == 2019, "Car_big", species))|> #Keeping this as Car_sp because both med and Siri describe it differently than Car_big, and similarly (light green, long, thin, with long tip).
@@ -1103,9 +933,11 @@ Lav_3_1_Agr_cap_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -1113,18 +945,7 @@ Lav_3_1_Agr_cap_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
 community_clean <- community_clean |>
   mutate(species = ifelse(species == "Agr_cap_cf" & plotID == "Lav_1_1", "Agr_cap", species))|>
@@ -1379,9 +1200,11 @@ Ulv_5_5_Agr_mer_fix <- community_clean |>
          moss = NA,
          lichen = NA,
          litter = NA,
+         soil = NA,
          rock = NA,
          poo = NA,
          fungus = NA,
+         bare = NA,
          logger = NA,
          vegetation_height_mm = NA,
          moss_depth_mm = NA,
@@ -1389,20 +1212,9 @@ Ulv_5_5_Agr_mer_fix <- community_clean |>
          date_comment = NA,
          recorder = NA,
          writer = NA,
-         vegetation_cover = NA,
-         functional_group = NA,
-         bare_ground = NA,
-         total_bryophyte_cover = NA,
-         total_litter_cover = NA,
-         total_lichen_cover = NA,
-         total_bare_ground_cover = NA,
-         total_poo_cover = NA,
-         total_rock_cover = NA,
-         total_fungus_cover = NA,
-         vegetation_height_mean = NA, 
-         moss_depth_mean = NA)
+         vegetation_cover = NA)
 
-  community_clean <- community_clean |>
+community_clean <- community_clean |>
   mutate(species = ifelse(species == "Vio_sp" & plotID == "Ulv_1_1", "Vio_bif", species))|>
   mutate(cover = ifelse(species == "Vio_bif" & plotID == "Ulv_1_1" & year == 2021, 7, cover))|>
   mutate(cover = ifelse(species == "Phl_alp" & plotID == "Ulv_1_1" & year == 2021, 2, cover))|>
@@ -1584,9 +1396,16 @@ community_clean <- community_clean|>
   select(-imputed_cover) |>
   mutate(cover = ifelse(species == "Fes_ovi" & plotID == "Ulv_7_3" & year == 2018, 1, cover)) #Fes_ovi did not have a cover in 2019, it was only present in one subplot therefore it gets a 1 in cover.
 
+### Removing duplicates that were created during cleaning
+#Such as when we changed one species to another, but it was already registered in that subplot, etc.
+
+community_clean <- community_clean |> unique()
+
+
+##### Adding information about total % of different functional groups #####
 community_clean <- community_clean|>
-  mutate(functional_group = case_when(species %in% c("Ant_odo", "Eup_wet", "Sib_pro", "Alc_alp", "Alc_sp", "Oma_sup", "Ver_alp", "Vio_pal", "Cam_rot", "Sag_sag", "Leo_aut", "Sel_sel", "Pyr_sp", "Luz_mul", "Tar_sp", "Pot_cra", "Dip_alp", "Tha_alp", "Lys_eur", "Hie_alp", "Rum_ace", "Cer_cer", "Epi_ana", "Equ_arv", "Epi_sp", "Tof_pus", "Nid_seedling", "Bar_alp", "Sil_aca", "Par_pal", "Hie_alp", "Cer_fon", "Pot_ere", "Vio_bif", "Coel_vir", "Ran_acr", "Gen_niv", "Pin_vul", "Eri_sp", "Ach_mil", "Pyr_min", "Bis_viv", "Ast_alp", "Rum_acl", "Bot_lun", "Gen_ama", "Ran_sp", "Oxy_dig", "Fern", "Ger_syl", "Geu_riv", "Rhi_min", "Hie_sp", "Tri_ces", "Hyp_sel", "Sol_vir", "Vio_can", "Ort_sec", "Pru_vul", "Ver_off", "Suc_pra", "Hyp_mac", "Ran_pyg", "Dry_oct", "Luz_spi", "Tri_rep", "Hyp_sp", "Ste_gra", "Sel_sp", "Vio_tri", "Ver_cha", "Nid_juvenile", "Gen_sp", "Tri_sp", "Oma_sp", "Cer_alp", "Tri_pra", "Sil_vul", "Sag_sp", "Phe_con", "Gym_dry", "Oma_nor", "Gal_sp", "Gen_cam", "Oxa_ace", "Lot_cor", "Aco_sep", "Eri_uni", "Equ_sci", "Sau_alp", "Leu_vul", "Hie_pil", "Vio_sp", "Gal_bor", "Lyc_alp") ~ "Forbs",
-                                      species %in% c( "Nar_str", "Agr_mer", "Agr_cap", "Car_big", "Car_nor", "Car_cap", "Car_pal", "Car_pil", "Poa_pra", "Car_vag", "Ave_fle", "Des_ces", "Poa_alp", "Jun_tri", "Phl_alp", "Fes_ovi", "Fes_rub", "Sau_alp", "Fes_sp" ,"Car_sp", "Ant_dio", "Fes_viv", "Des_alp", "Car_fla", "Car_sax", "Ant_sp", "Car_atr" ) ~ "Graminoids",
+  mutate(functional_group = case_when(species %in% c("Ant_dio", "Ant_sp", "Eup_wet", "Sib_pro", "Alc_alp", "Alc_sp", "Oma_sup", "Ver_alp", "Vio_pal", "Cam_rot", "Sag_sag", "Leo_aut", "Sel_sel", "Pyr_sp", "Luz_mul", "Tar_sp", "Pot_cra", "Dip_alp", "Tha_alp", "Lys_eur", "Hie_alp", "Rum_ace", "Cer_cer", "Epi_ana", "Equ_arv", "Epi_sp", "Tof_pus", "Nid_seedling", "Bar_alp", "Sil_aca", "Par_pal", "Hie_alp", "Cer_fon", "Pot_ere", "Vio_bif", "Coel_vir", "Ran_acr", "Gen_niv", "Pin_vul", "Eri_sp", "Ach_mil", "Pyr_min", "Bis_viv", "Ast_alp", "Rum_acl", "Bot_lun", "Gen_ama", "Ran_sp", "Oxy_dig", "Fern", "Ger_syl", "Geu_riv", "Rhi_min", "Hie_sp", "Tri_ces", "Hyp_sel", "Sol_vir", "Vio_can", "Ort_sec", "Pru_vul", "Ver_off", "Suc_pra", "Hyp_mac", "Ran_pyg", "Dry_oct", "Luz_spi", "Tri_rep", "Hyp_sp", "Ste_gra", "Sel_sp", "Vio_tri", "Ver_cha", "Gen_sp", "Tri_sp", "Oma_sp", "Cer_alp", "Tri_pra", "Sil_vul", "Sag_sp", "Phe_con", "Gym_dry", "Oma_nor", "Gal_sp", "Gen_cam", "Oxa_ace", "Lot_cor", "Aco_sep", "Eri_uni", "Equ_sci", "Sau_alp", "Leu_vul", "Hie_pil", "Vio_sp", "Gal_bor", "Lyc_alp") ~ "Forbs",
+                                      species %in% c("Ant_odo", "Nar_str", "Agr_mer", "Agr_cap", "Car_big", "Car_nor", "Car_cap", "Car_pal", "Car_pil", "Poa_pra", "Car_vag", "Ave_fle", "Des_ces", "Poa_alp", "Jun_tri", "Phl_alp", "Fes_ovi", "Fes_rub", "Sau_alp", "Fes_sp" ,"Car_sp", "Fes_viv", "Des_alp", "Car_fla", "Car_sax", "Car_atr" ) ~ "Graminoids",
                                       species %in% c("Sal_her", "Vac_myr", "Vac_uli", "Sal_sp", "Bet_nan", "Bet_pub", "Sal_lan") ~"Deciduous_shrubs",
                                       species %in% c("Emp_nig", "Vac_vit", "Cal_vul", "Arc_urc") ~ "Evergreen_shrubs")) |>
   group_by(plotID, year) |>
@@ -1615,13 +1434,20 @@ total_cover <- community_clean |>
   filter(measure == "subPlot") |>
   unique() |>  #Gjør at koden kun tar de unike verdiene, og tar derfor vekk kopier. 
   group_by(plotID, year) |>
-  mutate(total_bryophyte_cover = sum(moss, na.rm = TRUE) / 29, 
-         total_litter_cover = sum(litter, na.rm = TRUE) / 29,
-         total_lichen_cover = sum(lichen, na.rm = TRUE) / 29, 
-         total_bare_ground_cover = sum(bare_ground, na.rm = TRUE) / 29, 
-         total_poo_cover = sum(poo, na.rm = TRUE) / 29,
-         total_rock_cover = sum(rock, na.rm = TRUE) / 29,
-         total_fungus_cover = sum(fungus, na.rm = TRUE) / 29) |>
+  mutate(moss = ifelse(moss == 0, NA_real_, moss),
+         litter = ifelse(litter == 0, NA_real_, litter),
+         lichen = ifelse(lichen == 0, NA_real_, lichen),
+         bare_ground = ifelse(bare_ground == 0, NA_real_, bare_ground),
+         poo = ifelse(poo == 0, NA_real_, poo),
+         rock = ifelse(rock == 0, NA_real_, rock),
+         fungus = ifelse(fungus == 0, NA_real_, fungus)) |> 
+  mutate(total_bryophyte_cover = ifelse(year == 2022, sum(moss, na.rm = TRUE) / 9, sum(moss, na.rm = TRUE) / 29), 
+         total_litter_cover = ifelse(year == 2022, sum(litter, na.rm = TRUE) / 9, sum(litter, na.rm = TRUE) / 29),
+         total_lichen_cover = ifelse(year == 2022, sum(lichen, na.rm = TRUE) / 9, sum(lichen, na.rm = TRUE) / 29), 
+         total_bare_ground_cover = ifelse(year == 2022, sum(bare_ground, na.rm = TRUE) / 9, sum(bare_ground, na.rm = TRUE) / 29), 
+         total_poo_cover = ifelse(year == 2022, sum(poo, na.rm = TRUE) / 9, sum(poo, na.rm = TRUE) / 29),
+         total_rock_cover = ifelse(year == 2022, sum(rock, na.rm = TRUE) / 9, sum(rock, na.rm = TRUE) / 29),
+         total_fungus_cover = ifelse(year == 2022, sum(fungus, na.rm = TRUE) / 9, sum(fungus, na.rm = TRUE) / 29)) |>
   mutate(total_bryophyte_cover = case_when(is.na(total_bryophyte_cover) ~ 0,
                                            total_bryophyte_cover == 0 ~ 0,
                                            total_bryophyte_cover < 1 ~ 1,
