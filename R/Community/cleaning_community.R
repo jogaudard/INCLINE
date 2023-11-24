@@ -199,11 +199,545 @@ community_clean <- community_clean |>
 
 ###### Skjellingahaugen ######
 
+Skj_1_1_Agr_mer_2019_fix <- community_clean |> 
+  filter(plotID == "Skj_1_1", species == "Agr_mer", year == "2018") |> 
+  mutate(year = 2019,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+Skj_1_1_Agr_mer_2022_fix <- community_clean |> 
+  filter(plotID == "Skj_1_1", species == "Agr_mer", year == "2021") |> 
+  filter(!subPlot %in% c(1, 2, 3, 4, 5, 6, 7, 8, 14, 15, 21, 22, 28, 29, 30, 31, 32, 33, 34, 35)) |> #Remove the subplots they didn't survey in 2022
+  mutate(year = 2022,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+Skj_1_3_Agr_mer_2019_fix <- community_clean |> 
+  filter(plotID == "Skj_1_3", species == "Agr_mer", year == "2018") |> 
+  mutate(year = 2019,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+Skj_1_3_Agr_mer_2022_fix <- community_clean |> 
+  filter(plotID == "Skj_1_3", species == "Agr_mer", year == "2021") |> 
+  filter(!subPlot %in% c(1, 2, 3, 4, 5, 6, 7, 8, 14, 15, 21, 22, 28, 29, 30, 31, 32, 33, 34, 35)) |> #Remove the subplots they didn't survey in 2022
+  mutate(year = 2022,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+Skj_1_5_Agr_mer_2019_fix <- community_clean |> 
+  filter(plotID == "Skj_1_5", species == "Agr_mer", year == "2018") |> 
+  mutate(year = 2019,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+Skj_1_5_Agr_mer_2022_fix <- community_clean |> 
+  filter(plotID == "Skj_1_5", species == "Agr_mer", year == "2021") |> 
+  filter(!subPlot %in% c(1, 2, 3, 4, 5, 6, 7, 8, 14, 15, 21, 22, 28, 29, 30, 31, 32, 33, 34, 35)) |> #Remove the subplots they didn't survey in 2022
+  mutate(year = 2022,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+Skj_5_1_Agr_mer_2019_fix <- community_clean |> 
+  filter(plotID == "Skj_5_1", species == "Agr_mer", year == "2018") |> 
+  mutate(year = 2019,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+Skj_5_1_Agr_mer_2022_fix <- community_clean |> 
+  filter(plotID == "Skj_5_1", species == "Agr_mer", year == "2021") |> 
+  filter(!subPlot %in% c(1, 2, 3, 4, 5, 6, 7, 8, 14, 15, 21, 22, 28, 29, 30, 31, 32, 33, 34, 35)) |> #Remove the subplots they didn't survey in 2022
+  mutate(year = 2022,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+Skj_5_2_Agr_mer_2019_fix <- community_clean |> 
+  filter(plotID == "Skj_5_2", species == "Agr_mer", year == "2018") |> 
+  mutate(year = 2019,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+Skj_5_2_Agr_mer_2022_fix <- community_clean |> 
+  filter(plotID == "Skj_5_2", species == "Agr_mer", year == "2021") |> 
+  filter(!subPlot %in% c(1, 2, 3, 4, 5, 6, 7, 8, 14, 15, 21, 22, 28, 29, 30, 31, 32, 33, 34, 35)) |> #Remove the subplots they didn't survey in 2022
+  mutate(year = 2022,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+Skj_5_3_Agr_mer_2019_fix <- community_clean |> 
+  filter(plotID == "Skj_5_3", species == "Agr_mer", year == "2018") |> 
+  mutate(year = 2019,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+Skj_5_3_Agr_mer_2022_fix <- community_clean |> 
+  filter(plotID == "Skj_5_3", species == "Agr_mer", year == "2021") |> 
+  filter(!subPlot %in% c(1, 2, 3, 4, 5, 6, 7, 8, 14, 15, 21, 22, 28, 29, 30, 31, 32, 33, 34, 35)) |> #Remove the subplots they didn't survey in 2022
+  mutate(year = 2022,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+Skj_5_4_Agr_mer_2019_fix <- community_clean |> 
+  filter(plotID == "Skj_5_4", species == "Agr_mer", year == "2018") |> 
+  mutate(year = 2019,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+Skj_5_4_Agr_mer_2022_fix <- community_clean |> 
+  filter(plotID == "Skj_5_4", species == "Agr_mer", year == "2021") |> 
+  filter(!subPlot %in% c(1, 2, 3, 4, 5, 6, 7, 8, 14, 15, 21, 22, 28, 29, 30, 31, 32, 33, 34, 35)) |> #Remove the subplots they didn't survey in 2022
+  mutate(year = 2022,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+Skj_5_5_Agr_mer_2019_fix <- community_clean |> 
+  filter(plotID == "Skj_5_5", species == "Agr_mer", year == "2018") |> 
+  mutate(year = 2019,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+
+Skj_5_6_Agr_mer_2019_fix <- community_clean |> 
+  filter(plotID == "Skj_5_6", species == "Agr_mer", year == "2018") |> 
+  mutate(year = 2019,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+Skj_5_6_Agr_mer_2022_fix <- community_clean |> 
+  filter(plotID == "Skj_5_6", species == "Agr_mer", year == "2021") |> 
+  filter(!subPlot %in% c(1, 2, 3, 4, 5, 6, 7, 8, 14, 15, 21, 22, 28, 29, 30, 31, 32, 33, 34, 35)) |> #Remove the subplots they didn't survey in 2022
+  mutate(year = 2022,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
 community_clean <- community_clean |> 
-  #We checked in the field 2023 and there is both Agr_mer and Agr_cap in this plot. It was not registered in 2019 or 2022. What to do?
-  #mutate(species = ifelse(species == "Agr_mer" & plotID == "Skj_1_1" & year %in% c(2018, 2021), "Agr_cap", species))|> 
-  mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_1" & year == 2018, 4, cover))|>
-  mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_1" & year == 2021, 5, cover ))|>
+  bind_rows(Skj_1_1_Agr_mer_2019_fix) |> #Add information of Agr_mer from previous year to 2019
+  bind_rows(Skj_1_1_Agr_mer_2022_fix) |> #Add information of Agr_mer from previous year to 2022
   mutate(species = ifelse(species %in% c("Car_big_cf", "Car_sp") & plotID == "Skj_1_1" & year %in% c(2021, 2022), "Car_big", species))|>
   mutate(cover = ifelse(species == "Car_big" & plotID == "Skj_1_1" & year == 2021, 2, cover), cover = ifelse(species == "Car_big" & plotID == "Skj_1_1" & year == 2022,6, cover ))|>
   mutate(species = ifelse(species == "Fes_rub_cf_kanskje_Ave_fle" & plotID == "Skj_1_1", "Fes_rub", species))|> #Checked in 2023, none of either species, so sticking to Fes_rub as that was what the registrator was most convinved about.
@@ -213,19 +747,15 @@ community_clean <- community_clean |>
   mutate(cover = ifelse(species == "Sib_pro" & plotID == "Skj_1_1" & year == 2018, 4, cover)) |> 
   mutate(species = ifelse(species %in% c("Car_big_cf", "Car_nor") & plotID == "Skj_1_3" & year == 2018, "Car_big", species)) |> #Checked in the field 2023, and we agreed on this decision there
   mutate(cover = ifelse(species == "Car_big" & plotID == "Skj_1_3" & year == 2018, 3, cover))|>
-  #mutate(species = ifelse(species %in% c("Agr_mer","Phl_alp") & plotID == "Skj_1_3", "Agr_cap", species))|> #Agr_mer was confirmed in the field in 2023. What to do? Phl alp was only found in 2022, I saw we keep it, it was only one insidence.
-  #mutate(cover = ifelse(species =="Agr_cap" & plotID == "Skj_1_3" & year == 2022, 5, cover))|>
-  #mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_3" & year == 2018, 4, cover)) |>
-  #mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_3" & year == 2019, 3, cover))|>
-  #mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_3" & year == 2021,6,cover))|>
+  bind_rows(Skj_1_3_Agr_mer_2019_fix) |> #Add information of Agr_mer from previous year to 2019
+  bind_rows(Skj_1_3_Agr_mer_2022_fix) |> #Add information of Agr_mer from previous year to 2022
   mutate(species = ifelse(species %in% c("Agr_cap_cf","Agr_mer") & plotID == "Skj_1_4", "Agr_cap", species))|>
   mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_4" & year == 2021, 25, cover))|>
-  mutate(species = ifelse(species == "Car_fla" & plotID == "Skj_1_4", "Car_vag", species)) |>  #Most years it has been called Car_vag, and when it was called Car_fla it says specifically that it could be Car_avg.
+  mutate(species = ifelse(species == "Car_fla" & plotID == "Skj_1_4", "Car_vag", species)) |>  #Most years it has been called Car_vag, and when it was called Car_fla it says specifically that it could be Car_vag.
   mutate(species = ifelse(species == "Leu_aut_cf" & plotID == "Skj_1_4" & year == 2021, "Leo_aut", species)) |> 
   mutate(species = ifelse(species == "Fes_rub_cf_kanskje_Ave_fle" & plotID == "Skj_1_4" & year == 2022, "Fes_rub", species))|> 
-  #mutate(species = ifelse(species == "Agr_mer" & plotID == "Skj_1_5", "Agr_cap", species))|> #Agr_mer was confirmed in the field in 2023. What to do? 
-  #mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_5" & year == 2018, 12, cover))|>
-  #mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_1_5" & year == 2021, 13, cover))|>
+  bind_rows(Skj_1_5_Agr_mer_2019_fix) |> #Add information of Agr_mer from previous year to 2019
+  bind_rows(Skj_1_5_Agr_mer_2022_fix) |> #Add information of Agr_mer from previous year to 2022
   mutate(species = ifelse(species == "Pot_cra" & plotID == "Skj_1_5" & year == 2022, "Pot_ere", species))|> #Checked in the field, it is Pot_ere.
   mutate(species = ifelse(species == "Car_atr" & plotID == "Skj_2_1" & year == 2018, "Car_big", species))|> 
   mutate(cover = ifelse(species == "Car_big" & plotID == "Skj_2_1" & year == 2018, 7, cover))|>
@@ -244,8 +774,8 @@ community_clean <- community_clean |>
   mutate(species = ifelse(species %in% c("Epi_ana_cf", "Epilobium_sp") & plotID == "Skj_2_5" & year %in% c(2018,2022), "Epi_ana", species)) |> 
   mutate(species = ifelse(species == "Equ_sp" & plotID == "Skj_2_5" & year %in% c(2019, 2021), "Equ_arv", species)) |> 
   mutate(cover = ifelse(species == "Equ_arv" & plotID == "Skj_2_5" & year == 2021, 3, cover)) |>
-  #mutate(species = ifelse(species %in% c("Agr_cap_cf", "Agr_mer") & plotID == "Skj_2_6" & year == 2021, "Agr_cap", species))|> #Agr_mer was confirmed in the field in 2023. What to do?
-  #mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_2_6" & year == 2021, 3, cover))|>
+  mutate(species = ifelse(species == "Agr_cap_cf" & plotID == "Skj_2_6" & year == 2021, "Agr_cap", species))|> 
+  mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_2_6" & year == 2021, 3, cover))|>
   mutate(species = ifelse(species == "Alc_sp_cf" & plotID == "Skj_2_6" & year == 2022, "Alc_sp", species)) |> 
   mutate(species = ifelse(species == "Car_vag_CF" & plotID == "Skj_2_6" & year == 2022, "Car_vag", species)) |> 
   mutate(species = ifelse(species == "Poa_pra" & plotID == "Skj_2_6" & year == 2022, "Poa_alp", species)) |> 
@@ -306,9 +836,10 @@ community_clean <- community_clean |>
   mutate(cover = ifelse(species == "Cam_rot" & plotID == "Skj_4_5" & year == 2018, 1, cover))|>
   mutate(cover = ifelse(species == "Rum_ace" & plotID == "Skj_4_5" & year == 2018, 2, cover))|>
   mutate(cover = ifelse(species == "Sag_sag" & plotID == "Skj_4_5" & year == 2018, 1, cover))|>
-  mutate(species = ifelse(species %in% c("Agr_cap_cf", "Agr_mer") & plotID == "Skj_5_1" & year == 2021, "Agr_cap", species))|> 
-  #Did not do block 5 at SKJ in 2023 because of the OTC mix up. SO have not checked these fixes with that. After we decide what to do with Agr_cap and Agr_mer, look over those here.
+  mutate(species = ifelse(species == "Agr_cap_cf" & plotID == "Skj_5_1" & year == 2021, "Agr_cap", species))|> 
   mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_5_1" & year == 2021, 7, cover))|>
+  bind_rows(Skj_5_1_Agr_mer_2019_fix) |> #Add information of Agr_mer from previous year to 2019
+  bind_rows(Skj_5_1_Agr_mer_2022_fix) |> #Add information of Agr_mer from previous year to 2022
   mutate(species = ifelse(species == "Alc_sp_cf" & plotID == "Skj_5_1" & year == 2022, "Alc_sp", species))|>
   mutate(species = ifelse(species == "Car_fla" & plotID == "Skj_5_1", "Car_big", species))|> 
   mutate(species = ifelse(species == "Fes_rub_cf_kanskje_Ave_fle" & plotID == "Skj_5_1", "Fes_rub", species)) |>
@@ -316,23 +847,30 @@ community_clean <- community_clean |>
   mutate(species = ifelse(species == "Sib_pro_cf" & plotID == "Skj_5_1" & year == 2019, "Sib_pro", species)) |>
   mutate(species = ifelse(species == "Ver_alp_cf" & plotID == "Skj_5_1" & year == 2021, "Ver_alp", species)) |>
   mutate(cover = ifelse(species == "Ver_alp" & plotID == "Skj_5_1" & year == 2021, 2, cover))|>
+  bind_rows(Skj_5_2_Agr_mer_2019_fix) |> #Add information of Agr_mer from previous year to 2019
+  bind_rows(Skj_5_2_Agr_mer_2022_fix) |> #Add information of Agr_mer from previous year to 2022
   mutate(species = ifelse(species %in% c("Car_fla", "Car_fla_CF") & plotID == "Skj_5_2" & year %in% c(2018,2021), "Car_vag", species))|>
   mutate(species = ifelse(species == "Fes_rub" & plotID == "Skj_5_2" & year == 2019, "Ave_fle", species))|>
   mutate(species = ifelse(species == "Jun_tri_CF" & plotID == "Skj_5_2" & year == 2021, "Jun_tri", species)) |>
   mutate(species = ifelse(species == "Leu_aut_cf" & plotID == "Skj_5_2" & year == 2022, "Leo_aut", species))|>
+  bind_rows(Skj_5_3_Agr_mer_2019_fix) |> #Add information of Agr_mer from previous year to 2019
+  bind_rows(Skj_5_3_Agr_mer_2022_fix) |> #Add information of Agr_mer from previous year to 2022
   mutate(species = ifelse(species == "Leu_aut_cf" & plotID == "Skj_5_3" & year == 2022, "Leo_aut", species))|>
+  bind_rows(Skj_5_4_Agr_mer_2019_fix) |> #Add information of Agr_mer from previous year to 2019
+  bind_rows(Skj_5_4_Agr_mer_2022_fix) |> #Add information of Agr_mer from previous year to 2022
   mutate(species = ifelse(species == "Car_pal" & plotID == "Skj_5_4" & year == 2022, "Car_pil", species))|>
   mutate(cover = ifelse(species == "Alc_sp" & plotID == "Skj_5_4" & year == 2021, 1, cover))|>
   mutate(cover = ifelse(species == "Ave_fle" & plotID == "Skj_5_4" & year == 2019, 1, cover))|>
-  mutate(species = ifelse(species %in% c("Agr_mer_CF", "Agr_mer") & plotID == "Skj_5_5" & year %in% c(2018,2021), "Agr_cap", species))|> 
-  mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_5_5" & year == 2018, 3, cover))|>
-  mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_5_5" & year == 2021, 8, cover))|>
+  bind_rows(Skj_5_5_Agr_mer_2019_fix) |> #Add information of Agr_mer from previous year to 2019
+  mutate(species = ifelse(species %in% c("Agr_mer_CF") & plotID == "Skj_5_5", "Agr_mer", species))|> 
+  mutate(cover = ifelse(species == "Agr_mer" & plotID == "Skj_5_5" & year == 2018, 2, cover))|>
   mutate(species = ifelse(species == "Hie_sp" & plotID == "Skj_5_5" & year == 2022, "Hie_pil", species))|>
   mutate(species = ifelse(species == "Jun_tri_CF" & plotID == "Skj_5_5" & year == 2018, "Jun_tri", species))|>
   mutate(cover = ifelse(species == "Jun_tri" & plotID == "Skj_5_5" & year == 2018, 5, cover))|>
-  mutate(species = ifelse(species %in% c("Phl_alp", "Agr_mer") & plotID == "Skj_5_6", "Agr_cap", species)) |>
-  mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_5_6" & year == 2018, 7, cover))|>
-  mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_5_6" & year == 2021, 11, cover))|>
+  bind_rows(Skj_5_6_Agr_mer_2019_fix) |> #Add information of Agr_mer from previous year to 2019
+  bind_rows(Skj_5_6_Agr_mer_2022_fix) |> #Add information of Agr_mer from previous year to 2022
+  mutate(species = ifelse(species == "Phl_alp" & plotID == "Skj_5_6", "Agr_cap", species)) |>
+  mutate(cover = ifelse(species == "Agr_cap" & plotID == "Skj_5_6" & year == 2018, 4, cover))|>
   mutate(species = ifelse(species == "Cer_cer_cf" & plotID == "Skj_6_1", "Cer_cer", species))|> 
   #No turfmapper for SKJ_6_2
   mutate(species = ifelse(species %in% c("Hie_pil", "Hie_sp") & plotID == "Skj_6_2" & year %in% c(2018,2019,2022), "Hie_alp", species))|> 
@@ -369,12 +907,64 @@ community_clean <- community_clean |>
 Gud_4_1_Car_fla_fix <- community_clean |> 
   filter(plotID == "Gud_4_1", species == "Car_fla", year == "2019") |> 
   mutate(year = 2018,
-         date = NA)
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
 
 Gud_4_1_Car_vag_fix <- community_clean |> 
   filter(plotID == "Gud_4_1", species == "Car_vag", year == "2021") |> 
   mutate(year = 2022,
-         date = NA)
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
 
 community_clean <- community_clean|>
   #mutate(species = ifelse(species == "Car_sp" & plotID == "Gud_1_2" & year == 2019, "Car_big", species))|> #Keeping this as Car_sp because both med and Siri describe it differently than Car_big, and similarly (light green, long, thin, with long tip).
@@ -508,7 +1098,33 @@ community_clean <- community_clean|>
 Lav_3_1_Agr_cap_fix <- community_clean |> 
   filter(plotID == "Lav_3_1", species == "Agr_cap", year == "2018") |> 
   mutate(year = 2019,
-         date = NA)
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
 
 community_clean <- community_clean |>
   mutate(species = ifelse(species == "Agr_cap_cf" & plotID == "Lav_1_1", "Agr_cap", species))|>
@@ -755,7 +1371,38 @@ community_clean <- community_clean |>
 
 ###### Ulvehaugen ######
 
-community_clean <- community_clean |>
+Ulv_5_5_Agr_mer_fix <- community_clean |> 
+  filter(plotID == "Ulv_5_5", species == "Agr_mer", year == "2019") |> 
+  mutate(year = 2018,
+         date = NA,
+         weather = NA,
+         moss = NA,
+         lichen = NA,
+         litter = NA,
+         rock = NA,
+         poo = NA,
+         fungus = NA,
+         logger = NA,
+         vegetation_height_mm = NA,
+         moss_depth_mm = NA,
+         comments = NA,
+         date_comment = NA,
+         recorder = NA,
+         writer = NA,
+         vegetation_cover = NA,
+         functional_group = NA,
+         bare_ground = NA,
+         total_bryophyte_cover = NA,
+         total_litter_cover = NA,
+         total_lichen_cover = NA,
+         total_bare_ground_cover = NA,
+         total_poo_cover = NA,
+         total_rock_cover = NA,
+         total_fungus_cover = NA,
+         vegetation_height_mean = NA, 
+         moss_depth_mean = NA)
+
+  community_clean <- community_clean |>
   mutate(species = ifelse(species == "Vio_sp" & plotID == "Ulv_1_1", "Vio_bif", species))|>
   mutate(cover = ifelse(species == "Vio_bif" & plotID == "Ulv_1_1" & year == 2021, 7, cover))|>
   mutate(cover = ifelse(species == "Phl_alp" & plotID == "Ulv_1_1" & year == 2021, 2, cover))|>
@@ -768,12 +1415,13 @@ community_clean <- community_clean |>
   mutate(cover = ifelse(species == "Tha_alp" & plotID == "Ulv_1_3" & year == 2021, 1, cover))|>
   mutate(cover = ifelse(species == "Vac_vit" & plotID == "Ulv_1_3" & year == 2021, 1, cover))|>
   mutate(species = ifelse(species == "Alc_sp_cf" & plotID == "Ulv_1_4", "Alc_sp", species))|>
-  mutate(cover = ifelse(species == "Alc_sp" & plotID == "Ulv_1_4" & year == 2019,4,cover))|>
+  mutate(cover = ifelse(species == "Alc_sp" & plotID == "Ulv_1_4" & year == 2019, 4, cover))|>
   mutate(species = ifelse(species == "Cer_Sag_cf" & plotID == "Ulv_1_4", "Cer_cer", species))|>
-  mutate(cover = ifelse(species == "Cer_cer" & plotID == "Ulv_1_4" & year == 2019,4,cover))|>
+  mutate(cover = ifelse(species == "Cer_cer" & plotID == "Ulv_1_4" & year == 2019, 4, cover))|>
   mutate(species = ifelse(species == "Oma_nor" & plotID == "Ulv_1_4", "Oma_sup", species))|>
   mutate(species = ifelse(species == "Poa_pra" & plotID == "Ulv_1_4", "Poa_alp", species))|>
-  mutate(species = ifelse(species == "Unknown" & plotID == "Ulv_1_4", "Des_ces", species))|>
+  mutate(species = ifelse(species %in% c("Vac_myr", "Vac_vit") & plotID == "Ulv_1_4", "Sal_her", species))|>
+  mutate(cover = ifelse(species == "Sal_her" & plotID == "Ulv_1_4" & year == 2019, 15, cover))|>
   mutate(species = ifelse(species == "Cer_alp_cf" & plotID == "Ulv_1_5", "Cer_cer", species))|>
   mutate(cover = ifelse(species == "Cer_cer" & plotID == "Ulv_1_5" & year == 2019, 6,cover))|>
   mutate(species = ifelse(species == "Epi_sp" & plotID == "Ulv_1_5", "Epi_ana", species))|>
@@ -782,30 +1430,29 @@ community_clean <- community_clean |>
   mutate(cover = ifelse(species == "Vio_bif" & plotID == "Ulv_2_1" & year == 2019, 6, cover))|>
   mutate(species = ifelse(species == "Car_pal" & plotID == "Ulv_2_2", "Car_pil", species))|>
   mutate(species = ifelse(species == "Leu_aut_cf" & plotID == "Ulv_2_2", "Leo_aut", species))|>
-  mutate(cover = ifelse(species == "Ver_alp" & plotID == "Ulv_2_2" & year == 2022,1,cover ))|>
   mutate(species = ifelse(species == "Agr_cap_cf" & plotID == "Ulv_2_3", "Agr_cap", species))|>
-  mutate(cover = ifelse(species == "Agr_cap" & plotID == "Ulv_2_3" & year == 2019,19,cover))|>
-  mutate(cover = ifelse(species == "Alc_sp" & plotID == "Ulv_2_3" & year == 2022,2,cover))|>
+  mutate(cover = ifelse(species == "Agr_cap" & plotID == "Ulv_2_3" & year == 2019, 19, cover))|>
+  mutate(cover = ifelse(species == "Alc_sp" & plotID == "Ulv_2_3" & year == 2022, 2, cover))|>
   mutate(species = ifelse(species == "Epi_sp" & plotID == "Ulv_2_3", "Epi_ana", species))|>
   mutate(species = ifelse(species == "Fes_rub_cf_kanskje_Ave_fle" & plotID == "Ulv_2_4", "Ave_fle", species))|>
-  mutate(cover = ifelse(species == "Ave_fle" & plotID == "Ulv_2_4" & year == 2022, 2,cover))|>
+  mutate(cover = ifelse(species == "Ave_fle" & plotID == "Ulv_2_4" & year == 2022, 2, cover))|>
   mutate(species = ifelse(species == "Oma_sp" & plotID == "Ulv_2_4", "Oma_sup", species))|>
-  mutate(cover = ifelse(species == "Phl_alp" & plotID == "Ulv_2_4" & year == 2019, 2,cover))|>
+  mutate(cover = ifelse(species == "Phl_alp" & plotID == "Ulv_2_4" & year == 2019, 2, cover))|>
   mutate(species = ifelse(species == "Sib_pro_cf" & plotID == "Ulv_2_4", "Sib_pro", species))|>
   mutate(cover = ifelse(species == "Leo_aut" & plotID == "Ulv_2_4" & year == 2018, 1,cover))|>
-  mutate(cover = ifelse(species == "Car_big" & plotID == "Ulv_2_4" & year == 2022,3,cover))|>
+  mutate(cover = ifelse(species == "Car_big" & plotID == "Ulv_2_4" & year == 2022, 3, cover))|> #Based on previous years cover
   mutate(species = ifelse(species == "Alc_sp_cf" & plotID == "Ulv_2_5", "Alc_sp", species))|>
   mutate(species = ifelse(species == "Car_cap_cf" & plotID == "Ulv_2_5", "Car_cap", species))|>
   mutate(species = ifelse(species == "Leu_aut_cf" & plotID == "Ulv_2_5", "Leo_aut", species))|>
-  mutate(cover = ifelse(species == "Car_big" & plotID == "Ulv_2_5" & year == 2022,2, cover))|>
+  mutate(cover = ifelse(species == "Car_big" & plotID == "Ulv_2_5" & year == 2022, 2, cover))|>
   mutate(species = ifelse(species %in% c("Lyc_sp", "Sel_sp") & plotID == "Ulv_2_5", "Sel_sel", species))|>
   mutate(species = ifelse(species == "Ver_cha" & plotID == "Ulv_2_5", "Ver_alp", species))|>
   mutate(cover = ifelse(species == "Ver_alp" & plotID == "Ulv_2_5" & year == 2019, 2, cover))|>
-  mutate(cover = ifelse(species == "Sib_pro" & plotID == "Ulv_2_5" & year == 2019, 5,cover))|>
-  mutate(cover = ifelse(species =="Alc_sp" & plotID == "Ulv_2_5" & year == 2021, 30, cover))|>
+  mutate(cover = ifelse(species == "Sib_pro" & plotID == "Ulv_2_5" & year == 2019, 5, cover))|> #Same cover as the year before
+  mutate(cover = ifelse(species =="Alc_sp" & plotID == "Ulv_2_5" & year == 2021, 30, cover))|> #Adding cover that had not been entered from the same year
   mutate(species = ifelse(species == "Epi_ana_cf" & plotID == "Ulv_3_1", "Epi_ana", species))|> 
   mutate(species = ifelse(species == "Car_big_cf" & plotID == "Ulv_3_1", "Car_big", species))|> 
-  mutate(cover = ifelse(species == "Car_big" & plotID == "Ulv_3_1" & year == 2018,4,cover))|>
+  mutate(cover = ifelse(species == "Car_big" & plotID == "Ulv_3_1" & year == 2018, 4, cover))|>
   mutate(species = ifelse(species == "Agr_mer" & plotID == "Ulv_3_2", "Agr_cap", species))|>
   mutate(cover = ifelse(species == "Agr_cap" & plotID == "Ulv_3_2" & year == 2019, 14, cover))|>
   mutate(species = ifelse(species == "Alc_sp_cf" & plotID == "Ulv_3_2", "Alc_sp", species))|>
@@ -815,11 +1462,11 @@ community_clean <- community_clean |>
   mutate(species = ifelse(species == "Fes_rub" & plotID == "Ulv_3_2", "Ave_fle", species))|>
   mutate(species = ifelse(species == "Leu_aut_cf" & plotID == "Ulv_3_2", "Leo_aut", species))|>
   mutate(species = ifelse(species == "Epi_nor" & plotID == "Ulv_3_3", "Epi_ana", species))|>
-  mutate(species = ifelse(species == "Ver_cha" & plotID == "Ulv_3_3", "Ver_alp", species))|>
-  mutate(species = ifelse(species == "Ver_alp_cf" & plotID == "Ulv_3_3", "Ver_alp", species))|>
-  mutate(species = ifelse(species == "Fes_rub" & plotID == "Ulv_3_4", "Ave_fle", species))|>
-  mutate(species = ifelse(species == "Pyr_sp" & plotID == "Ulv_3_4", "Pyr_min", species))|>
+  mutate(species = ifelse(species %in% c("Ver_cha", "Ver_alp_cf") & plotID == "Ulv_3_3", "Ver_alp", species))|>
+  mutate(cover = ifelse(species == "Nar_str" & plotID == "Ulv_3_3" & year == 2022, 3, cover))|> #Using the cover from last year
   mutate(species = ifelse(species == "Epi_nor" & plotID == "Ulv_3_4", "Epi_ana", species))|>
+  mutate(species = ifelse(species == "Fes_rub" & plotID == "Ulv_3_4", "Ave_fle", species))|>
+  mutate(species = ifelse(species %in% c("Pyr_sp", "Pyr_rot") & plotID == "Ulv_3_4", "Pyr_min", species))|>
   mutate(species = ifelse(species == "Epi_sp" & plotID == "Ulv_3_5", "Epi_ana", species))|>
   mutate(species = ifelse(species == "Hie_sp" & plotID == "Ulv_3_5", "Hie_pil",species))|>
   mutate(species = ifelse(species == "Leo_sp" & plotID == "Ulv_3_5", "Leo_aut", species))|>
@@ -828,76 +1475,99 @@ community_clean <- community_clean |>
   mutate(cover = ifelse(species == "Car_big" & plotID == "Ulv_4_1" & year == 2021, 4, cover))|>
   mutate(species = ifelse(species == "Car_sp_2" & plotID == "Ulv_4_1", "Car_sp", species))|>
   mutate(species = ifelse(species == "Cer_alp" & plotID == "Ulv_4_1", "Cer_fon", species))|>
-  mutate(cover = ifelse(species == "Poa_alp" & plotID == "Ulv_4_1" & year == 2019 ,1,cover))|>
-  mutate(cover = ifelse(species == "Sal_her" & plotID == "Ulv_4_1" & year == 2019 ,1,cover))|>
+  mutate(cover = ifelse(species == "Poa_alp" & plotID == "Ulv_4_1" & year == 2019, 1, cover))|>
+  mutate(cover = ifelse(species == "Sal_her" & plotID == "Ulv_4_1" & year == 2019, 1, cover))|>
   mutate(species = ifelse(species == "Vio_sp" & plotID == "Ulv_4_1", "Vio_bif", species))|>
-  mutate(cover = ifelse(species == "Vio_bif" & plotID == "Ulv_4_1" & year == 2021, 5,cover))|>
-  mutate(species = ifelse(species == "Car_big_cf" & plotID == "Ulv_4_3", "Car_big", species))|>
-  mutate(cover = ifelse(species == "Car_big" & plotID == "Ulv_4_3" & year == 2018, 17,cover))|>
-  mutate(species = ifelse(species %in% c("Gen_sp", "Gen_ana") & plotID == "Ulv_4_3", "Gen_ama", species))|>
+  mutate(cover = ifelse(species == "Vio_bif" & plotID == "Ulv_4_1" & year == 2021, 5, cover))|>
+  mutate(species = ifelse(species %in% c("Car_big_cf", "Car_sp") & plotID == "Ulv_4_3", "Car_big", species))|>
+  mutate(cover = ifelse(species == "Car_big" & plotID == "Ulv_4_3" & year == 2018, 17, cover))|>
+  mutate(cover = ifelse(species == "Car_big" & plotID == "Ulv_4_3" & year == 2021, 30, cover))|> #Combining Car_sp1 and Car_big, but I don't think it is realistic that it is 25 + 15 in cover, so I gave it 30 instead. There is no other carex than car big and car pal in any other years.
+  mutate(species = ifelse(species == "Gen_sp" & plotID == "Ulv_4_3", "Gen_ama", species))|>
   mutate(species = ifelse(species == "Pot_ere" & plotID == "Ulv_4_3", "Pot_cra", species))|>
   mutate(species = ifelse(species == "Poa_alp" & plotID == "Ulv_4_3", "Poa_pra", species))|>
   mutate(species = ifelse(species == "Car_pil_cf" & plotID == "Ulv_4_4", "Car_pil", species))|>
+  mutate(cover = ifelse(species == "Des_ces" & plotID == "Ulv_4_4" & year == 2022, 8, cover))|> #Same cover as the year before
+  mutate(cover = ifelse(species == "Poa_alp" & plotID == "Ulv_4_4" & year == 2019, 1, cover))|> #Same cover as the year before
   mutate(species = ifelse(species == "Sib_pro_cf" & plotID == "Ulv_4_4", "Sib_pro", species))|>
   mutate(species = ifelse(species == "Vio_pal" & plotID == "Ulv_4_4", "Vio_bif", species))|>
-  mutate(cover = ifelse(species == "Vio_bif" & plotID == "Ulv_4_4" & year == 2022, 6,cover))|>
+  mutate(cover = ifelse(species == "Vio_bif" & plotID == "Ulv_4_4" & year == 2022, 6, cover))|>
   mutate(species = ifelse(species == "Car_vag_CF" & plotID == "Ulv_5_1", "Car_vag", species))|>
   mutate(cover = ifelse(species == "Car_vag" & plotID == "Ulv_5_1" & year == 2021, 2, cover))|>
+  mutate(species = ifelse(species == "Car_sp" & plotID == "Ulv_5_1" & subPlot == 22, "Car_vag", species))|>
+  mutate(species = ifelse(species == "Car_sp" & plotID == "Ulv_5_1" & subPlot == 14, "Car_atr", species))|>
+  mutate(species = ifelse(species == "Car_big" & plotID == "Ulv_5_1", "Car_atr", species))|>
+  mutate(cover = ifelse(species == "Car_vag" & plotID == "Ulv_5_1" & year == 2018, 1, cover))|>
+  mutate(cover = ifelse(species == "Car_atr" & plotID == "Ulv_5_1" & year == 2018, 1, cover))|>
+  mutate(cover = ifelse(species == "Car_atr" & plotID == "Ulv_5_1" & year == 2019, 2, cover))|>
   mutate(species = ifelse(species %in% c("Unknown", "Eri_uni_cf") & plotID == "Ulv_5_1", "Eri_uni", species))|>
-  mutate(species = ifelse(species == "Hie_sp" & plotID == "Ulv_5_1", "Hie_alp", species))|>
+  mutate(species = ifelse(species %in% c("Hie_sp", "Hie_alp") & plotID == "Ulv_5_1", "Hie_vul", species))|>
   mutate(species = ifelse(species == "Rum_ace_cf" & plotID == "Ulv_5_1", "Rum_ace", species))|>
   mutate(cover = ifelse(species == "Rum_ace" & plotID == "Ulv_5_1" & year == 2021, 3, cover))|>
   mutate(cover = ifelse(species == "Tar_sp" & plotID == "Ulv_5_1" & year == 2021, 2, cover))|>
   mutate(cover = ifelse(species == "Cam_rot" & plotID == "Ulv_5_1" & year == 2019, 2, cover))|>
   mutate(species = ifelse(species == "Rum_acl" & plotID == "Ulv_5_3", "Rum_ace", species))|>
   mutate(species = ifelse(species %in% c("Car_sp", "Car_big") & plotID == "Ulv_5_3", "Car_vag", species))|>
-  mutate(cover = ifelse(species == "Car_vag" & plotID == "Ulv_5_3" & year == 2018,8, cover))|>
+  mutate(cover = ifelse(species == "Car_vag" & plotID == "Ulv_5_3" & year == 2018, 8, cover))|>
   mutate(species = ifelse(species == "Rum_acl" & plotID == "Ulv_5_3", "Rum_ace", species))|>
-  mutate(species = ifelse(species == "Car_big" & plotID == "Ulv_5_4", "Car_vag", species))|>
-  mutate(species = ifelse(species == "Ant_sp" & plotID == "Ulv_5_4", "Ant_dio", species))|>
+  mutate(species = ifelse(species %in% c("Car_big", "Car_sp") & plotID == "Ulv_5_4", "Car_vag", species))|>
+  mutate(cover = ifelse(species == "Car_vag" & plotID == "Ulv_5_4" & year == 2018, 10, cover))|>
+  mutate(species = ifelse(species %in% c("Ant_sp", "Ant_dio") & plotID == "Ulv_5_4", "Ant_alp", species))|>
   mutate(species = ifelse(species == "Jun_sp" & plotID == "Ulv_5_4", "Jun_tri", species))|>
   mutate(cover = ifelse(species == "Jun_tri" & plotID == "Ulv_5_4" & year == 2021, 2, cover))|>
   mutate(species = ifelse(species == "Pyr_sp" & plotID == "Ulv_5_4", "Pyr_min", species))|>
-  mutate(cover = ifelse(species == "Tar_sp" & plotID == "Ulv_5_4" & year == 2019, 1,cover))|>
+  mutate(cover = ifelse(species == "Tar_sp" & plotID == "Ulv_5_4" & year == 2019, 1, cover))|>
+  bind_rows(Ulv_5_5_Agr_mer_fix) |> #Add information of Agr_mer from previous year to 2021
   mutate(cover = ifelse(species == "Car_big" & plotID == "Ulv_5_5" & year == 2019, 1, cover))|>
   mutate(species = ifelse(species == "Car_nor_cf" & plotID == "Ulv_5_5", "Car_nor", species))|>
   mutate(species = ifelse(species == "Car_sp" & plotID == "Ulv_5_5", "Car_vag", species))|>
   mutate(species = ifelse(species == "Fes_rub_cf_kanskje_Ave_fle" & plotID == "Ulv_5_5", "Fes_rub", species))|>
   mutate(species = ifelse(species == "Luz_spi" & plotID == "Ulv_5_5", "Luz_mul", species))|>
-  mutate(species = ifelse(species == "Pyr_min" & plotID == "Ulv_5_5", "Pyr_sp", species))|>
+  mutate(species = ifelse(species == "Pyr_sp" & plotID == "Ulv_5_5", "Pyr_min", species))|>
   mutate(species = ifelse(species == "Sib_pro_cf" & plotID == "Ulv_5_5", "Sib_pro", species))|>
+  mutate(species = ifelse(species =="Alc_alp_cf" & plotID == "Ulv_6_1", "Alc_sp", species))|>
+  mutate(cover = ifelse(species =="Alc_sp" & plotID == "Ulv_6_1" & year == 2021, 3, cover))|>
+  mutate(cover = ifelse(species =="Des_ces" & plotID == "Ulv_6_1" & year == 2018, 20, cover))|>
   mutate(species = ifelse(species == "Leu_aut_cf" & plotID == "Ulv_6_1", "Leo_aut", species))|>
-  mutate(species = ifelse(species =="Alc_alp_cf" & plotID == "Ulv_6_1", "Alc_alp", species))|>
-  mutate(cover = ifelse(species =="Alc_alp" & plotID == "Ulv_6_1" & year == 2021, 1,cover))|>
-  mutate(species = ifelse(species == "Car_sp_smal" & plotID == "Ulv_6_2", "Car_cap", species))|>
+  mutate(species = ifelse(species == "Epi_sp" & plotID == "Ulv_6_1", "Ver_alp", species))|>
+  mutate(species = ifelse(species == "Car_sp_smal" & plotID == "Ulv_6_2", "Car_big", species))|>
+  mutate(cover = ifelse(species =="Car_big" & plotID == "Ulv_6_2" & year == 2018, 2, cover))|>
   mutate(species = ifelse(species == "Phl_alp_cf" & plotID == "Ulv_6_2", "Phl_alp", species))|>
   mutate(cover = ifelse(species == "Phl_alp" & plotID == "Ulv_6_2" & year == 2021, 2, cover))|>
   mutate(species = ifelse(species == "Alc_sp_cf" & plotID == "Ulv_6_4", "Alc_sp", species))|>
-  mutate(species = ifelse(species == "Car_sp_smal" & plotID == "Ulv_6_4", "Car_sp", species))|>
-  mutate(species = ifelse(species == "Car_nor_cf" & plotID == "Ulv_6_4", "Car_nor", species))|>
+  mutate(species = ifelse(species %in% c("Car_sp_smal", "Car_nor_cf", "Car_sp", "Car_cap") & plotID == "Ulv_6_4", "Car_big", species))|>
+  mutate(cover = ifelse(species =="Car_big" & plotID == "Ulv_6_4" & year == 2018, 2, cover))|>
+  mutate(cover = ifelse(species =="Car_big" & plotID == "Ulv_6_4" & year == 2021, 1, cover))|>
+  mutate(cover = ifelse(species =="Car_big" & plotID == "Ulv_6_4" & year == 2023, 2, cover))|>
+  mutate(species = ifelse(species == "Car_nor_cf" & plotID == "Ulv_6_5", "Car_big", species))|> #Based on turfmapper in the field
+  mutate(cover = ifelse(species =="Car_big" & plotID == "Ulv_6_5" & year == 2021, 4, cover))|>
   mutate(species = ifelse(species == "Leu_aut_cf" & plotID == "Ulv_6_5", "Leo_aut", species))|>
-  mutate(species = ifelse(species == "Car_nor_cf" & plotID == "Ulv_6_5", "Car_nor", species))|>
   mutate(species = ifelse(species == "Agr_cap" & plotID == "Ulv_6_6", "Agr_mer", species))|>
-  mutate(cover = ifelse(species =="Agr_mer" & plotID == "Ulv_6_6" & year == 2022,16,cover))|>
+  mutate(cover = ifelse(species =="Agr_mer" & plotID == "Ulv_6_6" & year == 2022, 16, cover))|>
   mutate(species = ifelse(species == "Car_sp_smal" & plotID == "Ulv_6_6", "Car_big", species))|>
+  mutate(species = ifelse(species == "Pyr_sp" & plotID == "Ulv_6_6", "Pyr_min", species))|>
   mutate(species = ifelse(species %in% c("Ave_fle", "Fes_rub_cf_kanskje_Ave_fle") & plotID == "Ulv_7_2", "Fes_rub", species))|>
   mutate(species = ifelse(species == "Car_big_cf" & plotID == "Ulv_7_2", "Car_big", species))|>
+  mutate(cover = ifelse(species == "Car_big" & plotID == "Ulv_7_2" & year == 2018, 22, cover))|> #Adding missing cover
+  mutate(cover = ifelse(species == "Car_pil" & plotID == "Ulv_7_2" & year == 2019, 1, cover))|> #Adding missing cover
   mutate(species = ifelse(species == "Cer_alp" & plotID == "Ulv_7_2", "Cer_fon", species))|>
-  mutate(cover = ifelse(species == "Car_pil" & plotID == "Ulv_7_2" & year == 2019, 1, cover))|>
   mutate(cover = ifelse(species == "Cer_fon" & plotID == "Ulv_7_2" & year == 2021, 3, cover))|>
-  mutate(species = ifelse(species %in% c("Ave_fle", "Fes_rub_cf_kanskje_Ave_fle") & plotID == "Ulv_7_3", "Fes_rub", species))|>
-  mutate(species = ifelse(species == "Alc_sp" & plotID == "Ulv_7_3", "Alc_alp", species))|>
-  mutate(species = ifelse(species == "Hyp_mac" & plotID == "Ulv_7_3", "Hyp_sp", species))|>
+  mutate(species = ifelse(species == "Hie_sp" & plotID == "Ulv_7_2", "Hie_pil", species))|>
   mutate(cover = ifelse(species == "Ver_off" & plotID == "Ulv_7_2" & year == 2019 & is.na(cover),0, cover))|>
   mutate(cover = ifelse(species =="Vio_can" & plotID == "Ulv_7_2" & year == 2019, 1, cover))|>
+  mutate(species = ifelse(species %in% c("Ave_fle", "Fes_rub_cf_kanskje_Ave_fle") & plotID == "Ulv_7_3", "Fes_rub", species))|>
+  mutate(species = ifelse(species == "Alc_alp" & plotID == "Ulv_7_3", "Alc_sp", species))|>
+  mutate(species = ifelse(species == "Hyp_sp" & plotID == "Ulv_7_3", "Hyp_mac", species))|>
+  mutate(species = ifelse(species == "Pyr_sp" & plotID == "Ulv_7_3", "Pyr_min", species))|>
   mutate(species = ifelse(species %in% c("Ave_fle", "Fes_rub_cf_kanskje_Ave_fle", "Fes_ovi") & plotID == "Ulv_7_4", "Fes_rub", species))|>
   mutate(species = ifelse(species == "Sil_aca_cf" & plotID == "Ulv_7_4", "Sil_aca", species))|>
-  mutate(cover = ifelse(species == "Tha_alp" & plotID == "Ulv_7_4" & year == 2019, 1, cover))|>
-  mutate(cover = ifelse(species == "Ach_mil" & plotID == "Ulv_7_4" & year == 2019 & is.na(cover),0, cover))
+  mutate(species = ifelse(species == "Leu_vul" & plotID == "Ulv_7_4", "Leo_aut", species))|>
+    mutate(cover = ifelse(species == "Leo_aut" & plotID == "Ulv_7_4" & year == 2021, 3, cover))|>
+  mutate(cover = ifelse(species == "Tha_alp" & plotID == "Ulv_7_4" & year == 2019, 1, cover)) |> 
+  mutate(cover = ifelse(species == "Cer_fon" & plotID == "Ulv_7_6" & year == 2021, 1, cover))
 
 
 ###### Ulv_7_3 2018 ######
-#The Ulv_7_3 2018 plot lacks cover. To use the data, we have decided to give it the same cover as the year after
+#The Ulv_7_3 2018 plot lacks cover. We have decided to give it the same cover as the year after
 
 #Making a dataset with the 2019 coverdata for the species in Ulv_7_3
 Ulv_7_3_2019 <- community_clean|>
