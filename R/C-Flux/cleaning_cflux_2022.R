@@ -1,11 +1,12 @@
 library(dataDownloader)
+library(fluxible)
 library(tidyverse)
 library(fs)
-library(lubridate)
-library(broom)
-library(zoo)
+# library(lubridate)
+# library(broom)
+# library(zoo)
 
-source("https://raw.githubusercontent.com/jogaudard/common/master/fun-fluxes.R")
+# source("https://raw.githubusercontent.com/jogaudard/common/master/fun-fluxes.R")
 
 # download and read data -----------------------------------------------------------
 get_file(node = "zhk3m",
@@ -33,20 +34,19 @@ if(file.exists(zipfile)){
 #importing fluxes data
 location <- "data/C-Flux/summer_2022/raw_data" #location of datafiles
 
-raw_CO2_INCLINE_2022 <-
-  dir_ls(location, regexp = "*CO2_campaign*") %>% 
-  map_dfr(read_csv,  na = c("#N/A", "Over"))
-  # rename( #rename the column to get something more practical without space
-  #   CO2 = "CO2 (ppm)",
-  #   temp_air = "Temp_air ('C)",
-  #   temp_soil = "Temp_soil ('C)",
-  #   PAR = "PAR (umolsm2)",
-  #   datetime = "Date/Time"
-  # ) %>%  
-  # mutate(
-  #   datetime = dmy_hms(datetime)
-  # ) %>%
-  # select(datetime, CO2, PAR, temp_air, temp_soil)
+raw_CO2_INCLINE_2022 <- dir_ls(location, regexp = "*CO2_campaign*")  |>
+  map_dfr(read_csv,  na = c("#N/A", "Over")) |>
+  rename( #rename the column to get something more practical without space
+    CO2 = "CO2 (ppm)",
+    temp_air = "Temp_air ('C)",
+    temp_soil = "Temp_soil ('C)",
+    PAR = "PAR (umolsm2)",
+    datetime = "Date/Time"
+  ) %>%  
+  mutate(
+    datetime = dmy_hms(datetime)
+  ) %>%
+  select(datetime, CO2, PAR, temp_air, temp_soil)
 
 record <- read_csv("data/C-Flux/summer_2022/raw_data/INCLINE_field-record_2022.csv", na = c(""), col_types = "fffccfc") %>% 
   drop_na(starting_time) %>%  #delete row without starting time (meaning no measurement was done)
@@ -54,20 +54,32 @@ record <- read_csv("data/C-Flux/summer_2022/raw_data/INCLINE_field-record_2022.c
     starting_time = case_when(
       campaign != 1 ~ gsub("(\\d{2})(?=\\d{2})", "\\1:", starting_time, perl = TRUE), # campaing 1 was written as hh:mm:ss and others as hhmmss
       campaign == 1 ~ starting_time
-      )
+      ),
+    start = paste(date, starting_time),
+    start = ymd_hms(start)
   )
 
+str(raw_CO2_INCLINE_2022)
+str(record)
 
 # match fluxes and CO2 concentration --------------------------------------
 
-CO2_INCLINE_2022 <- match.flux4(raw_CO2_INCLINE_2022,
-                                record,
-                                window_length = 180,
-                                startcrop = 0,
-                                measurement_length = 180,
-                                time_format = "time",
-                                date_format = "ymd"
-                                )
+CO2_INCLINE_2022 <- flux_match(
+  raw_CO2_INCLINE_2022,
+  record,
+  startcrop = 0,
+  measurement_length = 180,
+  conc_col = "CO2"
+)
+
+# CO2_INCLINE_2022 <- match.flux4(raw_CO2_INCLINE_2022,
+#                                 record,
+#                                 window_length = 180,
+#                                 startcrop = 0,
+#                                 measurement_length = 180,
+#                                 time_format = "time",
+#                                 date_format = "ymd"
+#                                 )
 
 # detecting transcript mistakes by checking the length of each measurement
 
