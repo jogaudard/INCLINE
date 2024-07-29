@@ -72,34 +72,14 @@ CO2_INCLINE_2022 <- flux_match(
   conc_col = "CO2"
 )
 
-# CO2_INCLINE_2022 <- match.flux4(raw_CO2_INCLINE_2022,
-#                                 record,
-#                                 window_length = 180,
-#                                 startcrop = 0,
-#                                 measurement_length = 180,
-#                                 time_format = "time",
-#                                 date_format = "ymd"
-#                                 )
-
-# detecting transcript mistakes by checking the length of each measurement
-
-# mistakes <- CO2_INCLINE_2022 %>% 
-#   group_by(fluxID, turfID, start, type) %>% 
-#   # nest() %>% 
-#   summarise(
-#     length = length(datetime)
-#   ) %>% 
-#   ungroup() %>% 
-#   arrange(start) %>% 
-#   mutate(
-#     flag = case_when(
-#       lag(length) < 181 ~ "flag",
-#       length < 181 ~ "flag"
-#     )
-#   ) %>% 
+# CO2_INCLINE_2022  |>
 #   filter(
-#     flag == "flag"
-#   )
+#     f_fluxID %in% c(760:772) 
+#   ) |>
+#     view()
+# those measurements where done in the 60 minutes before I fell in the river with the setup. which is probably why the data are missing.
+
+
 
 
 # comments and temperature cleaning ---------------------------------------
@@ -118,28 +98,38 @@ CO2_INCLINE_2022 <- CO2_INCLINE_2022 %>%
 
 # get slopes --------------------------------------------------------------
 
-slopes_INCLINE_2022 <- CO2_INCLINE_2022 %>% 
-  filter(
-    datetime > start_window &
-      datetime < end_window
-  ) %>% 
-  fitting.flux_nocut2()
-  # fitting.flux(
-  #   weird_fluxesID = c(
-  #     355, # second half was detected for window, but it should be the first one
-  #     386, # tz is at the wrong end, it does not reflect the reality of the flux (negative ER)
-  #     549, # slope_fit is too far from real points and window is too short
-  #     640, # wrong direction of slope
-  #     696, # dip in the flux
-  #     719, # slope in wrong direction
-  #     743, # window mismatch
-  #     751, # slope in wrong direction
-  #     762, # dip in flux
-  #     775, # mess at the beginning of the flux
-  #     791, # slope in the wrong direction
-  #     876 # flux is quite weird
-  #     )
-  # )
+slopes_INCLINE_2022 <- CO2_INCLINE_2022 |>
+  flux_fitting(fit_type = "exp")
+
+str(slopes_INCLINE_2022)
+
+slopes_INCLINE_2022 <- slopes_INCLINE_2022 |>
+  flux_quality(fit_type = "exp", slope_col = "f_slope_tz")
+
+flux_plot(slopes_INCLINE_2022, fit_type = "exp")
+
+# slopes_INCLINE_2022 <- CO2_INCLINE_2022 %>% 
+#   filter(
+#     datetime > start_window &
+#       datetime < end_window
+#   ) %>% 
+#   fitting.flux_nocut2()
+#   # fitting.flux(
+#   #   weird_fluxesID = c(
+#   #     355, # second half was detected for window, but it should be the first one
+#   #     386, # tz is at the wrong end, it does not reflect the reality of the flux (negative ER)
+#   #     549, # slope_fit is too far from real points and window is too short
+#   #     640, # wrong direction of slope
+#   #     696, # dip in the flux
+#   #     719, # slope in wrong direction
+#   #     743, # window mismatch
+#   #     751, # slope in wrong direction
+#   #     762, # dip in flux
+#   #     775, # mess at the beginning of the flux
+#   #     791, # slope in the wrong direction
+#   #     876 # flux is quite weird
+#   #     )
+#   # )
 
 
 # slopes_INCLINE_2022_metrics <- slopes_INCLINE_2022%>%
