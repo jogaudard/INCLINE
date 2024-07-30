@@ -106,7 +106,13 @@ str(slopes_INCLINE_2022)
 slopes_INCLINE_2022 <- slopes_INCLINE_2022 |>
   flux_quality(fit_type = "exp", slope_col = "f_slope_tz")
 
-flux_plot(slopes_INCLINE_2022, fit_type = "exp")
+flux_plot(
+  slopes_INCLINE_2022,
+  fit_type = "exp",
+  f_ylim_lower = 300
+  )
+
+
 
 # slopes_INCLINE_2022 <- CO2_INCLINE_2022 %>% 
 #   filter(
@@ -136,131 +142,131 @@ flux_plot(slopes_INCLINE_2022, fit_type = "exp")
 #   select(fluxID, Cm, b, b_est, RMSE, r.squared_slope, flag, cor_coef) %>%
 #   distinct()
 
-slopes_INCLINE_2022_metrics <- slopes_INCLINE_2022%>%
-  select(fluxID, Cm, b, b_est, RMSE, NRMSE, flag, cor_coef, meanCO2, sdCO2, rangeCO2) %>%
-  distinct()
+# slopes_INCLINE_2022_metrics <- slopes_INCLINE_2022%>%
+#   select(fluxID, Cm, b, b_est, RMSE, NRMSE, flag, cor_coef, meanCO2, sdCO2, rangeCO2) %>%
+#   distinct()
 
-# trying some flagging ----------------------------------------------------
+# # trying some flagging ----------------------------------------------------
 
-# problem when b > 1
-# problem when tz is too far in the flux
+# # problem when b > 1
+# # problem when tz is too far in the flux
 
-# compare NRMSE and RMSE
+# # compare NRMSE and RMSE
 
-slopes_INCLINE_2022_metrics %>% 
-  mutate(
-    NRMSE = RMSE / meanCO2
-  ) %>% 
-  filter(
-    fluxID != 570
-  ) %>%
-  ggplot(aes(NRMSE, RMSE, color = flag)) +
-  geom_point() 
-  # ylim(0,100) +
-  # xlim(0,1)
+# slopes_INCLINE_2022_metrics %>% 
+#   mutate(
+#     NRMSE = RMSE / meanCO2
+#   ) %>% 
+#   filter(
+#     fluxID != 570
+#   ) %>%
+#   ggplot(aes(NRMSE, RMSE, color = flag)) +
+#   geom_point() 
+#   # ylim(0,100) +
+#   # xlim(0,1)
 
-# graph CO2 concentration ------------------------------------------------------------
-theme_set(theme_grey(base_size = 5))
+# # graph CO2 concentration ------------------------------------------------------------
+# theme_set(theme_grey(base_size = 5))
 
-slopes_INCLINE_2022 %>%
-  filter(
-    campaign == 1
-  ) %>%
-  ggplot(aes(datetime)) +
-  # geom_point(aes(y = CO2, color = cut), size = 0.2) +
-  geom_point(aes(y = CO2), size = 0.2) +
-  geom_line(aes(y = fit, color = flag), linetype = "longdash") +
-  geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
-  scale_color_manual(values = c(
-    # "keep" = "green",
-    # "cut" = "red",
-    "ok" = "green",
-    "discard" = "red",
-    "zero" = "grey",
-    "start_error" = "red"
-  )) +
-  scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
-  # ylim(400,800) +
-  facet_wrap(~fluxID, scales = "free")
+# slopes_INCLINE_2022 %>%
+#   filter(
+#     campaign == 1
+#   ) %>%
+#   ggplot(aes(datetime)) +
+#   # geom_point(aes(y = CO2, color = cut), size = 0.2) +
+#   geom_point(aes(y = CO2), size = 0.2) +
+#   geom_line(aes(y = fit, color = flag), linetype = "longdash") +
+#   geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
+#   scale_color_manual(values = c(
+#     # "keep" = "green",
+#     # "cut" = "red",
+#     "ok" = "green",
+#     "discard" = "red",
+#     "zero" = "grey",
+#     "start_error" = "red"
+#   )) +
+#   scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
+#   # ylim(400,800) +
+#   facet_wrap(~fluxID, scales = "free")
 
-ggsave("campaign1b.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
+# ggsave("campaign1b.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
 
-gc()
+# gc()
 
-slopes_INCLINE_2022 %>%
-  filter(
-    campaign == 2
-  ) %>%
-  ggplot(aes(datetime)) +
-  # geom_point(aes(y = CO2, color = cut), size = 0.2) +
-  geom_point(aes(y = CO2), size = 0.2) +
-  geom_line(aes(y = fit, color = flag), linetype = "longdash") +
-  geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
-  scale_color_manual(values = c(
-    # "keep" = "green",
-    # "cut" = "red",
-    "ok" = "green",
-    "discard" = "red",
-    "zero" = "grey",
-    "start_error" = "red"
-  )) +
-  scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
-  # ylim(400,800) +
-  facet_wrap(~fluxID, scales = "free")
+# slopes_INCLINE_2022 %>%
+#   filter(
+#     campaign == 2
+#   ) %>%
+#   ggplot(aes(datetime)) +
+#   # geom_point(aes(y = CO2, color = cut), size = 0.2) +
+#   geom_point(aes(y = CO2), size = 0.2) +
+#   geom_line(aes(y = fit, color = flag), linetype = "longdash") +
+#   geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
+#   scale_color_manual(values = c(
+#     # "keep" = "green",
+#     # "cut" = "red",
+#     "ok" = "green",
+#     "discard" = "red",
+#     "zero" = "grey",
+#     "start_error" = "red"
+#   )) +
+#   scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
+#   # ylim(400,800) +
+#   facet_wrap(~fluxID, scales = "free")
 
-ggsave("campaign2b.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
+# ggsave("campaign2b.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
 
-gc()
+# gc()
 
-slopes_INCLINE_2022 %>%
-  filter(
-    campaign == 3
-  ) %>%
-  ggplot(aes(datetime)) +
-  # geom_point(aes(y = CO2, color = cut), size = 0.2) +
-  geom_point(aes(y = CO2), size = 0.2) +
-  geom_line(aes(y = fit, color = flag), linetype = "longdash") +
-  geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
-  scale_color_manual(values = c(
-    # "keep" = "green",
-    # "cut" = "red",
-    "ok" = "green",
-    "discard" = "red",
-    "zero" = "grey",
-    "start_error" = "red"
-  )) +
-  scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
-  # ylim(400,800) +
-  facet_wrap(~fluxID, scales = "free")
+# slopes_INCLINE_2022 %>%
+#   filter(
+#     campaign == 3
+#   ) %>%
+#   ggplot(aes(datetime)) +
+#   # geom_point(aes(y = CO2, color = cut), size = 0.2) +
+#   geom_point(aes(y = CO2), size = 0.2) +
+#   geom_line(aes(y = fit, color = flag), linetype = "longdash") +
+#   geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
+#   scale_color_manual(values = c(
+#     # "keep" = "green",
+#     # "cut" = "red",
+#     "ok" = "green",
+#     "discard" = "red",
+#     "zero" = "grey",
+#     "start_error" = "red"
+#   )) +
+#   scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
+#   # ylim(400,800) +
+#   facet_wrap(~fluxID, scales = "free")
 
-ggsave("campaign3b.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
+# ggsave("campaign3b.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
 
-gc()
+# gc()
 
-slopes_INCLINE_2022 %>%
-  filter(
-    campaign == 4
-  ) %>%
-  ggplot(aes(datetime)) +
-  # geom_point(aes(y = CO2, color = cut), size = 0.2) +
-  geom_point(aes(y = CO2), size = 0.2) +
-  geom_line(aes(y = fit, color = flag), linetype = "longdash") +
-  geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
-  scale_color_manual(values = c(
-    # "keep" = "green",
-    # "cut" = "red",
-    "ok" = "green",
-    "discard" = "red",
-    "zero" = "grey",
-    "start_error" = "red"
-  )) +
-  scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
-  # ylim(400,800) +
-  facet_wrap(~fluxID, scales = "free")
+# slopes_INCLINE_2022 %>%
+#   filter(
+#     campaign == 4
+#   ) %>%
+#   ggplot(aes(datetime)) +
+#   # geom_point(aes(y = CO2, color = cut), size = 0.2) +
+#   geom_point(aes(y = CO2), size = 0.2) +
+#   geom_line(aes(y = fit, color = flag), linetype = "longdash") +
+#   geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
+#   scale_color_manual(values = c(
+#     # "keep" = "green",
+#     # "cut" = "red",
+#     "ok" = "green",
+#     "discard" = "red",
+#     "zero" = "grey",
+#     "start_error" = "red"
+#   )) +
+#   scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
+#   # ylim(400,800) +
+#   facet_wrap(~fluxID, scales = "free")
 
-ggsave("campaign4b.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
+# ggsave("campaign4b.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
 
-gc()
+# gc()
 
 
 
