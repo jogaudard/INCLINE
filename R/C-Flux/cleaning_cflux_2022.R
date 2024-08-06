@@ -99,18 +99,43 @@ CO2_INCLINE_2022 <- CO2_INCLINE_2022 %>%
 # get slopes --------------------------------------------------------------
 
 slopes_INCLINE_2022 <- CO2_INCLINE_2022 |>
-  flux_fitting(fit_type = "exp")
+  flux_fitting(
+    fit_type = "exp",
+    start_cut = 10,
+    end_cut = 10
+    )
 
 str(slopes_INCLINE_2022)
 
-slopes_INCLINE_2022 <- slopes_INCLINE_2022 |>
-  flux_quality(fit_type = "exp", slope_col = "f_slope_tz")
+slopes_INCLINE_2022_flags <- slopes_INCLINE_2022 |>
+  flux_quality(fit_type = "exp",
+    slope_col = "f_slope_tz",
+    weird_fluxesID = c(
+      107, # the slope reflects a small bump that is not representing the entire flux
+      383, # should not be 0, it is clearly not flat
+      482, # small bump at the start affecting the slope
+      662 # slope not reflecting the flux
+      ),
+    force_okID = c(
+      359, # there are just a couple of outliers data points messing up the RMSE but the fit is ok
+      378, # same, some outliers
+      379, # same, outlisers issue
+      384, # outliers issue
+      407, # outlier at the start triggering start error
+      409, # outliers issue
+      422, # noise in the second part is affecting RMSE but not the fit
+      673, # outliers issue
+      786, # outliers affecting RMSE but slope good
+      867 # noisy but slope quite obvious
+      )
+    )
 
 flux_plot(
-  slopes_INCLINE_2022,
+  slopes_INCLINE_2022_flags,
   fit_type = "exp",
   f_ylim_lower = 300
   )
+
 
 
 
