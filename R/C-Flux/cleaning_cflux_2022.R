@@ -107,6 +107,8 @@ slopes_INCLINE_2022 <- CO2_INCLINE_2022 |>
 
 str(slopes_INCLINE_2022)
 
+# quality checks
+
 slopes_INCLINE_2022_flags <- slopes_INCLINE_2022 |>
   flux_quality(fit_type = "exp",
     slope_col = "f_slope_tz",
@@ -130,183 +132,31 @@ slopes_INCLINE_2022_flags <- slopes_INCLINE_2022 |>
       )
     )
 
-flux_plot(
-  slopes_INCLINE_2022_flags,
-  fit_type = "exp",
-  f_ylim_lower = 300
-  )
+# plotting to check the data
 
+# plotting is passed as comments because it takes about 25 minutes to run
 
-
-
-# slopes_INCLINE_2022 <- CO2_INCLINE_2022 %>% 
-#   filter(
-#     datetime > start_window &
-#       datetime < end_window
-#   ) %>% 
-#   fitting.flux_nocut2()
-#   # fitting.flux(
-#   #   weird_fluxesID = c(
-#   #     355, # second half was detected for window, but it should be the first one
-#   #     386, # tz is at the wrong end, it does not reflect the reality of the flux (negative ER)
-#   #     549, # slope_fit is too far from real points and window is too short
-#   #     640, # wrong direction of slope
-#   #     696, # dip in the flux
-#   #     719, # slope in wrong direction
-#   #     743, # window mismatch
-#   #     751, # slope in wrong direction
-#   #     762, # dip in flux
-#   #     775, # mess at the beginning of the flux
-#   #     791, # slope in the wrong direction
-#   #     876 # flux is quite weird
-#   #     )
-#   # )
-
-
-# slopes_INCLINE_2022_metrics <- slopes_INCLINE_2022%>%
-#   select(fluxID, Cm, b, b_est, RMSE, r.squared_slope, flag, cor_coef) %>%
-#   distinct()
-
-# slopes_INCLINE_2022_metrics <- slopes_INCLINE_2022%>%
-#   select(fluxID, Cm, b, b_est, RMSE, NRMSE, flag, cor_coef, meanCO2, sdCO2, rangeCO2) %>%
-#   distinct()
-
-# # trying some flagging ----------------------------------------------------
-
-# # problem when b > 1
-# # problem when tz is too far in the flux
-
-# # compare NRMSE and RMSE
-
-# slopes_INCLINE_2022_metrics %>% 
-#   mutate(
-#     NRMSE = RMSE / meanCO2
-#   ) %>% 
-#   filter(
-#     fluxID != 570
-#   ) %>%
-#   ggplot(aes(NRMSE, RMSE, color = flag)) +
-#   geom_point() 
-#   # ylim(0,100) +
-#   # xlim(0,1)
-
-# # graph CO2 concentration ------------------------------------------------------------
-# theme_set(theme_grey(base_size = 5))
-
-# slopes_INCLINE_2022 %>%
-#   filter(
-#     campaign == 1
-#   ) %>%
-#   ggplot(aes(datetime)) +
-#   # geom_point(aes(y = CO2, color = cut), size = 0.2) +
-#   geom_point(aes(y = CO2), size = 0.2) +
-#   geom_line(aes(y = fit, color = flag), linetype = "longdash") +
-#   geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
-#   scale_color_manual(values = c(
-#     # "keep" = "green",
-#     # "cut" = "red",
-#     "ok" = "green",
-#     "discard" = "red",
-#     "zero" = "grey",
-#     "start_error" = "red"
-#   )) +
-#   scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
-#   # ylim(400,800) +
-#   facet_wrap(~fluxID, scales = "free")
-
-# ggsave("campaign1b.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
-
-# gc()
-
-# slopes_INCLINE_2022 %>%
-#   filter(
-#     campaign == 2
-#   ) %>%
-#   ggplot(aes(datetime)) +
-#   # geom_point(aes(y = CO2, color = cut), size = 0.2) +
-#   geom_point(aes(y = CO2), size = 0.2) +
-#   geom_line(aes(y = fit, color = flag), linetype = "longdash") +
-#   geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
-#   scale_color_manual(values = c(
-#     # "keep" = "green",
-#     # "cut" = "red",
-#     "ok" = "green",
-#     "discard" = "red",
-#     "zero" = "grey",
-#     "start_error" = "red"
-#   )) +
-#   scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
-#   # ylim(400,800) +
-#   facet_wrap(~fluxID, scales = "free")
-
-# ggsave("campaign2b.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
-
-# gc()
-
-# slopes_INCLINE_2022 %>%
-#   filter(
-#     campaign == 3
-#   ) %>%
-#   ggplot(aes(datetime)) +
-#   # geom_point(aes(y = CO2, color = cut), size = 0.2) +
-#   geom_point(aes(y = CO2), size = 0.2) +
-#   geom_line(aes(y = fit, color = flag), linetype = "longdash") +
-#   geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
-#   scale_color_manual(values = c(
-#     # "keep" = "green",
-#     # "cut" = "red",
-#     "ok" = "green",
-#     "discard" = "red",
-#     "zero" = "grey",
-#     "start_error" = "red"
-#   )) +
-#   scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
-#   # ylim(400,800) +
-#   facet_wrap(~fluxID, scales = "free")
-
-# ggsave("campaign3b.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
-
-# gc()
-
-# slopes_INCLINE_2022 %>%
-#   filter(
-#     campaign == 4
-#   ) %>%
-#   ggplot(aes(datetime)) +
-#   # geom_point(aes(y = CO2, color = cut), size = 0.2) +
-#   geom_point(aes(y = CO2), size = 0.2) +
-#   geom_line(aes(y = fit, color = flag), linetype = "longdash") +
-#   geom_line(aes(y = fit_slope, color = flag), linetype = "dashed") +
-#   scale_color_manual(values = c(
-#     # "keep" = "green",
-#     # "cut" = "red",
-#     "ok" = "green",
-#     "discard" = "red",
-#     "zero" = "grey",
-#     "start_error" = "red"
-#   )) +
-#   scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
-#   # ylim(400,800) +
-#   facet_wrap(~fluxID, scales = "free")
-
-# ggsave("campaign4b.png", height = 60, width = 100, units = "cm", path = "data/C-Flux/summer_2022/graph_fluxes")
-
-# gc()
+# flux_plot(
+#   slopes_INCLINE_2022_flags,
+#   fit_type = "exp",
+#   f_ylim_lower = 300
+#   )
 
 
 
 
 # clean cut ---------------------------------------------------------------
 
-slopes_INCLINE_2022_cut <- slopes_INCLINE_2022 %>% 
-  filter(
-    cut == "keep"
-  )
+# this is now inlcuded in flux_calc
+# slopes_INCLINE_2022_cut <- slopes_INCLINE_2022 %>% 
+#   filter(
+#     cut == "keep"
+#   )
 
 
 # PAR cleaning ------------------------------------------------------------
 
-slopes_INCLINE_2022_cut <- slopes_INCLINE_2022_cut %>% 
+slopes_INCLINE_2022_flags <- slopes_INCLINE_2022_flags %>% 
   mutate(
     PAR =
       case_when(
@@ -317,91 +167,74 @@ slopes_INCLINE_2022_cut <- slopes_INCLINE_2022_cut %>%
       )
   )
 
-filter(slopes_INCLINE_2022_cut
-       # type == "NEE"
+filter(slopes_INCLINE_2022_flags,
+       type == "NEE"
        ) %>% #faster than looking at the graph!
   summarise(
     rangePAR = range(PAR, na.rm = TRUE)
   )
 
-# slopes_INCLINE_2022_cut <- slopes_INCLINE_2022_cut %>% 
-#   mutate(
-#     PAR = case_when(
-#       # fluxID %in% c(
-#       #   691,
-#       #   697,
-#       #   695,
-#       #   873,
-#       #   137,
-#       #   51,
-#       #   273,
-#       #   183,
-#       #   585,
-#       #   629,
-#       #   475,
-#       #   257,
-#       #   583,
-#       #   53,
-#       #   275,
-#       #   821,
-#       #   627,
-#       #   469,
-#       #   285,
-#       #   751,
-#       #   749,
-#       #   
-#       #   ) & 
-#         PAR < 60 ~ NA_real_, # PAR sensor had a faulty contact
-#       TRUE ~ PAR
-#       
-#     )
-#   )
 
-slopes_INCLINE_2022_cut %>% 
+
+slopes_INCLINE_2022_flags %>% 
   filter(
-    # type == "NEE"
-     fluxID == 772
+    # type == "ER"
+     f_fluxID == 792
     # & PAR < 10
   ) %>% 
   mutate(
-    datetime = ymd_hms(datetime),
-    time = hms::as_hms(datetime)
+    datetime = ymd_hms(f_datetime),
+    time = hms::as_hms(f_datetime)
   ) %>% 
   ggplot(aes(x = time, y = PAR)) +
   geom_point() +
-  geom_text(aes(label = fluxID), hjust=-1,vjust=1)
+  geom_text(aes(label = f_fluxID), hjust=-1,vjust=1)
 
-slopes_INCLINE_2022_cut %>% 
+slopes_INCLINE_2022_flags %>% 
   filter(
     type == "NEE"
     # & fluxID == 697
     & PAR < 100
   ) %>% 
   mutate(
-    datetime = ymd_hms(datetime),
-    time = hms::as_hms(datetime)
+    datetime = ymd_hms(f_datetime),
+    time = hms::as_hms(f_datetime)
   ) %>% 
   ggplot(aes(x = time, y = PAR)) +
   geom_point() +
-  geom_text(aes(label = fluxID), hjust=-1,vjust=1) +
+  geom_text(aes(label = f_fluxID), hjust=-1,vjust=1) +
   facet_wrap(~campaign)
 
 
 
 # calculate fluxes --------------------------------------------------------
 
-fluxes_INCLINE_2022 <- slopes_INCLINE_2022_cut %>% 
-  mutate(
-    slope = case_when(
-      flag == "ok" & type == "ER" & slope_tz < 0 ~ NA_real_, # maybe this should be NA or 0, not sure
-      flag == "ok" ~ slope_tz,
-      flag == "zero" ~ 0,
-      flag %in% c("discard", "start_error", "weird_flux") ~ NA_real_
+fluxes_INCLINE_2022 <- slopes_INCLINE_2022_flags |>
+    flux_calc(
+      slope_col = "f_slope_corr",
+      cut_col = "f_cut",
+      keep_arg = "keep",
+      chamber_volume = 35,
+      plot_area = 0.0875,
+      cols_keep = c("turfID", "treatment", "type", "campaign", "comments", "f_quality_flag"),
+      cols_ave = c("PAR", "temp_soil")
     )
-  ) %>%
-  flux.calc.zhao18(
-    chamber_volume = 35, plot_area = 0.0875
-  ) # need to change dimension of chamber
+
+
+str(fluxes_INCLINE_2022)
+
+# fluxes_INCLINE_2022 <- slopes_INCLINE_2022_cut %>% 
+#   mutate(
+#     slope = case_when(
+#       flag == "ok" & type == "ER" & slope_tz < 0 ~ NA_real_, # maybe this should be NA or 0, not sure
+#       flag == "ok" ~ slope_tz,
+#       flag == "zero" ~ 0,
+#       flag %in% c("discard", "start_error", "weird_flux") ~ NA_real_
+#     )
+#   ) %>%
+#   flux.calc.zhao18(
+#     chamber_volume = 35, plot_area = 0.0875
+#   ) # need to change dimension of chamber
   
 
 # adding metadata
