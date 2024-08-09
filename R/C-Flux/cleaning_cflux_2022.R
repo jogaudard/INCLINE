@@ -110,8 +110,9 @@ str(slopes_INCLINE_2022)
 # quality checks
 
 slopes_INCLINE_2022_flags <- slopes_INCLINE_2022 |>
-  flux_quality(fit_type = "exp",
-    slope_col = "f_slope_tz",
+  flux_quality(
+    # fit_type = "exp",
+    slope_col = "f_slope",
     weird_fluxesID = c(
       107, # the slope reflects a small bump that is not representing the entire flux
       383, # should not be 0, it is clearly not flat
@@ -138,7 +139,7 @@ slopes_INCLINE_2022_flags <- slopes_INCLINE_2022 |>
 
 # flux_plot(
 #   slopes_INCLINE_2022_flags,
-#   fit_type = "exp",
+#   # fit_type = "exp",
 #   f_ylim_lower = 300
 #   )
 
@@ -242,7 +243,7 @@ str(fluxes_INCLINE_2022)
 INCLINE_metadata <- read_csv2("data/C-Flux/summer_2022/raw_data/INCLINE_metadata.csv")
 
 fluxes_INCLINE_2022 <- fluxes_INCLINE_2022 %>% 
-  select(fluxID, PARavg, temp_soilavg, turfID, type, datetime, campaign, flux, temp_airavg, RMSE) %>% 
+  select(f_fluxID, PAR, temp_soil, turfID, type, datetime, campaign, flux, temp_air_ave, f_quality_flag) %>% 
   left_join(INCLINE_metadata)
 
 # graph ER and NEE to detect outliers --------------------------------------------
