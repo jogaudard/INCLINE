@@ -113,13 +113,13 @@ slopes_INCLINE_2022_flags <- slopes_INCLINE_2022 |>
   flux_quality(
     # fit_type = "exp",
     slope_col = "f_slope",
-    weird_fluxesID = c(
+    weird_fluxes_id = c(
       107, # the slope reflects a small bump that is not representing the entire flux
       383, # should not be 0, it is clearly not flat
       482, # small bump at the start affecting the slope
       662 # slope not reflecting the flux
       ),
-    force_okID = c(
+    force_ok_id = c(
       359, # there are just a couple of outliers data points messing up the RMSE but the fit is ok
       378, # same, some outliers
       379, # same, outlisers issue
@@ -137,11 +137,11 @@ slopes_INCLINE_2022_flags <- slopes_INCLINE_2022 |>
 
 # plotting is passed as comments because it takes about 25 minutes to run
 
-# flux_plot(
-#   slopes_INCLINE_2022_flags,
-#   # fit_type = "exp",
-#   f_ylim_lower = 300
-#   )
+flux_plot(
+  slopes_INCLINE_2022_flags,
+  # fit_type = "exp",
+  f_ylim_lower = 300
+  )
 
 
 
