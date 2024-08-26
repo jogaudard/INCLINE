@@ -140,7 +140,9 @@ slopes_INCLINE_2022_flags <- slopes_INCLINE_2022 |>
 flux_plot(
   slopes_INCLINE_2022_flags,
   # fit_type = "exp",
-  f_ylim_lower = 300
+  f_ylim_lower = 300,
+  output = "pdfpages",
+  print_plot = FALSE
   )
 
 
