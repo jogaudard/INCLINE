@@ -112,8 +112,8 @@ conc_incline_fit <- flux_fitting(
     f_conc = CO2,
     f_datetime = datetime,
     fit_type = "exp_zhao18",
-    start_cut = 10,
-    end_cut = 60
+    start_cut = 20,
+    end_cut = 40
 )
 
 conc_incline_flag <- flux_quality(
