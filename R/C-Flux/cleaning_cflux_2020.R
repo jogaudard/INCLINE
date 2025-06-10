@@ -91,12 +91,161 @@ combined <- fluxes %>%
 #   drop_na(starting_time) %>% #need to remove rows with NA in starting time: when running out of battery we took only two measurements per plot, but the replicates stayed in the record file
 #   select(plot_ID,type,replicate,starting_time,date,campaign,remarks,start,end)
 
-incline <- read_csv("data/C-Flux/summer_2020/INCLINE_field-record_2020.csv", na = c(""), col_types = "cccntcfc") %>% 
+incline_record <- read_csv("data/C-Flux/summer_2020/INCLINE_field-record_2020.csv", na = c(""), col_types = "cccntcfc") %>% 
   drop_na(starting_time) %>% #delete row without starting time (meaning no measurement was done)
   mutate(
     date = dmy(date),
-    start = ymd_hms(paste(date, starting_time)), #converting the date as posixct, pasting date and starting time together
-    end = start + measurement, #creating column End
-    start_window = start + startcrop, #cropping the start
-    end_window = end - endcrop #cropping the end of the measurement
-  )
+    start = ymd_hms(paste(date, starting_time)) #converting the date as posixct, pasting date and starting time together
+  ) |>
+  select(!c(date, starting_time))
+
+conc_incline <- flux_match(
+    combined,
+    incline_record,
+    datetime,
+    start_col = start,
+    measurement_length = 180
+)
+
+conc_incline_fit <- flux_fitting(
+    conc_incline,
+    f_conc = CO2,
+    f_datetime = datetime,
+    fit_type = "exp_zhao18",
+    start_cut = 10,
+    end_cut = 60
+)
+
+conc_incline_flag <- flux_quality(
+    conc_incline_fit,
+    f_conc = CO2,
+    error = 200
+)
+
+# min(conc_incline$CO2, na.rm = TRUE)
+# max(conc_incline$CO2, na.rm = TRUE)
+
+conc_incline_flag |>
+    filter(
+        campaign == 2
+        & replicate == 1
+    ) |>
+    flux_plot(
+    f_conc = CO2,
+    f_datetime = datetime,
+    output = "pdfpages",
+    f_plotname = "campaign2_1",
+    f_ylim_lower = 250
+)
+
+conc_incline_flag |>
+    filter(
+        campaign == 2
+        & replicate == 2
+    ) |>
+    flux_plot(
+    f_conc = CO2,
+    f_datetime = datetime,
+    output = "pdfpages",
+    f_plotname = "campaign2_2",
+    f_ylim_lower = 250
+)
+
+conc_incline_flag |>
+    filter(
+        campaign == 2
+        & replicate == 3
+    ) |>
+    flux_plot(
+    f_conc = CO2,
+    f_datetime = datetime,
+    output = "pdfpages",
+    f_plotname = "campaign2_3",
+    f_ylim_lower = 250
+)
+
+
+conc_incline_flag |>
+    filter(
+        campaign == 3
+        & replicate == 1
+    ) |>
+    flux_plot(
+    f_conc = CO2,
+    f_datetime = datetime,
+    output = "pdfpages",
+    f_plotname = "campaign3_1",
+    f_ylim_lower = 250
+)
+
+conc_incline_flag |>
+    filter(
+        campaign == 3
+        & replicate == 2
+    ) |>
+    flux_plot(
+    f_conc = CO2,
+    f_datetime = datetime,
+    output = "pdfpages",
+    f_plotname = "campaign3_2",
+    f_ylim_lower = 250
+)
+
+conc_incline_flag |>
+    filter(
+        campaign == 3
+        & replicate == 3
+    ) |>
+    flux_plot(
+    f_conc = CO2,
+    f_datetime = datetime,
+    output = "pdfpages",
+    f_plotname = "campaign3_3",
+    f_ylim_lower = 250
+)
+
+conc_incline_flag |>
+    filter(
+        campaign == 4
+        & replicate == 1
+    ) |>
+    flux_plot(
+    f_conc = CO2,
+    f_datetime = datetime,
+    output = "pdfpages",
+    f_plotname = "campaign4_1",
+    f_ylim_lower = 250
+)
+
+conc_incline_flag |>
+    filter(
+        campaign == 4
+        & replicate == 2
+    ) |>
+    flux_plot(
+    f_conc = CO2,
+    f_datetime = datetime,
+    output = "pdfpages",
+    f_plotname = "campaign4_2",
+    f_ylim_lower = 250
+)
+
+conc_incline_flag |>
+    filter(
+        campaign == 4
+        & replicate == 3
+    ) |>
+    flux_plot(
+    f_conc = CO2,
+    f_datetime = datetime,
+    output = "pdfpages",
+    f_plotname = "campaign4_3",
+    f_ylim_lower = 250
+)
+
+# flux_plot(
+#     conc_incline_flag,
+#     f_conc = CO2,
+#     f_datetime = datetime,
+#     output = "pdfpages"
+# )
