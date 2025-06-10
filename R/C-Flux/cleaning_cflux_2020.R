@@ -41,16 +41,24 @@ fluxes <-
   select(datetime, CO2)
 
 #import date/time and PAR columns from PAR file
-PAR <-
-  list.files(path = location, pattern = "*PAR*", full.names = T) %>% 
-  map_df(~read_table2(., "", na = c("NA"), col_names = paste0("V",seq_len(12)))) %>% #need that because logger is adding columns with useless information
-  rename(date = V2, time = V3, PAR = V4) %>% 
+
+PAR <- list.files(path = location, pattern = "*PAR*", full.names = TRUE) |>
+  map_dfr( # we map read_tsv on all the files
+    # read_tsv is the version of read_delim for tab separated value files
+    read_tsv,
+    na = c("NA"),
+    col_names = paste0("V", seq_len(3)),
+    # creates a column with the filename, that we can use as flux ID
+    id = "filename"
+  ) |>
+  rename(datetime = V2, PAR = V3) |>
+  filter(V1 == 2) |> # anything else seems to be an error
   mutate(
-    PAR = as.numeric(as.character(.$PAR)), #removing any text from the PAR column (again, the logger...)
-    datetime = paste(date, time),
+    PAR = as.numeric(PAR), #removing any text from the PAR column (again, the logger...)
     datetime = ymd_hms(datetime)
   ) %>% 
   select(datetime, PAR)
+
 
 #import date/time and value column from iButton file
 
