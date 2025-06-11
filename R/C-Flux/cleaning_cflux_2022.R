@@ -37,16 +37,16 @@ location <- "data/C-Flux/summer_2022/raw_data" #location of datafiles
 raw_CO2_INCLINE_2022 <- dir_ls(location, regexp = "*CO2_campaign*")  |>
   map_dfr(read_csv,  na = c("#N/A", "Over")) |>
   rename( #rename the column to get something more practical without space
-    CO2 = "CO2 (ppm)",
+    f_conc = "CO2 (ppm)",
     temp_air = "Temp_air ('C)",
     temp_soil = "Temp_soil ('C)",
     PAR = "PAR (umolsm2)",
-    datetime = "Date/Time"
+    f_datetime = "Date/Time"
   ) %>%  
   mutate(
-    datetime = dmy_hms(datetime)
+    f_datetime = dmy_hms(f_datetime)
   ) %>%
-  select(datetime, CO2, PAR, temp_air, temp_soil)
+  select(f_datetime, f_conc, PAR, temp_air, temp_soil)
 
 record <- read_csv("data/C-Flux/summer_2022/raw_data/INCLINE_field-record_2022.csv", na = c(""), col_types = "fffccfc") %>% 
   drop_na(starting_time) %>%  #delete row without starting time (meaning no measurement was done)
@@ -67,9 +67,9 @@ str(record)
 CO2_INCLINE_2022 <- flux_match(
   raw_CO2_INCLINE_2022,
   record,
-  startcrop = 0,
-  measurement_length = 180,
-  conc_col = "CO2"
+  f_datetime,
+  start,
+  measurement_length = 180
 )
 
 # CO2_INCLINE_2022  |>
@@ -100,7 +100,7 @@ CO2_INCLINE_2022 <- CO2_INCLINE_2022 %>%
 
 slopes_INCLINE_2022 <- CO2_INCLINE_2022 |>
   flux_fitting(
-    fit_type = "exp",
+    fit_type = "exp_zhao18",
     start_cut = 10,
     end_cut = 10
     )
@@ -112,14 +112,18 @@ str(slopes_INCLINE_2022)
 slopes_INCLINE_2022_flags <- slopes_INCLINE_2022 |>
   flux_quality(
     # fit_type = "exp",
-    slope_col = "f_slope",
-    weird_fluxes_id = c(
-      107, # the slope reflects a small bump that is not representing the entire flux
+    force_discard = c(
       383, # should not be 0, it is clearly not flat
       482, # small bump at the start affecting the slope
       662 # slope not reflecting the flux
       ),
-    force_ok_id = c(
+    force_zero = c(
+      107, # the slope reflects a small bump that is not representing the entire flux
+    ),
+    force_lm = c(
+      132, # lm is fine
+    ),
+    force_ok = c(
       359, # there are just a couple of outliers data points messing up the RMSE but the fit is ok
       378, # same, some outliers
       379, # same, outlisers issue
@@ -137,13 +141,45 @@ slopes_INCLINE_2022_flags <- slopes_INCLINE_2022 |>
 
 # plotting is passed as comments because it takes about 25 minutes to run
 
-flux_plot(
-  slopes_INCLINE_2022_flags,
-  # fit_type = "exp",
-  f_ylim_lower = 300,
-  output = "pdfpages",
-  print_plot = FALSE
+slopes_INCLINE_2022_flags |>
+  filter(campaign == 1) |>
+  flux_plot(
+    f_ylim_lower = 300,
+    output = "pdfpages",
+    f_plotname = "campaign1"
   )
+
+slopes_INCLINE_2022_flags |>
+  filter(campaign == 2) |>
+  flux_plot(
+    f_ylim_lower = 300,
+    output = "pdfpages",
+    f_plotname = "campaign2"
+  )
+
+slopes_INCLINE_2022_flags |>
+  filter(campaign == 3) |>
+  flux_plot(
+    f_ylim_lower = 300,
+    output = "pdfpages",
+    f_plotname = "campaign3"
+  )
+
+slopes_INCLINE_2022_flags |>
+  filter(campaign == 4) |>
+  flux_plot(
+    f_ylim_lower = 300,
+    output = "pdfpages",
+    f_plotname = "campaign4"
+  )
+
+# flux_plot(
+#   slopes_INCLINE_2022_flags,
+#   # fit_type = "exp",
+#   f_ylim_lower = 300,
+#   output = "pdfpages",
+#   print_plot = FALSE
+#   )
 
 
 
