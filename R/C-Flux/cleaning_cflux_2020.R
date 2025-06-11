@@ -5,6 +5,9 @@ library(fs)
 library(ggplot2)
 library(ggforce)
 library(progress)
+library(stringr)
+library(broom)
+library(ggpmisc)
 
 
 get_file(node = "pk4bg",
@@ -21,6 +24,17 @@ get_file(node = "zhk3m",
          file = "INCLINE_cutting_2020.csv",
          path = "data/C-Flux/raw_data",
          remote_path = "RawData/C-Flux")
+
+get_file(node = "zhk3m",
+         file = "INCLINE_metadata.csv",
+         path = "data",
+         remote_path = "RawData")
+
+metadata <- read_csv2("data/INCLINE_metadata.csv") |>
+    mutate(
+        plot_ID = str_to_upper(plotID)
+    )
+
 
 # Unzip files
 zipFile <- "data/C-Flux/raw_data/Three-D_cflux_2020.zip"
@@ -179,24 +193,25 @@ conc_incline_flag <- flux_quality(
 # min(conc_incline$CO2, na.rm = TRUE)
 # max(conc_incline$CO2, na.rm = TRUE)
 
-conc_incline_flag |>
-    filter(
-        campaign == 2
-        & replicate == 1
-    ) |>
-    flux_plot(
-    f_conc = CO2,
-    f_datetime = datetime,
-    output = "pdfpages",
-    f_plotname = "campaign2_1",
-    f_ylim_lower = 250
-)
-
 conc_incline_flag_lrc <- flux_quality(
     conc_incline_fit_lrc,
     f_conc = CO2,
     error = 200
 )
+
+
+# conc_incline_flag |>
+#     filter(
+#         campaign == 2
+#         & replicate == 1
+#     ) |>
+#     flux_plot(
+#     f_conc = CO2,
+#     f_datetime = datetime,
+#     output = "pdfpages",
+#     f_plotname = "campaign2_1",
+#     f_ylim_lower = 250
+# )
 
 # conc_incline_flag_lrc |>
 #     flux_plot(
@@ -377,14 +392,14 @@ plot <- filter(slope_df, type == ((filter))) %>%
 }
 
 # passing plots as comment to save time
-plot_PAR(conc_incline_flag, "NEE", "plot_NEE_PAR.pdf", "free")
-plot_PAR(conc_incline_flag, "ER", "plot_ER_PAR.pdf", "free")
-plot_PAR(conc_incline_flag_lrc, 1, "plot_LRC1_PAR.pdf", "free")
-plot_PAR(conc_incline_flag_lrc, 2, "plot_LRC2_PAR.pdf", "free")
-plot_PAR(conc_incline_flag_lrc, 3, "plot_LRC3_PAR.pdf", "free")
-plot_PAR(conc_incline_flag_lrc, 4, "plot_LRC4_PAR.pdf", "free")
-plot_PAR(conc_incline_flag_lrc, 5, "plot_LRC5_PAR.pdf", "free")
-plot_PAR(conc_incline_flag_lrc, 6, "plot_LRC6_PAR.pdf", "free")
+# plot_PAR(conc_incline_flag, "NEE", "plot_NEE_PAR.pdf", "free")
+# plot_PAR(conc_incline_flag, "ER", "plot_ER_PAR.pdf", "free")
+# plot_PAR(conc_incline_flag_lrc, 1, "plot_LRC1_PAR.pdf", "free")
+# plot_PAR(conc_incline_flag_lrc, 2, "plot_LRC2_PAR.pdf", "free")
+# plot_PAR(conc_incline_flag_lrc, 3, "plot_LRC3_PAR.pdf", "free")
+# plot_PAR(conc_incline_flag_lrc, 4, "plot_LRC4_PAR.pdf", "free")
+# plot_PAR(conc_incline_flag_lrc, 5, "plot_LRC5_PAR.pdf", "free")
+# plot_PAR(conc_incline_flag_lrc, 6, "plot_LRC6_PAR.pdf", "free")
 
 
 
@@ -434,3 +449,89 @@ fluxes_incline_lrc <- flux_calc(
 )
 
 # now we can do LRC
+
+
+fluxes_incline_lrc <- fluxes_incline_lrc |>
+    select(!treatment) |>
+    left_join(metadata, by = join_by("plot_ID"))
+
+ggplot(fluxes_incline_lrc, aes(x = PAR_ave, y = f_flux, color = OTC)) +
+  geom_point(size = 0.9) +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE)
+
+coefficients_lrc <- fluxes_incline_lrc %>%
+  group_by(OTC) %>% 
+  nest %>% 
+  mutate(lm = map(data, ~ lm(f_flux ~ PAR_ave + I(PAR_ave^2), data = .x)),
+         table = map(lm, tidy),
+         table = map(table, select, term, estimate),
+         table = map(table, pivot_wider, names_from = term, values_from = estimate) 
+  ) %>% 
+  unnest(table) %>% 
+  select(OTC, `(Intercept)`, PAR_ave, `I(PAR_ave^2)`) %>% 
+  rename(
+    origin = "(Intercept)",
+    a = "I(PAR_ave^2)",
+    b = "PAR_ave"
+  )
+
+
+# #origini is calculated with coefficients from the model and flux and PAR value of specific flux
+
+fluxes_incline <- fluxes_incline |>
+    select(!treatment) |>
+    left_join(metadata, by = join_by("plot_ID"))
+
+fluxes_incline |>
+  summarise(
+    .by = type,
+    mean = median(PAR_ave, na.rm = TRUE)
+    )
+
+PARfix <- 500 #PAR value at which we want the corrected flux to be for NEE
+PARnull <- 0 #PAR value for ER
+
+
+
+flux_corrected_PAR <- fluxes_incline %>% 
+  left_join(coefficients_lrc, by = "OTC") %>% 
+  mutate(
+    PAR_corrected_flux = 
+      case_when( #we correct only the NEE
+        type == "NEE" ~ f_flux + a * (PARfix^2 - PAR_ave^2) + b * (PARfix - PAR_ave),
+        type == "ER" ~ f_flux + a * (PARnull^2 - PAR_ave^2) + b * (PARnull - PAR_ave),
+        .default = f_flux
+      )
+    # delta_flux = flux - corrected_flux
+  )
+
+# let's compare with previous cleaning
+
+flux_incline_old <- read_csv("data_cleaned/INCLINE_c-flux_2020_old.csv")
+
+flux_incline_old <- flux_incline_old |>
+  select(turfID, type, campaign, replicate, flux) |>
+  rename(flux_old = "flux")
+
+fluxes_incline_new <- flux_corrected_PAR |>
+  select(plot_ID, type, campaign, replicate, f_flux, PAR_corrected_flux)
+
+fluxes_comparison <- full_join(
+  flux_incline_old,
+  fluxes_incline_new,
+  by = join_by("turfID" == "plot_ID", type, campaign, replicate)
+) |>
+pivot_longer(
+  cols = c(flux_old, PAR_corrected_flux),
+  names_to = "method",
+  values_to = "flux"
+)
+
+fluxes_comparison |>
+  ggplot(aes(f_flux, flux, color = method)) +
+  geom_point(size = 0.5) +
+  # geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +
+  geom_abline(slope = 1, intercept = 0) +
+  stat_poly_line() +
+  stat_correlation(use_label("cor.label", "R2", "n"))
+
