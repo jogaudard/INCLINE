@@ -510,10 +510,12 @@ flux_corrected_PAR <- fluxes_incline %>%
 flux_incline_old <- read_csv("data_cleaned/INCLINE_c-flux_2020_old.csv")
 
 flux_incline_old <- flux_incline_old |>
+  filter(type %in% c("NEE", "ER")) |>
   select(turfID, type, campaign, replicate, flux) |>
   rename(flux_old = "flux")
 
 fluxes_incline_new <- flux_corrected_PAR |>
+  filter(type %in% c("NEE", "ER")) |>
   select(plot_ID, type, campaign, replicate, f_flux, PAR_corrected_flux)
 
 fluxes_comparison <- full_join(
@@ -533,5 +535,17 @@ fluxes_comparison |>
   # geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +
   geom_abline(slope = 1, intercept = 0) +
   stat_poly_line() +
-  stat_correlation(use_label("cor.label", "R2", "n"))
+  stat_correlation(use_label("cor.label", "R2", "n")) +
+  facet_grid(type ~ .)
+
+fluxes_comparison |>
+  filter(method == "flux_old") |>
+  summarise(
+    .by = type,
+    mean_oldflux = mean(flux, na.rm = TRUE),
+    mean_fflux = mean(f_flux, na.rm = TRUE)
+  ) |>
+  mutate(
+    diff = (mean_oldflux - mean_fflux) / abs(mean_fflux)
+  )
 
