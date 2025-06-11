@@ -7,7 +7,7 @@ library(fs)
 get_file(node = "pk4bg",
          file = "Three-D_cflux_2020.zip",
          path = "data/C-Flux/raw_data",
-         remote_path = "RawData/C-Flux")
+         remote_path = "RawData/13_Three-D_raw_C-Flux")
 
 get_file(node = "zhk3m",
          file = "INCLINE_field-record_2020.csv",
@@ -91,7 +91,7 @@ combined <- fluxes %>%
 #   drop_na(starting_time) %>% #need to remove rows with NA in starting time: when running out of battery we took only two measurements per plot, but the replicates stayed in the record file
 #   select(plot_ID,type,replicate,starting_time,date,campaign,remarks,start,end)
 
-incline_record <- read_csv("data/C-Flux/summer_2020/INCLINE_field-record_2020.csv", na = c(""), col_types = "cccntcfc") %>% 
+record <- read_csv("data/C-Flux/summer_2020/INCLINE_field-record_2020.csv", na = c(""), col_types = "cccntcfc") %>% 
   drop_na(starting_time) %>% #delete row without starting time (meaning no measurement was done)
   mutate(
     date = dmy(date),
@@ -99,9 +99,23 @@ incline_record <- read_csv("data/C-Flux/summer_2020/INCLINE_field-record_2020.cs
   ) |>
   select(!c(date, starting_time))
 
+incline_record <- record |>
+  filter(campaign != "LRC") # we will do the LRC separately, because there is some overlap
+
+incline_record_lrc <- record |>
+  filter(campaign == "LRC")
+
 conc_incline <- flux_match(
     combined,
     incline_record,
+    datetime,
+    start_col = start,
+    measurement_length = 180
+)
+
+conc_incline_lrc <- flux_match(
+    combined,
+    incline_record_lrc,
     datetime,
     start_col = start,
     measurement_length = 180
@@ -112,14 +126,51 @@ conc_incline_fit <- flux_fitting(
     f_conc = CO2,
     f_datetime = datetime,
     fit_type = "exp_zhao18",
-    start_cut = 20,
+    start_cut = 30, # there seems to be a real problem at the start of quite some fluxes
+    end_cut = 40
+)
+
+conc_incline_fit_lrc <- flux_fitting(
+    conc_incline_lrc,
+    f_conc = CO2,
+    f_datetime = datetime,
+    fit_type = "exp_zhao18",
+    start_cut = 30, # there seems to be a real problem at the start of quite some fluxes
     end_cut = 40
 )
 
 conc_incline_flag <- flux_quality(
     conc_incline_fit,
     f_conc = CO2,
-    error = 200
+    error = 200,
+    force_lm = c(
+        # 50, # small peak at the start getting the exp the wrong way
+        # 101, # strange dip at the start
+        # 60, # dip at the start
+        # 75,
+        74, # exp messed up but lm is fine
+        98, # noise at the start messing up the exp
+        81, # curvature because of dip at start
+        105, # curvature because of dip at start
+        70, # curvature because of dip at start
+        97, # curvature because of dip at start
+        314, # exp bad, but lm is fine
+        315, # exp bad, but lm is fine
+        665, # lm is fine
+        696 # lm is fines
+    ),
+    # force_zero = c(
+    #     77, # it is flat
+    # ),
+    force_ok = c(
+        # 149, # there is curvature
+        461, # start is actually fine
+        393, # definitely not zero
+        469 # dip at the end, but actually ok
+    ),
+    force_discard = c(
+        324 # what is that shape?
+    )
 )
 
 # min(conc_incline$CO2, na.rm = TRUE)
@@ -135,6 +186,24 @@ conc_incline_flag |>
     f_datetime = datetime,
     output = "pdfpages",
     f_plotname = "campaign2_1",
+    f_ylim_lower = 250
+)
+
+conc_incline_flag_lrc <- flux_quality(
+    conc_incline_fit_lrc,
+    f_conc = CO2,
+    error = 200
+)
+
+conc_incline_flag |>
+    filter(
+        campaign == "LRC"
+    ) |>
+    flux_plot(
+    f_conc = CO2,
+    f_datetime = datetime,
+    output = "pdfpages",
+    f_plotname = "incline_lrc",
     f_ylim_lower = 250
 )
 
@@ -247,5 +316,6 @@ conc_incline_flag |>
 #     conc_incline_flag,
 #     f_conc = CO2,
 #     f_datetime = datetime,
-#     output = "pdfpages"
+#     output = "pdfpages",
+#     f_ylim_lower = 250
 # )
