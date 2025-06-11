@@ -195,122 +195,119 @@ conc_incline_flag_lrc <- flux_quality(
     error = 200
 )
 
-conc_incline_flag |>
-    filter(
-        campaign == "LRC"
-    ) |>
-    flux_plot(
-    f_conc = CO2,
-    f_datetime = datetime,
-    output = "pdfpages",
-    f_plotname = "incline_lrc",
-    f_ylim_lower = 250
-)
+# conc_incline_flag_lrc |>
+#     flux_plot(
+#     f_conc = CO2,
+#     f_datetime = datetime,
+#     output = "pdfpages",
+#     f_plotname = "incline_lrc",
+#     f_ylim_lower = 250
+# )
 
-conc_incline_flag |>
-    filter(
-        campaign == 2
-        & replicate == 2
-    ) |>
-    flux_plot(
-    f_conc = CO2,
-    f_datetime = datetime,
-    output = "pdfpages",
-    f_plotname = "campaign2_2",
-    f_ylim_lower = 250
-)
+# conc_incline_flag |>
+#     filter(
+#         campaign == 2
+#         & replicate == 2
+#     ) |>
+#     flux_plot(
+#     f_conc = CO2,
+#     f_datetime = datetime,
+#     output = "pdfpages",
+#     f_plotname = "campaign2_2",
+#     f_ylim_lower = 250
+# )
 
-conc_incline_flag |>
-    filter(
-        campaign == 2
-        & replicate == 3
-    ) |>
-    flux_plot(
-    f_conc = CO2,
-    f_datetime = datetime,
-    output = "pdfpages",
-    f_plotname = "campaign2_3",
-    f_ylim_lower = 250
-)
+# conc_incline_flag |>
+#     filter(
+#         campaign == 2
+#         & replicate == 3
+#     ) |>
+#     flux_plot(
+#     f_conc = CO2,
+#     f_datetime = datetime,
+#     output = "pdfpages",
+#     f_plotname = "campaign2_3",
+#     f_ylim_lower = 250
+# )
 
 
-conc_incline_flag |>
-    filter(
-        campaign == 3
-        & replicate == 1
-    ) |>
-    flux_plot(
-    f_conc = CO2,
-    f_datetime = datetime,
-    output = "pdfpages",
-    f_plotname = "campaign3_1",
-    f_ylim_lower = 250
-)
+# conc_incline_flag |>
+#     filter(
+#         campaign == 3
+#         & replicate == 1
+#     ) |>
+#     flux_plot(
+#     f_conc = CO2,
+#     f_datetime = datetime,
+#     output = "pdfpages",
+#     f_plotname = "campaign3_1",
+#     f_ylim_lower = 250
+# )
 
-conc_incline_flag |>
-    filter(
-        campaign == 3
-        & replicate == 2
-    ) |>
-    flux_plot(
-    f_conc = CO2,
-    f_datetime = datetime,
-    output = "pdfpages",
-    f_plotname = "campaign3_2",
-    f_ylim_lower = 250
-)
+# conc_incline_flag |>
+#     filter(
+#         campaign == 3
+#         & replicate == 2
+#     ) |>
+#     flux_plot(
+#     f_conc = CO2,
+#     f_datetime = datetime,
+#     output = "pdfpages",
+#     f_plotname = "campaign3_2",
+#     f_ylim_lower = 250
+# )
 
-conc_incline_flag |>
-    filter(
-        campaign == 3
-        & replicate == 3
-    ) |>
-    flux_plot(
-    f_conc = CO2,
-    f_datetime = datetime,
-    output = "pdfpages",
-    f_plotname = "campaign3_3",
-    f_ylim_lower = 250
-)
+# conc_incline_flag |>
+#     filter(
+#         campaign == 3
+#         & replicate == 3
+#     ) |>
+#     flux_plot(
+#     f_conc = CO2,
+#     f_datetime = datetime,
+#     output = "pdfpages",
+#     f_plotname = "campaign3_3",
+#     f_ylim_lower = 250
+# )
 
-conc_incline_flag |>
-    filter(
-        campaign == 4
-        & replicate == 1
-    ) |>
-    flux_plot(
-    f_conc = CO2,
-    f_datetime = datetime,
-    output = "pdfpages",
-    f_plotname = "campaign4_1",
-    f_ylim_lower = 250
-)
+# conc_incline_flag |>
+#     filter(
+#         campaign == 4
+#         & replicate == 1
+#     ) |>
+#     flux_plot(
+#     f_conc = CO2,
+#     f_datetime = datetime,
+#     output = "pdfpages",
+#     f_plotname = "campaign4_1",
+#     f_ylim_lower = 250
+# )
 
-conc_incline_flag |>
-    filter(
-        campaign == 4
-        & replicate == 2
-    ) |>
-    flux_plot(
-    f_conc = CO2,
-    f_datetime = datetime,
-    output = "pdfpages",
-    f_plotname = "campaign4_2",
-    f_ylim_lower = 250
-)
+# conc_incline_flag |>
+#     filter(
+#         campaign == 4
+#         & replicate == 2
+#     ) |>
+#     flux_plot(
+#     f_conc = CO2,
+#     f_datetime = datetime,
+#     output = "pdfpages",
+#     f_plotname = "campaign4_2",
+#     f_ylim_lower = 250
+# )
 
-conc_incline_flag |>
-    filter(
-        campaign == 4
-        & replicate == 3
-    ) |>
-    flux_plot(
-    f_conc = CO2,
-    f_datetime = datetime,
-    output = "pdfpages",
-    f_plotname = "campaign4_3",
-    f_ylim_lower = 250
-)
+# conc_incline_flag |>
+#     filter(
+#         campaign == 4
+#         & replicate == 3
+#     ) |>
+#     flux_plot(
+#     f_conc = CO2,
+#     f_datetime = datetime,
+#     output = "pdfpages",
+#     f_plotname = "campaign4_3",
+#     f_ylim_lower = 250
+# )
 
 # flux_plot(
 #     conc_incline_flag,
@@ -319,3 +316,49 @@ conc_incline_flag |>
 #     output = "pdfpages",
 #     f_ylim_lower = 250
 # )
+
+fluxes_incline <- flux_calc(
+    slopes_df = conc_incline_flag,
+    slope_col = f_slope_corr,
+    f_datetime = datetime,
+    temp_air_col = temp_air,
+    setup_volume = 34.3,
+    plot_area = 0.08575,
+    cols_keep = c(
+        "plot_ID",
+        "treatment",
+        "type",
+        "replicate",
+        "campaign",
+        "remarks",
+        "f_quality_flag"
+    ),
+    cols_ave = "PAR",
+    flux_unit = "mmol",
+    conc_unit = "ppm",
+    atm_pressure = 1
+)
+
+fluxes_incline_lrc <- flux_calc(
+    conc_incline_flag_lrc,
+    f_slope_corr,
+    datetime,
+    temp_air,
+    setup_volume = 34.3,
+    atm_pressure = 1,
+    plot_area = 0.08575,
+    cols_keep = c(
+        "plot_ID",
+        "treatment",
+        "type",
+        "replicate",
+        "campaign",
+        "remarks",
+        "f_quality_flag"
+    ),
+    cols_ave = "PAR",
+    flux_unit = "mmol",
+    conc_unit = "ppm"
+)
+
+# now we can do LRC
