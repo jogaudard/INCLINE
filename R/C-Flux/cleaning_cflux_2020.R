@@ -505,7 +505,14 @@ flux_corrected_PAR <- fluxes_incline %>%
     # delta_flux = flux - corrected_flux
   )
 
+write_csv(flux_corrected_PAR, "data_cleaned/INCLINE_c-flux_2020.csv")
+
 # let's compare with previous cleaning
+
+get_file(node = "zhk3m",
+         file = "INCLINE_c-flux_2020_old.csv",
+         path = "data_cleaned",
+         remote_path = "C-Flux")
 
 flux_incline_old <- read_csv("data_cleaned/INCLINE_c-flux_2020_old.csv")
 
