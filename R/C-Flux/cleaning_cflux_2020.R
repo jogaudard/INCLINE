@@ -2,6 +2,9 @@ library(fluxible)
 library(tidyverse)
 library(dataDownloader)
 library(fs)
+library(ggplot2)
+library(ggforce)
+library(progress)
 
 
 get_file(node = "pk4bg",
@@ -316,6 +319,75 @@ conc_incline_flag_lrc <- flux_quality(
 #     output = "pdfpages",
 #     f_ylim_lower = 250
 # )
+
+# cleaning PAR
+
+#PAR: same + NA for soilR and ER
+
+conc_incline_flag <- conc_incline_flag |>
+  mutate(
+    PAR =
+      case_when(
+        type == "ER" & PAR < 0 ~ 0,
+        type == "ER" & PAR > 10 ~ NA_real_,
+        type == "NEE" & PAR < 75 ~ NA_real_,
+        TRUE ~ PAR
+      )
+  )
+
+
+
+plot_PAR <- function(slope_df, filter, filename, scale){
+plot <- filter(slope_df, type == ((filter))) %>%
+  ggplot(aes(x = datetime)) +
+    geom_point(size = 0.2, aes(group = f_fluxid, y = PAR, color = f_cut)) +
+    scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
+    do.call(facet_wrap_paginate,
+      args = c(facets = ~f_fluxid, ncol = 5, nrow = 3, scales = ((scale)))
+    ) +
+    scale_color_manual(values = c(
+      "cut" = "#D55E00",
+      "keep" = "#009E73"
+    ))
+
+    pdf(((filename)), paper = "a4r", width = 11.7, height = 8.3)
+
+
+ pb <- progress_bar$new(
+      format =
+        "Printing plots in pdf document [:bar] :current/:total (:percent)",
+      total = n_pages(plot)
+    )
+    pb$tick(0)
+    Sys.sleep(3)
+    for (i in 1:n_pages(plot)) {
+      pb$tick()
+      Sys.sleep(0.1)
+      print(plot +
+        do.call(facet_wrap_paginate,
+          args = c(
+            facets = ~f_fluxid,
+            page = i,
+            ncol = 5, nrow = 3, scales = ((scale))
+          )
+        ))
+    }
+    quietly(dev.off())
+
+}
+
+# passing plots as comment to save time
+plot_PAR(conc_incline_flag, "NEE", "plot_NEE_PAR.pdf", "free")
+plot_PAR(conc_incline_flag, "ER", "plot_ER_PAR.pdf", "free")
+plot_PAR(conc_incline_flag_lrc, 1, "plot_LRC1_PAR.pdf", "free")
+plot_PAR(conc_incline_flag_lrc, 2, "plot_LRC2_PAR.pdf", "free")
+plot_PAR(conc_incline_flag_lrc, 3, "plot_LRC3_PAR.pdf", "free")
+plot_PAR(conc_incline_flag_lrc, 4, "plot_LRC4_PAR.pdf", "free")
+plot_PAR(conc_incline_flag_lrc, 5, "plot_LRC5_PAR.pdf", "free")
+plot_PAR(conc_incline_flag_lrc, 6, "plot_LRC6_PAR.pdf", "free")
+
+
+
 
 fluxes_incline <- flux_calc(
     slopes_df = conc_incline_flag,
