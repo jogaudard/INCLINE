@@ -1,3 +1,7 @@
+
+# THIS IS AN OLD SCRIPT, THAT IS HOW WE CLEANED THE FLUX DATA BEFORE DEVELOPPING THE FLUXIBLE R PACKAGE
+
+
 # This script is to clean raw data from various loggers into one datafile with calculated fluxes
 library(tidyverse)
 # source("https://raw.githubusercontent.com/jogaudard/common/fluxes/fun-fluxes.R")
