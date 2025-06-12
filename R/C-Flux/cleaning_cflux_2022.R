@@ -70,6 +70,9 @@ CO2_INCLINE_2022 <- flux_match(
   f_datetime,
   start,
   measurement_length = 180
+) |>
+filter(
+  !(f_fluxid %in% c(760:772)) # those missing data points are annoying
 )
 
 # CO2_INCLINE_2022  |>
@@ -111,17 +114,19 @@ str(slopes_INCLINE_2022)
 
 slopes_INCLINE_2022_flags <- slopes_INCLINE_2022 |>
   flux_quality(
-    # fit_type = "exp",
-    force_discard = c(
-      383, # should not be 0, it is clearly not flat
-      482, # small bump at the start affecting the slope
-      662 # slope not reflecting the flux
-      ),
     force_zero = c(
-      107, # the slope reflects a small bump that is not representing the entire flux
+      107 # the slope reflects a small bump that is not representing the entire flux
     ),
     force_lm = c(
       132, # lm is fine
+      383,
+      402,
+      435,
+      482, # small bump at the start affecting the slope
+      662,
+      671,
+      674,
+      873
     ),
     force_ok = c(
       359, # there are just a couple of outliers data points messing up the RMSE but the fit is ok
