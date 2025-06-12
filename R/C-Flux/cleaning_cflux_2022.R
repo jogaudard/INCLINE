@@ -77,7 +77,7 @@ filter(
 
 # CO2_INCLINE_2022  |>
 #   filter(
-#     f_fluxID %in% c(760:772) 
+#     f_fluxid %in% c(760:772) 
 #   ) |>
 #     view()
 # those measurements where done in the 60 minutes before I fell in the river with the setup. which is probably why the data are missing.
@@ -144,39 +144,39 @@ slopes_INCLINE_2022_flags <- slopes_INCLINE_2022 |>
 
 # plotting to check the data
 
-# plotting is passed as comments because it takes about 25 minutes to run
+# plotting is passed as comments because it takes very long to run and we have checked them already
 
-slopes_INCLINE_2022_flags |>
-  filter(campaign == 1) |>
-  flux_plot(
-    f_ylim_lower = 300,
-    output = "pdfpages",
-    f_plotname = "campaign1"
-  )
+# slopes_INCLINE_2022_flags |>
+#   filter(campaign == 1) |>
+#   flux_plot(
+#     f_ylim_lower = 300,
+#     output = "pdfpages",
+#     f_plotname = "campaign1"
+#   )
 
-slopes_INCLINE_2022_flags |>
-  filter(campaign == 2) |>
-  flux_plot(
-    f_ylim_lower = 300,
-    output = "pdfpages",
-    f_plotname = "campaign2"
-  )
+# slopes_INCLINE_2022_flags |>
+#   filter(campaign == 2) |>
+#   flux_plot(
+#     f_ylim_lower = 300,
+#     output = "pdfpages",
+#     f_plotname = "campaign2"
+#   )
 
-slopes_INCLINE_2022_flags |>
-  filter(campaign == 3) |>
-  flux_plot(
-    f_ylim_lower = 300,
-    output = "pdfpages",
-    f_plotname = "campaign3"
-  )
+# slopes_INCLINE_2022_flags |>
+#   filter(campaign == 3) |>
+#   flux_plot(
+#     f_ylim_lower = 300,
+#     output = "pdfpages",
+#     f_plotname = "campaign3"
+#   )
 
-slopes_INCLINE_2022_flags |>
-  filter(campaign == 4) |>
-  flux_plot(
-    f_ylim_lower = 300,
-    output = "pdfpages",
-    f_plotname = "campaign4"
-  )
+# slopes_INCLINE_2022_flags |>
+#   filter(campaign == 4) |>
+#   flux_plot(
+#     f_ylim_lower = 300,
+#     output = "pdfpages",
+#     f_plotname = "campaign4"
+#   )
 
 # flux_plot(
 #   slopes_INCLINE_2022_flags,
@@ -223,7 +223,7 @@ filter(slopes_INCLINE_2022_flags,
 slopes_INCLINE_2022_flags %>% 
   filter(
     # type == "ER"
-     f_fluxID == 792
+     f_fluxid == 792
     # & PAR < 10
   ) %>% 
   mutate(
@@ -232,7 +232,7 @@ slopes_INCLINE_2022_flags %>%
   ) %>% 
   ggplot(aes(x = time, y = PAR)) +
   geom_point() +
-  geom_text(aes(label = f_fluxID), hjust=-1,vjust=1)
+  geom_text(aes(label = f_fluxid), hjust=-1,vjust=1)
 
 slopes_INCLINE_2022_flags %>% 
   filter(
@@ -246,7 +246,7 @@ slopes_INCLINE_2022_flags %>%
   ) %>% 
   ggplot(aes(x = time, y = PAR)) +
   geom_point() +
-  geom_text(aes(label = f_fluxID), hjust=-1,vjust=1) +
+  geom_text(aes(label = f_fluxid), hjust=-1,vjust=1) +
   facet_wrap(~campaign)
 
 
@@ -255,11 +255,13 @@ slopes_INCLINE_2022_flags %>%
 
 fluxes_INCLINE_2022 <- slopes_INCLINE_2022_flags |>
     flux_calc(
-      slope_col = "f_slope_corr",
-      cut_col = "f_cut",
-      keep_arg = "keep",
-      chamber_volume = 35,
+      slope_col = f_slope_corr,
+      temp_air_col = temp_air,
+      setup_volume = 35,
       plot_area = 0.0875,
+      atm_pressure = 1,
+      conc_unit = "ppm",
+      flux_unit = "mmol",
       cols_keep = c("turfID", "treatment", "type", "campaign", "comments", "f_quality_flag"),
       cols_ave = c("PAR", "temp_soil")
     )
@@ -286,17 +288,17 @@ str(fluxes_INCLINE_2022)
 INCLINE_metadata <- read_csv2("data/C-Flux/summer_2022/raw_data/INCLINE_metadata.csv")
 
 fluxes_INCLINE_2022 <- fluxes_INCLINE_2022 %>% 
-  select(f_fluxID, PAR, temp_soil, turfID, type, datetime, campaign, flux, temp_air_ave, f_quality_flag) %>% 
+  select(f_fluxid, PAR_ave, temp_soil_ave, turfID, type, f_datetime, campaign, f_flux, f_temp_air_ave, f_quality_flag) %>% 
   left_join(INCLINE_metadata)
 
 # graph ER and NEE to detect outliers --------------------------------------------
 
 fluxes_INCLINE_2022 %>% 
   mutate(
-    datetime = ymd_hms(datetime),
-    time = hms::as_hms(datetime)
+    datetime = ymd_hms(f_datetime),
+    time = hms::as_hms(f_datetime)
   ) %>% 
-  ggplot(aes(time, flux, color = type)) +
+  ggplot(aes(time, f_flux, color = type)) +
   geom_point() +
   facet_wrap(~campaign)
 
