@@ -1,3 +1,7 @@
+
+# THIS IS AN OLD SCRIPT, THAT IS HOW WE CLEANED THE FLUX DATA BEFORE DEVELOPPING THE FLUXIBLE R PACKAGE
+
+
 # This script is to clean raw data from various loggers into one datafile with calculated fluxes
 library(tidyverse)
 # source("https://raw.githubusercontent.com/jogaudard/common/fluxes/fun-fluxes.R")
@@ -165,17 +169,17 @@ ggplot(co2_conc_incline_cut, aes(x = datetime, y = CO2, color = cut)) +
   geom_line(size = 0.2, aes(group = ID)) +
   scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
   # scale_x_date(date_labels = "%H:%M:%S") +
-  facet_wrap(vars(ID), ncol = 36, scales = "free") +
+  facet_wrap(vars(ID), ncol = 36, scales = "free")
   ggsave("incline_detail.png", height = 60, width = 126, units = "cm")
 
 
 #graph CO2 fluxes to visually check the data
-ggplot(co2_conc_incline_cut, aes(x=datetime, y=CO2, color = cut)) + 
+ggplot(co2_conc_incline_cut, aes(x=datetime, y=CO2, color = cut)) +
   # geom_point(size=0.005) +
   geom_line(size = 0.2, aes(group = ID)) +
   # coord_fixed(ratio = 10) +
   scale_x_datetime(date_breaks = "10 min", minor_breaks = "30 sec", date_labels = "%e/%m \n %H:%M:%S") +
-  facet_wrap(vars(date), ncol = 1, scales = "free") +
+  facet_wrap(vars(date), ncol = 1, scales = "free")
   # geom_line(size=0.05)
   ggsave("incline.png", height = 40, width = 100, units = "cm")
 
@@ -199,14 +203,24 @@ ggplot(flux_incline, aes(nobs)) +
   geom_bar() +
   scale_x_binned()
 
+#look at how many measurements were in each ranges of length
+range <- data.frame(a = c(1, 60, 90), b = c(60, 90, 200))
+range <- range %>% 
+  mutate(
+    freq = pmap(range, ~ flux_incline %>% summarise(sum(between(nobs, .x, .y)))) %>% 
+      unlist,
+    share = round(freq / sum(freq), digits = 2)
+  )
+  
+
 #another graph to check
-filter(co2_conc_incline_cut, cut == "keep") %>% 
-  ggplot(aes(x = datetime, y = CO2, color = cut)) +
-  geom_line(size = 0.2, aes(group = ID)) +
-  scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
-  # scale_x_date(date_labels = "%H:%M:%S") +
-  facet_wrap(vars(ID), ncol = 36, scales = "free") +
-  ggsave("incline_detail_cut.png", height = 60, width = 126, units = "cm")
+# filter(co2_conc_incline_cut, cut == "keep") %>% 
+#   ggplot(aes(x = datetime, y = CO2, color = cut)) +
+#   geom_line(size = 0.2, aes(group = ID)) +
+#   scale_x_datetime(date_breaks = "1 min", minor_breaks = "10 sec", date_labels = "%e/%m \n %H:%M") +
+#   # scale_x_date(date_labels = "%H:%M:%S") +
+#   facet_wrap(vars(ID), ncol = 36, scales = "free") +
+#   ggsave("incline_detail_cut.png", height = 60, width = 126, units = "cm")
 
 #to remove poor quality data
 # co2_flux_incline_clean <- flux_incline %>%

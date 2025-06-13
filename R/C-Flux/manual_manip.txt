@@ -1,0 +1,2 @@
+plot LAV_4_3 NEE (1,2,3), LAV_4_5 ER+NEE (1,2,3), LAV_5_2 ER 1 on 24/08/20 (campaign 4): the logger was 20 sec ahead of the watch, I corrected this manually in the record file.
+Flux nb 618, 620, 661, 675: time in field record was not reported correctly. I corrected manually the field record.
