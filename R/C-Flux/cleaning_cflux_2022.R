@@ -290,7 +290,7 @@ str(fluxes_INCLINE_2022)
 INCLINE_metadata <- read_csv2("data/C-Flux/summer_2022/raw_data/INCLINE_metadata.csv")
 
 fluxes_INCLINE_2022 <- fluxes_INCLINE_2022 %>% 
-  select(f_fluxid, PAR_ave, temp_soil_ave, turfID, type, f_datetime, campaign, f_flux, f_temp_air_ave, f_quality_flag) %>% 
+  select(f_fluxid, PAR_ave, temp_soil_ave, turfID, type, f_datetime, campaign, f_flux, f_temp_air_ave, f_quality_flag, f_RMSE) %>% 
   left_join(INCLINE_metadata)
 
 # graph ER and NEE to detect outliers --------------------------------------------
