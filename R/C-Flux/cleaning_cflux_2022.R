@@ -304,10 +304,10 @@ fluxes_INCLINE_2022 %>%
 
 # light response curves and NEE correction --------------------------------
 
-lrc_INCLINE_2022 <- fluxes_INCLINE_2022 %>% 
-  filter(
-    type == "LRC"
-  )
+# lrc_INCLINE_2022 <- fluxes_INCLINE_2022 %>% 
+#   filter(
+#     type == "LRC"
+#   )
 
 # lrc_INCLINE_2022 %>% 
 #   ggplot(aes(PARavg, flux, color = OTC)) +
@@ -316,62 +316,85 @@ lrc_INCLINE_2022 <- fluxes_INCLINE_2022 %>%
 #   # facet_grid(siteID ~ campaign, scales = "free")
 #   facet_grid(~siteID, scales = "free")
 
-fluxes_INCLINE_2022 <- LRC.calc(
-  lrc_INCLINE_2022,
-  fluxes_INCLINE_2022,
-  group = c("siteID", "OTC"),
-  PARfix = 300,
-  PARnull = 0
-)
+# fluxes_INCLINE_2022 <- LRC.calc(
+#   lrc_INCLINE_2022,
+#   fluxes_INCLINE_2022,
+#   group = c("siteID", "OTC"),
+#   PARfix = 300,
+#   PARnull = 0
+# )
+
+fluxes_INCLINE_2022 <- fluxes_INCLINE_2022 |>
+  mutate(
+    type = case_when(
+      campaign == "LRC" ~ "LRC",
+      .default = type
+    )
+  )
+
+fluxes_INCLINE_2022_par <- fluxes_INCLINE_2022 |>
+  flux_lrc(
+    type_col = type,
+    par_ave = PAR_ave,
+    lrc_group = "OTC"
+  )
 
 # calculate GPP -----------------------------------------------------------
 
-fluxes_INCLINE_2022_gep_meta <- GEP.calc2(fluxes_INCLINE_2022)
+# fluxes_INCLINE_2022_gep_meta <- GEP.calc2(fluxes_INCLINE_2022)
 
 # fluxes_INCLINE_2022_gep_meta <- fluxes_INCLINE_2022_gep %>% 
 #   left_join(INCLINE_metadata) #we loose the metadata when calculating GEP
 
+fluxes_INCLINE_2022_gpp <- flux_gpp(
+  fluxes_INCLINE_2022_par,
+  type,
+  f_datetime,
+  id_cols = c("turfID", "campaign"),
+  cols_keep = "all"
+)
+
 
 # graph fluxes ------------------------------------------------------------
 
-fluxes_INCLINE_2022_gep_meta %>% 
+fluxes_INCLINE_2022_gpp %>% 
   filter(
-    type %in% c("ER", "GEP")
+    type %in% c("ER", "GPP")
   ) %>% 
-  ggplot(aes(datetime, PAR_corrected_flux, color = siteID, linetype = OTC)) +
+  ggplot(aes(f_datetime, PAR_corrected_flux, color = siteID, linetype = OTC)) +
   geom_point() +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE) +
-  geom_hline(yintercept=0, size = 0.3) +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +
+  geom_hline(yintercept=0, linewidth = 0.3) +
   facet_grid(type ~ ., scales = "free")
 
-fluxes_INCLINE_2022_gep_meta %>% 
+fluxes_INCLINE_2022_gpp %>% 
   filter(
-    type %in% c("ER", "GEP")
+    type %in% c("ER", "GPP")
   ) %>% 
   ggplot(aes(`precipitation_2009-2019`, PAR_corrected_flux, linetype = OTC)) +
   geom_point() +
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +
-  geom_hline(yintercept=0, size = 0.3) +
+  geom_hline(yintercept=0, linewidth = 0.3) +
   facet_grid(type ~ ., scales = "free")
 
-fluxes_INCLINE_2022_gep_meta %>% 
+fluxes_INCLINE_2022_gpp %>% 
   filter(
-    type %in% c("ER", "GEP")
+    type %in% c("ER", "GPP")
   ) %>% 
-  ggplot(aes(datetime, flux, color = siteID, linetype = OTC)) +
+  ggplot(aes(f_datetime, f_flux, color = siteID, linetype = OTC)) +
   geom_point() +
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE) +
-  geom_hline(yintercept=0, size = 0.3) +
+  geom_hline(yintercept=0, linewidth = 0.3) +
   facet_grid(type ~ ., scales = "free")
 
-fluxes_INCLINE_2022_gep_meta %>% 
+fluxes_INCLINE_2022_gpp %>% 
   filter(
-    type %in% c("ER", "GEP")
+    type %in% c("ER", "GPP")
   ) %>% 
-  ggplot(aes(`precipitation_2009-2019`, flux, linetype = OTC)) +
+  ggplot(aes(`precipitation_2009-2019`, f_flux, linetype = OTC)) +
   geom_point() +
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +
-  geom_hline(yintercept=0, size = 0.3) +
+  geom_hline(yintercept=0, linewidth = 0.3) +
   facet_grid(type ~ ., scales = "free")
 
 
@@ -379,10 +402,10 @@ fluxes_INCLINE_2022_gep_meta %>%
 # writing csv -------------------------------------------------------------
 # getting rid of meta data
 
-fluxes_INCLINE_2022_gep <- fluxes_INCLINE_2022_gep_meta %>% 
-  select(datetime, campaign, plotID, PARavg, type, flux, PAR_corrected_flux, temp_soilavg, temp_airavg, RMSE)
+fluxes_INCLINE_2022_gpp <- fluxes_INCLINE_2022_gpp %>% 
+  select(f_datetime, campaign, plotID, PAR_ave, type, f_flux, PAR_corrected_flux, temp_soil_ave, f_temp_air_ave)
 
-write_csv(fluxes_INCLINE_2022_gep, "data_cleaned/INCLINE_c-flux_2022.csv")
+write_csv(fluxes_INCLINE_2022_gpp, "data_cleaned/INCLINE_c-flux_2022.csv")
 
 
 
