@@ -264,7 +264,7 @@ fluxes_INCLINE_2022 <- slopes_INCLINE_2022_flags |>
       atm_pressure = 1,
       conc_unit = "ppm",
       flux_unit = "mmol",
-      cols_keep = c("turfID", "treatment", "type", "campaign", "comments", "f_quality_flag"),
+      cols_keep = c("turfID", "treatment", "type", "campaign", "comments", "f_quality_flag", "f_RMSE"),
       cols_ave = c("PAR", "temp_soil")
     )
 
@@ -405,7 +405,7 @@ fluxes_INCLINE_2022_gpp %>%
 # getting rid of meta data
 
 fluxes_INCLINE_2022_gpp <- fluxes_INCLINE_2022_gpp %>% 
-  select(f_datetime, campaign, plotID, PAR_ave, type, f_flux, PAR_corrected_flux, temp_soil_ave, f_temp_air_ave)
+  select(f_datetime, campaign, plotID, PAR_ave, type, f_flux, PAR_corrected_flux, temp_soil_ave, f_temp_air_ave, f_RMSE)
 
 write_csv(fluxes_INCLINE_2022_gpp, "data_cleaned/INCLINE_c-flux_2022.csv")
 
