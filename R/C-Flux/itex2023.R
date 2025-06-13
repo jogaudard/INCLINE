@@ -1,6 +1,5 @@
 library(dataDownloader)
 library(tidyverse)
-library(lubridate)
 library(measurements)
 
 get_file(node = "zhk3m",
@@ -40,7 +39,7 @@ fluxes_itex <- fluxes %>%
   ) %>% 
   left_join(soil_moisture_avg, by = c("turfID", "campaign")) %>%
   mutate(
-    date = date(datetime),
+    date = date(f_datetime),
     OTC = str_replace_all(OTC, c("C" = "CTL", "W" = "OTC")),
     ITEX_ID = case_when(
       siteID == "Lavisdalen" ~ "NOR_9",
@@ -48,17 +47,32 @@ fluxes_itex <- fluxes %>%
       siteID == "Ulvehaugen" ~ "NOR_10",
       siteID == "Skjellingahaugen" ~ "NOR_12"
     ),
-    flux = flux * 0.04401 # they want g CO2 / m2 / h
+    f_flux = f_flux * 0.04401 # they want g CO2 / m2 / h
   ) %>% 
-  select(plotID, siteID, date, OTC, temp_soilavg, flux, temp_airavg, ITEX_ID, soil_moisture, comments, RMSE) %>% 
+  select(plotID, siteID, date, OTC, temp_soil_ave, f_flux, f_temp_air_ave, ITEX_ID, soil_moisture, comments, f_RMSE) %>% 
   rename(
-    treatment = "OTC"
+    treatment = "OTC",
+    RMSE = "f_RMSE",
+    flux = "f_flux",
+    temp_airavg = "f_temp_air_ave",
+    temp_soilavg = "temp_soil_ave"
   ) %>% 
   drop_na(date, flux) %>% 
   arrange(ITEX_ID) %>% 
   relocate(ITEX_ID, date, treatment, plotID, flux, RMSE, temp_airavg, temp_soilavg, soil_moisture, siteID, comments)
 
 write_csv(fluxes_itex, "ITEX/ITEX_fluxes_2022.csv")
+
+fluxes_itex |>
+select(plotID) |>
+unique() |>
+View()
+
+itex_old <- read_csv("ITEX/ITEX_fluxes_2022_old.csv")
+
+library(compare)
+
+summary(compare(fluxes_itex, itex_old))
 
 
 # cover dataset -----------------------------------------------------------
@@ -116,6 +130,7 @@ height <- height %>%
     year == 2022
     # & treatment == "C"
   ) %>% 
+  pivot_wider(names_from = "name", values_from = "value") |>
   select(plotID, total_bryophyte_cover, total_lichen_cover, vegetation_height_mean)
 
 community <- read_csv("data_cleaned/INCLINE_community_species_cover.csv")
