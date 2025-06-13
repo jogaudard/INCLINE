@@ -2,6 +2,8 @@ library(dataDownloader)
 library(fluxible)
 library(tidyverse)
 library(fs)
+library(ggpmisc)
+
 # library(lubridate)
 # library(broom)
 # library(zoo)
@@ -409,11 +411,68 @@ write_csv(fluxes_INCLINE_2022_gpp, "data_cleaned/INCLINE_c-flux_2022.csv")
 
 
 
+# comparison
+
+get_file(node = "zhk3m",
+         file = "INCLINE_c-flux_2022_old.csv",
+         path = "data_cleaned",
+         remote_path = "C-Flux")
+
+flux_incline_old <- read_csv("data_cleaned/INCLINE_c-flux_2022_old.csv")
+
+flux_incline_old <- flux_incline_old |>
+  filter(type %in% c("NEE", "ER")) |>
+  select(plotID, type, campaign, flux) |>
+  rename(flux_old = "flux") |>
+  mutate(
+    campaign = as.factor(campaign)
+  )
+
+fluxes_incline_new <- fluxes_INCLINE_2022_gpp |>
+  filter(type %in% c("NEE", "ER")) |>
+  select(plotID, type, campaign, f_flux, PAR_corrected_flux)
+
+fluxes_comparison <- full_join(
+  flux_incline_old,
+  fluxes_incline_new,
+  by = join_by(plotID, type, campaign)
+) |>
+pivot_longer(
+  cols = c(flux_old, PAR_corrected_flux),
+  names_to = "method",
+  values_to = "flux"
+)
+
+fluxes_comparison |>
+  ggplot(aes(f_flux, flux, color = method)) +
+  geom_point(size = 0.5) +
+  # geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +
+  geom_abline(slope = 1, intercept = 0) +
+  stat_poly_line() +
+  stat_correlation(use_label("cor.label", "R2", "n")) +
+  facet_grid(type ~ .)
+
+fluxes_comparison |>
+  filter(method == "flux_old") |>
+  drop_na(f_flux) |>
+  mutate(
+    diff = case_when(
+      f_flux != 0 ~ (flux - f_flux) / (f_flux)
+    )
+  ) |>
+  summarise(
+    .by = type,
+    mean = mean(diff, na.rm = TRUE)
+  )
 
 
-
-
-
-
-
-
+fluxes_comparison |>
+  filter(method == "flux_old") |>
+  summarise(
+    .by = type,
+    mean_oldflux = mean(flux, na.rm = TRUE),
+    mean_fflux = mean(f_flux, na.rm = TRUE)
+  ) |>
+  mutate(
+    diff = (mean_oldflux - mean_fflux) / abs(mean_fflux)
+  )
