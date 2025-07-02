@@ -349,12 +349,24 @@ fluxes_INCLINE_2022_par <- fluxes_INCLINE_2022 |>
 #   left_join(INCLINE_metadata) #we loose the metadata when calculating GEP
 
 fluxes_INCLINE_2022_gpp <- flux_gpp(
-  fluxes_INCLINE_2022_par,
+  fluxes_INCLINE_2022,
   type,
   f_datetime,
   id_cols = c("turfID", "campaign"),
   cols_keep = "all"
 )
+
+fluxes_INCLINE_2022_gpp_par <- flux_gpp(
+  fluxes_INCLINE_2022_par,
+  type,
+  f_datetime,
+  f_flux = PAR_corrected_flux,
+  id_cols = c("turfID", "campaign"),
+  cols_keep = "none"
+)
+
+fluxes_INCLINE_2022_gpp <- fluxes_INCLINE_2022_gpp |>
+  left_join(fluxes_INCLINE_2022_gpp_par)
 
 
 # graph fluxes ------------------------------------------------------------
