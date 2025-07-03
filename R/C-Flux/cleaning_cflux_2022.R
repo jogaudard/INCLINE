@@ -375,7 +375,7 @@ fluxes_INCLINE_2022_gpp <- flux_gpp(
 fluxes_INCLINE_2022_gpp %>% 
   filter(
     type %in% c("ER", "GPP")
-    & par_correction == "par_corrected"
+    & isTRUE(par_correction)
   ) %>% 
   ggplot(aes(f_datetime, f_flux, color = siteID, linetype = OTC)) +
   geom_point() +
@@ -386,7 +386,7 @@ fluxes_INCLINE_2022_gpp %>%
 fluxes_INCLINE_2022_gpp %>% 
   filter(
     type %in% c("ER", "GPP")
-    & par_correction == "par_corrected"
+    & isTRUE(par_correction)
   ) %>% 
   ggplot(aes(`precipitation_2009-2019`, f_flux, linetype = OTC)) +
   geom_point() +
@@ -447,7 +447,7 @@ flux_incline_old <- flux_incline_old |>
 
 fluxes_incline_new <- fluxes_INCLINE_2022_gpp |>
   filter(type %in% c("NEE", "ER")
-    & par_correction == "par_corrected"
+    & isTRUE(par_correction)
   ) |>
   select(plotID, type, campaign, f_flux)
 
