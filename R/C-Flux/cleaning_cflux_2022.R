@@ -263,7 +263,7 @@ fluxes_INCLINE_2022 <- slopes_INCLINE_2022_flags |>
       plot_area = 0.0875,
       atm_pressure = 1,
       conc_unit = "ppm",
-      flux_unit = "mmol",
+      flux_unit = "mmol/m2/h",
       cols_keep = c("turfID", "treatment", "type", "campaign", "comments", "f_quality_flag", "f_RMSE"),
       cols_ave = c("PAR", "temp_soil")
     )
@@ -349,24 +349,25 @@ fluxes_INCLINE_2022_par <- fluxes_INCLINE_2022 |>
 #   left_join(INCLINE_metadata) #we loose the metadata when calculating GEP
 
 fluxes_INCLINE_2022_gpp <- flux_gpp(
-  fluxes_INCLINE_2022,
-  type,
-  f_datetime,
-  id_cols = c("turfID", "campaign"),
-  cols_keep = "all"
-)
-
-fluxes_INCLINE_2022_gpp_par <- flux_gpp(
   fluxes_INCLINE_2022_par,
   type,
   f_datetime,
-  f_flux = PAR_corrected_flux,
-  id_cols = c("turfID", "campaign"),
-  cols_keep = "none"
+  id_cols = c("turfID", "campaign", "par_correction"),
+  cols_keep = "all"
 )
 
-fluxes_INCLINE_2022_gpp <- fluxes_INCLINE_2022_gpp |>
-  left_join(fluxes_INCLINE_2022_gpp_par)
+# not needed since fluxible 1.2.10
+# fluxes_INCLINE_2022_gpp_par <- flux_gpp(
+#   fluxes_INCLINE_2022_par,
+#   type,
+#   f_datetime,
+#   f_flux = PAR_corrected_flux,
+#   id_cols = c("turfID", "campaign"),
+#   cols_keep = "none"
+# )
+
+# fluxes_INCLINE_2022_gpp <- fluxes_INCLINE_2022_gpp |>
+#   left_join(fluxes_INCLINE_2022_gpp_par)
 
 
 # graph fluxes ------------------------------------------------------------
@@ -374,8 +375,9 @@ fluxes_INCLINE_2022_gpp <- fluxes_INCLINE_2022_gpp |>
 fluxes_INCLINE_2022_gpp %>% 
   filter(
     type %in% c("ER", "GPP")
+    & par_correction == "par_corrected"
   ) %>% 
-  ggplot(aes(f_datetime, PAR_corrected_flux, color = siteID, linetype = OTC)) +
+  ggplot(aes(f_datetime, f_flux, color = siteID, linetype = OTC)) +
   geom_point() +
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +
   geom_hline(yintercept=0, linewidth = 0.3) +
@@ -384,8 +386,9 @@ fluxes_INCLINE_2022_gpp %>%
 fluxes_INCLINE_2022_gpp %>% 
   filter(
     type %in% c("ER", "GPP")
+    & par_correction == "par_corrected"
   ) %>% 
-  ggplot(aes(`precipitation_2009-2019`, PAR_corrected_flux, linetype = OTC)) +
+  ggplot(aes(`precipitation_2009-2019`, f_flux, linetype = OTC)) +
   geom_point() +
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +
   geom_hline(yintercept=0, linewidth = 0.3) +
@@ -394,6 +397,7 @@ fluxes_INCLINE_2022_gpp %>%
 fluxes_INCLINE_2022_gpp %>% 
   filter(
     type %in% c("ER", "GPP")
+    & is.na(par_correction)
   ) %>% 
   ggplot(aes(f_datetime, f_flux, color = siteID, linetype = OTC)) +
   geom_point() +
@@ -404,6 +408,7 @@ fluxes_INCLINE_2022_gpp %>%
 fluxes_INCLINE_2022_gpp %>% 
   filter(
     type %in% c("ER", "GPP")
+    & is.na(par_correction)
   ) %>% 
   ggplot(aes(`precipitation_2009-2019`, f_flux, linetype = OTC)) +
   geom_point() +
@@ -417,7 +422,7 @@ fluxes_INCLINE_2022_gpp %>%
 # getting rid of meta data
 
 fluxes_INCLINE_2022_gpp <- fluxes_INCLINE_2022_gpp %>% 
-  select(f_datetime, campaign, plotID, PAR_ave, type, f_flux, PAR_corrected_flux, temp_soil_ave, f_temp_air_ave, f_RMSE)
+  select(f_datetime, campaign, plotID, PAR_ave, type, f_flux, par_correction, temp_soil_ave, f_temp_air_ave, f_RMSE)
 
 write_csv(fluxes_INCLINE_2022_gpp, "data_cleaned/INCLINE_c-flux_2022.csv")
 
@@ -441,22 +446,19 @@ flux_incline_old <- flux_incline_old |>
   )
 
 fluxes_incline_new <- fluxes_INCLINE_2022_gpp |>
-  filter(type %in% c("NEE", "ER")) |>
-  select(plotID, type, campaign, f_flux, PAR_corrected_flux)
+  filter(type %in% c("NEE", "ER")
+    & par_correction == "par_corrected"
+  ) |>
+  select(plotID, type, campaign, f_flux)
 
 fluxes_comparison <- full_join(
   flux_incline_old,
   fluxes_incline_new,
   by = join_by(plotID, type, campaign)
-) |>
-pivot_longer(
-  cols = c(flux_old, PAR_corrected_flux),
-  names_to = "method",
-  values_to = "flux"
 )
 
 fluxes_comparison |>
-  ggplot(aes(f_flux, flux, color = method)) +
+  ggplot(aes(f_flux, flux_old)) +
   geom_point(size = 0.5) +
   # geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +
   geom_abline(slope = 1, intercept = 0) +
@@ -464,27 +466,3 @@ fluxes_comparison |>
   stat_correlation(use_label("cor.label", "R2", "n")) +
   facet_grid(type ~ .)
 
-fluxes_comparison |>
-  filter(method == "flux_old") |>
-  drop_na(f_flux) |>
-  mutate(
-    diff = case_when(
-      f_flux != 0 ~ (flux - f_flux) / (f_flux)
-    )
-  ) |>
-  summarise(
-    .by = type,
-    mean = mean(diff, na.rm = TRUE)
-  )
-
-
-fluxes_comparison |>
-  filter(method == "flux_old") |>
-  summarise(
-    .by = type,
-    mean_oldflux = mean(flux, na.rm = TRUE),
-    mean_fflux = mean(f_flux, na.rm = TRUE)
-  ) |>
-  mutate(
-    diff = (mean_oldflux - mean_fflux) / abs(mean_fflux)
-  )
