@@ -3,7 +3,7 @@
 ###########################
 #
 
-source("https://raw.githubusercontent.com/audhalbritter/Three-D/master/R/Climate/soilmoisture_correction.R")
+source("https://raw.githubusercontent.com/audhalbritter/Three-D/master/R/functions/soilmoisture_correction.R")
 library(tidyverse)
 library(lubridate)
 library(dataDownloader)
@@ -232,21 +232,21 @@ gc()
 
 
 #soil temperature
-# microclimate %>% #cleaned
-#   filter(
-#     sensor == "soil_temperature" &
-#       site == "Gudmedalen"
-#   ) %>%
-#   ggplot(aes(x = datetime, y = value, color = cutting)) +
-#   geom_point(size = 0.04, aes(group = loggerID)) +
-#   scale_color_manual(values = c(
-#     "keep" = "#1e90ff",
-#     "cut" = "#ff0800"
-#   )) +
-#   scale_x_datetime(date_breaks = "1 month", minor_breaks = "10 day", date_labels = "%e/%m/%y") +
-#   # scale_x_date(date_labels = "%H:%M:%S") +
-#   facet_wrap(vars(loggerID), ncol = 3, scales = "free") +
-#   ggsave("microclimate.png", height = 40, width = 80, units = "cm")
+microclimate_plot <- microclimate %>% #cleaned
+  filter(
+    sensor == "soil_temperature" &
+      site == "Gudmedalen"
+  ) %>%
+  ggplot(aes(x = datetime, y = value, color = cutting)) +
+  geom_point(size = 0.04, aes(group = loggerID)) +
+  scale_color_manual(values = c(
+    "keep" = "#1e90ff",
+    "cut" = "#ff0800"
+  )) +
+  scale_x_datetime(date_breaks = "1 month", minor_breaks = "10 day", date_labels = "%e/%m/%y") +
+  # scale_x_date(date_labels = "%H:%M:%S") +
+  facet_wrap(vars(loggerID), ncol = 3, scales = "free")
+  ggsave("microclimate.png", height = 40, width = 80, units = "cm")
 
 # microclimate %>% #cleaned
 #   filter(
