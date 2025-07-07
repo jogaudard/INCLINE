@@ -120,7 +120,9 @@ slopes_INCLINE_2022_flags <- slopes_INCLINE_2022 |>
       107 # the slope reflects a small bump that is not representing the entire flux
     ),
     force_lm = c(
+      70,
       132, # lm is fine
+      246,
       383,
       402,
       435,
@@ -141,12 +143,24 @@ slopes_INCLINE_2022_flags <- slopes_INCLINE_2022 |>
       673, # outliers issue
       786, # outliers affecting RMSE but slope good
       867 # noisy but slope quite obvious
-      )
+      ),
+      force_discard = 792
     )
 
 # plotting to check the data
 
 # plotting is passed as comments because it takes very long to run and we have checked them already
+
+# investigating some outliers
+
+slopes_INCLINE_2022_flags |>
+  filter(
+    f_fluxid %in% c(70, 246, 792)
+  ) |>
+  flux_plot(
+    output = "longpdf",
+    f_plotname = "outliers"
+  )
 
 # slopes_INCLINE_2022_flags |>
 #   filter(campaign == 1) |>
