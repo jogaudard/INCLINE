@@ -23,6 +23,7 @@ files <- dir(path = "data/INCLINE_microclimate", pattern = "^data.*\\.csv$", ful
 
 # remove empty file 
 
+test_myclim <- mc_read_files("data/INCLINE_microclimate", dataformat_name = "TOMST", recursive = F, silent = T)
 
 # Function to read in data
 # temp <- map_df(set_names(files), function(file) {
@@ -55,9 +56,6 @@ microclimate2022 <- microclimate_all %>%
     datetime_s = substr(datetime_c, start = 0, stop = 16), #some dates are in ymd_hms format
     datetime = ymd_hm(datetime_s)
     ) %>% 
-  # Soil moisture calibration
-  #mutate(SoilMoisture = a * RawSoilmoisture^2 + b * RawSoilmoisture + c) %>% 
-  # get logger ID -> not needed anymore, have whole filename now!!!
   mutate(
     loggerID = substr(filename, nchar(filename)-13, nchar(filename)-6),
     loggerID = as.factor(loggerID)
