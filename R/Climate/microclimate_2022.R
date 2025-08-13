@@ -16,6 +16,7 @@ get_file(node = "zhk3m",
          remote_path = "RawData/Climate")
 
 unzip("data/INCLINE_microclimate.zip", exdir = "data")
+unlink("data/INCLINE_microclimate.zip")
 
 ### Read in files
 files <- dir(path = "data/INCLINE_microclimate", pattern = "^data.*\\.csv$", full.names = TRUE, recursive = TRUE)
@@ -24,26 +25,51 @@ files <- dir(path = "data/INCLINE_microclimate", pattern = "^data.*\\.csv$", ful
 
 
 # Function to read in data
-temp <- map_df(set_names(files), function(file) {
-  file %>% 
-    set_names() %>% 
-    map_df(~ read_delim(file = file, col_names = FALSE, delim = ";"))
-}, .id = "File")
+# temp <- map_df(set_names(files), function(file) {
+#   file %>% 
+#     set_names() %>% 
+#     map_df(~ read_delim(file = file, col_names = FALSE, delim = ";"))
+# }, .id = "File")
 
-microclimate <- temp %>% 
+microclimate_all <- files |>
+  map(
+    read_delim,
+    col_names = FALSE,
+    delim = ";",
+    show_col_types = FALSE,
+    id = "filename",
+    progress = FALSE,
+    .progress = TRUE
+  ) |>
+  keep(function(df) {
+  any(df$X1 != "File is empty")
+}) |>
+  list_rbind()
+
+
+microclimate2022 <- microclimate_all %>% 
   # rename column names
   rename("ID" = "X1", "datetime" = "X2", "time_zone" = "X3", "soil_temperature" = "X4", "ground_temperature" = "X5", "air_temperature" = "X6", "RawSoilmoisture" = "X7", "Shake" = "X8", "ErrorFlag" = "X9") %>% 
   mutate(
-    datetime = as.character(datetime),
-    datetime = substr(datetime, start = 0, stop = 16), #some dates are in ymd_hms format
-    datetime = ymd_hm(datetime)
+    datetime_c = as.character(datetime),
+    datetime_s = substr(datetime_c, start = 0, stop = 16), #some dates are in ymd_hms format
+    datetime = ymd_hm(datetime_s)
     ) %>% 
   # Soil moisture calibration
   #mutate(SoilMoisture = a * RawSoilmoisture^2 + b * RawSoilmoisture + c) %>% 
   # get logger ID -> not needed anymore, have whole filename now!!!
   mutate(
-    loggerID = substr(File, nchar(File)-13, nchar(File)-6),
+    loggerID = substr(filename, nchar(filename)-13, nchar(filename)-6),
     loggerID = as.factor(loggerID)
   ) %>% 
-  select(!c(File, ID)) %>% 
-  distinct()
+  select(!c(filename, ID)) %>% 
+  distinct() |>
+  mutate(
+    year = year(datetime)
+  ) |>
+  filter(
+    # year(datetime) == 2022
+    ErrorFlag == 0
+  )
+
+unlink("data/INCLINE_microclimate/")
