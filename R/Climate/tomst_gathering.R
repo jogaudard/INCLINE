@@ -28,38 +28,66 @@ tomst_import <- function(node, file, path, remote_path) {
 
   # deleting the zip (that's permanent, not in the trash!)
   unlink(zip_loc)
+  message("zip file deleted!")
 
   # list the files
   files_loc <- str_remove(zip_loc, ".zip")
   files <- dir(path = files_loc, pattern = "^data.*\\.csv$", full.names = TRUE, recursive = TRUE)
 
+  
   # reading the files
   microclimate_all <- files |>
   map(
-    read_delim,
+    ~ suppressMessages(read_csv2(.,
     col_names = FALSE,
-    delim = ";",
+    # delim = ";",
     show_col_types = FALSE,
     id = "filename",
-    progress = FALSE,
+    progress = FALSE)),
     .progress = TRUE
   ) |>
   keep(function(df) { # removing empty files
   any(df$X1 != "File is empty")
 }) |>
   list_rbind() |>
-  distinct() # removing duplicates
+  distinct() |> # removing duplicates
+  rename(
+    "ID" = "X1",
+    "datetime" = "X2",
+    "time_zone" = "X3",
+    "soil_temperature" = "X4",
+    "ground_temperature" = "X5",
+    "air_temperature" = "X6",
+    "RawSoilmoisture" = "X7",
+    "Shake" = "X8",
+    "ErrorFlag" = "X9") |>
+    filter(ErrorFlag == 0) |>
+  mutate(
+    datetime = as.character(datetime),
+    datetime = substr(datetime, start = 0, stop = 16), #some dates are in ymd_hms format
+    datetime = ymd_hm(datetime)
+    ) |>
+  mutate(
+    loggerID = substr(filename, nchar(filename)-13, nchar(filename)-6),
+    loggerID = as.factor(loggerID)
+  ) |>
+  select(!c(filename, ID))
+
+  # deleting files
+  unlink(files_loc, recursive = TRUE)
+  message("files deleted!")
 
   microclimate_all
 }
 
-# function to import many tomst logger data at once
+# function to import many tomst logger data at once ####
 
 tomst_import_many <- function(node, files, path, remote_path) {
   output <- map(
+    files,
     tomst_import,
     node = node,
-    file = files,
+    # file = files,
     path = path,
     remote_path = remote_path,
     .progress = TRUE
@@ -69,6 +97,18 @@ tomst_import_many <- function(node, files, path, remote_path) {
 
   output
 }
+
+# testing functions #####
+
+microclimate_test <- tomst_import("zhk3m", "INCLINE_microclimate.zip", "data", "RawData/Climate")
+
+microclimate_all_test <- tomst_import_many("zhk3m",
+                                           c("INCLINE_microclimate.zip",
+                                             "INCLINE_TOMST_Spring2022.zip",
+                                             "INCLINE_TOMST_Fall2022.zip"
+                                           ),
+                                           "data",
+                                           "RawData/Climate")
 
 #### importing and reading data ####
 
