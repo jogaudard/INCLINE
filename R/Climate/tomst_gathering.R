@@ -15,40 +15,56 @@ lapply(my_packages, library, character.only = TRUE)
 # read the data
 # delete the file
 
-
-tomst_import <- function(node, file, path, remote_path) {
-  get_file(node = node,
-         file = file,
-         path = path,
-         remote_path = remote_path)
-
-  # unzipping
-  zip_loc <- paste(path, file, sep = "/")
-  unzip(zip_loc, exdir = path)
-
-  # deleting the zip (that's permanent, not in the trash!)
-  unlink(zip_loc)
-  message("zip file deleted!")
-
-  # list the files
-  files_loc <- str_remove(zip_loc, ".zip")
-  files <- dir(path = files_loc, pattern = "^data.*\\.csv$", full.names = TRUE, recursive = TRUE)
-
-  
-  # reading the files
-  microclimate_all <- files |>
-  map(
-    ~ suppressMessages(read_csv2(.,
-    col_names = FALSE,
-    # delim = ";",
+tomst_read <- function(file) {
+  output <- read_delim(
+    file,
+    col_names = c(
+      "ID",
+      "datetime",
+      "time_zone",
+      "soil_temperature",
+      "ground_temperature",
+      "air_temperature",
+      "RawSoilmoisture",
+      "Shake",
+      "ErrorFlag"
+    ),
+    delim = ";",
     show_col_types = FALSE,
     id = "filename",
-    progress = FALSE)),
+    progress = FALSE
+  ) |>
+  mutate_all(~ gsub(",", ".", ., fixed = TRUE)) |>
+    mutate(
+    # datetime = as.character(datetime),
+    datetime = substr(datetime, start = 0, stop = 16), #some dates are in ymd_hms format
+    datetime = ymd_hm(datetime),
+    loggerID = substr(filename, nchar(filename)-13, nchar(filename)-6),
+    loggerID = as.factor(loggerID),
+    time_zone = as.numeric(time_zone),
+    soil_temperature = as.numeric(soil_temperature),
+    ground_temperature = as.numeric(ground_temperature),
+    air_temperature = as.numeric(air_temperature),
+    RawSoilmoisture = as.numeric(RawSoilmoisture),
+    Shake = as.numeric(Shake),
+    ErrorFlag = as.numeric(ErrorFlag)
+  ) |>
+  select(!c(filename, ID))
+
+
+  map(
+    read_delim,
+    col_names = colnames,
+    delim = ";",
+    show_col_types = FALSE,
+    id = "filename",
+    progress = FALSE,
     .progress = TRUE
   ) |>
   keep(function(df) { # removing empty files
   any(df$X1 != "File is empty")
 }) |>
+    mutate_all(~ gsub(",", ".", ., fixed = TRUE))
   list_rbind() |>
   distinct() |> # removing duplicates
   rename(
@@ -71,6 +87,71 @@ tomst_import <- function(node, file, path, remote_path) {
     loggerID = substr(filename, nchar(filename)-13, nchar(filename)-6),
     loggerID = as.factor(loggerID)
   ) |>
+  select(!c(filename, ID))
+}
+
+
+tomst_import <- function(node, file, path, remote_path) {
+  get_file(node = node,
+         file = file,
+         path = path,
+         remote_path = remote_path)
+
+  # unzipping
+  zip_loc <- paste(path, file, sep = "/")
+  unzip(zip_loc, exdir = path)
+
+  # deleting the zip (that's permanent, not in the trash!)
+  unlink(zip_loc)
+  message("zip file deleted!")
+
+  # list the files
+  files_loc <- str_remove(zip_loc, ".zip")
+  files <- dir(path = files_loc, pattern = "^data.*\\.csv$", full.names = TRUE, recursive = TRUE)
+
+  
+  # reading the files
+  microclimate_all <- files |>
+    map(
+    read_delim,
+    col_names = FALSE,
+    delim = ";",
+    show_col_types = FALSE,
+    col_types = cols(.default = "text"),
+    id = "filename",
+    progress = FALSE,
+    .progress = TRUE
+  ) |>
+  keep(function(df) { # removing empty files
+  any(df$X1 != "File is empty")
+}) |> 
+  list_rbind() |>
+  mutate_all(~ gsub(",", ".", ., fixed = TRUE)) |> # replace , with .
+  distinct() |> # removing duplicates
+  rename(
+    "ID" = "X1",
+    "datetime" = "X2",
+    "time_zone" = "X3",
+    "soil_temperature" = "X4",
+    "ground_temperature" = "X5",
+    "air_temperature" = "X6",
+    "RawSoilmoisture" = "X7",
+    "Shake" = "X8",
+    "ErrorFlag" = "X9") |>
+    mutate(
+    datetime = substr(datetime, start = 0, stop = 16), #some dates are in ymd_hms format
+    datetime = ymd_hm(datetime),
+    loggerID = substr(filename, nchar(filename)-13, nchar(filename)-6),
+    loggerID = as.factor(loggerID),
+    time_zone = as.numeric(time_zone),
+    soil_temperature = as.numeric(soil_temperature),
+    ground_temperature = as.numeric(ground_temperature),
+    air_temperature = as.numeric(air_temperature),
+    RawSoilmoisture = as.numeric(RawSoilmoisture),
+    Shake = as.numeric(Shake),
+    ErrorFlag = as.numeric(ErrorFlag)
+  ) |>
+    filter(ErrorFlag == 0) |>
   select(!c(filename, ID))
 
   # deleting files
