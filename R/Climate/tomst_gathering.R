@@ -15,81 +15,6 @@ lapply(my_packages, library, character.only = TRUE)
 # read the data
 # delete the file
 
-tomst_read <- function(file) {
-  output <- read_delim(
-    file,
-    col_names = c(
-      "ID",
-      "datetime",
-      "time_zone",
-      "soil_temperature",
-      "ground_temperature",
-      "air_temperature",
-      "RawSoilmoisture",
-      "Shake",
-      "ErrorFlag"
-    ),
-    delim = ";",
-    show_col_types = FALSE,
-    id = "filename",
-    progress = FALSE
-  ) |>
-  mutate_all(~ gsub(",", ".", ., fixed = TRUE)) |>
-    mutate(
-    # datetime = as.character(datetime),
-    datetime = substr(datetime, start = 0, stop = 16), #some dates are in ymd_hms format
-    datetime = ymd_hm(datetime),
-    loggerID = substr(filename, nchar(filename)-13, nchar(filename)-6),
-    loggerID = as.factor(loggerID),
-    time_zone = as.numeric(time_zone),
-    soil_temperature = as.numeric(soil_temperature),
-    ground_temperature = as.numeric(ground_temperature),
-    air_temperature = as.numeric(air_temperature),
-    RawSoilmoisture = as.numeric(RawSoilmoisture),
-    Shake = as.numeric(Shake),
-    ErrorFlag = as.numeric(ErrorFlag)
-  ) |>
-  select(!c(filename, ID))
-
-
-  map(
-    read_delim,
-    col_names = colnames,
-    delim = ";",
-    show_col_types = FALSE,
-    id = "filename",
-    progress = FALSE,
-    .progress = TRUE
-  ) |>
-  keep(function(df) { # removing empty files
-  any(df$X1 != "File is empty")
-}) |>
-    mutate_all(~ gsub(",", ".", ., fixed = TRUE))
-  list_rbind() |>
-  distinct() |> # removing duplicates
-  rename(
-    "ID" = "X1",
-    "datetime" = "X2",
-    "time_zone" = "X3",
-    "soil_temperature" = "X4",
-    "ground_temperature" = "X5",
-    "air_temperature" = "X6",
-    "RawSoilmoisture" = "X7",
-    "Shake" = "X8",
-    "ErrorFlag" = "X9") |>
-    filter(ErrorFlag == 0) |>
-  mutate(
-    datetime = as.character(datetime),
-    datetime = substr(datetime, start = 0, stop = 16), #some dates are in ymd_hms format
-    datetime = ymd_hm(datetime)
-    ) |>
-  mutate(
-    loggerID = substr(filename, nchar(filename)-13, nchar(filename)-6),
-    loggerID = as.factor(loggerID)
-  ) |>
-  select(!c(filename, ID))
-}
-
 
 tomst_import <- function(node, file, path, remote_path) {
   get_file(node = node,
@@ -117,7 +42,7 @@ tomst_import <- function(node, file, path, remote_path) {
     col_names = FALSE,
     delim = ";",
     show_col_types = FALSE,
-    col_types = cols(.default = "text"),
+    col_types = cols(.default = col_character()),
     id = "filename",
     progress = FALSE,
     .progress = TRUE
@@ -141,8 +66,9 @@ tomst_import <- function(node, file, path, remote_path) {
     mutate(
     datetime = substr(datetime, start = 0, stop = 16), #some dates are in ymd_hms format
     datetime = ymd_hm(datetime),
-    loggerID = substr(filename, nchar(filename)-13, nchar(filename)-6),
-    loggerID = as.factor(loggerID),
+    filename = basename(filename),
+    # loggerID = substr(filename, nchar(filename)-13, nchar(filename)-6),
+    # loggerID = as.factor(loggerID),
     time_zone = as.numeric(time_zone),
     soil_temperature = as.numeric(soil_temperature),
     ground_temperature = as.numeric(ground_temperature),
@@ -151,8 +77,14 @@ tomst_import <- function(node, file, path, remote_path) {
     Shake = as.numeric(Shake),
     ErrorFlag = as.numeric(ErrorFlag)
   ) |>
+  separate_wider_delim(
+        filename,
+        delim = "_",
+        names = c(NA, "loggerID"),
+        too_many = "drop"
+      ) |>
     filter(ErrorFlag == 0) |>
-  select(!c(filename, ID))
+    select(!any_of(c("ID", "Shake", "ErrorFlag", "X10")))
 
   # deleting files
   unlink(files_loc, recursive = TRUE)
@@ -168,7 +100,6 @@ tomst_import_many <- function(node, files, path, remote_path) {
     files,
     tomst_import,
     node = node,
-    # file = files,
     path = path,
     remote_path = remote_path,
     .progress = TRUE
@@ -181,7 +112,7 @@ tomst_import_many <- function(node, files, path, remote_path) {
 
 # testing functions #####
 
-microclimate_test <- tomst_import("zhk3m", "INCLINE_microclimate.zip", "data", "RawData/Climate")
+microclimate_test <- tomst_import("zhk3m", "INCLINE_TOMST_Spring2022.zip", "data", "RawData/Climate")
 
 microclimate_all_test <- tomst_import_many("zhk3m",
                                            c("INCLINE_microclimate.zip",
