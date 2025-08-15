@@ -55,3 +55,8 @@ microclimate2022 <- microclimate2022_all |>
     & datetime < date_out
   ) |>
   arrange(datetime)
+
+# calculating soil moisture ####
+
+
+# cleaning ####
