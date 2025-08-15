@@ -9,6 +9,8 @@ my_packages <- c(
 lapply(my_packages, library, character.only = TRUE)
 
 #### importing and reading data ####
+source("https://raw.githubusercontent.com/jogaudard/INCLINE/tomst2022/R/Climate/tomst_gathering.R")
+
 
 microclimate2022_og <- tomst_import_many(
   "zhk3m",
@@ -57,6 +59,26 @@ microclimate2022 <- microclimate2022_all |>
   arrange(datetime)
 
 # calculating soil moisture ####
+source("https://raw.githubusercontent.com/audhalbritter/Three-D/master/R/functions/soilmoisture_correction.R")
+
+microclimate2022 <- microclimate2022 |>
+  mutate( # calculate soil moisture
+    soil_moisture = soil.moist(
+      rawsoilmoist = RawSoilmoisture,
+      soil_temp = soil_temperature,
+      soilclass = "silt_loam" #it is the closest soil class, but still very wrong. The TMS calibration tool does not have any class for our soil
+    ))
+
+# plottting ####
 
 
-# cleaning ####
+microclimate2022 |>
+  filter(
+    datetime > ymd("2022-08-01")
+    & datetime < ymd("2022-08-31")
+    & siteID == "Gudmedalen"
+  ) |>
+  pivot_longer(c(soil_temperature, soil_moisture, ground_temperature, air_temperature), names_to = "sensor") |>
+  ggplot(aes(datetime, value)) +
+  geom_point() +
+  facet_wrap(. ~ sensor, scales = "free", ncol = 1)
