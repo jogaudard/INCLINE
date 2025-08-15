@@ -21,11 +21,37 @@ microclimate2022_og <- tomst_import_many(
   "RawData/Climate"
 )
 
-microclimate2022 <- microclimate2022_og |>
+microclimate2022_all <- microclimate2022_og |>
   filter(
     year(datetime) == 2022
   )
 
-tomst_metadata2022 <- read_csv("data/tomst_logger_metadata_2022.csv")
+tomst_metadata2022_og <- read_csv("data/tomst_logger_metadata_2022.csv")
+
 
 # slicing ####
+
+tomst_metadata2022 <- tomst_metadata2022_og |>
+  mutate(
+    loggerID = str_remove_all(loggerID, "TMS"),
+    date_in = case_when(
+      season == "winter" & is.na(date_in) ~ ymd("2021-12-31"),
+      .default = date_in
+    ),
+    date_out = case_when(
+      season == "winter" & is.na(date_out) ~ ymd("2023-01-01"),
+      .default = date_out
+    )
+  )
+
+
+
+microclimate2022 <- microclimate2022_all |>
+  left_join(
+    tomst_metadata2022, by = "loggerID", relationship = "many-to-many"
+  ) |>
+  filter(
+    datetime > date_in
+    & datetime < date_out
+  ) |>
+  arrange(datetime)
