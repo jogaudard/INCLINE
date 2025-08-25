@@ -100,7 +100,7 @@ microclimate2022_clean |>
     # & datetime < ymd("2022-08-10")
     month(datetime) == 12
     # date(datetime) == ymd("2022-02-17")
-    & siteID == "Ulvehaugen"
+    & siteID == "Lavisdalen"
     # & loggerID == 94194656
   ) |>
   ggplot(aes(datetime, value)) +
