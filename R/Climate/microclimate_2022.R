@@ -85,8 +85,9 @@ microclimate2022 <- readRDS("data/microclimate2022.rds")
 
 microclimate2022_clean <- microclimate2022 |>
   mutate(value = case_when(
-    # loggerID == 94205721 & date(datetime) == ymd("2022-02-18") ~ NA, # messed up and no record the next 3 days
-    siteID %in% c("Gudmedalen", "Ulvehaugen") & month(datetime) == 8 & sensor == "soil_temperature" & value > 20 ~ NA,
+    loggerID == 94205721 & date(datetime) == ymd("2022-02-18") ~ NA, # messed up and no record the next 3 days
+    siteID %in% c("Gudmedalen", "Ulvehaugen", "Skjellingahaugen") & month(datetime) == 8 & sensor == "soil_temperature" & value > 20 ~ NA,
+    siteID == "Skjellingahaugen" & month(datetime) == 9 & sensor == "soil_temperature" & value > 20 ~ NA,
     .default = value
   )
   )
@@ -100,7 +101,7 @@ microclimate2022_clean |>
     # & datetime < ymd("2022-08-10")
     month(datetime) == 12
     # date(datetime) == ymd("2022-02-17")
-    & siteID == "Lavisdalen"
+    & siteID == "Skjellingahaugen"
     # & loggerID == 94194656
   ) |>
   ggplot(aes(datetime, value)) +
