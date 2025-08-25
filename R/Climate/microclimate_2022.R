@@ -77,16 +77,16 @@ microclimate2022 <- microclimate2022 |>
 microclimate2022 <- microclimate2022 |>
   pivot_longer(c(soil_temperature, soil_moisture, ground_temperature, air_temperature), names_to = "sensor")
 
-# saveRDS(microclimate2022, "data/microclimate2022.rds")
+saveRDS(microclimate2022, "data/microclimate2022.rds")
 
-# microclimate2022 <- readRDS("data/microclimate2022.rds")
+microclimate2022 <- readRDS("data/microclimate2022.rds")
 
 # cleaning ####
 
 microclimate2022_clean <- microclimate2022 |>
   mutate(value = case_when(
-    loggerID == 94205721 & date(datetime) == ymd("2022-02-18") ~ NA, # messed up and no record the next 3 days
-    siteID == "Gudmedalen" & month(datetime) == 8 & sensor == "soil_temperature" & value > 15 ~ NA,
+    # loggerID == 94205721 & date(datetime) == ymd("2022-02-18") ~ NA, # messed up and no record the next 3 days
+    siteID == "Gudmedalen" & month(datetime) == 8 & sensor == "soil_temperature" & value > 20 ~ NA,
     .default = value
   )
   )
@@ -98,7 +98,7 @@ microclimate2022_clean |>
   filter(
     # datetime > ymd("2022-08-06")
     # & datetime < ymd("2022-08-10")
-    month(datetime) == 10
+    month(datetime) == 12
     # date(datetime) == ymd("2022-02-17")
     & siteID == "Gudmedalen"
     # & loggerID == 94205721
@@ -127,7 +127,7 @@ microclimate2022_clean |>
 microclimate2022_clean |>
   filter(
     siteID == "Gudmedalen"
-    & month(datetime) == 11) |>
+    & month(datetime) == 2) |>
   View()
 
 microclimate2022_all |>
