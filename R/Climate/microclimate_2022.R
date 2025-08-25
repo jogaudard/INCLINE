@@ -31,6 +31,13 @@ microclimate2022_all <- microclimate2022_og |>
     year(datetime) == 2022
   )
 
+get_file(
+  "zhk3m",
+  "RawData/Climate",
+  "tomst_logger_metadata_2022.csv",
+  "data"
+)
+
 tomst_metadata2022_og <- read_csv("data/tomst_logger_metadata_2022.csv")
 
 
@@ -147,3 +154,28 @@ tomst_metadata2022 |>
     & siteID == "Ulvehaugen"
   ) |>
   View()
+
+# exporting ####
+
+get_file(
+  "zhk3m",
+  "Climate",
+  "INCLINE_microclimate.zip",
+  "data"
+)
+
+unzip("data/INCLINE_microclimate.zip", exdir = "data/INCLINE_microclimate")
+
+unlink("INCLINE_microclimate.zip")
+
+air_temperature <- read_csv("data/INCLINE_microclimate/INCLINE_microclimate_air_temperature.csv")
+ground_temperature <- read_csv("data/INCLINE_microclimate/INCLINE_microclimate_ground_temperature.csv")
+soil_moisture <- read_csv("data/INCLINE_microclimate/INCLINE_microclimate_soil_moisture.csv")
+soil_temperature <- read_csv("data/INCLINE_microclimate/INCLINE_microclimate_soil_temperature.csv")
+
+unlink("data/INCLINE_microclimate", recursive = TRUE)
+
+air_temperature2022 <- microclimate2022_clean |>
+  filter(sensor == "air_temperature") |>
+  rename(air_temperature = "value") |>
+  select(!sensor)
