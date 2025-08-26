@@ -96,7 +96,8 @@ microclimate2022_clean <- microclimate2022 |>
     siteID %in% c("Gudmedalen", "Ulvehaugen", "Skjellingahaugen") & month(datetime) == 8 & sensor == "soil_temperature" & value > 20 ~ NA,
     siteID == "Skjellingahaugen" & month(datetime) == 9 & sensor == "soil_temperature" & value > 20 ~ NA,
     .default = value
-  )
+  ),
+  loggerID = as.double(loggerID)
   )
 
 # plottting ####
@@ -166,16 +167,28 @@ get_file(
 
 unzip("data/INCLINE_microclimate.zip", exdir = "data/INCLINE_microclimate")
 
-unlink("INCLINE_microclimate.zip")
+unlink("data/INCLINE_microclimate.zip")
 
-air_temperature <- read_csv("data/INCLINE_microclimate/INCLINE_microclimate_air_temperature.csv")
-ground_temperature <- read_csv("data/INCLINE_microclimate/INCLINE_microclimate_ground_temperature.csv")
-soil_moisture <- read_csv("data/INCLINE_microclimate/INCLINE_microclimate_soil_moisture.csv")
-soil_temperature <- read_csv("data/INCLINE_microclimate/INCLINE_microclimate_soil_temperature.csv")
+air_temperature_og <- read_csv("data/INCLINE_microclimate/INCLINE_microclimate_air_temperature.csv")
+ground_temperature_og <- read_csv("data/INCLINE_microclimate/INCLINE_microclimate_ground_temperature.csv")
+soil_moisture_og <- read_csv("data/INCLINE_microclimate/INCLINE_microclimate_soil_moisture.csv")
+soil_temperature_og <- read_csv("data/INCLINE_microclimate/INCLINE_microclimate_soil_temperature.csv")
 
 unlink("data/INCLINE_microclimate", recursive = TRUE)
+
+air_temperature_old <- air_temperature_og |>
+  separate_wider_delim(plotID, delim = "_", names = c(NA, "blockID", "plotID")) |>
+  select(!c(OTC, treatment)) |>
+  mutate(
+    blockID = as.double(blockID),
+    plotID = as.double(plotID)
+  )
 
 air_temperature2022 <- microclimate2022_clean |>
   filter(sensor == "air_temperature") |>
   rename(air_temperature = "value") |>
-  select(!sensor)
+  select(!c(sensor, time_zone, RawSoilmoisture, date_in, date_out))
+
+air_temperature <- bind_rows(air_temperature2022, air_temperature_old)
+air_temperature |>
+  distinct(siteID)
