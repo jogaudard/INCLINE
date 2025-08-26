@@ -192,3 +192,70 @@ air_temperature2022 <- microclimate2022_clean |>
 air_temperature <- bind_rows(air_temperature2022, air_temperature_old)
 air_temperature |>
   distinct(siteID)
+
+write_csv(air_temperature, "data_cleaned/INCLINE_microclimate_air_temperature.csv")
+
+
+ground_temperature_old <- ground_temperature_og |>
+  separate_wider_delim(plotID, delim = "_", names = c(NA, "blockID", "plotID")) |>
+  select(!c(OTC, treatment)) |>
+  mutate(
+    blockID = as.double(blockID),
+    plotID = as.double(plotID)
+  )
+
+ground_temperature2022 <- microclimate2022_clean |>
+  filter(sensor == "ground_temperature") |>
+  rename(ground_temperature = "value") |>
+  select(!c(sensor, time_zone, RawSoilmoisture, date_in, date_out))
+
+ground_temperature <- bind_rows(ground_temperature2022, ground_temperature_old)
+ground_temperature |>
+  distinct(siteID)
+
+write_csv(ground_temperature, "data_cleaned/INCLINE_microclimate_ground_temperature.csv")
+
+
+soil_moisture_old <- soil_moisture_og |>
+  separate_wider_delim(plotID, delim = "_", names = c(NA, "blockID", "plotID")) |>
+  select(!c(OTC, treatment)) |>
+  mutate(
+    blockID = as.double(blockID),
+    plotID = as.double(plotID)
+  )
+
+soil_moisture2022 <- microclimate2022_clean |>
+  filter(sensor == "soil_moisture") |>
+  rename(soil_moisture = "value") |>
+  select(!c(sensor, time_zone, date_in, date_out))
+
+soil_moisture <- bind_rows(soil_moisture2022, soil_moisture_old)
+soil_moisture |>
+  distinct(siteID)
+
+write_csv(soil_moisture, "data_cleaned/INCLINE_microclimate_soil_moisture.csv")
+
+soil_temperature_old <- soil_temperature_og |>
+  separate_wider_delim(plotID, delim = "_", names = c(NA, "blockID", "plotID")) |>
+  select(!c(OTC, treatment)) |>
+  mutate(
+    blockID = as.double(blockID),
+    plotID = as.double(plotID)
+  )
+
+soil_temperature2022 <- microclimate2022_clean |>
+  filter(sensor == "soil_temperature") |>
+  rename(soil_temperature = "value") |>
+  select(!c(sensor, time_zone, RawSoilmoisture, date_in, date_out))
+
+soil_temperature <- bind_rows(soil_temperature2022, soil_temperature_old)
+soil_temperature |>
+  distinct(siteID)
+
+
+write_csv(soil_temperature, "data_cleaned/INCLINE_microclimate_soil_temperature.csv")
+
+zip("data_cleaned/INCLINE_microclimate.zip", c("data_cleaned/INCLINE_microclimate_air_temperature.csv",
+                                               "data_cleaned/INCLINE_microclimate_soil_temperature.csv",
+                                               "data_cleaned/INCLINE_microclimate_ground_temperature.csv",
+                                               "data_cleaned/INCLINE_microclimate_soil_moisture.csv"))
