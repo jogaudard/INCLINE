@@ -103,58 +103,58 @@ microclimate2022_clean <- microclimate2022 |>
 # plottting ####
 
 
-microclimate2022_clean |>
-  filter(
-    # datetime > ymd("2022-08-06")
-    # & datetime < ymd("2022-08-10")
-    month(datetime) == 12
-    # date(datetime) == ymd("2022-02-17")
-    & siteID == "Skjellingahaugen"
-    # & loggerID == 94194656
-  ) |>
-  ggplot(aes(datetime, value)) +
-  geom_point(size = 0.1) +
-  theme_bw() +
-  facet_wrap(. ~ sensor, scales = "free", ncol = 1)
+# microclimate2022_clean |>
+#   filter(
+#     # datetime > ymd("2022-08-06")
+#     # & datetime < ymd("2022-08-10")
+#     month(datetime) == 12
+#     # date(datetime) == ymd("2022-02-17")
+#     & siteID == "Skjellingahaugen"
+#     # & loggerID == 94194656
+#   ) |>
+#   ggplot(aes(datetime, value)) +
+#   geom_point(size = 0.1) +
+#   theme_bw() +
+#   facet_wrap(. ~ sensor, scales = "free", ncol = 1)
 
 
 
 # checking ranges ####
 
-microclimate2022_clean |>
-  reframe(
-    .by = sensor,
-    range = range(value, na.rm = TRUE)
-  )
+# microclimate2022_clean |>
+#   reframe(
+#     .by = sensor,
+#     range = range(value, na.rm = TRUE)
+#   )
 
-microclimate2022_clean |>
-  filter(
-    sensor == "soil_temperature"
-    & value > 20
-    ) |>
-  View()
+# microclimate2022_clean |>
+#   filter(
+#     sensor == "soil_temperature"
+#     & value > 20
+#     ) |>
+#   View()
 
-microclimate2022_clean |>
-  filter(
-    siteID == "Gudmedalen"
-    & month(datetime) == 2) |>
-  View()
+# microclimate2022_clean |>
+#   filter(
+#     siteID == "Gudmedalen"
+#     & month(datetime) == 2) |>
+#   View()
 
-microclimate2022_all |>
-  left_join(
-    tomst_metadata2022, by = "loggerID", relationship = "many-to-many"
-  ) |>
-  filter(
-    siteID == "Gudmedalen"
-    & month(datetime) == 11) |>
-  View()
+# microclimate2022_all |>
+#   left_join(
+#     tomst_metadata2022, by = "loggerID", relationship = "many-to-many"
+#   ) |>
+#   filter(
+#     siteID == "Gudmedalen"
+#     & month(datetime) == 11) |>
+#   View()
 
-tomst_metadata2022 |>
-  filter(
-    season == "growth"
-    & siteID == "Ulvehaugen"
-  ) |>
-  View()
+# tomst_metadata2022 |>
+#   filter(
+#     season == "growth"
+#     & siteID == "Ulvehaugen"
+#   ) |>
+#   View()
 
 # exporting ####
 
@@ -176,86 +176,93 @@ soil_temperature_og <- read_csv("data/INCLINE_microclimate/INCLINE_microclimate_
 
 unlink("data/INCLINE_microclimate", recursive = TRUE)
 
-air_temperature_old <- air_temperature_og |>
-  separate_wider_delim(plotID, delim = "_", names = c(NA, "blockID", "plotID")) |>
-  select(!c(OTC, treatment)) |>
-  mutate(
-    blockID = as.double(blockID),
-    plotID = as.double(plotID)
-  )
+air_temperature_old <- air_temperature_og # |> # this was for the previous version of microclimate
+  # separate_wider_delim(plotID, delim = "_", names = c(NA, "blockID", "plotID")) |>
+  # select(!c(OTC, treatment)) |>
+  # mutate(
+  #   blockID = as.double(blockID),
+  #   plotID = as.double(plotID)
+  # )
 
 air_temperature2022 <- microclimate2022_clean |>
   filter(sensor == "air_temperature") |>
   rename(air_temperature = "value") |>
   select(!c(sensor, time_zone, RawSoilmoisture, date_in, date_out))
 
-air_temperature <- bind_rows(air_temperature2022, air_temperature_old)
+air_temperature <- bind_rows(air_temperature2022, air_temperature_old) |>
+  distinct()
 air_temperature |>
   distinct(siteID)
 
 write_csv(air_temperature, "data_cleaned/INCLINE_microclimate_air_temperature.csv")
 
 
-ground_temperature_old <- ground_temperature_og |>
-  separate_wider_delim(plotID, delim = "_", names = c(NA, "blockID", "plotID")) |>
-  select(!c(OTC, treatment)) |>
-  mutate(
-    blockID = as.double(blockID),
-    plotID = as.double(plotID)
-  )
+ground_temperature_old <- ground_temperature_og #|> # this was for the previous version of microclimate
+  # separate_wider_delim(plotID, delim = "_", names = c(NA, "blockID", "plotID")) |>
+  # select(!c(OTC, treatment)) |>
+  # mutate(
+  #   blockID = as.double(blockID),
+  #   plotID = as.double(plotID)
+  # )
 
 ground_temperature2022 <- microclimate2022_clean |>
   filter(sensor == "ground_temperature") |>
   rename(ground_temperature = "value") |>
   select(!c(sensor, time_zone, RawSoilmoisture, date_in, date_out))
 
-ground_temperature <- bind_rows(ground_temperature2022, ground_temperature_old)
+ground_temperature <- bind_rows(ground_temperature2022, ground_temperature_old) |>
+  distinct()
 ground_temperature |>
   distinct(siteID)
 
 write_csv(ground_temperature, "data_cleaned/INCLINE_microclimate_ground_temperature.csv")
 
 
-soil_moisture_old <- soil_moisture_og |>
-  separate_wider_delim(plotID, delim = "_", names = c(NA, "blockID", "plotID")) |>
-  select(!c(OTC, treatment)) |>
-  mutate(
-    blockID = as.double(blockID),
-    plotID = as.double(plotID)
-  )
+soil_moisture_old <- soil_moisture_og #|> # this was for the previous version of microclimate
+  # separate_wider_delim(plotID, delim = "_", names = c(NA, "blockID", "plotID")) |>
+  # select(!c(OTC, treatment)) |>
+  # mutate(
+  #   blockID = as.double(blockID),
+  #   plotID = as.double(plotID)
+  # )
 
 soil_moisture2022 <- microclimate2022_clean |>
   filter(sensor == "soil_moisture") |>
   rename(soil_moisture = "value") |>
   select(!c(sensor, time_zone, date_in, date_out))
 
-soil_moisture <- bind_rows(soil_moisture2022, soil_moisture_old)
+soil_moisture <- bind_rows(soil_moisture2022, soil_moisture_old) |>
+  distinct()
 soil_moisture |>
   distinct(siteID)
 
 write_csv(soil_moisture, "data_cleaned/INCLINE_microclimate_soil_moisture.csv")
 
-soil_temperature_old <- soil_temperature_og |>
-  separate_wider_delim(plotID, delim = "_", names = c(NA, "blockID", "plotID")) |>
-  select(!c(OTC, treatment)) |>
-  mutate(
-    blockID = as.double(blockID),
-    plotID = as.double(plotID)
-  )
+soil_temperature_old <- soil_temperature_og # |> # this was for the previous version of microclimate
+  # separate_wider_delim(plotID, delim = "_", names = c(NA, "blockID", "plotID")) |>
+  # select(!c(OTC, treatment)) |>
+  # mutate(
+  #   blockID = as.double(blockID),
+  #   plotID = as.double(plotID)
+  # )
 
 soil_temperature2022 <- microclimate2022_clean |>
   filter(sensor == "soil_temperature") |>
   rename(soil_temperature = "value") |>
   select(!c(sensor, time_zone, RawSoilmoisture, date_in, date_out))
 
-soil_temperature <- bind_rows(soil_temperature2022, soil_temperature_old)
+soil_temperature <- bind_rows(soil_temperature2022, soil_temperature_old) |>
+  distinct()
 soil_temperature |>
   distinct(siteID)
 
 
 write_csv(soil_temperature, "data_cleaned/INCLINE_microclimate_soil_temperature.csv")
 
+unlink("data_cleaned/INCLINE_microclimate.zip") # just in case it is already there
+
 zip("data_cleaned/INCLINE_microclimate.zip", c("data_cleaned/INCLINE_microclimate_air_temperature.csv",
                                                "data_cleaned/INCLINE_microclimate_soil_temperature.csv",
                                                "data_cleaned/INCLINE_microclimate_ground_temperature.csv",
-                                               "data_cleaned/INCLINE_microclimate_soil_moisture.csv"))
+                                               "data_cleaned/INCLINE_microclimate_soil_moisture.csv"),
+                                               flags = '-r9Xj')
