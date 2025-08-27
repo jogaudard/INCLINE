@@ -190,7 +190,7 @@ air_temperature2022 <- microclimate2022_clean |>
   select(!c(sensor, time_zone, RawSoilmoisture, date_in, date_out))
 
 air_temperature <- bind_rows(air_temperature2022, air_temperature_old) |>
-  distinct()
+  distinct(loggerID, datetime, .keep_all = TRUE)
 air_temperature |>
   distinct(siteID)
 
@@ -211,7 +211,7 @@ ground_temperature2022 <- microclimate2022_clean |>
   select(!c(sensor, time_zone, RawSoilmoisture, date_in, date_out))
 
 ground_temperature <- bind_rows(ground_temperature2022, ground_temperature_old) |>
-  distinct()
+  distinct(loggerID, datetime, .keep_all = TRUE)
 ground_temperature |>
   distinct(siteID)
 
@@ -232,7 +232,7 @@ soil_moisture2022 <- microclimate2022_clean |>
   select(!c(sensor, time_zone, date_in, date_out))
 
 soil_moisture <- bind_rows(soil_moisture2022, soil_moisture_old) |>
-  distinct()
+  distinct(loggerID, datetime, .keep_all = TRUE)
 soil_moisture |>
   distinct(siteID)
 
@@ -252,7 +252,7 @@ soil_temperature2022 <- microclimate2022_clean |>
   select(!c(sensor, time_zone, RawSoilmoisture, date_in, date_out))
 
 soil_temperature <- bind_rows(soil_temperature2022, soil_temperature_old) |>
-  distinct()
+  distinct(loggerID, datetime, .keep_all = TRUE)
 soil_temperature |>
   distinct(siteID)
 
